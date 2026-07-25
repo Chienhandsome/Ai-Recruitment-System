@@ -14,16 +14,14 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../../database/prisma.service");
-const auth_constants_1 = require("./auth.constants");
 const userProfileInclude = {
-    userRoles: {
-        include: {
-            role: true,
-        },
-    },
     candidateProfile: true,
     recruiterProfile: true,
 };
+const getUserWithProfile = (prisma) => prisma.user.findUnique({
+    where: { id: '' },
+    include: userProfileInclude,
+});
 let AuthService = AuthService_1 = class AuthService {
     prisma;
     logger = new common_1.Logger(AuthService_1.name);
@@ -43,8 +41,6 @@ let AuthService = AuthService_1 = class AuthService {
                 data: {
                     email: authUser.email,
                     fullName: authUser.fullName,
-                    avatarUrl: authUser.avatarUrl,
-                    lastLoginAt: new Date(),
                 },
                 include: userProfileInclude,
             });
@@ -61,40 +57,19 @@ let AuthService = AuthService_1 = class AuthService {
         const signupRole = dto.role;
         try {
             const created = await this.prisma.$transaction(async (transaction) => {
-                const roleDetails = auth_constants_1.ROLE_DETAILS[signupRole];
-                const role = await transaction.role.upsert({
-                    where: { code: signupRole },
-                    update: {
-                        name: roleDetails.name,
-                        description: roleDetails.description,
-                    },
-                    create: {
-                        code: signupRole,
-                        name: roleDetails.name,
-                        description: roleDetails.description,
-                    },
-                });
                 const user = await transaction.user.create({
                     data: {
                         id: authUser.id,
                         email: authUser.email,
                         fullName: authUser.fullName,
-                        avatarUrl: authUser.avatarUrl,
-                        status: 'ACTIVE',
-                        lastLoginAt: new Date(),
-                        userRoles: {
-                            create: {
-                                roleId: role.id,
-                            },
-                        },
+                        userStatus: 'ACTIVE',
+                        role: signupRole,
                     },
                 });
                 if (signupRole === 'CANDIDATE') {
                     await transaction.candidateProfile.create({
                         data: {
                             userId: user.id,
-                            fullName: user.fullName,
-                            email: user.email,
                         },
                     });
                 }
@@ -102,21 +77,10 @@ let AuthService = AuthService_1 = class AuthService {
                     await transaction.recruiterProfile.create({
                         data: {
                             userId: user.id,
+                            companyName: 'Unknown Company',
                         },
                     });
                 }
-                await transaction.auditLog.create({
-                    data: {
-                        userId: user.id,
-                        action: 'AUTH_PROFILE_BOOTSTRAPPED',
-                        entityName: 'User',
-                        entityId: user.id,
-                        newValues: {
-                            role: signupRole,
-                            source: 'PUBLIC_SIGNUP',
-                        },
-                    },
-                });
                 return transaction.user.findUniqueOrThrow({
                     where: { id: user.id },
                     include: userProfileInclude,
@@ -158,38 +122,13 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async provisionAdmin(createdByUserId, invitedUser) {
         const created = await this.prisma.$transaction(async (transaction) => {
-            const roleDetails = auth_constants_1.ROLE_DETAILS.ADMIN;
-            const adminRole = await transaction.role.upsert({
-                where: { code: 'ADMIN' },
-                update: roleDetails,
-                create: {
-                    code: 'ADMIN',
-                    ...roleDetails,
-                },
-            });
             const user = await transaction.user.create({
                 data: {
                     id: invitedUser.id,
                     email: invitedUser.email,
                     fullName: invitedUser.fullName,
-                    status: 'ACTIVE',
-                    userRoles: {
-                        create: {
-                            roleId: adminRole.id,
-                        },
-                    },
-                },
-            });
-            await transaction.auditLog.create({
-                data: {
-                    userId: createdByUserId,
-                    action: 'ADMIN_INVITED',
-                    entityName: 'User',
-                    entityId: user.id,
-                    newValues: {
-                        email: user.email,
-                        role: 'ADMIN',
-                    },
+                    userStatus: 'ACTIVE',
+                    role: 'ADMIN',
                 },
             });
             return transaction.user.findUniqueOrThrow({
@@ -200,17 +139,14 @@ let AuthService = AuthService_1 = class AuthService {
         return this.toAuthResponse(created);
     }
     toAuthResponse(user) {
-        this.assertAccountIsActive(user.status);
-        const roles = user.userRoles
-            .map((userRole) => userRole.role.code)
-            .sort();
+        this.assertAccountIsActive(user.userStatus);
+        const roles = user.role ? [user.role] : [];
         return {
             id: user.id,
             email: user.email,
             fullName: user.fullName,
             phone: user.phone,
-            avatarUrl: user.avatarUrl,
-            status: user.status,
+            status: user.userStatus,
             roles,
             candidateProfile: user.candidateProfile
                 ? {
@@ -224,7 +160,7 @@ let AuthService = AuthService_1 = class AuthService {
             recruiterProfile: user.recruiterProfile
                 ? {
                     id: user.recruiterProfile.id,
-                    departmentId: user.recruiterProfile.departmentId,
+                    companyName: user.recruiterProfile.companyName,
                     title: user.recruiterProfile.title,
                 }
                 : null,
@@ -234,7 +170,7 @@ let AuthService = AuthService_1 = class AuthService {
         if (status !== 'ACTIVE') {
             throw new common_1.ForbiddenException({
                 code: 'ACCOUNT_UNAVAILABLE',
-                message: `This account is ${status.toLowerCase()}.`,
+                message: `This account is ${status?.toLowerCase() ?? 'unavailable'}.`,
             });
         }
     }

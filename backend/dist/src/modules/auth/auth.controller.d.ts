@@ -12,9 +12,8 @@ export declare class AuthController {
         email: string;
         fullName: string;
         phone: string | null;
-        avatarUrl: string | null;
-        status: import(".prisma/client").$Enums.AccountStatus;
-        roles: ("ADMIN" | "RECRUITER" | "CANDIDATE")[];
+        status: import(".prisma/client").$Enums.UserStatus | null;
+        roles: import(".prisma/client").$Enums.Role[];
         candidateProfile: {
             id: string;
             address: string | null;
@@ -24,7 +23,7 @@ export declare class AuthController {
         } | null;
         recruiterProfile: {
             id: string;
-            departmentId: string | null;
+            companyName: string;
             title: string | null;
         } | null;
     }>;
@@ -33,9 +32,8 @@ export declare class AuthController {
         email: string;
         fullName: string;
         phone: string | null;
-        avatarUrl: string | null;
-        status: import(".prisma/client").$Enums.AccountStatus;
-        roles: ("ADMIN" | "RECRUITER" | "CANDIDATE")[];
+        status: import(".prisma/client").$Enums.UserStatus | null;
+        roles: import(".prisma/client").$Enums.Role[];
         candidateProfile: {
             id: string;
             address: string | null;
@@ -45,7 +43,7 @@ export declare class AuthController {
         } | null;
         recruiterProfile: {
             id: string;
-            departmentId: string | null;
+            companyName: string;
             title: string | null;
         } | null;
     }>;
@@ -54,9 +52,8 @@ export declare class AuthController {
         email: string;
         fullName: string;
         phone: string | null;
-        avatarUrl: string | null;
-        status: import(".prisma/client").$Enums.AccountStatus;
-        roles: ("ADMIN" | "RECRUITER" | "CANDIDATE")[];
+        status: import(".prisma/client").$Enums.UserStatus | null;
+        roles: import(".prisma/client").$Enums.Role[];
         candidateProfile: {
             id: string;
             address: string | null;
@@ -66,7 +63,7 @@ export declare class AuthController {
         } | null;
         recruiterProfile: {
             id: string;
-            departmentId: string | null;
+            companyName: string;
             title: string | null;
         } | null;
     }>;

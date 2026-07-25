@@ -33,23 +33,17 @@ let RolesGuard = class RolesGuard {
         const user = await this.prisma.user.findUnique({
             where: { id: request.authUser.id },
             select: {
-                status: true,
-                userRoles: {
-                    select: {
-                        role: {
-                            select: { code: true },
-                        },
-                    },
-                },
+                userStatus: true,
+                role: true,
             },
         });
         if (!user) {
             throw new common_1.ForbiddenException('The application profile has not been initialized.');
         }
-        if (user.status !== 'ACTIVE') {
-            throw new common_1.ForbiddenException(`This account is ${user.status.toLowerCase()}.`);
+        if (user.userStatus !== 'ACTIVE') {
+            throw new common_1.ForbiddenException(`This account is ${user.userStatus?.toLowerCase() || 'unavailable'}.`);
         }
-        const assignedRoles = new Set(user.userRoles.map((userRole) => userRole.role.code));
+        const assignedRoles = new Set(user.role ? [user.role] : []);
         if (!requiredRoles.some((role) => assignedRoles.has(role))) {
             throw new common_1.ForbiddenException('You do not have permission to access this resource.');
         }

@@ -1,0 +1,439 @@
+generator client {
+  provider        = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AiEvaluation {
+  id                      String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id          String       @db.Uuid
+  overall_score           Decimal      @db.Decimal(5, 2)
+  match_level             MatchLevel   @default(LOW)
+  skills_score            Decimal?     @db.Decimal(5, 2)
+  experience_score        Decimal?     @db.Decimal(5, 2)
+  education_score         Decimal?     @db.Decimal(5, 2)
+  project_score           Decimal?     @db.Decimal(5, 2)
+  strengths               Json?
+  gaps                    Json?
+  missing_required_skills Json?
+  ai_summary              String?
+  weights_snapshot        Json?
+  embedding_model         String?
+  confidence_score        Decimal?     @db.Decimal(5, 2)
+  processing_time_ms      Int?
+  model_version           String
+  processed_at            DateTime     @default(now()) @db.Timestamptz(6)
+  created_at              DateTime     @default(now()) @db.Timestamptz(6)
+  applications            applications @relation(fields: [application_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([application_id], map: "idx_ai_evaluations_application_id")
+  @@index([processed_at], map: "idx_ai_evaluations_processed_at")
+  @@index([processed_at], map: "idx_ai_evaluations_processed_at_new")
+  }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Application {
+  id                   String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_id               String              @db.Uuid
+  submitted_at         DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime            @db.Timestamptz(6)
+  profile_snapshot     Json
+  candidate_profile_id String              @db.Uuid
+  application_status   ApplicationStatus?  @default(SUBMITTED)
+  ai_processing_status AIProcessingStatus? @default(PENDING)
+  ai_evaluations       ai_evaluations[]
+  candidate_profiles   candidate_profiles  @relation(fields: [candidate_profile_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  job_postings         job_postings        @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  notifications        notifications[]
+
+  @@unique([job_id, candidate_profile_id])
+  @@index([job_id])
+  @@index([ai_processing_status], map: "idx_applications_ai_processing_status")
+  @@index([ai_processing_status], map: "idx_applications_ai_processing_status_new")
+  @@index([application_status], map: "idx_applications_application_status")
+  @@index([application_status], map: "idx_applications_application_status_new")
+  @@index([candidate_profile_id], map: "idx_applications_candidate_profile_id")
+  @@index([candidate_profile_id], map: "idx_applications_candidate_profile_id_new")
+  @@index([job_id], map: "idx_applications_job_id")
+  @@index([job_id], map: "idx_applications_job_id_new")
+  }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model CandidateProfile {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  address              String?
+  linkedin_url         String?
+  github_url           String?
+  created_at           DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime           @db.Timestamptz(6)
+  portfolio_url        String?
+  candidate_user_id    String             @unique @db.Uuid
+  desired_title        String?
+  professional_summary String?
+  applications         applications[]
+  users                public_users       @relation(fields: [candidate_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  candidate_skills     candidate_skills[]
+  certificates         certificates[]
+  educations           educations[]
+  projects             projects[]
+  work_experiences     work_experiences[]
+
+  @@index([candidate_user_id], map: "idx_candidate_profiles_user_id")
+  }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model CandidateSkill {
+  skill_id             String             @db.Uuid
+  created_at           DateTime           @default(now()) @db.Timestamptz(6)
+  proficiency_level    ProficiencyLevel   @default(BEGINNER)
+  candidate_profile_id String             @db.Uuid
+  years_of_experience  Decimal?           @db.Decimal(4, 1)
+  is_primary           Boolean?           @default(false)
+  candidate_profiles   candidate_profiles @relation(fields: [candidate_profile_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  skills               skills             @relation(fields: [skill_id], references: [id], onUpdate: NoAction)
+
+  @@id([candidate_profile_id, skill_id])
+  @@index([candidate_profile_id], map: "idx_candidate_skills_candidate_profile_id")
+  @@index([skill_id], map: "idx_candidate_skills_skill_id")
+  }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Certificate {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  candidate_profile_id String             @db.Uuid
+  certificate_name     String
+  issuing_organization String
+  issue_date           DateTime?          @db.Date
+  expiry_date          DateTime?          @db.Date
+  credential_url       String?
+  created_at           DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime           @default(now()) @db.Timestamptz(6)
+  candidate_profiles   candidate_profiles @relation(fields: [candidate_profile_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([candidate_profile_id], map: "idx_certificates_candidate_profile_id")
+  }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Education {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  candidate_profile_id String             @db.Uuid
+  school_name          String
+  major                String?
+  degree               Degree?
+  gpa                  Decimal?           @db.Decimal(3, 2)
+  start_date           DateTime?          @db.Date
+  end_date             DateTime?          @db.Date
+  description          String?
+  created_at           DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime           @default(now()) @db.Timestamptz(6)
+  candidate_profiles   candidate_profiles @relation(fields: [candidate_profile_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([candidate_profile_id], map: "idx_educations_candidate_profile_id")
+  }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model HrProfile {
+  hr_user_id          String         @id @db.Uuid
+  company_name        String
+  company_logo_url    String?
+  company_address     String?
+  company_website     String?
+  company_description String?
+  created_at          DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime       @default(now()) @db.Timestamptz(6)
+  users               public_users   @relation(fields: [hr_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  job_postings        job_postings[]
+
+  }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model JobPosting {
+  id                        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_code                  String         @unique
+  title                     String
+  description               String
+  requirements              String?
+  benefits                  String?
+  employment_type           EmploymentType
+  status                    JobStatus      @default(DRAFT)
+  currency                  String         @default("VND")
+  location                  String?
+  created_at                DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime       @db.Timestamptz(6)
+  required_experience_years Decimal?       @db.Decimal(4, 1)
+  published_at              DateTime?      @db.Timestamptz(6)
+  closed_at                 DateTime?      @db.Timestamptz(6)
+  salary_min                Decimal?       @db.Decimal(12, 2)
+  salary_max                Decimal?       @db.Decimal(12, 2)
+  ai_weights_config         Json
+  work_mode                 WorkMode       @default(HYBRID)
+  hr_user_id                String         @db.Uuid
+  applications              applications[]
+  hr_profiles               hr_profiles    @relation(fields: [hr_user_id], references: [hr_user_id], onUpdate: NoAction)
+  job_skills                job_skills[]
+
+  @@index([created_at], map: "idx_job_postings_created_at")
+  @@index([hr_user_id], map: "idx_job_postings_hr_user_id")
+  @@index([status], map: "idx_job_postings_status")
+  @@index([status], map: "idx_job_postings_status_new")
+  @@index([work_mode], map: "idx_job_postings_work_mode")
+  @@index([status])
+  }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model JobSkill {
+  job_id        String            @db.Uuid
+  skill_id      String            @db.Uuid
+  weight        Decimal           @default(1) @db.Decimal(5, 2)
+  created_at    DateTime          @default(now()) @db.Timestamptz(6)
+  minimum_level ProficiencyLevel?
+  minimum_years Decimal?          @default(0) @db.Decimal(4, 1)
+  is_mandatory  Boolean?          @default(true)
+  job_postings  job_postings      @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  skills        skills            @relation(fields: [skill_id], references: [id], onUpdate: NoAction)
+
+  @@id([job_id, skill_id])
+  @@unique([job_id, skill_id])
+  @@index([job_id], map: "idx_job_skills_job_id")
+  @@index([skill_id], map: "idx_job_skills_skill_id")
+  }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Notification {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id    String?           @db.Uuid
+  title             String
+  message           String
+  created_at        DateTime          @default(now()) @db.Timestamptz(6)
+  read_at           DateTime?         @db.Timestamptz(6)
+  user_id           String?           @db.Uuid
+  notification_type NotificationType? @default(APPLICATION_STATUS_CHANGED)
+  is_read           Boolean?          @default(false)
+  applications      applications?     @relation(fields: [application_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users             public_users?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id, is_read], map: "idx_notifications_user_id_is_read")
+  }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Project {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  candidate_profile_id String             @db.Uuid
+  project_name         String
+  project_role         String?
+  description          String?
+  technologies         Json?
+  project_url          String?
+  start_date           DateTime?          @db.Date
+  end_date             DateTime?          @db.Date
+  created_at           DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime           @default(now()) @db.Timestamptz(6)
+  candidate_profiles   candidate_profiles @relation(fields: [candidate_profile_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([candidate_profile_id], map: "idx_projects_candidate_profile_id")
+  }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SkillAlias {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  skill_id         String   @db.Uuid
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  alias            String   @unique
+  normalized_alias String   @unique(map: "idx_skill_aliases_normalized_alias_uniq")
+  skills           skills   @relation(fields: [skill_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([skill_id, normalized_alias])
+  }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SkillCategory {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String   @unique
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @db.Timestamptz(6)
+  skills     skills[]
+
+  }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Skill {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  normalized_name  String             @unique(map: "idx_skills_normalized_name_uniq")
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @db.Timestamptz(6)
+  category_id      String             @db.Uuid
+  type             SkillType          @default(HARD)
+  candidate_skills candidate_skills[]
+  job_skills       job_skills[]
+  skill_aliases    skill_aliases[]
+  skill_categories skill_categories   @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+
+  @@index([normalized_name], map: "idx_skills_normalized_name")
+  @@index([category_id])
+  }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model User {
+  id                 String              @id @db.Uuid
+  email              String              @unique(map: "idx_users_email_uniq")
+  full_name          String
+  phone              String?
+  created_at         DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime            @db.Timestamptz(6)
+  birth_day          DateTime?           @db.Date
+  role               Role?               @default(CANDIDATE)
+  password_hash      String?
+  user_status        UserStatus?         @default(REGISTERED)
+  candidate_profiles candidate_profiles?
+  hr_profiles        hr_profiles?
+  notifications      notifications[]
+  
+  @@index([email], map: "idx_users_email")
+  @@index([role], map: "idx_users_role")
+  @@index([role], map: "idx_users_role_new")
+  @@index([email])
+  @@map("users")
+  }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model WorkExperience {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  candidate_profile_id String             @db.Uuid
+  company_name         String
+  position_title       String
+  employment_type      EmploymentType?
+  start_date           DateTime           @db.Date
+  end_date             DateTime?          @db.Date
+  is_current           Boolean?           @default(false)
+  description          String?
+  achievements         String?
+  created_at           DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime           @default(now()) @db.Timestamptz(6)
+  candidate_profiles   candidate_profiles @relation(fields: [candidate_profile_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([candidate_profile_id], map: "idx_work_experiences_candidate_profile_id")
+  }
+
+enum AIProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+
+  }
+
+enum ApplicationStatus {
+  SUBMITTED
+  INTERVIEW_CONFIRMED
+
+  }
+
+enum Degree {
+  BACHELOR
+  MASTER
+  DOCTORATE
+  ASSOCIATE
+  DIPLOMA
+  OTHER
+
+  }
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+
+  }
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  PAUSED
+  CLOSED
+  ARCHIVED
+
+  }
+
+enum MatchLevel {
+  LOW
+  MEDIUM
+  HIGH
+
+  }
+
+enum NotificationType {
+  APPLICATION_STATUS_CHANGED
+  INTERVIEW_SCHEDULED
+  MATCHING_COMPLETED
+  SYSTEM_ALERT
+
+  }
+
+enum ProficiencyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+
+  }
+
+enum Role {
+  ADMIN
+  HR
+  CANDIDATE
+
+  }
+
+enum SkillStatus {
+  ACTIVE
+  INACTIVE
+  PENDING_REVIEW
+
+  }
+
+enum SkillType {
+  HARD
+  SOFT
+
+  }
+
+enum UnrecognizedSkillStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MERGED
+
+  }
+
+enum UserStatus {
+  REGISTERED
+  ACTIVE
+  SUSPENDED
+  LOCKED
+
+  }
+
+enum WorkMode {
+  ON_SITE
+  HYBRID
+  REMOTE
+
+  }

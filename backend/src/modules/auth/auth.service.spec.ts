@@ -18,11 +18,9 @@ describe('AuthService', () => {
     } as unknown as PrismaService;
     const service = new AuthService(prisma);
 
-    await expect(service.bootstrap(authUser, {})).rejects.toMatchObject<
-      Partial<BadRequestException>
-    >({
-      status: 400,
-    });
+    await expect(service.bootstrap(authUser, {})).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('does not change the role of an existing user', async () => {
@@ -32,35 +30,18 @@ describe('AuthService', () => {
       fullName: authUser.fullName,
       phone: null,
       avatarUrl: null,
-      status: 'ACTIVE',
+      userStatus: 'ACTIVE',
       lastLoginAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      userRoles: [
-        {
-          id: 'role-link',
-          userId: authUser.id,
-          roleId: 'candidate-role',
-          createdAt: new Date(),
-          role: {
-            id: 'candidate-role',
-            code: 'CANDIDATE',
-            name: 'Candidate',
-            description: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        },
-      ],
-      candidate: {
+      role: 'CANDIDATE',
+      candidateProfile: {
         id: 'candidate-profile',
         userId: authUser.id,
-        fullName: authUser.fullName,
-        email: authUser.email,
-        phone: null,
         address: null,
         linkedinUrl: null,
         githubUrl: null,
+        portfolioUrl: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

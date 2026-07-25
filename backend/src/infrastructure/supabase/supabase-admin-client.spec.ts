@@ -53,8 +53,13 @@ describe('createSupabaseAdminClient', () => {
     let requestHeaders = new Headers();
 
     global.fetch = (async (input, init) => {
-      requestPath = new URL(typeof input === 'string' ? input : input.url)
-        .pathname;
+      const urlString =
+        typeof input === 'string'
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      requestPath = new URL(urlString).pathname;
       requestHeaders = new Headers(init?.headers);
 
       return new Response(

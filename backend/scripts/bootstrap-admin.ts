@@ -45,65 +45,27 @@ async function main() {
     undefined;
 
   await prisma.$transaction(async (transaction) => {
-    const adminRole = await transaction.role.upsert({
-      where: { code: 'ADMIN' },
-      update: {
-        name: 'Administrator',
-        description: 'System Administrator',
-      },
-      create: {
-        code: 'ADMIN',
-        name: 'Administrator',
-        description: 'System Administrator',
-      },
-    });
-
     const user = await transaction.user.upsert({
       where: { id: data.user.id },
       update: {
         email: adminEmail.toLowerCase(),
         fullName,
-        avatarUrl,
-        status: 'ACTIVE',
+        userStatus: 'ACTIVE',
+        role: 'ADMIN',
       },
       create: {
         id: data.user.id,
         email: adminEmail.toLowerCase(),
         fullName,
-        avatarUrl,
-        status: 'ACTIVE',
+        userStatus: 'ACTIVE',
+        role: 'ADMIN',
       },
     });
 
-    await transaction.userRole.upsert({
-      where: {
-        userId_roleId: {
-          userId: user.id,
-          roleId: adminRole.id,
-        },
-      },
-      update: {},
-      create: {
-        userId: user.id,
-        roleId: adminRole.id,
-      },
-    });
-
-    await transaction.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'FIRST_ADMIN_BOOTSTRAPPED',
-        entityName: 'User',
-        entityId: user.id,
-        newValues: {
-          role: 'ADMIN',
-          source: 'ONE_TIME_SCRIPT',
-        },
-      },
-    });
+    console.log(
+      `✓ Successfully bootstrapped ADMIN role for ${user.email} (${user.id})`,
+    );
   });
-
-  console.log(`ADMIN role assigned to ${adminEmail}.`);
 }
 
 main()

@@ -35,14 +35,8 @@ export class RolesGuard implements CanActivate {
     const user = await this.prisma.user.findUnique({
       where: { id: request.authUser.id },
       select: {
-        status: true,
-        userRoles: {
-          select: {
-            role: {
-              select: { code: true },
-            },
-          },
-        },
+        userStatus: true,
+        role: true,
       },
     });
 
@@ -52,15 +46,13 @@ export class RolesGuard implements CanActivate {
       );
     }
 
-    if (user.status !== 'ACTIVE') {
+    if (user.userStatus !== 'ACTIVE') {
       throw new ForbiddenException(
-        `This account is ${user.status.toLowerCase()}.`,
+        `This account is ${user.userStatus?.toLowerCase() || 'unavailable'}.`,
       );
     }
 
-    const assignedRoles = new Set(
-      user.userRoles.map((userRole) => userRole.role.code),
-    );
+    const assignedRoles = new Set(user.role ? [user.role] : []);
 
     if (!requiredRoles.some((role) => assignedRoles.has(role))) {
       throw new ForbiddenException(

@@ -33,7 +33,7 @@ export interface AuthProfile {
   } | null;
   recruiterProfile: {
     id: string;
-    departmentId: string | null;
+    companyName?: string | null;
     title: string | null;
   } | null;
 }

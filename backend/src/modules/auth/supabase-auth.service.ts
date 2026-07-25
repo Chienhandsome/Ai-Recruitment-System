@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createSupabaseAdminClient } from '../../infrastructure/supabase/supabase-admin-client';
 import type { AuthenticatedUser } from './auth.types';
 
 @Injectable()
@@ -47,12 +48,7 @@ export class SupabaseAuthService {
       this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
 
     if (secretKey) {
-      this.adminClient = createClient(supabaseUrl, secretKey, {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      });
+      this.adminClient = createSupabaseAdminClient(supabaseUrl, secretKey);
     }
   }
 

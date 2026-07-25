@@ -20,6 +20,7 @@ export declare class AuthController {
             address: string | null;
             githubUrl: string | null;
             linkedinUrl: string | null;
+            portfolioUrl: string | null;
         } | null;
         recruiterProfile: {
             id: string;
@@ -40,6 +41,7 @@ export declare class AuthController {
             address: string | null;
             githubUrl: string | null;
             linkedinUrl: string | null;
+            portfolioUrl: string | null;
         } | null;
         recruiterProfile: {
             id: string;
@@ -60,6 +62,7 @@ export declare class AuthController {
             address: string | null;
             githubUrl: string | null;
             linkedinUrl: string | null;
+            portfolioUrl: string | null;
         } | null;
         recruiterProfile: {
             id: string;

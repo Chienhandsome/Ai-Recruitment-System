@@ -1,4 +1,9 @@
-import { PrismaClient, DepartmentStatus, SkillStatus } from '@prisma/client';
+import {
+  PrismaClient,
+  DepartmentStatus,
+  SkillStatus,
+  SkillType,
+} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -50,33 +55,66 @@ async function main() {
   }
   console.log(`Seeded ${departments.length} departments.`);
 
-  // 4. Skills
+  // 4. Skill categories
+  const categoryNames = [
+    'Frontend',
+    'Backend',
+    'AI & Data',
+    'Database',
+    'Programming Language',
+    'Cloud',
+    'DevOps',
+    'Soft Skill',
+  ];
+  const categories = new Map<string, string>();
+  for (const name of categoryNames) {
+    const category = await prisma.skillCategory.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+    categories.set(name, category.id);
+  }
+  console.log(`Seeded ${categories.size} skill categories.`);
+
+  // 5. Skills
   const skillsData = [
-    { name: 'React', normalizedName: 'react', category: 'Frontend', status: SkillStatus.ACTIVE },
-    { name: 'Node.js', normalizedName: 'node.js', category: 'Backend', status: SkillStatus.ACTIVE },
-    { name: 'Python', normalizedName: 'python', category: 'Backend/AI', status: SkillStatus.ACTIVE },
-    { name: 'Java', normalizedName: 'java', category: 'Backend', status: SkillStatus.ACTIVE },
-    { name: 'SQL', normalizedName: 'sql', category: 'Database', status: SkillStatus.ACTIVE },
-    { name: 'TypeScript', normalizedName: 'typescript', category: 'Language', status: SkillStatus.ACTIVE },
-    { name: 'AWS', normalizedName: 'aws', category: 'Cloud', status: SkillStatus.ACTIVE },
-    { name: 'Docker', normalizedName: 'docker', category: 'DevOps', status: SkillStatus.ACTIVE },
-    { name: 'Kubernetes', normalizedName: 'kubernetes', category: 'DevOps', status: SkillStatus.ACTIVE },
-    { name: 'Communication', normalizedName: 'communication', category: 'Soft Skill', status: SkillStatus.ACTIVE },
-    { name: 'Leadership', normalizedName: 'leadership', category: 'Soft Skill', status: SkillStatus.ACTIVE },
+    { name: 'React', normalizedName: 'react', category: 'Frontend', type: SkillType.HARD },
+    { name: 'Node.js', normalizedName: 'node.js', category: 'Backend', type: SkillType.HARD },
+    { name: 'Python', normalizedName: 'python', category: 'AI & Data', type: SkillType.HARD },
+    { name: 'Java', normalizedName: 'java', category: 'Backend', type: SkillType.HARD },
+    { name: 'SQL', normalizedName: 'sql', category: 'Database', type: SkillType.HARD },
+    { name: 'TypeScript', normalizedName: 'typescript', category: 'Programming Language', type: SkillType.HARD },
+    { name: 'AWS', normalizedName: 'aws', category: 'Cloud', type: SkillType.HARD },
+    { name: 'Docker', normalizedName: 'docker', category: 'DevOps', type: SkillType.HARD },
+    { name: 'Kubernetes', normalizedName: 'kubernetes', category: 'DevOps', type: SkillType.HARD },
+    { name: 'Communication', normalizedName: 'communication', category: 'Soft Skill', type: SkillType.SOFT },
+    { name: 'Leadership', normalizedName: 'leadership', category: 'Soft Skill', type: SkillType.SOFT },
   ];
 
   const skillRecords = [];
   for (const skill of skillsData) {
     const record = await prisma.skill.upsert({
       where: { normalizedName: skill.normalizedName },
-      update: {},
-      create: skill,
+      update: {
+        name: skill.name,
+        categoryId: categories.get(skill.category)!,
+        type: skill.type,
+        status: SkillStatus.ACTIVE,
+      },
+      create: {
+        name: skill.name,
+        normalizedName: skill.normalizedName,
+        categoryId: categories.get(skill.category)!,
+        type: skill.type,
+        status: SkillStatus.ACTIVE,
+      },
     });
     skillRecords.push(record);
   }
   console.log(`Seeded ${skillRecords.length} skills.`);
 
-  // 5. Skill Aliases
+  // 6. Skill Aliases
   const skillAliasesData = [
     { skillNormalized: 'react', alias: 'reactjs' },
     { skillNormalized: 'react', alias: 'react.js' },

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
-const supabase_js_1 = require("@supabase/supabase-js");
 const client_1 = require("@prisma/client");
+const supabase_admin_client_1 = require("../src/infrastructure/supabase/supabase-admin-client");
 const prisma = new client_1.PrismaClient();
 async function main() {
     const adminUserId = process.env.ADMIN_USER_ID?.trim();
@@ -15,12 +15,7 @@ async function main() {
     if (!supabaseUrl || !supabaseSecretKey) {
         throw new Error('SUPABASE_URL and SUPABASE_SECRET_KEY are required to verify the Auth user.');
     }
-    const supabase = (0, supabase_js_1.createClient)(supabaseUrl, supabaseSecretKey, {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-        },
-    });
+    const supabase = (0, supabase_admin_client_1.createSupabaseAdminClient)(supabaseUrl, supabaseSecretKey);
     const { data, error } = await supabase.auth.admin.getUserById(adminUserId);
     if (error || !data.user?.email) {
         throw new Error(`Cannot load Supabase Auth user ${adminUserId}: ${error?.message ?? 'email is missing'}`);

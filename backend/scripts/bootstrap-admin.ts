@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { createClient } from '@supabase/supabase-js';
 import { PrismaClient } from '@prisma/client';
+import { createSupabaseAdminClient } from '../src/infrastructure/supabase/supabase-admin-client';
 
 const prisma = new PrismaClient();
 
@@ -23,12 +23,7 @@ async function main() {
     );
   }
 
-  const supabase = createClient(supabaseUrl, supabaseSecretKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  const supabase = createSupabaseAdminClient(supabaseUrl, supabaseSecretKey);
 
   const { data, error } = await supabase.auth.admin.getUserById(adminUserId);
 

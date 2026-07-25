@@ -14,6 +14,7 @@ exports.SupabaseAuthService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const supabase_js_1 = require("@supabase/supabase-js");
+const supabase_admin_client_1 = require("../../infrastructure/supabase/supabase-admin-client");
 let SupabaseAuthService = SupabaseAuthService_1 = class SupabaseAuthService {
     configService;
     logger = new common_1.Logger(SupabaseAuthService_1.name);
@@ -41,12 +42,7 @@ let SupabaseAuthService = SupabaseAuthService_1 = class SupabaseAuthService {
         const secretKey = this.configService.get('SUPABASE_SECRET_KEY') ??
             this.configService.get('SUPABASE_SERVICE_ROLE_KEY');
         if (secretKey) {
-            this.adminClient = (0, supabase_js_1.createClient)(supabaseUrl, secretKey, {
-                auth: {
-                    autoRefreshToken: false,
-                    persistSession: false,
-                },
-            });
+            this.adminClient = (0, supabase_admin_client_1.createSupabaseAdminClient)(supabaseUrl, secretKey);
         }
     }
     async verifyAccessToken(accessToken) {

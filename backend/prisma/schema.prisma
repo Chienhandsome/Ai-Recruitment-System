@@ -28,7 +28,7 @@ enum DepartmentStatus {
 
 enum JobStatus {
   DRAFT
-  OPEN
+  PUBLISHED
   PAUSED
   CLOSED
   ARCHIVED
@@ -58,6 +58,18 @@ enum SkillStatus {
   ACTIVE
   INACTIVE
   PENDING_REVIEW
+}
+
+enum SkillType {
+  HARD
+  SOFT
+}
+
+enum ProficiencyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
 }
 
 enum SkillRequirementType {
@@ -107,6 +119,12 @@ enum ApplicationStage {
   HIRED
   REJECTED
   WITHDRAWN
+}
+
+enum MatchLevel {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 enum HrDecision {
@@ -176,11 +194,13 @@ model Company {
   code        String?  @unique
   logoUrl     String?  @map("logo_url")
   website     String?
+  address     String?
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  departments Department[]
+  departments       Department[]
+  recruiterProfiles RecruiterProfile[]
 
   @@map("companies")
 }
@@ -205,6 +225,7 @@ model User {
   id          String        @id @db.Uuid
   email       String        @unique
   fullName    String        @map("full_name")
+  birthDay    DateTime?     @map("birth_day") @db.Date
   phone       String?
   avatarUrl   String?       @map("avatar_url")
   status      AccountStatus @default(ACTIVE)
@@ -214,7 +235,8 @@ model User {
 
   userRoles        UserRole[]
   recruiterProfile RecruiterProfile?
-  candidate        Candidate?
+  candidateProfile CandidateProfile?
+  notifications    Notification[]
 
   @@index([email])
   @@map("users")
@@ -249,57 +271,84 @@ model RecruiterProfile {
   id           String      @id @default(uuid())
   userId       String      @unique @map("user_id") @db.Uuid
   user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId    String?     @map("company_id")
+  company      Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
   departmentId String?     @map("department_id")
-  department   Department? @relation(fields: [departmentId], references: [id])
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   title        String?
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
 
+  jobPostings JobPosting[]
+
+  @@index([companyId])
+  @@index([departmentId])
   @@map("recruiter_profiles")
 }
 
 model JobPosting {
-  id              String          @id @default(uuid())
-  jobCode         String          @unique @map("job_code")
-  title           String
-  departmentId    String          @map("department_id")
-  department      Department      @relation(fields: [departmentId], references: [id])
-  description     String
-  requirements    String?
-  benefits        String?
-  employmentType  EmploymentType  @default(FULL_TIME) @map("employment_type")
-  experienceLevel ExperienceLevel @default(JUNIOR) @map("experience_level")
-  status          JobStatus       @default(DRAFT)
-  minSalary       Decimal?        @map("min_salary") @db.Decimal(12, 2)
-  maxSalary       Decimal?        @map("max_salary") @db.Decimal(12, 2)
-  currency        String          @default("VND")
-  location        String?
-  expiryDate      DateTime?       @map("expiry_date")
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
+  id                      String           @id @default(uuid())
+  jobCode                 String           @unique @map("job_code")
+  title                   String
+  recruiterId             String           @map("recruiter_id")
+  recruiter               RecruiterProfile @relation(fields: [recruiterId], references: [id], onDelete: Restrict)
+  departmentId            String?          @map("department_id")
+  department              Department?      @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  description             String
+  requirements            String?
+  benefits                String?
+  employmentType          EmploymentType   @default(FULL_TIME) @map("employment_type")
+  experienceLevel         ExperienceLevel  @default(JUNIOR) @map("experience_level")
+  status                  JobStatus        @default(DRAFT)
+  minSalary               Decimal?         @map("min_salary") @db.Decimal(12, 2)
+  maxSalary               Decimal?         @map("max_salary") @db.Decimal(12, 2)
+  currency                String           @default("VND")
+  location                String?
+  requiredExperienceYears Int?             @map("required_experience_years")
+  scoringWeights          Json?            @map("scoring_weights")
+  expiryDate              DateTime?        @map("expiry_date")
+  publishedAt             DateTime?        @map("published_at")
+  closedAt                DateTime?        @map("closed_at")
+  createdAt               DateTime         @default(now()) @map("created_at")
+  updatedAt               DateTime         @updatedAt @map("updated_at")
 
   jobSkills     JobSkill[]
   applications  Application[]
   uploadBatches CvUploadBatch[]
 
   @@index([status])
+  @@index([recruiterId])
   @@index([departmentId])
   @@map("job_postings")
 }
 
+model SkillCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  skills Skill[]
+
+  @@map("skill_categories")
+}
+
 model Skill {
-  id             String      @id @default(uuid())
+  id             String        @id @default(uuid())
   name           String
-  normalizedName String      @unique @map("normalized_name")
-  category       String?
-  status         SkillStatus @default(ACTIVE)
-  createdAt      DateTime    @default(now()) @map("created_at")
-  updatedAt      DateTime    @updatedAt @map("updated_at")
+  normalizedName String        @unique @map("normalized_name")
+  categoryId     String        @map("category_id")
+  category       SkillCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  type           SkillType     @default(HARD)
+  status         SkillStatus   @default(ACTIVE)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
 
   skillAliases    SkillAlias[]
   jobSkills       JobSkill[]
   candidateSkills CandidateSkill[]
 
+  @@index([categoryId])
   @@map("skills")
 }
 
@@ -320,6 +369,7 @@ model JobSkill {
   skillId            String               @map("skill_id")
   skill              Skill                @relation(fields: [skillId], references: [id], onDelete: Cascade)
   requirementType    SkillRequirementType @default(MANDATORY) @map("requirement_type")
+  minimumProficiency ProficiencyLevel?    @map("minimum_proficiency")
   weight             Decimal              @default(1.0) @db.Decimal(5, 2)
   minYearsExperience Int?                 @map("min_years_experience")
   createdAt          DateTime             @default(now()) @map("created_at")
@@ -328,18 +378,19 @@ model JobSkill {
   @@map("job_skills")
 }
 
-model Candidate {
-  id          String   @id @default(uuid())
-  userId      String?  @unique @map("user_id") @db.Uuid
-  user        User?    @relation(fields: [userId], references: [id])
-  fullName    String   @map("full_name")
-  email       String
-  phone       String?
-  address     String?
-  linkedinUrl String?  @map("linkedin_url")
-  githubUrl   String?  @map("github_url")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+model CandidateProfile {
+  id           String   @id @default(uuid())
+  userId       String?  @unique @map("user_id") @db.Uuid
+  user         User?    @relation(fields: [userId], references: [id])
+  fullName     String   @map("full_name")
+  email        String
+  phone        String?
+  address      String?
+  linkedinUrl  String?  @map("linkedin_url")
+  githubUrl    String?  @map("github_url")
+  portfolioUrl String?  @map("portfolio_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   resumes         Resume[]
   applications    Application[]
@@ -347,13 +398,13 @@ model Candidate {
 
   @@index([email])
   @@index([phone])
-  @@map("candidates")
+  @@map("candidate_profiles")
 }
 
 model Resume {
   id                  String              @id @default(uuid())
   candidateId         String              @map("candidate_id")
-  candidate           Candidate           @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  candidate           CandidateProfile    @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   source              ResumeSource        @default(CANDIDATE_UPLOAD)
   originalFileName    String              @map("original_file_name")
   storageBucket       String              @default("resumes") @map("storage_bucket")
@@ -391,18 +442,20 @@ model ResumeParsedData {
 }
 
 model CandidateSkill {
-  id              String      @id @default(uuid())
-  candidateId     String      @map("candidate_id")
-  candidate       Candidate   @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  resumeId        String      @map("resume_id")
-  resume          Resume      @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  skillId         String      @map("skill_id")
-  skill           Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  yearsExperience Decimal?    @map("years_experience") @db.Decimal(4, 1)
-  source          SkillSource @default(EXTRACTED)
-  createdAt       DateTime    @default(now()) @map("created_at")
+  id               String           @id @default(uuid())
+  candidateId      String           @map("candidate_id")
+  candidate        CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  resumeId         String?          @map("resume_id")
+  resume           Resume?          @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  skillId          String           @map("skill_id")
+  skill            Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  proficiencyLevel ProficiencyLevel @default(BEGINNER) @map("proficiency_level")
+  yearsExperience  Decimal?         @map("years_experience") @db.Decimal(4, 1)
+  source           SkillSource      @default(EXTRACTED)
+  createdAt        DateTime         @default(now()) @map("created_at")
 
-  @@unique([resumeId, skillId])
+  @@unique([candidateId, skillId])
+  @@index([resumeId])
   @@map("candidate_skills")
 }
 
@@ -428,12 +481,13 @@ model Application {
   jobId            String                      @map("job_id")
   job              JobPosting                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
   candidateId      String                      @map("candidate_id")
-  candidate        Candidate                   @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  candidate        CandidateProfile            @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   resumeId         String                      @map("resume_id")
   resume           Resume                      @relation(fields: [resumeId], references: [id], onDelete: Cascade)
   uploadBatchId    String?                     @map("upload_batch_id")
   uploadBatch      CvUploadBatch?              @relation(fields: [uploadBatchId], references: [id])
   source           ApplicationSource           @default(DIRECT_APPLY)
+  profileSnapshot  Json?                       @map("profile_snapshot")
   processingStatus ApplicationProcessingStatus @default(UPLOADED) @map("processing_status")
   currentStage     ApplicationStage            @default(RECEIVED) @map("current_stage")
   hrDecision       HrDecision                  @default(PENDING) @map("hr_decision")
@@ -447,6 +501,7 @@ model Application {
   notifications      Notification[]
   statusHistories    ApplicationStatusHistory[]
 
+  @@unique([jobId, candidateId])
   @@index([jobId])
   @@index([candidateId])
   @@index([processingStatus])
@@ -455,21 +510,27 @@ model Application {
 }
 
 model AiMatchingResult {
-  id               String      @id @default(uuid())
-  applicationId    String      @map("application_id")
-  application      Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  version          Int         @default(1)
-  overallScore     Decimal     @map("overall_score") @db.Decimal(5, 2)
-  skillScore       Decimal?    @map("skill_score") @db.Decimal(5, 2)
-  experienceScore  Decimal?    @map("experience_score") @db.Decimal(5, 2)
-  educationScore   Decimal?    @map("education_score") @db.Decimal(5, 2)
-  matchedSkills    Json?       @map("matched_skills")
-  missingSkills    Json?       @map("missing_skills")
-  strengths        Json?
-  weaknesses       Json?
-  reasoningSummary String?     @map("reasoning_summary")
-  inputSnapshot    Json?       @map("input_snapshot")
-  createdAt        DateTime    @default(now()) @map("created_at")
+  id                    String      @id @default(uuid())
+  applicationId         String      @map("application_id")
+  application           Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  version               Int         @default(1)
+  overallScore          Decimal     @map("overall_score") @db.Decimal(5, 2)
+  matchLevel            MatchLevel  @default(LOW) @map("match_level")
+  skillScore            Decimal?    @map("skill_score") @db.Decimal(5, 2)
+  experienceScore       Decimal?    @map("experience_score") @db.Decimal(5, 2)
+  educationScore        Decimal?    @map("education_score") @db.Decimal(5, 2)
+  projectScore          Decimal?    @map("project_score") @db.Decimal(5, 2)
+  matchedSkills         Json?       @map("matched_skills")
+  missingSkills         Json?       @map("missing_skills")
+  missingRequiredSkills Json?       @map("missing_required_skills")
+  strengths             Json?
+  gaps                  Json?
+  weaknesses            Json?
+  reasoningSummary      String?     @map("reasoning_summary")
+  inputSnapshot         Json?       @map("input_snapshot")
+  modelVersion          String?     @map("model_version")
+  createdAt             DateTime    @default(now()) @map("created_at")
+  updatedAt             DateTime    @updatedAt @map("updated_at")
 
   @@unique([applicationId, version])
   @@index([overallScore])
@@ -511,6 +572,7 @@ model Notification {
   applicationId   String?            @map("application_id")
   application     Application?       @relation(fields: [applicationId], references: [id])
   recipientUserId String?            @map("recipient_user_id") @db.Uuid
+  recipient       User?              @relation(fields: [recipientUserId], references: [id], onDelete: Cascade)
   type            NotificationType   @default(APPLICATION_STATUS_CHANGED)
   status          NotificationStatus @default(UNREAD)
   title           String
@@ -519,6 +581,7 @@ model Notification {
   createdAt       DateTime           @default(now()) @map("created_at")
   readAt          DateTime?          @map("read_at")
 
+  @@index([recipientUserId, status])
   @@map("notifications")
 }
 

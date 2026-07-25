@@ -16,7 +16,7 @@ const userProfileInclude = {
       role: true,
     },
   },
-  candidate: true,
+  candidateProfile: true,
   recruiterProfile: true,
 } satisfies Prisma.UserInclude;
 
@@ -94,7 +94,7 @@ export class AuthService {
         });
 
         if (signupRole === 'CANDIDATE') {
-          await transaction.candidate.create({
+          await transaction.candidateProfile.create({
             data: {
               userId: user.id,
               fullName: user.fullName,
@@ -232,12 +232,13 @@ export class AuthService {
       avatarUrl: user.avatarUrl,
       status: user.status,
       roles,
-      candidateProfile: user.candidate
+      candidateProfile: user.candidateProfile
         ? {
-            id: user.candidate.id,
-            address: user.candidate.address,
-            githubUrl: user.candidate.githubUrl,
-            linkedinUrl: user.candidate.linkedinUrl,
+            id: user.candidateProfile.id,
+            address: user.candidateProfile.address,
+            githubUrl: user.candidateProfile.githubUrl,
+            linkedinUrl: user.candidateProfile.linkedinUrl,
+            portfolioUrl: user.candidateProfile.portfolioUrl,
           }
         : null,
       recruiterProfile: user.recruiterProfile

@@ -9,9 +9,24 @@ const protectedPrefixes = [
   "/update-password",
 ];
 
+// Middleware runs on Edge — use console directly
+const isDev = process.env.NODE_ENV === "development";
+
+function logDebug(message: string) {
+  if (isDev) console.log(`[middleware] ${message}`);
+}
+
+function logWarn(message: string) {
+  console.warn(`[middleware] ${message}`);
+}
+
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  logDebug(`→ ${request.method} ${pathname}`);
+
   const config = getSupabasePublicConfig();
   if (!config.url || !config.publishableKey) {
+    logWarn("Supabase not configured — skipping auth check");
     return NextResponse.next({ request });
   }
 
@@ -37,14 +52,20 @@ export async function updateSession(request: NextRequest) {
   const claims = data?.claims;
 
   const requiresAuthentication = protectedPrefixes.some((prefix) =>
-    request.nextUrl.pathname.startsWith(prefix),
+    pathname.startsWith(prefix),
   );
 
   if (requiresAuthentication && !claims) {
+    logWarn(`Protected route ${pathname} — no valid session, redirecting to /login`);
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("next", request.nextUrl.pathname);
+    loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  if (requiresAuthentication && claims) {
+    const sub = (claims as Record<string, unknown>).sub;
+    logDebug(`Protected route ${pathname} — authenticated (sub=${sub})`);
   }
 
   return response;

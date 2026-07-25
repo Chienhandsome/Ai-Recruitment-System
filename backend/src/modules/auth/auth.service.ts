@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, type AccountStatus } from '@prisma/client';
@@ -26,18 +27,27 @@ type UserWithProfile = Prisma.UserGetPayload<{
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async bootstrap(
     authUser: AuthenticatedUser,
     dto: BootstrapAuthDto,
   ): Promise<ReturnType<AuthService['toAuthResponse']>> {
+    this.logger.log(
+      `bootstrap: Starting for user ${authUser.email} (${authUser.id}), role=${dto.role ?? 'none'}`,
+    );
+
     const existing = await this.prisma.user.findUnique({
       where: { id: authUser.id },
       include: userProfileInclude,
     });
 
     if (existing) {
+      this.logger.debug(
+        `bootstrap: Existing user found — updating lastLoginAt`,
+      );
       const updated = await this.prisma.user.update({
         where: { id: authUser.id },
         data: {
@@ -52,7 +62,10 @@ export class AuthService {
       return this.toAuthResponse(updated);
     }
 
+    this.logger.debug(`bootstrap: No existing user — creating new profile`);
+
     if (!dto.role) {
+      this.logger.warn(`bootstrap: No role provided for new user ${authUser.email}`);
       throw new BadRequestException({
         code: 'ROLE_REQUIRED',
         message:
@@ -134,6 +147,9 @@ export class AuthService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
+        this.logger.warn(
+          `bootstrap: P2002 duplicate detected for user ${authUser.id} — checking concurrent creation`,
+        );
         const concurrentlyCreated = await this.prisma.user.findUnique({
           where: { id: authUser.id },
           include: userProfileInclude,
@@ -144,6 +160,9 @@ export class AuthService {
         }
       }
 
+      this.logger.error(
+        `bootstrap: Failed for user ${authUser.email} — ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       throw error;
     }
   }
@@ -151,18 +170,22 @@ export class AuthService {
   async getMe(
     userId: string,
   ): Promise<ReturnType<AuthService['toAuthResponse']>> {
+    this.logger.debug(`getMe: Fetching profile for userId=${userId}`);
+
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: userProfileInclude,
     });
 
     if (!user) {
+      this.logger.warn(`getMe: No profile found for userId=${userId}`);
       throw new NotFoundException({
         code: 'PROFILE_NOT_INITIALIZED',
         message: 'The application profile has not been initialized.',
       });
     }
 
+    this.logger.debug(`getMe: Profile found for ${user.email}`);
     return this.toAuthResponse(user);
   }
 

@@ -18,8 +18,21 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
     isConnected = false;
     constructor() {
         super({
-            log: ['error', 'warn'],
+            log: process.env.NODE_ENV === 'development'
+                ? [
+                    { emit: 'event', level: 'query' },
+                    { emit: 'stdout', level: 'error' },
+                    { emit: 'stdout', level: 'warn' },
+                ]
+                : ['error', 'warn'],
         });
+        if (process.env.NODE_ENV === 'development') {
+            this.$on('query', (e) => {
+                if (e.duration > 200) {
+                    this.logger.warn(`Slow query (${e.duration}ms): ${e.query.substring(0, 200)}`);
+                }
+            });
+        }
     }
     async onModuleInit() {
         await this.connectWithRetry();
@@ -40,14 +53,18 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
             this.isConnected = false;
             return;
         }
+        const sanitizedUrl = dbUrl.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@');
+        this.logger.log(`Prisma: Connecting to ${sanitizedUrl}`);
+        const startTime = Date.now();
         try {
             await this.$connect();
             this.isConnected = true;
-            this.logger.log('Prisma successfully connected to Supabase PostgreSQL database.');
+            this.logger.log(`Prisma successfully connected to Supabase PostgreSQL database (${Date.now() - startTime}ms).`);
         }
         catch (error) {
             this.isConnected = false;
-            this.logger.error(`Prisma connection error: ${error instanceof Error ? error.message : 'Database connection failed'}`);
+            this.logger.error(`Prisma connection error after ${Date.now() - startTime}ms: ${error instanceof Error ? error.message : 'Database connection failed'}`);
+            this.logger.error(`Connection target: ${sanitizedUrl}`);
         }
     }
     async checkHealth() {

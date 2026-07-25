@@ -379,22 +379,28 @@ model JobSkill {
 }
 
 model CandidateProfile {
-  id           String   @id @default(uuid())
-  userId       String?  @unique @map("user_id") @db.Uuid
-  user         User?    @relation(fields: [userId], references: [id])
-  fullName     String   @map("full_name")
-  email        String
-  phone        String?
-  address      String?
-  linkedinUrl  String?  @map("linkedin_url")
-  githubUrl    String?  @map("github_url")
-  portfolioUrl String?  @map("portfolio_url")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                  String   @id @default(uuid())
+  userId              String?  @unique @map("user_id") @db.Uuid
+  user                User?    @relation(fields: [userId], references: [id])
+  fullName            String   @map("full_name")
+  email               String
+  phone               String?
+  address             String?
+  desiredTitle        String?  @map("desired_title")
+  professionalSummary String?  @map("professional_summary")
+  linkedinUrl         String?  @map("linkedin_url")
+  githubUrl           String?  @map("github_url")
+  portfolioUrl        String?  @map("portfolio_url")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
   resumes         Resume[]
   applications    Application[]
   candidateSkills CandidateSkill[]
+  workExperiences WorkExperience[]
+  educations      Education[]
+  projects        Project[]
+  certificates    Certificate[]
 
   @@index([email])
   @@index([phone])
@@ -451,12 +457,83 @@ model CandidateSkill {
   skill            Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
   proficiencyLevel ProficiencyLevel @default(BEGINNER) @map("proficiency_level")
   yearsExperience  Decimal?         @map("years_experience") @db.Decimal(4, 1)
+  isPrimary        Boolean          @default(false) @map("is_primary")
   source           SkillSource      @default(EXTRACTED)
   createdAt        DateTime         @default(now()) @map("created_at")
 
   @@unique([candidateId, skillId])
   @@index([resumeId])
+  @@index([skillId])
   @@map("candidate_skills")
+}
+
+model WorkExperience {
+  id                 String           @id @default(uuid())
+  candidateProfileId String           @map("candidate_profile_id")
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  companyName        String           @map("company_name")
+  positionTitle      String           @map("position_title")
+  startDate          DateTime         @map("start_date") @db.Date
+  endDate            DateTime?        @map("end_date") @db.Date
+  isCurrent          Boolean          @default(false) @map("is_current")
+  description        String?
+  achievements       String?
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  @@index([candidateProfileId])
+  @@map("work_experiences")
+}
+
+model Education {
+  id                 String           @id @default(uuid())
+  candidateProfileId String           @map("candidate_profile_id")
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  schoolName         String           @map("school_name")
+  major              String?
+  degree             String?
+  startDate          DateTime?        @map("start_date") @db.Date
+  endDate            DateTime?        @map("end_date") @db.Date
+  description        String?
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  @@index([candidateProfileId])
+  @@map("educations")
+}
+
+model Project {
+  id                 String           @id @default(uuid())
+  candidateProfileId String           @map("candidate_profile_id")
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  projectName        String           @map("project_name")
+  projectRole        String?          @map("project_role")
+  description        String?
+  technologies       Json?
+  projectUrl         String?          @map("project_url")
+  startDate          DateTime?        @map("start_date") @db.Date
+  endDate            DateTime?        @map("end_date") @db.Date
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  @@index([candidateProfileId])
+  @@map("projects")
+}
+
+model Certificate {
+  id                  String           @id @default(uuid())
+  candidateProfileId  String           @map("candidate_profile_id")
+  candidateProfile    CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  certificateName     String           @map("certificate_name")
+  issuingOrganization String           @map("issuing_organization")
+  issueDate           DateTime?        @map("issue_date") @db.Date
+  expiryDate          DateTime?        @map("expiry_date") @db.Date
+  credentialUrl       String?          @map("credential_url")
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+
+  @@index([candidateProfileId])
+  @@map("certificates")
 }
 
 model CvUploadBatch {

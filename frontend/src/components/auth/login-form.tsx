@@ -48,13 +48,17 @@ export function LoginForm({ initialError = "" }: LoginFormProps) {
     try {
       const supabase = createClient();
       const email = values.email.trim().toLowerCase();
+      console.log("[login] Attempting sign in for:", email);
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password: values.password,
       });
 
       if (error) {
+        console.error("[login] Supabase signIn error:", error.message);
         if (error.message.toLowerCase().includes("email not confirmed")) {
+          console.log("[login] Email not confirmed — redirecting to verify");
           router.push(`/verify-email?email=${encodeURIComponent(email)}`);
           return;
         }
@@ -62,23 +66,29 @@ export function LoginForm({ initialError = "" }: LoginFormProps) {
       }
 
       if (!data.session) {
+        console.error("[login] No session returned from Supabase");
         throw new Error("Supabase không trả về phiên đăng nhập.");
       }
 
+      console.log("[login] Session obtained, calling bootstrap...");
       const profile = await bootstrapProfile(data.session.access_token);
-      router.replace(dashboardPathForRoles(profile.roles));
+      const destination = dashboardPathForRoles(profile.roles);
+      console.log("[login] Success — navigating to:", destination);
+      router.replace(destination);
       router.refresh();
     } catch (error) {
       if (error instanceof AuthApiError && error.code === "ROLE_REQUIRED") {
+        console.log("[login] Role required — redirecting to complete registration");
         router.push("/register?complete=1");
         return;
       }
 
-      setFormError(
+      const message =
         error instanceof Error
           ? error.message
-          : "Đăng nhập không thành công. Vui lòng thử lại.",
-      );
+          : "Đăng nhập không thành công. Vui lòng thử lại.";
+      console.error("[login] Login failed:", message);
+      setFormError(message);
     } finally {
       setIsLoading(false);
     }

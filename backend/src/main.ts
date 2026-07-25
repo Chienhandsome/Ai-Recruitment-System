@@ -1,11 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
+
+  logger.log('Starting AI Recruitment System Backend...');
+  logger.log(`Environment: ${process.env.NODE_ENV ?? 'not set'}`);
+  logger.log(`SUPABASE_URL: ${process.env.SUPABASE_URL ?? 'NOT SET'}`);
+  logger.log(`DATABASE_URL: ${process.env.DATABASE_URL ? '***configured***' : 'NOT SET'}`);
+  logger.log(`RABBITMQ_URL: ${process.env.RABBITMQ_URL ? '***configured***' : 'NOT SET'}`);
+  logger.log(`AI_SERVICE_URL: ${process.env.AI_SERVICE_URL ?? 'NOT SET'}`);
+
+  const app = await NestFactory.create(AppModule, {
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['log', 'warn', 'error']
+        : ['log', 'warn', 'error', 'debug', 'verbose'],
+  });
 
   // 1. Configure Global Prefix
   app.setGlobalPrefix('api');
@@ -34,12 +48,18 @@ async function bootstrap() {
   const vercelPreviewOriginPattern =
     /^https:\/\/ai-recruitment-system-test-deploy-[a-z0-9-]+\.vercel\.app$/;
 
+  logger.log(`CORS allowed origins: ${corsOrigins.join(', ')}`);
+
   const corsOptions: CorsOptions = {
     origin: (origin, callback) => {
       const isAllowed =
         !origin ||
         corsOrigins.includes(origin) ||
         vercelPreviewOriginPattern.test(origin);
+
+      if (!isAllowed && origin) {
+        logger.warn(`CORS blocked request from origin: ${origin}`);
+      }
 
       callback(null, isAllowed);
     },
@@ -60,9 +80,8 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? process.env.BACKEND_PORT ?? 3001;
   await app.listen(port);
-  console.log(`Backend is running on: http://localhost:${port}/api`);
-  console.log(
-    `API documentation available at: http://localhost:${port}/api/docs`,
-  );
+  logger.log(`Backend is running on: http://localhost:${port}/api`);
+  logger.log(`API documentation available at: http://localhost:${port}/api/docs`);
+  logger.log(`Startup complete.`);
 }
 void bootstrap();

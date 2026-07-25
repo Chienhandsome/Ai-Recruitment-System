@@ -39,24 +39,33 @@ let SupabaseAuthService = SupabaseAuthService_1 = class SupabaseAuthService {
                 persistSession: false,
             },
         });
+        this.logger.log(`Supabase Auth client initialized for ${supabaseUrl}`);
         const secretKey = this.configService.get('SUPABASE_SECRET_KEY') ??
             this.configService.get('SUPABASE_SERVICE_ROLE_KEY');
         if (secretKey) {
             this.adminClient = (0, supabase_admin_client_1.createSupabaseAdminClient)(supabaseUrl, secretKey);
+            this.logger.log('Supabase Admin client initialized');
+        }
+        else {
+            this.logger.warn('Supabase Admin client NOT initialized — SUPABASE_SECRET_KEY is missing');
         }
     }
     async verifyAccessToken(accessToken) {
         if (!this.client) {
+            this.logger.error('verifyAccessToken called but Supabase client is null');
             throw new common_1.ServiceUnavailableException('Supabase Auth is not configured on the backend.');
         }
+        this.logger.debug(`verifyAccessToken: Verifying token (first 20 chars: ${accessToken.substring(0, 20)}...)`);
         const { data, error } = await this.client.auth.getClaims(accessToken);
         if (error || !data?.claims) {
+            this.logger.warn(`verifyAccessToken: getClaims failed — ${error?.message ?? 'No claims returned'}`);
             throw new common_1.UnauthorizedException('Invalid or expired access token.');
         }
         const claims = data.claims;
         const id = this.getStringClaim(claims, 'sub');
         const email = this.getStringClaim(claims, 'email');
         if (!id || !email) {
+            this.logger.warn(`verifyAccessToken: Token missing sub or email claim. sub=${id}, email=${email}`);
             throw new common_1.UnauthorizedException('The access token does not contain a valid user identity.');
         }
         const metadata = this.getObjectClaim(claims, 'user_metadata');
@@ -65,6 +74,7 @@ let SupabaseAuthService = SupabaseAuthService_1 = class SupabaseAuthService {
             email.split('@')[0];
         const avatarUrl = this.getMetadataString(metadata, 'avatar_url') ??
             this.getMetadataString(metadata, 'picture');
+        this.logger.debug(`verifyAccessToken: Success — user=${email}, id=${id}`);
         return {
             id,
             email: email.toLowerCase(),

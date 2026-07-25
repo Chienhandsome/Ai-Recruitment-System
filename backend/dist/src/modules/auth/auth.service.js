@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var AuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
@@ -23,17 +24,20 @@ const userProfileInclude = {
     candidateProfile: true,
     recruiterProfile: true,
 };
-let AuthService = class AuthService {
+let AuthService = AuthService_1 = class AuthService {
     prisma;
+    logger = new common_1.Logger(AuthService_1.name);
     constructor(prisma) {
         this.prisma = prisma;
     }
     async bootstrap(authUser, dto) {
+        this.logger.log(`bootstrap: Starting for user ${authUser.email} (${authUser.id}), role=${dto.role ?? 'none'}`);
         const existing = await this.prisma.user.findUnique({
             where: { id: authUser.id },
             include: userProfileInclude,
         });
         if (existing) {
+            this.logger.debug(`bootstrap: Existing user found — updating lastLoginAt`);
             const updated = await this.prisma.user.update({
                 where: { id: authUser.id },
                 data: {
@@ -46,7 +50,9 @@ let AuthService = class AuthService {
             });
             return this.toAuthResponse(updated);
         }
+        this.logger.debug(`bootstrap: No existing user — creating new profile`);
         if (!dto.role) {
+            this.logger.warn(`bootstrap: No role provided for new user ${authUser.email}`);
             throw new common_1.BadRequestException({
                 code: 'ROLE_REQUIRED',
                 message: 'Choose Candidate or Recruiter to finish creating your account.',
@@ -121,6 +127,7 @@ let AuthService = class AuthService {
         catch (error) {
             if (error instanceof client_1.Prisma.PrismaClientKnownRequestError &&
                 error.code === 'P2002') {
+                this.logger.warn(`bootstrap: P2002 duplicate detected for user ${authUser.id} — checking concurrent creation`);
                 const concurrentlyCreated = await this.prisma.user.findUnique({
                     where: { id: authUser.id },
                     include: userProfileInclude,
@@ -129,20 +136,24 @@ let AuthService = class AuthService {
                     return this.toAuthResponse(concurrentlyCreated);
                 }
             }
+            this.logger.error(`bootstrap: Failed for user ${authUser.email} — ${error instanceof Error ? error.message : 'Unknown error'}`);
             throw error;
         }
     }
     async getMe(userId) {
+        this.logger.debug(`getMe: Fetching profile for userId=${userId}`);
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             include: userProfileInclude,
         });
         if (!user) {
+            this.logger.warn(`getMe: No profile found for userId=${userId}`);
             throw new common_1.NotFoundException({
                 code: 'PROFILE_NOT_INITIALIZED',
                 message: 'The application profile has not been initialized.',
             });
         }
+        this.logger.debug(`getMe: Profile found for ${user.email}`);
         return this.toAuthResponse(user);
     }
     async provisionAdmin(createdByUserId, invitedUser) {
@@ -229,7 +240,7 @@ let AuthService = class AuthService {
     }
 };
 exports.AuthService = AuthService;
-exports.AuthService = AuthService = __decorate([
+exports.AuthService = AuthService = AuthService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], AuthService);

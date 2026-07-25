@@ -18,13 +18,22 @@ export async function GET(request: NextRequest) {
   const errorDescription =
     request.nextUrl.searchParams.get("error_description");
 
+  console.log("[auth/callback] Received callback:", {
+    hasCode: !!code,
+    intent,
+    next,
+    hasError: !!errorDescription,
+  });
+
   if (errorDescription) {
+    console.error("[auth/callback] Error from provider:", errorDescription);
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("error", errorDescription);
     return NextResponse.redirect(loginUrl);
   }
 
   if (!code) {
+    console.error("[auth/callback] Missing authorization code");
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("error", "OAuth callback thiếu authorization code.");
     return NextResponse.redirect(loginUrl);
@@ -32,34 +41,45 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = await createClient();
+    console.log("[auth/callback] Exchanging code for session...");
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) throw error;
+
+    if (error) {
+      console.error("[auth/callback] exchangeCodeForSession error:", error.message);
+      throw error;
+    }
 
     if (next === "/update-password") {
+      console.log("[auth/callback] Redirecting to /update-password");
       return NextResponse.redirect(new URL("/update-password", request.url));
     }
 
     if (!data.session) {
+      console.error("[auth/callback] No session returned from Supabase");
       throw new Error("Supabase không trả về phiên đăng nhập.");
     }
 
+    console.log("[auth/callback] Session obtained, bootstrapping profile...");
     const profile = await bootstrapProfile(
       data.session.access_token,
       intent,
     );
+
+    const destination = dashboardPathForRoles(profile.roles);
+    console.log("[auth/callback] Success — redirecting to:", destination);
     return NextResponse.redirect(
-      new URL(dashboardPathForRoles(profile.roles), request.url),
+      new URL(destination, request.url),
     );
   } catch (error) {
     if (error instanceof AuthApiError && error.code === "ROLE_REQUIRED") {
+      console.log("[auth/callback] Role required — redirecting to /register?complete=1");
       return NextResponse.redirect(new URL("/register?complete=1", request.url));
     }
 
+    const message = error instanceof Error ? error.message : "OAuth callback thất bại.";
+    console.error("[auth/callback] Unhandled error:", message);
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set(
-      "error",
-      error instanceof Error ? error.message : "OAuth callback thất bại.",
-    );
+    loginUrl.searchParams.set("error", message);
     return NextResponse.redirect(loginUrl);
   }
 }

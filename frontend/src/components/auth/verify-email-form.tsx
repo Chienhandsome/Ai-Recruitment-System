@@ -18,6 +18,8 @@ import {
 } from "@/lib/pending-signup";
 
 const RESEND_COOLDOWN_SECONDS = 60;
+const OTP_MIN_LENGTH = 6;
+const OTP_MAX_LENGTH = 8;
 
 export function VerifyEmailForm() {
   const router = useRouter();
@@ -48,8 +50,8 @@ export function VerifyEmailForm() {
       return;
     }
 
-    if (!/^\d{6}$/.test(token)) {
-      setErrorMessage("OTP phải gồm đúng 6 chữ số.");
+    if (!new RegExp(`^\\d{${OTP_MIN_LENGTH},${OTP_MAX_LENGTH}}$`).test(token)) {
+      setErrorMessage("OTP phải gồm từ 6 đến 8 chữ số.");
       return;
     }
 
@@ -128,7 +130,7 @@ export function VerifyEmailForm() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        Nhập mã 6 chữ số đã gửi đến{" "}
+        Nhập mã OTP đã gửi đến{" "}
         <span className="font-medium text-foreground">
           {email || "email của bạn"}
         </span>
@@ -141,13 +143,15 @@ export function VerifyEmailForm() {
           id="otp"
           inputMode="numeric"
           autoComplete="one-time-code"
-          maxLength={6}
+          maxLength={OTP_MAX_LENGTH}
           value={token}
           onChange={(event) =>
-            setToken(event.target.value.replace(/\D/g, "").slice(0, 6))
+            setToken(
+              event.target.value.replace(/\D/g, "").slice(0, OTP_MAX_LENGTH),
+            )
           }
-          placeholder="000000"
-          className="text-center text-2xl tracking-[0.5em]"
+          placeholder="00000000"
+          className="text-center text-2xl tracking-[0.3em] sm:tracking-[0.5em]"
           disabled={isLoading}
         />
       </div>

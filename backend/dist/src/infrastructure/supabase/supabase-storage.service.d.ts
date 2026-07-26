@@ -1,5 +1,6 @@
 import { OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ResumeStoragePathParams } from './storage-path.util';
 export interface UploadResult {
     bucket: string;
     objectPath: string;
@@ -28,6 +29,7 @@ export declare class SupabaseStorageService implements OnModuleInit {
     private initClient;
     ensureResumeBucket(): Promise<boolean>;
     uploadResume(buffer: Buffer, originalFileName: string, mimeType: string, customObjectPath?: string): Promise<UploadResult>;
+    uploadCandidateResume(buffer: Buffer, originalFileName: string, mimeType: string, pathParams: ResumeStoragePathParams): Promise<UploadResult>;
     createSignedDownloadUrl(objectPath: string, expiresIn?: number): Promise<SignedUrlResult>;
     removeResume(objectPath: string): Promise<RemoveResult>;
     fileExists(objectPath: string): Promise<boolean>;

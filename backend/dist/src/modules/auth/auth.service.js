@@ -95,6 +95,7 @@ let AuthService = AuthService_1 = class AuthService {
                             userId: user.id,
                             fullName: user.fullName,
                             email: user.email,
+                            status: 'EMPTY',
                         },
                     });
                 }

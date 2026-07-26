@@ -81,7 +81,6 @@ enum SkillRequirementType {
 enum ResumeSource {
   CANDIDATE_UPLOAD
   HR_UPLOAD
-  BATCH_IMPORT
   SYSTEM
 }
 
@@ -134,14 +133,6 @@ enum HrDecision {
   CONSIDER
 }
 
-enum BatchStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-  PARTIALLY_FAILED
-}
-
 enum InterviewType {
   ONLINE
   OFFLINE
@@ -182,6 +173,13 @@ enum UnrecognizedSkillStatus {
   APPROVED
   REJECTED
   MERGED
+}
+
+enum CandidateProfileStatus {
+  EMPTY
+  PROCESSING
+  READY
+  FAILED
 }
 
 // ==========================================
@@ -314,7 +312,6 @@ model JobPosting {
 
   jobSkills     JobSkill[]
   applications  Application[]
-  uploadBatches CvUploadBatch[]
 
   @@index([status])
   @@index([recruiterId])
@@ -379,20 +376,23 @@ model JobSkill {
 }
 
 model CandidateProfile {
-  id                  String   @id @default(uuid())
-  userId              String?  @unique @map("user_id") @db.Uuid
-  user                User?    @relation(fields: [userId], references: [id])
-  fullName            String   @map("full_name")
+  id                  String                 @id @default(uuid())
+  userId              String?                @unique @map("user_id") @db.Uuid
+  user                User?                  @relation(fields: [userId], references: [id])
+  status              CandidateProfileStatus @default(EMPTY)
+  fullName            String                 @map("full_name")
   email               String
   phone               String?
   address             String?
-  desiredTitle        String?  @map("desired_title")
-  professionalSummary String?  @map("professional_summary")
-  linkedinUrl         String?  @map("linkedin_url")
-  githubUrl           String?  @map("github_url")
-  portfolioUrl        String?  @map("portfolio_url")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  desiredTitle        String?                @map("desired_title")
+  professionalSummary String?                @map("professional_summary")
+  linkedinUrl         String?                @map("linkedin_url")
+  githubUrl           String?                @map("github_url")
+  portfolioUrl        String?                @map("portfolio_url")
+  primaryResumeId     String?                @unique @map("primary_resume_id")
+  primaryResume       Resume?                @relation("PrimaryResume", fields: [primaryResumeId], references: [id], onDelete: SetNull)
+  createdAt           DateTime               @default(now()) @map("created_at")
+  updatedAt           DateTime               @updatedAt @map("updated_at")
 
   resumes         Resume[]
   applications    Application[]
@@ -404,6 +404,7 @@ model CandidateProfile {
 
   @@index([email])
   @@index([phone])
+  @@index([status])
   @@map("candidate_profiles")
 }
 
@@ -422,9 +423,10 @@ model Resume {
   createdAt           DateTime            @default(now()) @map("created_at")
   updatedAt           DateTime            @updatedAt @map("updated_at")
 
-  parsedData      ResumeParsedData?
-  candidateSkills CandidateSkill[]
-  applications    Application[]
+  parsedData             ResumeParsedData?
+  candidateSkills        CandidateSkill[]
+  applications           Application[]
+  primaryForCandidateProfile CandidateProfile? @relation("PrimaryResume")
 
   @@index([parsingStatus])
   @@map("resumes")
@@ -536,23 +538,6 @@ model Certificate {
   @@map("certificates")
 }
 
-model CvUploadBatch {
-  id             String      @id @default(uuid())
-  jobId          String      @map("job_id")
-  job            JobPosting  @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  batchName      String      @map("batch_name")
-  totalFiles     Int         @map("total_files")
-  processedFiles Int         @default(0) @map("processed_files")
-  failedFiles    Int         @default(0) @map("failed_files")
-  status         BatchStatus @default(PENDING)
-  createdAt      DateTime    @default(now()) @map("created_at")
-  updatedAt      DateTime    @updatedAt @map("updated_at")
-
-  applications Application[]
-
-  @@map("cv_upload_batches")
-}
-
 model Application {
   id               String                      @id @default(uuid())
   jobId            String                      @map("job_id")
@@ -561,8 +546,6 @@ model Application {
   candidate        CandidateProfile            @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   resumeId         String                      @map("resume_id")
   resume           Resume                      @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  uploadBatchId    String?                     @map("upload_batch_id")
-  uploadBatch      CvUploadBatch?              @relation(fields: [uploadBatchId], references: [id])
   source           ApplicationSource           @default(DIRECT_APPLY)
   profileSnapshot  Json?                       @map("profile_snapshot")
   processingStatus ApplicationProcessingStatus @default(UPLOADED) @map("processing_status")
@@ -700,11 +683,3 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-model InfrastructureHealthRecord {
-  id        String   @id @default(uuid())
-  service   String
-  status    String
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("infrastructure_health_records")
-}

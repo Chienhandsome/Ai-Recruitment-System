@@ -112,6 +112,7 @@ export class AuthService {
               userId: user.id,
               fullName: user.fullName,
               email: user.email,
+              status: 'EMPTY',
             },
           });
         } else {

@@ -15,6 +15,7 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const supabase_js_1 = require("@supabase/supabase-js");
 const node_crypto_1 = require("node:crypto");
+const storage_path_util_1 = require("./storage-path.util");
 let SupabaseStorageService = SupabaseStorageService_1 = class SupabaseStorageService {
     configService;
     logger = new common_1.Logger(SupabaseStorageService_1.name);
@@ -142,6 +143,10 @@ let SupabaseStorageService = SupabaseStorageService_1 = class SupabaseStorageSer
             mimeType,
             size: buffer.length,
         };
+    }
+    async uploadCandidateResume(buffer, originalFileName, mimeType, pathParams) {
+        const objectPath = (0, storage_path_util_1.buildResumeObjectPath)(pathParams);
+        return this.uploadResume(buffer, originalFileName, mimeType, objectPath);
     }
     async createSignedDownloadUrl(objectPath, expiresIn) {
         if (!this.supabaseClient) {

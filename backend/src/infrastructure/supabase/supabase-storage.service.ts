@@ -7,6 +7,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
+import {
+  buildResumeObjectPath,
+  ResumeStoragePathParams,
+} from './storage-path.util';
 
 export interface UploadResult {
   bucket: string;
@@ -214,6 +218,23 @@ export class SupabaseStorageService implements OnModuleInit {
       mimeType,
       size: buffer.length,
     };
+  }
+
+  /**
+   * Upload a candidate resume using the standardized storage path convention:
+   * candidates/{candidateProfileId}/resumes/{resumeId}/{filename}
+   *
+   * Use this method for all production resume uploads (candidate self-upload, HR upload, batch import).
+   * The older `uploadResume` with customObjectPath is kept for backward compatibility and testing.
+   */
+  async uploadCandidateResume(
+    buffer: Buffer,
+    originalFileName: string,
+    mimeType: string,
+    pathParams: ResumeStoragePathParams,
+  ): Promise<UploadResult> {
+    const objectPath = buildResumeObjectPath(pathParams);
+    return this.uploadResume(buffer, originalFileName, mimeType, objectPath);
   }
 
   async createSignedDownloadUrl(

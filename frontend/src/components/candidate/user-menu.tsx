@@ -61,7 +61,7 @@ export function UserMenu({ fullName, avatarUrl }: UserMenuProps) {
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="w-56">
+      <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{fullName}</p>

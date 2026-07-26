@@ -1,26 +1,27 @@
-import { DashboardShell } from "@/components/auth/dashboard-shell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RecruiterWorkspace } from "@/components/recruiter/RecruiterWorkspace";
 import { requireProfile } from "@/lib/server-profile";
+import { getRecruiterProfile, getRecruiterDashboardStats } from "@/lib/recruiter-api";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function RecruiterDashboardPage() {
-  const profile = await requireProfile("RECRUITER");
+  await requireProfile("RECRUITER");
+  
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  let profile = null;
+  let stats = null;
+  
+  if (session) {
+    try {
+      profile = await getRecruiterProfile(session.access_token);
+      stats = await getRecruiterDashboardStats(session.access_token);
+    } catch (e) {
+      console.error("Failed to load recruiter data", e);
+    }
+  }
 
-  return (
-    <DashboardShell
-      title="Recruiter Dashboard"
-      fullName={profile.fullName}
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle>Tài khoản nhà tuyển dụng đã sẵn sàng</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">
-          Bạn có thể tiếp tục bổ sung công ty, phòng ban và chức danh trong bước
-          xây dựng hồ sơ Recruiter.
-        </CardContent>
-      </Card>
-    </DashboardShell>
-  );
+  return <RecruiterWorkspace profile={profile} stats={stats} />;
 }

@@ -24,7 +24,8 @@ export function BackendHelloLogger() {
         console.log(message)
       } catch (error) {
         if (error instanceof Error && error.name !== "AbortError") {
-          console.error("Cannot get backend hello message:", error)
+          // Log clean warning if local backend is offline
+          console.warn("Backend API endpoint is offline or unavailable:", API_URL)
         }
       }
     }

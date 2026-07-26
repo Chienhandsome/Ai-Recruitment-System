@@ -22,7 +22,8 @@ export function ProfileForm({
   fullName,
   email,
   phone,
-  avatarUrl,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _avatarUrl,
   address,
   githubUrl,
   linkedinUrl,

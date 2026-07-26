@@ -25,6 +25,7 @@ import {
 import { KanbanBoard, ApplicationStage, KanbanCandidate } from "./KanbanBoard";
 import { Candidate360Modal } from "./Candidate360Modal";
 import { RecruiterProfileModal } from "./RecruiterProfileModal";
+import { JobsWorkspace } from "./JobsWorkspace";
 import type { RecruiterProfileData, RecruiterDashboardStats } from "@/lib/recruiter-api";
 import { createClient } from "@/lib/supabase/client";
 
@@ -63,157 +64,18 @@ export interface JobPosting {
   postedDate: string;
 }
 
-// Mock Data
-const MOCK_CANDIDATES: Candidate[] = [
-  {
-    id: "cand-1",
-    name: "Nguyễn Văn An",
-    avatar: "https://picsum.photos/seed/an-dev/100/100",
-    roleApplied: "Senior Frontend Engineer",
-    matchScore: 94,
-    skillsFit: [
-      { skill: "React", fitScore: 98 },
-      { skill: "TypeScript", fitScore: 92 },
-      { skill: "Next.js", fitScore: 95 },
-      { skill: "Tailwind CSS", fitScore: 90 },
-    ],
-    experienceYears: 6,
-    aiSummary: "Chuyên gia React/Next.js với 6 năm kinh nghiệm tối ưu performance web app tải lớn.",
-    status: "SHORTLISTED",
-    appliedDate: "2026-07-25",
-    pros: [
-      "Thành thạo Server Driven UI và Next.js App Router",
-      "Có kinh nghiệm lead team 5 frontend engineers",
-      "Điểm kỹ năng TypeScript tuyệt đối 98%",
-    ],
-    cons: ["Chưa có kinh nghiệm làm việc trực tiếp với GraphQL Subscriptions"],
-    education: "Đại học Bách Khoa Hà Nội - Kỹ thuật Phần mềm",
-    radarScores: { skills: 98, experience: 92, education: 90, cultureFit: 94 },
-  },
-  {
-    id: "cand-2",
-    name: "Trần Thị Mai",
-    avatar: "https://picsum.photos/seed/mai-dev/100/100",
-    roleApplied: "Senior Java Backend Engineer",
-    matchScore: 89,
-    skillsFit: [
-      { skill: "Java Spring Boot", fitScore: 95 },
-      { skill: "Microservices", fitScore: 90 },
-      { skill: "PostgreSQL", fitScore: 88 },
-      { skill: "Kafka", fitScore: 82 },
-    ],
-    experienceYears: 5,
-    aiSummary: "Kiến trúc sư Spring Boot chuyên xử lý hệ thống giao dịch phân tán và message queue.",
-    status: "SHORTLISTED",
-    appliedDate: "2026-07-24",
-    pros: [
-      "Hiểu sâu kiến trúc Event-Driven Architecture với Kafka",
-      "Kinh nghiệm tối ưu SQL query giảm 40% latency",
-    ],
-    cons: ["Ít làm việc với Docker/Kubernetes trên môi trường AWS prod"],
-    education: "Đại học Công nghệ - ĐHQGHN",
-    radarScores: { skills: 92, experience: 90, education: 88, cultureFit: 86 },
-  },
-  {
-    id: "cand-3",
-    name: "Lê Hoàng Nam",
-    avatar: "https://picsum.photos/seed/nam-dev/100/100",
-    roleApplied: "AI/ML Engineer",
-    matchScore: 86,
-    skillsFit: [
-      { skill: "Python", fitScore: 96 },
-      { skill: "PyTorch", fitScore: 90 },
-      { skill: "LLM Fine-tuning", fitScore: 85 },
-      { skill: "RAG Systems", fitScore: 88 },
-    ],
-    experienceYears: 4,
-    aiSummary: "Chuyên gia xây dựng hệ thống RAG và fine-tune mô hình ngôn ngữ lớn cho ứng dụng SaaS.",
-    status: "SCREENING",
-    appliedDate: "2026-07-26",
-    pros: [
-      "Đã triển khai thành công 3 hệ thống Enterprise Search sử dụng Vector DB",
-      "Thạo LangChain & LlamaIndex",
-    ],
-    cons: ["Thời gian chuyển đổi việc (notice period) hơi dài (45 ngày)"],
-    education: "Đại học FPT - Trí tuệ Nhân tạo",
-    radarScores: { skills: 90, experience: 82, education: 85, cultureFit: 88 },
-  },
-  {
-    id: "cand-4",
-    name: "Phạm Quốc Minh",
-    avatar: "https://picsum.photos/seed/minh-dev/100/100",
-    roleApplied: "DevOps Engineer",
-    matchScore: 78,
-    skillsFit: [
-      { skill: "Docker", fitScore: 88 },
-      { skill: "Kubernetes", fitScore: 76 },
-      { skill: "CI/CD Pipeline", fitScore: 82 },
-      { skill: "Terraform", fitScore: 65 },
-    ],
-    experienceYears: 3,
-    aiSummary: "Kỹ sư DevOps triển khai CI/CD thành thục nhưng cần trau dồi thêm về IaC Terraform.",
-    status: "NEW",
-    appliedDate: "2026-07-26",
-    pros: ["Kỹ năng viết script Bash/Python tự động hóa tốt"],
-    cons: ["Kinh nghiệm Terraform thực tế chưa sâu", "Chưa có chứng chỉ AWS/Azure"],
-    education: "Đại học Bách Khoa TP.HCM",
-    radarScores: { skills: 78, experience: 75, education: 80, cultureFit: 80 },
-  },
-];
-
-const MOCK_JOBS: JobPosting[] = [
-  {
-    id: "job-1",
-    title: "Senior Frontend Engineer (React/Next.js)",
-    department: "Engineering",
-    location: "Hà Nội (Hybrid)",
-    applicantsCount: 42,
-    shortlistedCount: 8,
-    avgMatchScore: 84.2,
-    status: "ACTIVE",
-    postedDate: "2026-07-15",
-  },
-  {
-    id: "job-2",
-    title: "Senior Java Backend Engineer",
-    department: "Core Banking Team",
-    location: "Hồ Chí Minh",
-    applicantsCount: 36,
-    shortlistedCount: 6,
-    avgMatchScore: 81.5,
-    status: "ACTIVE",
-    postedDate: "2026-07-18",
-  },
-  {
-    id: "job-3",
-    title: "AI/ML Solutions Architect",
-    department: "AI Research Lab",
-    location: "Hà Nội",
-    applicantsCount: 18,
-    shortlistedCount: 4,
-    avgMatchScore: 88.0,
-    status: "ACTIVE",
-    postedDate: "2026-07-20",
-  },
-  {
-    id: "job-4",
-    title: "Senior DevOps Infrastructure Engineer",
-    department: "Cloud Operations",
-    location: "Remote",
-    applicantsCount: 24,
-    shortlistedCount: 3,
-    avgMatchScore: 76.4,
-    status: "PAUSED",
-    postedDate: "2026-07-01",
-  },
-];
+// Mock Data Removed - System uses live API data
+const MOCK_CANDIDATES: Candidate[] = [];
+const MOCK_JOBS: JobPosting[] = [];
 
 export function RecruiterWorkspace({
   profile,
   stats,
+  token,
 }: {
   profile: RecruiterProfileData | null;
   stats: RecruiterDashboardStats | null;
+  token: string;
 }) {
   const [activeTab, setActiveTab] = useState<"dashboard" | "jobs" | "candidates">("dashboard");
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
@@ -264,7 +126,7 @@ export function RecruiterWorkspace({
                   : "text-[#64748B] hover:text-[#0F172A]"
               }`}
             >
-              Quản lý Bài đăng ({MOCK_JOBS.length})
+              Quản lý Bài đăng
             </button>
             <button
               onClick={() => setActiveTab("candidates")}
@@ -373,7 +235,7 @@ export function RecruiterWorkspace({
         )}
 
         {/* Tab 2: Job Management */}
-        {activeTab === "jobs" && <JobsTab jobs={MOCK_JOBS} onOpenCreateJob={() => setIsCreateJobOpen(true)} />}
+        {activeTab === "jobs" && <JobsWorkspace initialData={null} token={token} />}
 
         {/* Tab 3: Candidate Ranking */}
         {activeTab === "candidates" && (

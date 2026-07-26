@@ -23,5 +23,5 @@ export default async function RecruiterDashboardPage() {
     }
   }
 
-  return <RecruiterWorkspace profile={profile} stats={stats} />;
+  return <RecruiterWorkspace profile={profile} stats={stats} token={session?.access_token || ""} />;
 }

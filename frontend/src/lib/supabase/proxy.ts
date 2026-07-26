@@ -9,6 +9,19 @@ const protectedPrefixes = [
   "/update-password",
 ];
 
+/**
+ * Public routes where we should NOT attempt to refresh the session.
+ * This prevents "Refresh Token Not Found" errors when stale cookies exist
+ * during signup/login flows.
+ */
+const publicAuthPrefixes = [
+  "/login",
+  "/register",
+  "/verify-email",
+  "/auth/callback",
+  "/forgot-password",
+];
+
 // Middleware runs on Edge — use console directly
 const isDev = process.env.NODE_ENV === "development";
 
@@ -30,6 +43,17 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
+  // Skip session refresh for public auth routes to avoid
+  // "Invalid Refresh Token" errors from stale cookies during signup/login.
+  const isPublicAuthRoute = publicAuthPrefixes.some((prefix) =>
+    pathname.startsWith(prefix),
+  );
+
+  if (isPublicAuthRoute) {
+    logDebug(`Public auth route ${pathname} — skipping session refresh`);
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
   const supabase = createServerClient(config.url, config.publishableKey, {
     cookies: {
@@ -48,7 +72,30 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const { data } = await supabase.auth.getClaims();
+  const { data, error } = await supabase.auth.getClaims();
+
+  // If refresh token is invalid/not found, clear the stale session cookies
+  // and let the request proceed (user will be treated as unauthenticated).
+  if (error && "code" in error && error.code === "refresh_token_not_found") {
+    logWarn(`Stale refresh token detected — clearing session cookies`);
+    const clearResponse = NextResponse.next({ request });
+    request.cookies.getAll().forEach(({ name }) => {
+      if (name.startsWith("sb-")) {
+        clearResponse.cookies.delete(name);
+      }
+    });
+    const requiresAuthentication = protectedPrefixes.some((prefix) =>
+      pathname.startsWith(prefix),
+    );
+    if (requiresAuthentication) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return clearResponse;
+  }
+
   const claims = data?.claims;
 
   const requiresAuthentication = protectedPrefixes.some((prefix) =>

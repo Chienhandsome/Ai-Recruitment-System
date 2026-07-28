@@ -28,6 +28,7 @@ const interviews_module_1 = require("./modules/interviews/interviews.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const recruiters_module_1 = require("./modules/recruiters/recruiters.module");
+const admin_module_1 = require("./modules/admin/admin.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -54,6 +55,7 @@ exports.AppModule = AppModule = __decorate([
             notifications_module_1.NotificationsModule,
             auth_module_1.AuthModule,
             recruiters_module_1.RecruitersModule,
+            admin_module_1.AdminModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

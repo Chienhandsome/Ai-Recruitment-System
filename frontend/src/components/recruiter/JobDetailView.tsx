@@ -87,14 +87,14 @@ export function JobDetailView({
     <div className="flex flex-col h-full space-y-6">
       
       {/* Header & Navigation */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#121620] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div className="space-y-1">
-          <button onClick={onBack} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 mb-2 transition-colors">
+          <button onClick={onBack} className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#2563EB] mb-2 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Quay lại Danh sách Bài tuyển dụng
           </button>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{job.title}</h1>
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold">
+            <h1 className="text-2xl font-extrabold text-[#1F2937]">{job.title}</h1>
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#EFF6FF] text-[#2563EB] font-bold border border-blue-200">
               {job.jobCode}
             </span>
             <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
@@ -105,7 +105,7 @@ export function JobDetailView({
               {job.status === "PUBLISHED" ? "ĐANG TUYỂN" : job.status === "DRAFT" ? "BẢN NHÁP" : job.status}
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-500 font-medium">
             Phòng ban: <strong>{job.department?.name || "Chưa xếp"}</strong> • Tạo ngày: {new Date(job.createdAt).toLocaleDateString("vi-VN")}
           </p>
         </div>
@@ -115,7 +115,7 @@ export function JobDetailView({
           {job.status === "DRAFT" && (
             <button 
               onClick={() => handleStatusChange("PUBLISHED")}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-all"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-all"
             >
               Xuất bản (Publish)
             </button>
@@ -123,21 +123,21 @@ export function JobDetailView({
           {job.status === "PUBLISHED" && (
             <button 
               onClick={() => handleStatusChange("CLOSED")}
-              className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl transition-all"
+              className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-xl transition-all"
             >
               Đóng tuyển dụng
             </button>
           )}
           <button 
             onClick={() => onEdit(job)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-400 text-xs font-semibold rounded-xl border border-indigo-200 dark:border-indigo-500/20 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] text-xs font-bold rounded-xl border border-blue-200 transition-colors shadow-sm"
           >
             <Edit className="w-4 h-4" /> Chỉnh sửa JD
           </button>
           {job.status === "DRAFT" && (
             <button 
               onClick={handleDelete}
-              className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors"
+              className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
               title="Xóa bài nháp"
             >
               <Trash2 className="w-4 h-4" />
@@ -147,27 +147,27 @@ export function JobDetailView({
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800">
+      <div className="flex p-1 bg-[#EFF6FF] rounded-xl border border-blue-100">
         <button
           onClick={() => setActiveTab("info")}
-          className={`px-6 py-3 text-sm font-bold border-b-2 transition-all ${
+          className={`px-5 py-2 text-xs font-bold rounded-lg transition-all ${
             activeTab === "info"
-              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              ? "bg-[#2563EB] text-white shadow-md"
+              : "text-[#1F2937] hover:text-[#2563EB]"
           }`}
         >
           1. Thông tin Chi tiết JD (Job Information)
         </button>
         <button
           onClick={() => setActiveTab("candidates")}
-          className={`px-6 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+          className={`px-5 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${
             activeTab === "candidates"
-              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              ? "bg-[#2563EB] text-white shadow-md"
+              : "text-[#1F2937] hover:text-[#2563EB]"
           }`}
         >
           2. Đánh giá Ứng viên AI (AI Candidate Evaluation)
-          <span className="px-2 py-0.5 text-xs rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold">
+          <span className={`px-2 py-0.5 text-xs rounded-full font-bold ${activeTab === "candidates" ? "bg-white text-[#2563EB]" : "bg-blue-100 text-[#2563EB]"}`}>
             {job._count?.applications || 0}
           </span>
         </button>
@@ -178,17 +178,17 @@ export function JobDetailView({
         <div className="grid grid-cols-3 gap-6">
           <div className="col-span-2 space-y-6">
             {/* Description & Requirements */}
-            <div className="bg-white dark:bg-[#121620] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800/60 pb-3">Mô tả công việc</h3>
-              <div className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
+              <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3">Mô tả công việc</h3>
+              <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
                 {job.description}
               </div>
             </div>
 
             {job.requirements && (
-              <div className="bg-white dark:bg-[#121620] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800/60 pb-3">Yêu cầu công việc</h3>
-                <div className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
+                <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3">Yêu cầu công việc</h3>
+                <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
                   {job.requirements}
                 </div>
               </div>
@@ -196,17 +196,17 @@ export function JobDetailView({
 
             {/* Required Skills Section */}
             {job.jobSkills && job.jobSkills.length > 0 && (
-              <div className="bg-white dark:bg-[#121620] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800/60 pb-3 flex items-center justify-between">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
+                <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3 flex items-center justify-between">
                   <span>Kỹ năng Yêu cầu Đính kèm ({job.jobSkills.length})</span>
                   <span className="text-xs font-normal text-slate-500">Được mã hóa để AI So khớp Chấm điểm</span>
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {job.jobSkills.map((sk, idx) => (
-                    <div key={idx} className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 ${
+                    <div key={idx} className={`px-3 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 ${
                       sk.requirementType === 'MANDATORY' 
-                        ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-800/50' 
-                        : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800/50'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200' 
+                        : 'bg-amber-50 text-amber-700 border-amber-200'
                     }`}>
                       <span>{sk.skill?.name || "Kỹ năng"}</span>
                       <span className="text-[10px] opacity-75 uppercase">({sk.requirementType === 'MANDATORY' ? 'Bắt buộc' : 'Ưu tiên'})</span>
@@ -219,58 +219,58 @@ export function JobDetailView({
 
           {/* Right Sidebar: Meta & AI Configurations */}
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#121620] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800/60 pb-3">Tổng quan Yêu cầu</h3>
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
+              <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3">Tổng quan Yêu cầu</h3>
               
               <div className="space-y-3 text-xs">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Ngành nghề:</span>
-                  <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                  <span className="font-bold text-[#2563EB]">
                     {job.category?.name || "Chưa phân loại"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Mức lương:</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span className="font-bold text-emerald-600">
                     {job.minSalary && job.maxSalary ? `${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()} ${job.currency}` : "Thỏa thuận"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Mô hình làm việc:</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">{job.workingModel || "On-site"}</span>
+                  <span className="font-bold text-[#1F2937]">{job.workingModel || "On-site"}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Hình thức tuyển:</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">{job.employmentType}</span>
+                  <span className="font-bold text-[#1F2937]">{job.employmentType}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Kinh nghiệm yêu cầu:</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">
+                  <span className="font-bold text-[#1F2937]">
                     {job.requiredExperienceYears ? `${job.requiredExperienceYears} năm` : "Không yêu cầu"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Hạn nộp hồ sơ:</span>
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">
+                  <span className="font-bold text-rose-600">
                     {job.expiryDate ? format(new Date(job.expiryDate), "dd/MM/yyyy") : "Vô thời hạn"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Yêu cầu Bằng chứng:</span>
-                  <span className="font-semibold text-indigo-600 dark:text-indigo-400">{job.requiresProofOfWork ? `Có (${job.proofOfWorkType})` : "Không"}</span>
+                  <span className="font-bold text-[#2563EB]">{job.requiresProofOfWork ? `Có (${job.proofOfWorkType})` : "Không"}</span>
                 </div>
               </div>
             </div>
 
             {/* Required Certificates */}
             {job.jobCertificates && job.jobCertificates.length > 0 && (
-              <div className="bg-white dark:bg-[#121620] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Award className="w-4 h-4 text-indigo-600" /> Chứng chỉ Yêu cầu
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
+                <h3 className="text-sm font-bold text-[#1F2937] flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#2563EB]" /> Chứng chỉ Yêu cầu
                 </h3>
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {job.jobCertificates.map((c: { certificateName: string }, idx: number) => (
-                    <span key={idx} className="px-2.5 py-1 text-xs rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-500/20">
+                    <span key={idx} className="px-2.5 py-1 text-xs rounded-lg bg-[#EFF6FF] text-[#2563EB] font-bold border border-blue-200">
                       📜 {c.certificateName}
                     </span>
                   ))}
@@ -279,14 +279,14 @@ export function JobDetailView({
             )}
 
             {/* AI Configuration */}
-            <div className="bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-500/5 dark:to-purple-500/5 p-6 rounded-2xl border border-indigo-100 dark:border-indigo-500/10 space-y-3 shadow-sm">
-              <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
-                <Bot className="w-4 h-4 text-indigo-600" /> Cấu hình Trợ lý AI
+            <div className="bg-[#EFF6FF] p-6 rounded-2xl border border-blue-200 space-y-3 shadow-sm">
+              <h3 className="text-sm font-bold text-[#1F2937] flex items-center gap-2">
+                <Bot className="w-4 h-4 text-[#2563EB]" /> Cấu hình Trợ lý AI
               </h3>
-              <div className="space-y-2 text-xs text-indigo-800 dark:text-indigo-300">
+              <div className="space-y-2 text-xs text-[#1F2937]">
                 <div className="flex justify-between">
                   <span>Ngưỡng Đạt tiêu chuẩn:</span>
-                  <span className="font-bold">{job.autoShortlistThreshold || 85} / 100 điểm</span>
+                  <span className="font-bold text-[#2563EB]">{job.autoShortlistThreshold || 85} / 100 điểm</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Trọng số Kỹ năng:</span>
@@ -305,24 +305,24 @@ export function JobDetailView({
       {/* TAB 2: AI Candidate Evaluation */}
       {activeTab === "candidates" && (
         <div className="space-y-4">
-          <div className="flex justify-between items-center bg-white dark:bg-[#121620] p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200">
             <div className="relative w-72">
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#3B82F6]" />
               <input
                 type="text"
                 placeholder="Tìm kiếm ứng viên..."
                 value={searchCandidate}
                 onChange={(e) => setSearchCandidate(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-slate-900 dark:text-white focus:ring-1 focus:ring-indigo-500"
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-[#EFF6FF] border border-blue-200 rounded-lg outline-none text-[#1F2937] focus:ring-2 focus:ring-[#2563EB]"
               />
             </div>
-            <span className="text-xs text-slate-500">Hệ thống xếp hạng ứng viên dựa trên dữ liệu Hồ sơ được ứng viên cập nhật.</span>
+            <span className="text-xs text-slate-500 font-medium">Hệ thống xếp hạng ứng viên dựa trên dữ liệu Hồ sơ được ứng viên cập nhật.</span>
           </div>
 
-          <div className="p-12 text-center bg-white dark:bg-[#121620] rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500 space-y-2">
-            <User className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600" />
-            <h4 className="text-base font-bold text-slate-800 dark:text-slate-200">Chưa có hồ sơ ứng viên nộp vào bài đăng này</h4>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
+          <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 space-y-2">
+            <User className="w-10 h-10 mx-auto text-[#2563EB]/60" />
+            <h4 className="text-base font-bold text-[#1F2937]">Chưa có hồ sơ ứng viên nộp vào bài đăng này</h4>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
               Khi ứng viên ứng tuyển, AI sẽ tự động đọc hồ sơ đã được cập nhật của ứng viên để tính điểm và hiển thị danh sách xếp hạng tại đây.
             </p>
           </div>

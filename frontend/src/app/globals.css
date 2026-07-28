@@ -12,6 +12,12 @@
 
   --secondary: #eff6ff;
   --secondary-foreground: #2563eb;
+
+  --tertiary: #3b82f6;
+  --tertiary-foreground: #ffffff;
+
+  --neutral: #1f2937;
+  --neutral-foreground: #f9fafb;
   
   --error: #ba1a1a;
   --error-foreground: #ffffff;
@@ -35,17 +41,10 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-destructive: var(--error);
-  --color-destructive-foreground: var(--error-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
-  --radius-lg: var(--radius-lg);
-  --radius-full: var(--radius-full);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+  --color-neutral: var(--neutral);
+  --color-neutral-foreground: var(--neutral-foreground);
   
   /* Font Families */
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;

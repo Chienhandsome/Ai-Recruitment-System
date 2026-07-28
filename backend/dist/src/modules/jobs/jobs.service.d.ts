@@ -52,8 +52,10 @@ export declare class JobsService {
         updatedAt: Date;
         status: import(".prisma/client").$Enums.JobStatus;
         categoryId: string | null;
-        title: string;
         departmentId: string | null;
+        title: string;
+        jobCode: string;
+        recruiterId: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -62,10 +64,6 @@ export declare class JobsService {
         maxSalary: Prisma.Decimal | null;
         currency: string;
         location: string | null;
-        workingModel: import(".prisma/client").$Enums.WorkingModel;
-        requiresProofOfWork: boolean;
-        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
-        expiryDate: Date | null;
         requiredExperienceYears: number | null;
         autoShortlistThreshold: Prisma.Decimal | null;
         autoRejectThreshold: Prisma.Decimal | null;
@@ -74,10 +72,12 @@ export declare class JobsService {
         experienceWeight: Prisma.Decimal;
         educationWeight: Prisma.Decimal;
         otherWeight: Prisma.Decimal;
-        jobCode: string;
-        recruiterId: string;
+        expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        workingModel: import(".prisma/client").$Enums.WorkingModel;
+        requiresProofOfWork: boolean;
+        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
     }>;
     findAll(userId: string, query: QueryJobDto): Promise<{
         data: ({
@@ -100,8 +100,10 @@ export declare class JobsService {
             updatedAt: Date;
             status: import(".prisma/client").$Enums.JobStatus;
             categoryId: string | null;
-            title: string;
             departmentId: string | null;
+            title: string;
+            jobCode: string;
+            recruiterId: string;
             requirements: string | null;
             benefits: string | null;
             employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -110,10 +112,6 @@ export declare class JobsService {
             maxSalary: Prisma.Decimal | null;
             currency: string;
             location: string | null;
-            workingModel: import(".prisma/client").$Enums.WorkingModel;
-            requiresProofOfWork: boolean;
-            proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
-            expiryDate: Date | null;
             requiredExperienceYears: number | null;
             autoShortlistThreshold: Prisma.Decimal | null;
             autoRejectThreshold: Prisma.Decimal | null;
@@ -122,10 +120,12 @@ export declare class JobsService {
             experienceWeight: Prisma.Decimal;
             educationWeight: Prisma.Decimal;
             otherWeight: Prisma.Decimal;
-            jobCode: string;
-            recruiterId: string;
+            expiryDate: Date | null;
             publishedAt: Date | null;
             closedAt: Date | null;
+            workingModel: import(".prisma/client").$Enums.WorkingModel;
+            requiresProofOfWork: boolean;
+            proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
         })[];
         meta: {
             total: number;
@@ -178,8 +178,10 @@ export declare class JobsService {
         updatedAt: Date;
         status: import(".prisma/client").$Enums.JobStatus;
         categoryId: string | null;
-        title: string;
         departmentId: string | null;
+        title: string;
+        jobCode: string;
+        recruiterId: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -188,10 +190,6 @@ export declare class JobsService {
         maxSalary: Prisma.Decimal | null;
         currency: string;
         location: string | null;
-        workingModel: import(".prisma/client").$Enums.WorkingModel;
-        requiresProofOfWork: boolean;
-        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
-        expiryDate: Date | null;
         requiredExperienceYears: number | null;
         autoShortlistThreshold: Prisma.Decimal | null;
         autoRejectThreshold: Prisma.Decimal | null;
@@ -200,10 +198,12 @@ export declare class JobsService {
         experienceWeight: Prisma.Decimal;
         educationWeight: Prisma.Decimal;
         otherWeight: Prisma.Decimal;
-        jobCode: string;
-        recruiterId: string;
+        expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        workingModel: import(".prisma/client").$Enums.WorkingModel;
+        requiresProofOfWork: boolean;
+        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
     }>;
     update(userId: string, id: string, dto: UpdateJobDto): Promise<{
         department: {
@@ -249,8 +249,10 @@ export declare class JobsService {
         updatedAt: Date;
         status: import(".prisma/client").$Enums.JobStatus;
         categoryId: string | null;
-        title: string;
         departmentId: string | null;
+        title: string;
+        jobCode: string;
+        recruiterId: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -259,10 +261,6 @@ export declare class JobsService {
         maxSalary: Prisma.Decimal | null;
         currency: string;
         location: string | null;
-        workingModel: import(".prisma/client").$Enums.WorkingModel;
-        requiresProofOfWork: boolean;
-        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
-        expiryDate: Date | null;
         requiredExperienceYears: number | null;
         autoShortlistThreshold: Prisma.Decimal | null;
         autoRejectThreshold: Prisma.Decimal | null;
@@ -271,10 +269,12 @@ export declare class JobsService {
         experienceWeight: Prisma.Decimal;
         educationWeight: Prisma.Decimal;
         otherWeight: Prisma.Decimal;
-        jobCode: string;
-        recruiterId: string;
+        expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        workingModel: import(".prisma/client").$Enums.WorkingModel;
+        requiresProofOfWork: boolean;
+        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
     }>;
     remove(userId: string, id: string): Promise<{
         message: string;

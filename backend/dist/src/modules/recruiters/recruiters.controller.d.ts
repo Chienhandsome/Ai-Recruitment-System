@@ -38,8 +38,8 @@ export declare class RecruitersController {
         updatedAt: Date;
         companyId: string | null;
         userId: string;
-        title: string | null;
         departmentId: string | null;
+        title: string | null;
     }>;
     updateProfile(user: AuthenticatedUser, dto: UpdateRecruiterProfileDto): Promise<{
         company: {
@@ -75,8 +75,8 @@ export declare class RecruitersController {
         updatedAt: Date;
         companyId: string | null;
         userId: string;
-        title: string | null;
         departmentId: string | null;
+        title: string | null;
     }>;
     getDashboardStats(user: AuthenticatedUser): Promise<{
         totalActiveJobs: number;

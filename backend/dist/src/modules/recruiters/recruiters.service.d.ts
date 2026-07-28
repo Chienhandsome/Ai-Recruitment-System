@@ -37,8 +37,8 @@ export declare class RecruitersService {
         updatedAt: Date;
         companyId: string | null;
         userId: string;
-        title: string | null;
         departmentId: string | null;
+        title: string | null;
     }>;
     updateProfile(userId: string, dto: UpdateRecruiterProfileDto): Promise<{
         company: {
@@ -74,8 +74,8 @@ export declare class RecruitersService {
         updatedAt: Date;
         companyId: string | null;
         userId: string;
-        title: string | null;
         departmentId: string | null;
+        title: string | null;
     }>;
     getDashboardStats(userId: string): Promise<{
         totalActiveJobs: number;

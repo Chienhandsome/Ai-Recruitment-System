@@ -65,6 +65,23 @@ enum SkillType {
   SOFT
 }
 
+enum ProofType {
+  PORTFOLIO
+  CODE_REPOSITORY
+  CASE_STUDY
+  SALES_RECORD
+  PUBLICATION
+  CERTIFICATE_DOC
+  OTHER
+}
+
+enum WorkingModel {
+  ON_SITE
+  HYBRID
+  REMOTE
+  SHIFT
+}
+
 enum ProficiencyLevel {
   BEGINNER
   INTERMEDIATE
@@ -303,15 +320,33 @@ model JobPosting {
   currency                String           @default("VND")
   location                String?
   requiredExperienceYears Int?             @map("required_experience_years")
-  scoringWeights          Json?            @map("scoring_weights")
+  
+  // AI Matching Configurations
+  autoShortlistThreshold  Decimal?         @map("auto_shortlist_threshold") @db.Decimal(5, 2)
+  autoRejectThreshold     Decimal?         @map("auto_reject_threshold") @db.Decimal(5, 2)
+  rejectOnMissingMandatory Boolean         @default(true) @map("reject_on_missing_mandatory")
+  
+  // AI Scoring Weights
+  skillWeight             Decimal          @default(40.0) @map("skill_weight") @db.Decimal(5, 2)
+  experienceWeight        Decimal          @default(30.0) @map("experience_weight") @db.Decimal(5, 2)
+  educationWeight         Decimal          @default(15.0) @map("education_weight") @db.Decimal(5, 2)
+  otherWeight             Decimal          @default(15.0) @map("other_weight") @db.Decimal(5, 2)
+
   expiryDate              DateTime?        @map("expiry_date")
   publishedAt             DateTime?        @map("published_at")
   closedAt                DateTime?        @map("closed_at")
   createdAt               DateTime         @default(now()) @map("created_at")
   updatedAt               DateTime         @updatedAt @map("updated_at")
 
-  jobSkills     JobSkill[]
-  applications  Application[]
+  categoryId              String?               @map("category_id")
+  category                JobCategory?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  workingModel            WorkingModel          @default(ON_SITE) @map("working_model")
+  requiresProofOfWork     Boolean               @default(false) @map("requires_proof_of_work")
+  proofOfWorkType         ProofType?            @map("proof_of_work_type")
+
+  jobSkills          JobSkill[]
+  jobCertificates    JobCertificate[]
+  applications       Application[]
 
   @@index([status])
   @@index([recruiterId])
@@ -375,6 +410,31 @@ model JobSkill {
   @@map("job_skills")
 }
 
+model JobCategory {
+  id        String       @id @default(uuid())
+  name      String       @unique
+  slug      String       @unique
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  jobs JobPosting[]
+
+  @@map("job_categories")
+}
+
+model JobCertificate {
+  id              String               @id @default(uuid())
+  jobId           String               @map("job_id")
+  job             JobPosting           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  certificateName String               @map("certificate_name")
+  requirementType SkillRequirementType @default(MANDATORY) @map("requirement_type")
+
+  @@unique([jobId, certificateName])
+  @@map("job_certificates")
+}
+
+
+
 model CandidateProfile {
   id                  String                 @id @default(uuid())
   userId              String?                @unique @map("user_id") @db.Uuid
@@ -394,6 +454,10 @@ model CandidateProfile {
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @updatedAt @map("updated_at")
 
+  expectedMinSalary     Decimal?         @map("expected_min_salary") @db.Decimal(12, 2)
+  expectedMaxSalary     Decimal?         @map("expected_max_salary") @db.Decimal(12, 2)
+  preferredModel        WorkingModel?    @map("preferred_model")
+
   resumes         Resume[]
   applications    Application[]
   candidateSkills CandidateSkill[]
@@ -401,6 +465,7 @@ model CandidateProfile {
   educations      Education[]
   projects        Project[]
   certificates    Certificate[]
+  proofs          CandidateProof[]
 
   @@index([email])
   @@index([phone])
@@ -556,7 +621,6 @@ model Application {
   updatedAt        DateTime                    @updatedAt @map("updated_at")
 
   aiMatchingResults  AiMatchingResult[]
-  interviewQuestions InterviewQuestion[]
   interviews         Interview[]
   notifications      Notification[]
   statusHistories    ApplicationStatusHistory[]
@@ -597,17 +661,7 @@ model AiMatchingResult {
   @@map("ai_matching_results")
 }
 
-model InterviewQuestion {
-  id              String      @id @default(uuid())
-  applicationId   String      @map("application_id")
-  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  question        String
-  category        String?
-  suggestedAnswer String?     @map("suggested_answer")
-  createdAt       DateTime    @default(now()) @map("created_at")
 
-  @@map("interview_questions")
-}
 
 model Interview {
   id               String          @id @default(uuid())
@@ -668,6 +722,21 @@ model ApplicationStatusHistory {
 
   @@map("application_status_histories")
 }
+
+model CandidateProof {
+  id          String           @id @default(uuid())
+  candidateId String           @map("candidate_id")
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  proofType   ProofType        @default(PORTFOLIO) @map("proof_type")
+  title       String
+  url         String
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  @@map("candidate_proofs")
+}
+
+
 
 model AuditLog {
   id         String   @id @default(uuid())

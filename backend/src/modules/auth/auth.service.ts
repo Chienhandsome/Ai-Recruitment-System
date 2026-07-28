@@ -52,8 +52,6 @@ export class AuthService {
         where: { id: authUser.id },
         data: {
           email: authUser.email,
-          fullName: authUser.fullName,
-          avatarUrl: authUser.avatarUrl,
           lastLoginAt: new Date(),
         },
         include: userProfileInclude,

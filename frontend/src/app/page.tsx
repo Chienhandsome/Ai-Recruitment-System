@@ -71,21 +71,25 @@ export default function HomePage() {
               centered
             />
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {MOCK_DEPARTMENTS.map((dept) => (
-                <Card key={dept.id} className="hover:shadow-md transition-shadow cursor-pointer border-border group">
-                  <CardHeader className="flex flex-row items-center gap-4 pb-4">
-                    <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                      {getDepartmentIcon(dept.name)}
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{dept.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">{dept.jobCount} việc làm</p>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
+            {MOCK_DEPARTMENTS.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                {MOCK_DEPARTMENTS.map((dept) => (
+                  <Card key={dept.id} className="hover:shadow-md transition-shadow cursor-pointer border-border group">
+                    <CardHeader className="flex flex-row items-center gap-4 pb-4">
+                      <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                        {getDepartmentIcon(dept.name)}
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">{dept.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">{dept.jobCount} việc làm</p>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-10">Hệ thống chưa có danh mục phòng ban.</div>
+            )}
           </div>
         </section>
 
@@ -103,42 +107,48 @@ export default function HomePage() {
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {MOCK_FEATURED_JOBS.map((job) => (
-                <Card key={job.id} className="hover:shadow-md transition-shadow flex flex-col h-full border-border">
-                  <CardHeader>
-                    {job.isUrgent && (
-                      <div className="mb-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          Tuyển gấp
-                        </span>
+            {MOCK_FEATURED_JOBS.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {MOCK_FEATURED_JOBS.map((job) => (
+                  <Card key={job.id} className="hover:shadow-md transition-shadow flex flex-col h-full border-border">
+                    <CardHeader>
+                      {job.isUrgent && (
+                        <div className="mb-2">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Tuyển gấp
+                          </span>
+                        </div>
+                      )}
+                      <CardTitle className="text-xl line-clamp-2">{job.title}</CardTitle>
+                      <div className="text-sm text-primary font-medium mt-2">{job.department}</div>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col gap-3">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="mr-2 h-4 w-4" />
+                        {job.location}
                       </div>
-                    )}
-                    <CardTitle className="text-xl line-clamp-2">{job.title}</CardTitle>
-                    <div className="text-sm text-primary font-medium mt-2">{job.department}</div>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col gap-3">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="mr-2 h-4 w-4" />
-                      {job.location}
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Briefcase className="mr-2 h-4 w-4" />
-                      {job.type}
-                    </div>
-                    {job.salary && (
-                      <div className="font-semibold text-foreground mt-2">
-                        {job.salary}
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        {job.type}
                       </div>
-                    )}
-                  </CardContent>
-                  <CardFooter className="flex justify-between items-center border-t border-border/50 pt-4 mt-4">
-                    <span className="text-xs text-muted-foreground">{job.postedAt}</span>
-                    <Button variant="secondary" size="sm">Ứng tuyển</Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
+                      {job.salary && (
+                        <div className="font-semibold text-foreground mt-2">
+                          {job.salary}
+                        </div>
+                      )}
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center border-t border-border/50 pt-4 mt-4">
+                      <span className="text-xs text-muted-foreground">{job.postedAt}</span>
+                      <Button variant="secondary" size="sm">Ứng tuyển</Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-12 border border-dashed rounded-xl bg-background">
+                Hiện tại chưa có bài đăng tuyển dụng công khai nào.
+              </div>
+            )}
             <div className="mt-8 text-center md:hidden">
               <Button variant="outline" className="w-full">
                 Xem tất cả việc làm

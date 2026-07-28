@@ -19,6 +19,7 @@ import { ScreeningsModule } from './modules/screenings/screenings.module';
 import { InterviewsModule } from './modules/interviews/interviews.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RecruitersModule } from './modules/recruiters/recruiters.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AuthModule } from './modules/auth/auth.module';
     InterviewsModule,
     NotificationsModule,
     AuthModule,
+    RecruitersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Pencil, Star, MapPin, Phone, Briefcase, Link2, Github } from "lucide-react"
+import { Pencil, Star, MapPin, Phone, Briefcase, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { CandidateSkillData } from "@/lib/candidate-api"
@@ -144,7 +144,7 @@ export function ProfileView({
               <LinkRow icon={<Briefcase className="h-4 w-4" />} label="LinkedIn" url={linkedinUrl} />
             )}
             {githubUrl && (
-              <LinkRow icon={<Github className="h-4 w-4" />} label="GitHub" url={githubUrl} />
+              <LinkRow icon={<Link2 className="h-4 w-4" />} label="GitHub" url={githubUrl} />
             )}
             {portfolioUrl && (
               <LinkRow icon={<Link2 className="h-4 w-4" />} label="Portfolio" url={portfolioUrl} />

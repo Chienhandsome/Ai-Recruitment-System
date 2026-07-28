@@ -1,6 +1,5 @@
 import { requireProfile } from "@/lib/server-profile"
-import { ProfileForm } from "@/components/candidate/profile-form"
-import { SkillsEditor } from "@/components/candidate/skills-editor"
+import { ProfilePageClient } from "@/components/candidate/profile-page-client"
 import { getCandidateSkills } from "@/lib/candidate-api"
 import { createClient } from "@/lib/supabase/server"
 
@@ -17,7 +16,7 @@ export default async function CandidateProfilePage() {
     try {
       initialSkills = await getCandidateSkills(session.access_token)
     } catch {
-      // Skills will be empty on first load — that's fine
+      // Skills will be empty on first load
     }
   }
 
@@ -31,18 +30,20 @@ export default async function CandidateProfilePage() {
           Cập nhật thông tin cá nhân để nhà tuyển dụng hiểu rõ hơn về bạn
         </p>
 
-        <div className="mt-8 space-y-6">
-          <ProfileForm
+        <div className="mt-8">
+          <ProfilePageClient
             fullName={profile.fullName}
             email={profile.email}
             phone={profile.phone}
             avatarUrl={profile.avatarUrl}
             address={profile.candidateProfile?.address ?? null}
+            desiredTitle={profile.candidateProfile?.desiredTitle ?? null}
+            professionalSummary={profile.candidateProfile?.professionalSummary ?? null}
             githubUrl={profile.candidateProfile?.githubUrl ?? null}
             linkedinUrl={profile.candidateProfile?.linkedinUrl ?? null}
+            portfolioUrl={profile.candidateProfile?.portfolioUrl ?? null}
+            initialSkills={initialSkills}
           />
-
-          <SkillsEditor initialSkills={initialSkills} />
         </div>
       </div>
     </div>

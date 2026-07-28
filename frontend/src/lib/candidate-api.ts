@@ -93,3 +93,35 @@ export async function searchSkills(search?: string): Promise<SkillItemData[]> {
   if (!res.ok) return [];
   return res.json();
 }
+
+// ─── Profile Update ───────────────────────────────────────────────────
+
+export interface UpdateCandidateProfileInput {
+  fullName?: string;
+  phone?: string | null;
+  address?: string | null;
+  desiredTitle?: string | null;
+  professionalSummary?: string | null;
+  linkedinUrl?: string | null;
+  githubUrl?: string | null;
+  portfolioUrl?: string | null;
+}
+
+export async function updateCandidateProfile(
+  token: string,
+  data: UpdateCandidateProfileInput
+): Promise<void> {
+  const res = await fetch(`${API_URL}/candidates/me/profile`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Không thể cập nhật hồ sơ: ${text}`);
+  }
+}

@@ -28,8 +28,11 @@ export interface AuthProfile {
   candidateProfile: {
     id: string;
     address: string | null;
+    desiredTitle: string | null;
+    professionalSummary: string | null;
     githubUrl: string | null;
     linkedinUrl: string | null;
+    portfolioUrl: string | null;
   } | null;
   recruiterProfile: {
     id: string;

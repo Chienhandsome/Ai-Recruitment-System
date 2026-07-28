@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Put,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { CandidatesService } from './candidates.service';
 import { UpdateCandidateSkillsDto } from './dto/update-candidate-skills.dto';
+import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -26,6 +28,18 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 @Controller('candidates')
 export class CandidatesController {
   constructor(private readonly candidatesService: CandidatesService) {}
+
+  // ─── Profile ────────────────────────────────────────────────────────
+
+  @Patch('me/profile')
+  @ApiOperation({ summary: 'Update current candidate profile information' })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  async updateMyProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: UpdateCandidateProfileDto,
+  ) {
+    return this.candidatesService.updateProfile(user.id, dto);
+  }
 
   // ─── Skills ─────────────────────────────────────────────────────────
 

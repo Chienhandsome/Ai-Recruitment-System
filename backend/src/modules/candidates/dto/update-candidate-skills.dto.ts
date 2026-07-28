@@ -29,6 +29,7 @@ export class CandidateSkillItemDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   yearsExperience?: number;
 
   @ApiPropertyOptional({
@@ -37,6 +38,7 @@ export class CandidateSkillItemDto {
   })
   @IsOptional()
   @IsBoolean()
+  @Type(() => Boolean)
   isPrimary?: boolean;
 }
 

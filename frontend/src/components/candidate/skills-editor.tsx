@@ -30,6 +30,7 @@ interface LocalSkill {
 
 interface SkillsEditorProps {
   initialSkills: CandidateSkillData[]
+  isEditing: boolean
 }
 
 // ─── Constants ────────────────────────────────────────────────────────
@@ -50,7 +51,7 @@ const PROFICIENCY_OPTIONS: ProficiencyLevel[] = [
 
 // ─── Component ────────────────────────────────────────────────────────
 
-export function SkillsEditor({ initialSkills }: SkillsEditorProps) {
+export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
   const [skills, setSkills] = React.useState<LocalSkill[]>(() =>
     initialSkills.map((s) => ({
       skillId: s.skillId,
@@ -104,7 +105,6 @@ export function SkillsEditor({ initialSkills }: SkillsEditorProps) {
       setIsSearching(true)
       try {
         const results = await searchSkills(value.trim())
-        // Filter out skills already added
         const existingIds = new Set(skills.map((s) => s.skillId))
         setSearchResults(results.filter((r) => !existingIds.has(r.id)))
         setShowDropdown(true)
@@ -174,15 +174,19 @@ export function SkillsEditor({ initialSkills }: SkillsEditorProps) {
         return
       }
 
-      // Only send SELF_DECLARED skills to the update endpoint
       const selfDeclaredSkills: CandidateSkillInput[] = skills
         .filter((s) => s.source === "SELF_DECLARED")
-        .map((s) => ({
-          skillId: s.skillId,
-          proficiencyLevel: s.proficiencyLevel,
-          yearsExperience: s.yearsExperience ?? undefined,
-          isPrimary: s.isPrimary,
-        }))
+        .map((s) => {
+          const item: CandidateSkillInput = {
+            skillId: s.skillId,
+            proficiencyLevel: s.proficiencyLevel,
+            isPrimary: s.isPrimary,
+          }
+          if (s.yearsExperience != null && s.yearsExperience >= 0) {
+            item.yearsExperience = Number(s.yearsExperience)
+          }
+          return item
+        })
 
       await updateCandidateSkills(session.access_token, selfDeclaredSkills)
       setSaveMessage("Đã lưu kỹ năng thành công!")
@@ -199,6 +203,12 @@ export function SkillsEditor({ initialSkills }: SkillsEditorProps) {
   const selfDeclaredSkills = skills.filter((s) => s.source === "SELF_DECLARED")
   const extractedSkills = skills.filter((s) => s.source !== "SELF_DECLARED")
 
+  // ─── View mode (not editing) ───────────────────────────────────────
+  if (!isEditing) {
+    return null // ProfileView handles the skill display in view mode
+  }
+
+  // ─── Edit mode ─────────────────────────────────────────────────────
   return (
     <Card>
       <CardHeader>
@@ -257,7 +267,7 @@ export function SkillsEditor({ initialSkills }: SkillsEditorProps) {
           )}
         </div>
 
-        {/* Extracted Skills (from CV) */}
+        {/* Extracted Skills (from CV - read only) */}
         {extractedSkills.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -281,7 +291,7 @@ export function SkillsEditor({ initialSkills }: SkillsEditorProps) {
           </div>
         )}
 
-        {/* Self-Declared Skills */}
+        {/* Self-Declared Skills (editable) */}
         {selfDeclaredSkills.length > 0 && (
           <div className="space-y-2">
             {extractedSkills.length > 0 && (
@@ -295,7 +305,7 @@ export function SkillsEditor({ initialSkills }: SkillsEditorProps) {
                   key={skill.skillId}
                   className="flex items-center gap-2 rounded-lg border border-input p-3"
                 >
-                  {/* Skill name + primary toggle */}
+                  {/* Primary toggle */}
                   <button
                     type="button"
                     onClick={() => togglePrimary(skill.skillId)}
@@ -344,22 +354,33 @@ export function SkillsEditor({ initialSkills }: SkillsEditorProps) {
                     ))}
                   </select>
 
-                  {/* Years experience */}
+                  {/* Years experience — numeric only */}
                   <div className="flex items-center gap-1">
                     <input
                       type="number"
+                      inputMode="decimal"
                       min={0}
                       max={50}
                       step={0.5}
                       value={skill.yearsExperience ?? ""}
                       onChange={(e) => {
-                        const val = e.target.value
-                          ? parseFloat(e.target.value)
-                          : null
-                        updateSkillYears(skill.skillId, val)
+                        const raw = e.target.value
+                        if (raw === "") {
+                          updateSkillYears(skill.skillId, null)
+                          return
+                        }
+                        const val = parseFloat(raw)
+                        if (!isNaN(val) && val >= 0 && val <= 50) {
+                          updateSkillYears(skill.skillId, val)
+                        }
                       }}
-                      placeholder="Năm"
-                      className="h-8 w-16 rounded-md border border-input bg-background px-2 text-xs text-center focus:outline-none focus:ring-2 focus:ring-ring/20"
+                      onKeyDown={(e) => {
+                        if (["e", "E", "+", "-"].includes(e.key)) {
+                          e.preventDefault()
+                        }
+                      }}
+                      placeholder="0"
+                      className="h-8 w-16 rounded-md border border-input bg-background px-2 text-xs text-center focus:outline-none focus:ring-2 focus:ring-ring/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       aria-label={`Số năm kinh nghiệm cho ${skill.skillName}`}
                     />
                     <span className="text-xs text-muted-foreground">năm</span>

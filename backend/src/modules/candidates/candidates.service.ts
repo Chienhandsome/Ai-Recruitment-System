@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CandidateProfileStatus, SkillSource } from '@prisma/client';
 import { UpdateCandidateSkillsDto } from './dto/update-candidate-skills.dto';
+import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
 
 /**
  * Resolved candidate profile DTO that merges data from User and CandidateProfile.
@@ -124,6 +125,57 @@ export class CandidatesService {
     this.logger.log(
       `CandidateProfile ${candidateProfileId} primary resume set to ${resumeId}`,
     );
+  }
+
+  // ─── Profile Update ─────────────────────────────────────────────────
+
+  /**
+   * Update candidate profile info and optionally the linked User's name/phone.
+   */
+  async updateProfile(
+    userId: string,
+    dto: UpdateCandidateProfileDto,
+  ) {
+    const profile = await this.prisma.candidateProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException(
+        `Candidate profile for user ${userId} not found.`,
+      );
+    }
+
+    // Update user-level fields (fullName, phone) on the User table
+    if (dto.fullName || dto.phone !== undefined) {
+      const userData: Record<string, unknown> = {};
+      if (dto.fullName) userData.fullName = dto.fullName;
+      if (dto.phone !== undefined) userData.phone = dto.phone || null;
+
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: userData,
+      });
+    }
+
+    // Update candidate profile fields
+    const profileData: Record<string, unknown> = {};
+    if (dto.fullName) profileData.fullName = dto.fullName;
+    if (dto.phone !== undefined) profileData.phone = dto.phone || null;
+    if (dto.address !== undefined) profileData.address = dto.address || null;
+    if (dto.desiredTitle !== undefined) profileData.desiredTitle = dto.desiredTitle || null;
+    if (dto.professionalSummary !== undefined) profileData.professionalSummary = dto.professionalSummary || null;
+    if (dto.linkedinUrl !== undefined) profileData.linkedinUrl = dto.linkedinUrl || null;
+    if (dto.githubUrl !== undefined) profileData.githubUrl = dto.githubUrl || null;
+    if (dto.portfolioUrl !== undefined) profileData.portfolioUrl = dto.portfolioUrl || null;
+
+    const updated = await this.prisma.candidateProfile.update({
+      where: { id: profile.id },
+      data: profileData,
+    });
+
+    this.logger.log(`CandidateProfile ${profile.id} updated by user ${userId}`);
+    return updated;
   }
 
   // ─── Candidate Skills ────────────────────────────────────────────────

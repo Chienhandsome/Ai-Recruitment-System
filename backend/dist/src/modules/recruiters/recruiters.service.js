@@ -28,6 +28,8 @@ let RecruitersService = class RecruitersService {
                         fullName: true,
                         avatarUrl: true,
                         email: true,
+                        phone: true,
+                        birthDay: true,
                     }
                 }
             },
@@ -45,6 +47,8 @@ let RecruitersService = class RecruitersService {
                             fullName: true,
                             avatarUrl: true,
                             email: true,
+                            phone: true,
+                            birthDay: true,
                         }
                     }
                 }
@@ -83,6 +87,12 @@ let RecruitersService = class RecruitersService {
                     ...(dto.birthDay !== undefined && { birthDay: dto.birthDay ? new Date(dto.birthDay) : null }),
                 },
             });
+            await this.prisma.candidateProfile.updateMany({
+                where: { userId },
+                data: {
+                    ...(dto.fullName !== undefined && { fullName: dto.fullName }),
+                },
+            });
         }
         return this.prisma.recruiterProfile.upsert({
             where: { userId },
@@ -105,6 +115,8 @@ let RecruitersService = class RecruitersService {
                         fullName: true,
                         avatarUrl: true,
                         email: true,
+                        phone: true,
+                        birthDay: true,
                     }
                 }
             },

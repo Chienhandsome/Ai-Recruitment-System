@@ -1,21 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, ChevronRight, ChevronLeft, Bot, CheckCircle2, Settings2, Plus, Trash2 } from "lucide-react";
-import { createRecruiterJob } from "@/lib/recruiter-api";
+import React, { useState, useEffect } from "react";
+import { X, ChevronRight, ChevronLeft, Bot, CheckCircle2, Settings2, Plus, Trash2, Tag, Sparkles } from "lucide-react";
+import { 
+  createRecruiterJob, updateRecruiterJob, JobPostingData, 
+  getJobCategories, getSkillsByCategory, createCustomSkill, 
+  JobCategoryData, SkillItemData 
+} from "@/lib/recruiter-api";
 
 interface CreateJobWizardProps {
   isOpen: boolean;
   onClose: () => void;
   token: string;
   onSuccess: () => void;
+  initialJobData?: JobPostingData | null;
 }
 
-export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJobWizardProps) {
+export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobData }: CreateJobWizardProps) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
+    status: "DRAFT",
     departmentId: "",
     employmentType: "FULL_TIME",
     experienceLevel: "JUNIOR",
@@ -26,11 +32,14 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJob
     description: "",
     requirements: "",
     benefits: "",
+    categoryId: "",
     certificates: [] as { certificateName: string; requirementType: string }[],
+    selectedSkills: [] as { skillId: string; skillName: string; requirementType: string }[],
     workingModel: "ON_SITE",
     requiresProofOfWork: false,
     proofOfWorkType: "PORTFOLIO",
-    screeningQuestions: [] as { questionText: string; isRequired: boolean }[],
+    requiredExperienceYears: "",
+    expiryDate: "",
     autoShortlistThreshold: 85,
     autoRejectThreshold: 40,
     rejectOnMissingMandatory: true,
@@ -39,6 +48,67 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJob
     educationWeight: 15,
     otherWeight: 15,
   });
+
+  const [categories, setCategories] = useState<JobCategoryData[]>([]);
+  const [availableSkills, setAvailableSkills] = useState<SkillItemData[]>([]);
+  const [customSkillName, setCustomSkillName] = useState("");
+  const [creatingSkill, setCreatingSkill] = useState(false);
+
+  useEffect(() => {
+    getJobCategories().then(cats => {
+      setCategories(cats);
+      if (!initialJobData && cats.length > 0 && !formData.categoryId) {
+        setFormData(prev => ({ ...prev, categoryId: cats[0].id }));
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (formData.categoryId) {
+      getSkillsByCategory(formData.categoryId).then(skills => setAvailableSkills(skills));
+    }
+  }, [formData.categoryId]);
+
+  useEffect(() => {
+    if (initialJobData) {
+      setFormData({
+        title: initialJobData.title || "",
+        status: initialJobData.status || "DRAFT",
+        departmentId: initialJobData.departmentId || "",
+        categoryId: initialJobData.categoryId || "",
+        employmentType: initialJobData.employmentType || "FULL_TIME",
+        experienceLevel: (initialJobData as any).experienceLevel || "JUNIOR",
+        minSalary: initialJobData.minSalary ? String(initialJobData.minSalary) : "",
+        maxSalary: initialJobData.maxSalary ? String(initialJobData.maxSalary) : "",
+        currency: initialJobData.currency || "VND",
+        location: initialJobData.location || "",
+        description: initialJobData.description || "",
+        requirements: initialJobData.requirements || "",
+        benefits: (initialJobData as any).benefits || "",
+        certificates: initialJobData.jobCertificates?.map(c => ({
+          certificateName: c.certificateName,
+          requirementType: c.requirementType || "MANDATORY"
+        })) || [],
+        selectedSkills: initialJobData.jobSkills?.map(s => ({
+          skillId: s.skillId,
+          skillName: s.skill?.name || "Kỹ năng",
+          requirementType: s.requirementType || "MANDATORY"
+        })) || [],
+        workingModel: initialJobData.workingModel || "ON_SITE",
+        requiresProofOfWork: initialJobData.requiresProofOfWork || false,
+        proofOfWorkType: initialJobData.proofOfWorkType || "PORTFOLIO",
+        requiredExperienceYears: initialJobData.requiredExperienceYears ? String(initialJobData.requiredExperienceYears) : "",
+        expiryDate: initialJobData.expiryDate ? new Date(initialJobData.expiryDate).toISOString().split("T")[0] : "",
+        autoShortlistThreshold: initialJobData.autoShortlistThreshold || 85,
+        autoRejectThreshold: initialJobData.autoRejectThreshold || 40,
+        rejectOnMissingMandatory: initialJobData.rejectOnMissingMandatory ?? true,
+        skillWeight: initialJobData.skillWeight || 40,
+        experienceWeight: initialJobData.experienceWeight || 30,
+        educationWeight: initialJobData.educationWeight || 15,
+        otherWeight: initialJobData.otherWeight || 15,
+      });
+    }
+  }, [initialJobData]);
 
   if (!isOpen) return null;
 
@@ -74,28 +144,6 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJob
     }));
   };
 
-  const addQuestion = () => {
-    setFormData(prev => ({
-      ...prev,
-      screeningQuestions: [...prev.screeningQuestions, { questionText: "", isRequired: true }]
-    }));
-  };
-
-  const updateQuestion = (index: number, field: string, value: any) => {
-    setFormData(prev => {
-      const newQs = [...prev.screeningQuestions];
-      newQs[index] = { ...newQs[index], [field]: value };
-      return { ...prev, screeningQuestions: newQs };
-    });
-  };
-
-  const removeQuestion = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      screeningQuestions: prev.screeningQuestions.filter((_, i) => i !== index)
-    }));
-  };
-
   const handleNext = () => setStep(s => Math.min(s + 1, 3));
   const handlePrev = () => setStep(s => Math.max(s - 1, 1));
 
@@ -107,20 +155,27 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJob
         departmentId: formData.departmentId?.trim() ? formData.departmentId : undefined,
         minSalary: formData.minSalary ? Number(formData.minSalary) : undefined,
         maxSalary: formData.maxSalary ? Number(formData.maxSalary) : undefined,
+        requiredExperienceYears: formData.requiredExperienceYears ? Number(formData.requiredExperienceYears) : undefined,
+        expiryDate: formData.expiryDate ? formData.expiryDate : undefined,
         autoShortlistThreshold: Number(formData.autoShortlistThreshold),
         autoRejectThreshold: formData.autoRejectThreshold ? Number(formData.autoRejectThreshold) : undefined,
         skillWeight: Number(formData.skillWeight),
         experienceWeight: Number(formData.experienceWeight),
         educationWeight: Number(formData.educationWeight),
         otherWeight: Number(formData.otherWeight),
+        categoryId: formData.categoryId?.trim() ? formData.categoryId : undefined,
+        skills: formData.selectedSkills.map(s => ({ skillId: s.skillId, requirementType: s.requirementType })),
         certificates: formData.certificates.filter(c => c.certificateName.trim().length > 0),
-        screeningQuestions: formData.screeningQuestions.filter(q => q.questionText.trim().length > 0),
       };
-      await createRecruiterJob(token, payload);
+      if (initialJobData) {
+        await updateRecruiterJob(token, initialJobData.id, payload);
+      } else {
+        await createRecruiterJob(token, payload);
+      }
       onSuccess();
     } catch (err: any) {
       console.error(err);
-      alert(`Tạo Job thất bại: ${err?.message || JSON.stringify(err)}`);
+      alert(`Thao tác thất bại: ${err?.message || JSON.stringify(err)}`);
     } finally {
       setLoading(false);
     }
@@ -133,7 +188,9 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJob
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800/60">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Tạo Bài tuyển dụng mới</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              {initialJobData ? "Chỉnh sửa Bài tuyển dụng" : "Tạo Bài tuyển dụng mới"}
+            </h2>
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${step >= 1 ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' : 'bg-slate-100 text-slate-500'}`}>1. Cơ bản</span>
               <ChevronRight className="w-3 h-3 text-slate-400" />
@@ -154,6 +211,26 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJob
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Vị trí tuyển dụng <span className="text-red-500">*</span></label>
                 <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="VD: Senior Frontend Engineer" className="w-full px-4 py-2 bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Trạng thái bài tuyển dụng</label>
+                  <select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white font-semibold">
+                    <option value="DRAFT">Bản nháp (Draft)</option>
+                    <option value="PUBLISHED">Đang mở tuyển dụng (Published)</option>
+                    <option value="PAUSED">Tạm dừng (Paused)</option>
+                    <option value="CLOSED">Đóng tuyển dụng (Closed)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ngành nghề tuyển dụng (Job Category)</label>
+                  <select name="categoryId" value={formData.categoryId} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-[#0B0E14] border border-indigo-500/50 dark:border-indigo-500/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white font-medium">
+                    <option value="">-- Chọn ngành nghề --</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -204,11 +281,21 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJob
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mô hình làm việc (Working Model)</label>
                   <select name="workingModel" value={formData.workingModel} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                    <option value="ON_SITE">Tập trung (On-site)</option>
+                    <option value="ON_SITE">Làm tại văn phòng (On-site)</option>
                     <option value="HYBRID">Kết hợp (Hybrid)</option>
-                    <option value="REMOTE">Từ xa (Remote)</option>
+                    <option value="REMOTE">Làm từ xa (Remote)</option>
                     <option value="SHIFT">Theo ca (Shift Work)</option>
                   </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Kinh nghiệm tối thiểu (Số năm)</label>
+                  <input type="number" name="requiredExperienceYears" value={formData.requiredExperienceYears} onChange={handleChange} placeholder="VD: 2" className="w-full px-4 py-2 bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Hạn nộp hồ sơ (Expiry Date)</label>
+                  <input type="date" name="expiryDate" value={formData.expiryDate} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white" />
                 </div>
               </div>
             </div>
@@ -250,6 +337,133 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJob
                 )}
               </div>
 
+              {/* Industry Skills Selection */}
+              <div className="p-4 bg-indigo-50/50 dark:bg-indigo-500/5 border border-indigo-200 dark:border-indigo-500/20 rounded-xl space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">Kỹ năng Yêu cầu Theo Ngành nghề ({formData.selectedSkills.length})</h4>
+                  </div>
+                  <span className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">HR có thể chọn nhiều kỹ năng</span>
+                </div>
+
+                {/* Available Skill Suggestions */}
+                <div>
+                  <span className="text-xs text-slate-500 mb-1.5 block">Gợi ý kỹ năng ngành {categories.find(c => c.id === formData.categoryId)?.name || ''}:</span>
+                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1 bg-white dark:bg-[#0B0E14] rounded-lg border border-slate-200 dark:border-slate-800">
+                    {availableSkills.map(skill => {
+                      const isSelected = formData.selectedSkills.some(s => s.skillId === skill.id);
+                      return (
+                        <button
+                          key={skill.id}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setFormData(prev => ({
+                                ...prev,
+                                selectedSkills: prev.selectedSkills.filter(s => s.skillId !== skill.id)
+                              }));
+                            } else {
+                              setFormData(prev => ({
+                                ...prev,
+                                selectedSkills: [...prev.selectedSkills, { skillId: skill.id, skillName: skill.name, requirementType: 'MANDATORY' }]
+                              }));
+                            }
+                          }}
+                          className={`px-2.5 py-1 text-xs rounded-md transition-all font-medium flex items-center gap-1 ${
+                            isSelected 
+                              ? 'bg-indigo-600 text-white shadow-sm' 
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/50'
+                          }`}
+                        >
+                          {isSelected ? '✓ ' : '+ '}{skill.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Custom Skill Input */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="Nhập kỹ năng mới nếu chưa có trong danh sách..."
+                    value={customSkillName}
+                    onChange={(e) => setCustomSkillName(e.target.value)}
+                    className="flex-1 px-3 py-1.5 text-xs bg-white dark:bg-[#0B0E14] border border-slate-200 dark:border-slate-700 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    disabled={creatingSkill || !customSkillName.trim()}
+                    onClick={async () => {
+                      if (!customSkillName.trim() || !formData.categoryId) return;
+                      setCreatingSkill(true);
+                      try {
+                        const newSkill = await createCustomSkill(token, { name: customSkillName.trim(), categoryId: formData.categoryId });
+                        setAvailableSkills(prev => [...prev, newSkill]);
+                        setFormData(prev => ({
+                          ...prev,
+                          selectedSkills: [...prev.selectedSkills, { skillId: newSkill.id, skillName: newSkill.name, requirementType: 'MANDATORY' }]
+                        }));
+                        setCustomSkillName('');
+                      } catch (err) {
+                        alert('Không thể tạo kỹ năng mới');
+                      } finally {
+                        setCreatingSkill(false);
+                      }
+                    }}
+                    className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors shrink-0"
+                  >
+                    + Thêm kỹ năng riêng
+                  </button>
+                </div>
+
+                {/* Selected Skills List with Requirement Type Selector */}
+                {formData.selectedSkills.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-indigo-100 dark:border-indigo-500/20">
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Danh sách Kỹ năng đã đính kèm vào JD:</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {formData.selectedSkills.map((sk, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 bg-white dark:bg-[#0B0E14] border border-slate-200 dark:border-slate-800 rounded-lg text-xs">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate mr-2">{sk.skillName}</span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <select
+                              value={sk.requirementType}
+                              onChange={(e) => {
+                                const newReq = e.target.value;
+                                setFormData(prev => {
+                                  const updated = [...prev.selectedSkills];
+                                  updated[idx] = { ...updated[idx], requirementType: newReq };
+                                  return { ...prev, selectedSkills: updated };
+                                });
+                              }}
+                              className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                                sk.requirementType === 'MANDATORY' ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40'
+                              }`}
+                            >
+                              <option value="MANDATORY">Bắt buộc</option>
+                              <option value="PREFERRED">Ưu tiên</option>
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  selectedSkills: prev.selectedSkills.filter((_, i) => i !== idx)
+                                }));
+                              }}
+                              className="text-slate-400 hover:text-rose-500 transition-colors p-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Required Certificates section */}
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -277,42 +491,6 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess }: CreateJob
                       <option value="NICE_TO_HAVE">Điểm cộng</option>
                     </select>
                     <button type="button" onClick={() => removeCertificate(index)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Screening Questions section */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Câu hỏi sàng lọc ứng viên (Screening Questions)</label>
-                    <span className="text-xs text-slate-500">Tạo các câu hỏi điều kiện để ứng viên trả lời khi nộp CV</span>
-                  </div>
-                  <button type="button" onClick={addQuestion} className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
-                    <Plus className="w-3 h-3" /> Thêm câu hỏi
-                  </button>
-                </div>
-                {formData.screeningQuestions.map((q, index) => (
-                  <div key={index} className="flex items-center gap-2 mb-2">
-                    <input 
-                      type="text" 
-                      placeholder="VD: Bạn đã có giấy phép hành nghề / kinh nghiệm quản lý chưa?" 
-                      value={q.questionText}
-                      onChange={(e) => updateQuestion(index, 'questionText', e.target.value)}
-                      className="flex-1 px-3 py-1.5 text-sm bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-slate-700 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
-                    />
-                    <label className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={q.isRequired}
-                        onChange={(e) => updateQuestion(index, 'isRequired', e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600"
-                      />
-                      Bắt buộc
-                    </label>
-                    <button type="button" onClick={() => removeQuestion(index)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

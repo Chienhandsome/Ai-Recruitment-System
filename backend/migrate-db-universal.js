@@ -43,55 +43,12 @@ async function main() {
       `);
     } catch (e) {}
 
-    console.log('Creating job_screening_questions table...');
-    await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "job_screening_questions" (
-        "id" TEXT NOT NULL,
-        "job_id" TEXT NOT NULL,
-        "question_text" TEXT NOT NULL,
-        "is_required" BOOLEAN NOT NULL DEFAULT true,
-        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT "job_screening_questions_pkey" PRIMARY KEY ("id"),
-        CONSTRAINT "job_screening_questions_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "job_postings"("id") ON DELETE CASCADE ON UPDATE CASCADE
-      );
-    `);
-
-    console.log('Updating candidate_profiles with expected salary and preferred model...');
-    await prisma.$executeRawUnsafe(`
-      ALTER TABLE "candidate_profiles"
-      ADD COLUMN IF NOT EXISTS "expected_min_salary" DECIMAL(12,2),
-      ADD COLUMN IF NOT EXISTS "expected_max_salary" DECIMAL(12,2),
-      ADD COLUMN IF NOT EXISTS "preferred_model" "WorkingModel";
-    `);
-
-    console.log('Creating candidate_proofs table...');
-    await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "candidate_proofs" (
-        "id" TEXT NOT NULL,
-        "candidate_id" TEXT NOT NULL,
-        "proof_type" "ProofType" NOT NULL DEFAULT 'PORTFOLIO',
-        "title" TEXT NOT NULL,
-        "url" TEXT NOT NULL,
-        "description" TEXT,
-        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT "candidate_proofs_pkey" PRIMARY KEY ("id"),
-        CONSTRAINT "candidate_proofs_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidate_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE
-      );
-    `);
-
-    console.log('Creating application_answers table...');
-    await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "application_answers" (
-        "id" TEXT NOT NULL,
-        "application_id" TEXT NOT NULL,
-        "question_id" TEXT NOT NULL,
-        "answer_text" TEXT NOT NULL,
-        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT "application_answers_pkey" PRIMARY KEY ("id"),
-        CONSTRAINT "application_answers_application_id_fkey" FOREIGN KEY ("application_id") REFERENCES "applications"("id") ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT "application_answers_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "job_screening_questions"("id") ON DELETE CASCADE ON UPDATE CASCADE
-      );
-    `);
+    console.log('Dropping unused screening and interview question tables...');
+    try {
+      await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "application_answers" CASCADE;`);
+      await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "job_screening_questions" CASCADE;`);
+      await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "interview_questions" CASCADE;`);
+    } catch(e) { console.error('Error dropping question tables:', e); }
 
     console.log('Universal Multi-Industry Schema successfully applied!');
   } catch (e) {

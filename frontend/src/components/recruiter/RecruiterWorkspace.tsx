@@ -1,7 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Briefcase,
   Users,
@@ -69,7 +70,7 @@ const MOCK_CANDIDATES: Candidate[] = [];
 const MOCK_JOBS: JobPosting[] = [];
 
 export function RecruiterWorkspace({
-  profile,
+  profile: initialProfile,
   stats,
   token,
 }: {
@@ -77,11 +78,22 @@ export function RecruiterWorkspace({
   stats: RecruiterDashboardStats | null;
   token: string;
 }) {
+  const router = useRouter();
+  const [profile, setProfile] = useState<RecruiterProfileData | null>(initialProfile);
   const [activeTab, setActiveTab] = useState<"dashboard" | "jobs" | "candidates">("dashboard");
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedCandidateForReport, setSelectedCandidateForReport] = useState<Candidate | null>(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setProfile(initialProfile);
+  }, [initialProfile]);
+
+  const handleProfileUpdated = (updatedProfile: RecruiterProfileData) => {
+    setProfile(updatedProfile);
+    router.refresh();
+  };
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -276,6 +288,7 @@ export function RecruiterWorkspace({
         isOpen={isProfileModalOpen} 
         onClose={() => setIsProfileModalOpen(false)} 
         profile={profile}
+        onProfileUpdated={handleProfileUpdated}
       />
     </div>
   );

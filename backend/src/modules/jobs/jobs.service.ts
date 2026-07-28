@@ -40,12 +40,6 @@ export class JobsService {
       requirementType: c.requirementType,
     })) || [];
 
-    // Prepare screening questions data if provided
-    const questionsData = dto.screeningQuestions?.map(q => ({
-      questionText: q.questionText,
-      isRequired: q.isRequired ?? true,
-    })) || [];
-
     // Ensure job code is unique
     let jobCode = this.generateJobCode();
     let isUnique = false;
@@ -76,6 +70,8 @@ export class JobsService {
         workingModel: dto.workingModel,
         requiresProofOfWork: dto.requiresProofOfWork,
         proofOfWorkType: dto.proofOfWorkType,
+        categoryId: dto.categoryId,
+        expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
         requiredExperienceYears: dto.requiredExperienceYears,
         autoShortlistThreshold: dto.autoShortlistThreshold,
         autoRejectThreshold: dto.autoRejectThreshold,
@@ -90,9 +86,6 @@ export class JobsService {
         },
         jobCertificates: {
           create: certsData,
-        },
-        screeningQuestions: {
-          create: questionsData,
         }
       },
       include: {
@@ -100,8 +93,7 @@ export class JobsService {
         jobSkills: {
           include: { skill: true }
         },
-        jobCertificates: true,
-        screeningQuestions: true
+        jobCertificates: true
       }
     });
   }
@@ -174,8 +166,7 @@ export class JobsService {
         jobSkills: {
           include: { skill: true }
         },
-        jobCertificates: true,
-        screeningQuestions: true
+        jobCertificates: true
       }
     });
 
@@ -217,6 +208,8 @@ export class JobsService {
       workingModel: dto.workingModel,
       requiresProofOfWork: dto.requiresProofOfWork,
       proofOfWorkType: dto.proofOfWorkType,
+      categoryId: dto.categoryId,
+      expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
       requiredExperienceYears: dto.requiredExperienceYears,
       autoShortlistThreshold: dto.autoShortlistThreshold,
       autoRejectThreshold: dto.autoRejectThreshold,
@@ -258,17 +251,6 @@ export class JobsService {
       };
     }
 
-    // Handle screening questions update if provided
-    if (dto.screeningQuestions) {
-      updateData.screeningQuestions = {
-        deleteMany: {},
-        create: dto.screeningQuestions.map(q => ({
-          questionText: q.questionText,
-          isRequired: q.isRequired ?? true,
-        })),
-      };
-    }
-
     return this.prisma.jobPosting.update({
       where: { id },
       data: updateData,
@@ -277,8 +259,7 @@ export class JobsService {
         jobSkills: {
           include: { skill: true }
         },
-        jobCertificates: true,
-        screeningQuestions: true
+        jobCertificates: true
       }
     });
   }

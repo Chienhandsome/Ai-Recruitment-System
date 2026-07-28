@@ -5,6 +5,7 @@ import { Plus, Search, Filter, MoreHorizontal, Eye, Copy, Pencil, Play, Pause, X
 import type { JobsResponse, JobPostingData } from "@/lib/recruiter-api";
 import { updateRecruiterJob, getRecruiterJobs } from "@/lib/recruiter-api";
 import { CreateJobWizard } from "./CreateJobWizard";
+import { JobDetailView } from "./JobDetailView";
 import { format } from "date-fns";
 
 interface JobsWorkspaceProps {
@@ -16,9 +17,10 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
   const [data, setData] = useState<JobsResponse | null>(initialData);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("ALL");
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [editingJob, setEditingJob] = useState<JobPostingData | null>(null);
 
   const tabs = [
     { id: "ALL", label: "Tất cả" },
@@ -63,6 +65,44 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
       alert("Cập nhật trạng thái thất bại");
     }
   };
+
+  // If a job is selected, render the JobDetailView!
+  if (selectedJobId) {
+    return (
+      <>
+        <JobDetailView
+          jobId={selectedJobId}
+          token={token}
+          onBack={() => setSelectedJobId(null)}
+          onEdit={(job) => {
+            setEditingJob(job);
+            setIsWizardOpen(true);
+          }}
+          onJobDeleted={() => {
+            setSelectedJobId(null);
+            loadJobs(activeTab, search);
+          }}
+        />
+
+        {isWizardOpen && (
+          <CreateJobWizard 
+            isOpen={isWizardOpen} 
+            onClose={() => {
+              setIsWizardOpen(false);
+              setEditingJob(null);
+            }} 
+            token={token}
+            initialJobData={editingJob}
+            onSuccess={() => {
+              setIsWizardOpen(false);
+              setEditingJob(null);
+              loadJobs(activeTab, search);
+            }}
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-[#121620] rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800/60 overflow-hidden">
@@ -153,7 +193,11 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
               </thead>
               <tbody className="bg-white dark:bg-[#121620] divide-y divide-slate-200 dark:divide-slate-700/60">
                 {data.data.map((job) => (
-                  <tr key={job.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+                  <tr 
+                    key={job.id} 
+                    onClick={() => setSelectedJobId(job.id)}
+                    className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
                         <span className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
@@ -191,7 +235,7 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
                         {format(new Date(job.createdAt), "dd/MM/yyyy")}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       <select
                         value={job.status}
                         onChange={(e) => handleStatusChange(job.id, e.target.value)}
@@ -208,15 +252,23 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
                         <option value="CLOSED">Đóng</option>
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button title="Xem Pipeline" className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-500/10">
+                        <button 
+                          onClick={() => setSelectedJobId(job.id)} 
+                          title="Xem Chi tiết JD & AI Candidates" 
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
+                        >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button title="Sao chép link" className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800">
-                          <Copy className="w-4 h-4" />
-                        </button>
-                        <button title="Sửa" className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-md hover:bg-blue-50 dark:hover:bg-blue-500/10">
+                        <button 
+                          onClick={() => {
+                            setEditingJob(job);
+                            setIsWizardOpen(true);
+                          }} 
+                          title="Sửa JD" 
+                          className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-md hover:bg-blue-50 dark:hover:bg-blue-500/10"
+                        >
                           <Pencil className="w-4 h-4" />
                         </button>
                       </div>
@@ -248,10 +300,15 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
       {isWizardOpen && (
         <CreateJobWizard 
           isOpen={isWizardOpen} 
-          onClose={() => setIsWizardOpen(false)} 
+          onClose={() => {
+            setIsWizardOpen(false);
+            setEditingJob(null);
+          }} 
           token={token}
+          initialJobData={editingJob}
           onSuccess={() => {
             setIsWizardOpen(false);
+            setEditingJob(null);
             loadJobs(activeTab, search);
           }}
         />

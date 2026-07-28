@@ -28,6 +28,8 @@ export declare class RecruitersController {
         user: {
             email: string;
             fullName: string;
+            birthDay: Date | null;
+            phone: string | null;
             avatarUrl: string | null;
         };
     } & {
@@ -63,6 +65,8 @@ export declare class RecruitersController {
         user: {
             email: string;
             fullName: string;
+            birthDay: Date | null;
+            phone: string | null;
             avatarUrl: string | null;
         };
     } & {

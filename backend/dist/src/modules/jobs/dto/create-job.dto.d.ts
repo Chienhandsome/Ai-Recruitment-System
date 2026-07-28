@@ -7,10 +7,6 @@ export declare class JobCertificateDto {
     certificateName: string;
     requirementType: SkillRequirementType;
 }
-export declare class JobScreeningQuestionDto {
-    questionText: string;
-    isRequired?: boolean;
-}
 export declare class CreateJobDto {
     title: string;
     departmentId?: string;
@@ -26,6 +22,8 @@ export declare class CreateJobDto {
     workingModel?: WorkingModel;
     requiresProofOfWork?: boolean;
     proofOfWorkType?: ProofType;
+    categoryId?: string;
+    expiryDate?: string;
     requiredExperienceYears?: number;
     autoShortlistThreshold?: number;
     autoRejectThreshold?: number;
@@ -36,5 +34,4 @@ export declare class CreateJobDto {
     otherWeight?: number;
     skills?: JobSkillDto[];
     certificates?: JobCertificateDto[];
-    screeningQuestions?: JobScreeningQuestionDto[];
 }

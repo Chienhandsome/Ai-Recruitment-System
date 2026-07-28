@@ -31,13 +31,38 @@ export interface JobPostingData {
   workingModel?: string;
   requiresProofOfWork?: boolean;
   proofOfWorkType?: string;
-  screeningQuestions?: { id?: string; questionText: string; isRequired: boolean }[];
+  requirements?: string;
+  minSalary?: number;
+  maxSalary?: number;
+  currency?: string;
+  jobCertificates?: { id?: string; certificateName: string; requirementType?: string }[];
+  categoryId?: string;
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  location?: string;
   expiryDate?: string;
   createdAt: string;
   jobSkills?: JobSkillData[];
   _count?: {
     applications: number;
   };
+}
+
+export interface JobCategoryData {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface SkillItemData {
+  id: string;
+  name: string;
+  categoryId: string;
+  type: string;
+  category?: JobCategoryData;
 }
 
 export interface JobsResponse {
@@ -71,6 +96,8 @@ export interface RecruiterProfileData {
     fullName: string | null;
     avatarUrl: string | null;
     email: string;
+    phone?: string | null;
+    birthDay?: string | null;
   };
 }
 
@@ -85,7 +112,7 @@ export async function getRecruiterProfile(token: string): Promise<RecruiterProfi
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -114,7 +141,7 @@ export async function getRecruiterDashboardStats(token: string): Promise<Recruit
 
 export async function updateRecruiterProfile(
   token: string,
-  data: { title?: string; fullName?: string }
+  data: { title?: string; fullName?: string; phone?: string; birthDay?: string; avatarUrl?: string }
 ): Promise<RecruiterProfileData> {
   const res = await fetch(`${API_URL}/recruiters/profile`, {
     method: "PATCH",
@@ -194,6 +221,81 @@ export async function updateRecruiterJob(
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to update job: ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function getRecruiterJobDetail(
+  token: string,
+  jobId: string
+): Promise<JobPostingData> {
+  const res = await fetch(`${API_URL}/jobs/${jobId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    next: { revalidate: 0 },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch job detail");
+  }
+
+  return res.json();
+}
+
+export async function deleteRecruiterJob(
+  token: string,
+  jobId: string
+): Promise<void> {
+  const res = await fetch(`${API_URL}/jobs/${jobId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to delete job: ${text}`);
+  }
+}
+
+export async function getJobCategories(): Promise<JobCategoryData[]> {
+  const res = await fetch(`${API_URL}/categories`, {
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function getSkillsByCategory(categoryId?: string, search?: string): Promise<SkillItemData[]> {
+  const query = new URLSearchParams();
+  if (categoryId) query.append("categoryId", categoryId);
+  if (search) query.append("search", search);
+
+  const res = await fetch(`${API_URL}/skills?${query.toString()}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function createCustomSkill(
+  token: string,
+  data: { name: string; categoryId: string }
+): Promise<SkillItemData> {
+  const res = await fetch(`${API_URL}/skills`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to create custom skill");
   }
 
   return res.json();

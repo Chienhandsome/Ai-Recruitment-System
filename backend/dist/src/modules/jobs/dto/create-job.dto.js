@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateJobDto = exports.JobScreeningQuestionDto = exports.JobCertificateDto = exports.JobSkillDto = void 0;
+exports.CreateJobDto = exports.JobCertificateDto = exports.JobSkillDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const client_1 = require("@prisma/client");
@@ -45,23 +45,6 @@ __decorate([
     (0, class_validator_1.IsEnum)(client_1.SkillRequirementType),
     __metadata("design:type", String)
 ], JobCertificateDto.prototype, "requirementType", void 0);
-class JobScreeningQuestionDto {
-    questionText;
-    isRequired;
-}
-exports.JobScreeningQuestionDto = JobScreeningQuestionDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Question text' }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], JobScreeningQuestionDto.prototype, "questionText", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({ default: true }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], JobScreeningQuestionDto.prototype, "isRequired", void 0);
 class CreateJobDto {
     title;
     departmentId;
@@ -77,6 +60,8 @@ class CreateJobDto {
     workingModel;
     requiresProofOfWork;
     proofOfWorkType;
+    categoryId;
+    expiryDate;
     requiredExperienceYears;
     autoShortlistThreshold;
     autoRejectThreshold;
@@ -87,7 +72,6 @@ class CreateJobDto {
     otherWeight;
     skills;
     certificates;
-    screeningQuestions;
 }
 exports.CreateJobDto = CreateJobDto;
 __decorate([
@@ -175,6 +159,18 @@ __decorate([
     __metadata("design:type", String)
 ], CreateJobDto.prototype, "proofOfWorkType", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Job Category ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateJobDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Expiry date' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateJobDto.prototype, "expiryDate", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)({ description: 'Required experience in years' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
@@ -242,12 +238,4 @@ __decorate([
     (0, class_transformer_1.Type)(() => JobCertificateDto),
     __metadata("design:type", Array)
 ], CreateJobDto.prototype, "certificates", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({ description: 'Screening questions for applicants' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    (0, class_transformer_1.Type)(() => JobScreeningQuestionDto),
-    __metadata("design:type", Array)
-], CreateJobDto.prototype, "screeningQuestions", void 0);
 //# sourceMappingURL=create-job.dto.js.map

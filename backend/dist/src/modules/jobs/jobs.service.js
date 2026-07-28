@@ -42,10 +42,6 @@ let JobsService = class JobsService {
             certificateName: c.certificateName,
             requirementType: c.requirementType,
         })) || [];
-        const questionsData = dto.screeningQuestions?.map(q => ({
-            questionText: q.questionText,
-            isRequired: q.isRequired ?? true,
-        })) || [];
         let jobCode = this.generateJobCode();
         let isUnique = false;
         while (!isUnique) {
@@ -75,6 +71,8 @@ let JobsService = class JobsService {
                 workingModel: dto.workingModel,
                 requiresProofOfWork: dto.requiresProofOfWork,
                 proofOfWorkType: dto.proofOfWorkType,
+                categoryId: dto.categoryId,
+                expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
                 requiredExperienceYears: dto.requiredExperienceYears,
                 autoShortlistThreshold: dto.autoShortlistThreshold,
                 autoRejectThreshold: dto.autoRejectThreshold,
@@ -89,9 +87,6 @@ let JobsService = class JobsService {
                 },
                 jobCertificates: {
                     create: certsData,
-                },
-                screeningQuestions: {
-                    create: questionsData,
                 }
             },
             include: {
@@ -99,8 +94,7 @@ let JobsService = class JobsService {
                 jobSkills: {
                     include: { skill: true }
                 },
-                jobCertificates: true,
-                screeningQuestions: true
+                jobCertificates: true
             }
         });
     }
@@ -165,8 +159,7 @@ let JobsService = class JobsService {
                 jobSkills: {
                     include: { skill: true }
                 },
-                jobCertificates: true,
-                screeningQuestions: true
+                jobCertificates: true
             }
         });
         if (!job) {
@@ -203,6 +196,8 @@ let JobsService = class JobsService {
             workingModel: dto.workingModel,
             requiresProofOfWork: dto.requiresProofOfWork,
             proofOfWorkType: dto.proofOfWorkType,
+            categoryId: dto.categoryId,
+            expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
             requiredExperienceYears: dto.requiredExperienceYears,
             autoShortlistThreshold: dto.autoShortlistThreshold,
             autoRejectThreshold: dto.autoRejectThreshold,
@@ -239,15 +234,6 @@ let JobsService = class JobsService {
                 })),
             };
         }
-        if (dto.screeningQuestions) {
-            updateData.screeningQuestions = {
-                deleteMany: {},
-                create: dto.screeningQuestions.map(q => ({
-                    questionText: q.questionText,
-                    isRequired: q.isRequired ?? true,
-                })),
-            };
-        }
         return this.prisma.jobPosting.update({
             where: { id },
             data: updateData,
@@ -256,8 +242,7 @@ let JobsService = class JobsService {
                 jobSkills: {
                     include: { skill: true }
                 },
-                jobCertificates: true,
-                screeningQuestions: true
+                jobCertificates: true
             }
         });
     }

@@ -346,7 +346,6 @@ model JobPosting {
 
   jobSkills          JobSkill[]
   jobCertificates    JobCertificate[]
-  screeningQuestions JobScreeningQuestion[]
   applications       Application[]
 
   @@index([status])
@@ -434,18 +433,7 @@ model JobCertificate {
   @@map("job_certificates")
 }
 
-model JobScreeningQuestion {
-  id           String               @id @default(uuid())
-  jobId        String               @map("job_id")
-  job          JobPosting           @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  questionText String               @map("question_text")
-  isRequired   Boolean              @default(true) @map("is_required")
-  createdAt    DateTime             @default(now()) @map("created_at")
 
-  answers ApplicationAnswer[]
-
-  @@map("job_screening_questions")
-}
 
 model CandidateProfile {
   id                  String                 @id @default(uuid())
@@ -632,9 +620,7 @@ model Application {
   appliedAt        DateTime                    @default(now()) @map("applied_at")
   updatedAt        DateTime                    @updatedAt @map("updated_at")
 
-  answers            ApplicationAnswer[]
   aiMatchingResults  AiMatchingResult[]
-  interviewQuestions InterviewQuestion[]
   interviews         Interview[]
   notifications      Notification[]
   statusHistories    ApplicationStatusHistory[]
@@ -675,17 +661,7 @@ model AiMatchingResult {
   @@map("ai_matching_results")
 }
 
-model InterviewQuestion {
-  id              String      @id @default(uuid())
-  applicationId   String      @map("application_id")
-  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  question        String
-  category        String?
-  suggestedAnswer String?     @map("suggested_answer")
-  createdAt       DateTime    @default(now()) @map("created_at")
 
-  @@map("interview_questions")
-}
 
 model Interview {
   id               String          @id @default(uuid())
@@ -760,17 +736,7 @@ model CandidateProof {
   @@map("candidate_proofs")
 }
 
-model ApplicationAnswer {
-  id          String               @id @default(uuid())
-  appId       String               @map("application_id")
-  application Application          @relation(fields: [appId], references: [id], onDelete: Cascade)
-  questionId  String               @map("question_id")
-  question    JobScreeningQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  answerText  String               @map("answer_text")
-  createdAt   DateTime             @default(now()) @map("created_at")
 
-  @@map("application_answers")
-}
 
 model AuditLog {
   id         String   @id @default(uuid())

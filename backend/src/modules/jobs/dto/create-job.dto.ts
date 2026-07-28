@@ -37,18 +37,6 @@ export class JobCertificateDto {
   requirementType!: SkillRequirementType;
 }
 
-export class JobScreeningQuestionDto {
-  @ApiProperty({ description: 'Question text' })
-  @IsString()
-  @IsNotEmpty()
-  questionText!: string;
-
-  @ApiPropertyOptional({ default: true })
-  @IsOptional()
-  @IsBoolean()
-  isRequired?: boolean;
-}
-
 export class CreateJobDto {
   @ApiProperty({ description: 'Title of the job' })
   @IsString()
@@ -120,6 +108,16 @@ export class CreateJobDto {
   @IsEnum(ProofType)
   proofOfWorkType?: ProofType;
 
+  @ApiPropertyOptional({ description: 'Job Category ID' })
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @ApiPropertyOptional({ description: 'Expiry date' })
+  @IsOptional()
+  @IsString()
+  expiryDate?: string;
+
   @ApiPropertyOptional({ description: 'Required experience in years' })
   @IsOptional()
   @IsNumber()
@@ -177,11 +175,4 @@ export class CreateJobDto {
   @ValidateNested({ each: true })
   @Type(() => JobCertificateDto)
   certificates?: JobCertificateDto[];
-
-  @ApiPropertyOptional({ description: 'Screening questions for applicants' })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => JobScreeningQuestionDto)
-  screeningQuestions?: JobScreeningQuestionDto[];
 }

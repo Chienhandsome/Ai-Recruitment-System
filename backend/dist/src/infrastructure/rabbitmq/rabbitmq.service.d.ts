@@ -12,6 +12,8 @@ export declare class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     private connect;
     private disconnect;
     publishTestMessage(routingKey: string, payload: any): Promise<boolean>;
+    publish(routingKey: string, payload: unknown): Promise<boolean>;
+    subscribe(queueName: string, routingKeys: string[], handler: (message: unknown) => Promise<void>): Promise<void>;
     checkHealth(): {
         service: string;
         status: string;

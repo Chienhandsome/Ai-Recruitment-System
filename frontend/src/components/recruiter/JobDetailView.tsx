@@ -106,7 +106,7 @@ export function JobDetailView({
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            Phòng ban: <strong>{job.department?.name || "Chưa xếp"}</strong> • Tạo ngày: {new Date(job.createdAt).toLocaleDateString("vi-VN")}
+            Tạo ngày: {new Date(job.createdAt).toLocaleDateString("vi-VN")}
           </p>
         </div>
 
@@ -175,21 +175,39 @@ export function JobDetailView({
 
       {/* TAB 1: Job Information */}
       {activeTab === "info" && (
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2 space-y-6">
-            {/* Description & Requirements */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content (2 Columns) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Description */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
-              <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3">Mô tả công việc</h3>
+              <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#2563EB]" /> Mô tả công việc
+              </h3>
               <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
                 {job.description}
               </div>
             </div>
 
+            {/* Requirements */}
             {job.requirements && (
               <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
-                <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3">Yêu cầu công việc</h3>
+                <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#2563EB]" /> Yêu cầu công việc
+                </h3>
                 <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
                   {job.requirements}
+                </div>
+              </div>
+            )}
+
+            {/* Benefits */}
+            {(job as any).benefits && (
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
+                <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#2563EB]" /> Quyền lợi & Phúc lợi
+                </h3>
+                <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                  {(job as any).benefits}
                 </div>
               </div>
             )}
@@ -198,8 +216,10 @@ export function JobDetailView({
             {job.jobSkills && job.jobSkills.length > 0 && (
               <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
                 <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3 flex items-center justify-between">
-                  <span>Kỹ năng Yêu cầu Đính kèm ({job.jobSkills.length})</span>
-                  <span className="text-xs font-normal text-slate-500">Được mã hóa để AI So khớp Chấm điểm</span>
+                  <span className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-[#2563EB]" /> Kỹ năng Yêu cầu Đính kèm ({job.jobSkills.length})
+                  </span>
+                  <span className="text-xs font-normal text-slate-500">Đã mã hóa cho AI chấm điểm</span>
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {job.jobSkills.map((sk, idx) => (
@@ -219,45 +239,71 @@ export function JobDetailView({
 
           {/* Right Sidebar: Meta & AI Configurations */}
           <div className="space-y-6">
+            {/* Overview Box */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
               <h3 className="text-base font-bold text-[#1F2937] border-b border-slate-100 pb-3">Tổng quan Yêu cầu</h3>
               
               <div className="space-y-3 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Ngành nghề:</span>
-                  <span className="font-bold text-[#2563EB]">
+                  <span className="text-slate-500">Ngành nghề tuyển dụng:</span>
+                  <span className="font-bold text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
                     {job.category?.name || "Chưa phân loại"}
                   </span>
                 </div>
+
+
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Mức lương:</span>
                   <span className="font-bold text-emerald-600">
-                    {job.minSalary && job.maxSalary ? `${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()} ${job.currency}` : "Thỏa thuận"}
+                    {job.minSalary || job.maxSalary 
+                      ? `${job.minSalary ? Number(job.minSalary).toLocaleString() : '0'} ${job.maxSalary ? '- ' + Number(job.maxSalary).toLocaleString() : ''} ${job.currency || 'VND'}`
+                      : "Thỏa thuận"}
                   </span>
                 </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500">Cấp bậc (Level):</span>
+                  <span className="font-bold text-[#1F2937]">{(job as any).experienceLevel || "Không yêu cầu"}</span>
+                </div>
+
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Mô hình làm việc:</span>
-                  <span className="font-bold text-[#1F2937]">{job.workingModel || "On-site"}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Hình thức tuyển:</span>
-                  <span className="font-bold text-[#1F2937]">{job.employmentType}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Kinh nghiệm yêu cầu:</span>
                   <span className="font-bold text-[#1F2937]">
-                    {job.requiredExperienceYears ? `${job.requiredExperienceYears} năm` : "Không yêu cầu"}
+                    {job.workingModel === "ON_SITE" ? "Tại văn phòng (On-site)" :
+                     job.workingModel === "HYBRID" ? "Kết hợp (Hybrid)" :
+                     job.workingModel === "REMOTE" ? "Làm từ xa (Remote)" : job.workingModel || "On-site"}
                   </span>
                 </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500">Hình thức tuyển:</span>
+                  <span className="font-bold text-[#1F2937]">
+                    {job.employmentType === "FULL_TIME" ? "Toàn thời gian" :
+                     job.employmentType === "PART_TIME" ? "Bán thời gian" :
+                     job.employmentType === "CONTRACT" ? "Hợp đồng" :
+                     job.employmentType === "INTERNSHIP" ? "Thực tập" : job.employmentType}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500">Kinh nghiệm tối thiểu:</span>
+                  <span className="font-bold text-[#1F2937]">
+                    {job.requiredExperienceYears ? `${job.requiredExperienceYears} năm` : "Chưa yêu cầu"}
+                  </span>
+                </div>
+
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Hạn nộp hồ sơ:</span>
                   <span className="font-bold text-rose-600">
                     {job.expiryDate ? format(new Date(job.expiryDate), "dd/MM/yyyy") : "Vô thời hạn"}
                   </span>
                 </div>
+
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Yêu cầu Bằng chứng:</span>
-                  <span className="font-bold text-[#2563EB]">{job.requiresProofOfWork ? `Có (${job.proofOfWorkType})` : "Không"}</span>
+                  <span className="text-slate-500">Bằng chứng năng lực:</span>
+                  <span className="font-bold text-[#2563EB]">
+                    {job.requiresProofOfWork ? `Có (${job.proofOfWorkType || 'PORTFOLIO'})` : "Không"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -266,7 +312,7 @@ export function JobDetailView({
             {job.jobCertificates && job.jobCertificates.length > 0 && (
               <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
                 <h3 className="text-sm font-bold text-[#1F2937] flex items-center gap-2">
-                  <Award className="w-4 h-4 text-[#2563EB]" /> Chứng chỉ Yêu cầu
+                  <Award className="w-4 h-4 text-[#2563EB]" /> Chứng chỉ Yêu cầu ({job.jobCertificates.length})
                 </h3>
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {job.jobCertificates.map((c: { certificateName: string }, idx: number) => (
@@ -278,23 +324,56 @@ export function JobDetailView({
               </div>
             )}
 
-            {/* AI Configuration */}
-            <div className="bg-[#EFF6FF] p-6 rounded-2xl border border-blue-200 space-y-3 shadow-sm">
-              <h3 className="text-sm font-bold text-[#1F2937] flex items-center gap-2">
-                <Bot className="w-4 h-4 text-[#2563EB]" /> Cấu hình Trợ lý AI
+            {/* AI Configuration Box */}
+            <div className="bg-[#EFF6FF] p-6 rounded-2xl border border-blue-200 space-y-4 shadow-sm">
+              <h3 className="text-sm font-bold text-[#1F2937] flex items-center gap-2 border-b border-blue-100 pb-2">
+                <Bot className="w-4 h-4 text-[#2563EB]" /> Cấu hình Trợ lý AI Chấm điểm
               </h3>
-              <div className="space-y-2 text-xs text-[#1F2937]">
-                <div className="flex justify-between">
-                  <span>Ngưỡng Đạt tiêu chuẩn:</span>
-                  <span className="font-bold text-[#2563EB]">{job.autoShortlistThreshold || 85} / 100 điểm</span>
+              
+              <div className="space-y-2.5 text-xs text-[#1F2937]">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-600">Ngưỡng Tự động Đạt:</span>
+                  <span className="font-extrabold text-[#2563EB] bg-white px-2 py-0.5 rounded border border-blue-200">
+                    ≥ {job.autoShortlistThreshold || 85} / 100 điểm
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Trọng số Kỹ năng:</span>
-                  <span className="font-bold">{job.skillWeight || 40}%</span>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-600">Ngưỡng Tự động Loại:</span>
+                  <span className="font-extrabold text-rose-600 bg-white px-2 py-0.5 rounded border border-rose-200">
+                    &lt; {job.autoRejectThreshold || 40} điểm
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Trọng số Kinh nghiệm:</span>
-                  <span className="font-bold">{job.experienceWeight || 30}%</span>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-600">Loại khi thiếu Kỹ năng bắt buộc:</span>
+                  <span className={`font-bold px-2 py-0.5 rounded text-[11px] ${
+                    job.rejectOnMissingMandatory !== false ? "bg-rose-100 text-rose-700" : "bg-slate-200 text-slate-700"
+                  }`}>
+                    {job.rejectOnMissingMandatory !== false ? "Bật (Auto-Reject)" : "Tắt"}
+                  </span>
+                </div>
+
+                <div className="pt-2 border-t border-blue-200/60 space-y-1.5">
+                  <span className="font-bold text-slate-700 block text-[11px] uppercase tracking-wider">Phân bổ Trọng số Chấm điểm:</span>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="bg-white p-2 rounded-lg border border-blue-100 flex justify-between">
+                      <span className="text-slate-500">Kỹ năng:</span>
+                      <span className="font-bold text-[#2563EB]">{job.skillWeight || 40}%</span>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg border border-blue-100 flex justify-between">
+                      <span className="text-slate-500">Kinh nghiệm:</span>
+                      <span className="font-bold text-[#2563EB]">{job.experienceWeight || 30}%</span>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg border border-blue-100 flex justify-between">
+                      <span className="text-slate-500">Học vấn:</span>
+                      <span className="font-bold text-[#2563EB]">{job.educationWeight || 15}%</span>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg border border-blue-100 flex justify-between">
+                      <span className="text-slate-500">Khác:</span>
+                      <span className="font-bold text-[#2563EB]">{job.otherWeight || 15}%</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

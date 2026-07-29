@@ -50,13 +50,16 @@ export declare class AdminController {
     updateJobStatus(id: string, body: {
         status: JobStatus;
     }): Promise<{
-        status: import(".prisma/client").$Enums.JobStatus;
         id: string;
-        jobCode: string;
-        title: string;
-        recruiterId: string;
-        departmentId: string | null;
         description: string;
+        createdAt: Date;
+        updatedAt: Date;
+        status: import(".prisma/client").$Enums.JobStatus;
+        categoryId: string | null;
+        departmentId: string | null;
+        title: string;
+        jobCode: string;
+        recruiterId: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -76,21 +79,21 @@ export declare class AdminController {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
-        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
     }>;
     deleteJob(id: string): Promise<{
-        status: import(".prisma/client").$Enums.JobStatus;
         id: string;
-        jobCode: string;
-        title: string;
-        recruiterId: string;
-        departmentId: string | null;
         description: string;
+        createdAt: Date;
+        updatedAt: Date;
+        status: import(".prisma/client").$Enums.JobStatus;
+        categoryId: string | null;
+        departmentId: string | null;
+        title: string;
+        jobCode: string;
+        recruiterId: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -110,9 +113,6 @@ export declare class AdminController {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
-        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
@@ -131,10 +131,10 @@ export declare class AdminController {
     updateUserStatus(id: string, body: {
         status: AccountStatus;
     }): Promise<{
-        status: import(".prisma/client").$Enums.AccountStatus;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.AccountStatus;
         email: string;
         fullName: string;
         birthDay: Date | null;
@@ -143,10 +143,10 @@ export declare class AdminController {
         lastLoginAt: Date | null;
     }>;
     deleteUser(id: string): Promise<{
-        status: import(".prisma/client").$Enums.AccountStatus;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.AccountStatus;
         email: string;
         fullName: string;
         birthDay: Date | null;

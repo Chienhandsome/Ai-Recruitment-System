@@ -18,18 +18,18 @@ export declare class SkillsController {
         skillAliases: {
             id: string;
             createdAt: Date;
-            aliasName: string;
             skillId: string;
+            aliasName: string;
         }[];
     } & {
         id: string;
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.SkillStatus;
         normalizedName: string;
         categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
+        status: import(".prisma/client").$Enums.SkillStatus;
     })[]>;
     createSkill(body: {
         name: string;
@@ -39,10 +39,10 @@ export declare class SkillsController {
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.SkillStatus;
         normalizedName: string;
         categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
+        status: import(".prisma/client").$Enums.SkillStatus;
     }>;
     updateSkill(id: string, body: {
         name?: string;
@@ -58,32 +58,32 @@ export declare class SkillsController {
         skillAliases: {
             id: string;
             createdAt: Date;
-            aliasName: string;
             skillId: string;
+            aliasName: string;
         }[];
     } & {
         id: string;
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.SkillStatus;
         normalizedName: string;
         categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
+        status: import(".prisma/client").$Enums.SkillStatus;
     }>;
     addSkillAlias(id: string, body: {
         aliasName: string;
     }): Promise<{
         id: string;
         createdAt: Date;
-        aliasName: string;
         skillId: string;
+        aliasName: string;
     }>;
     deleteSkillAlias(aliasId: string): Promise<{
         id: string;
         createdAt: Date;
-        aliasName: string;
         skillId: string;
+        aliasName: string;
     }>;
     getUnrecognizedSkills(): Promise<{
         id: string;
@@ -110,10 +110,10 @@ export declare class SkillsController {
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.SkillStatus;
         normalizedName: string;
         categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
+        status: import(".prisma/client").$Enums.SkillStatus;
     }>;
     rejectUnrecognizedSkill(id: string): Promise<{
         id: string;

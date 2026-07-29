@@ -51,7 +51,35 @@ let SkillsService = SkillsService_1 = class SkillsService {
     async getSkills(categoryId, search) {
         const whereClause = { status: 'ACTIVE' };
         if (categoryId) {
-            whereClause.categoryId = categoryId;
+            const isSkillCat = await this.prisma.skillCategory.findUnique({ where: { id: categoryId } });
+            if (isSkillCat) {
+                whereClause.categoryId = categoryId;
+            }
+            else {
+                const isJobCat = await this.prisma.jobCategory.findUnique({ where: { id: categoryId } });
+                if (isJobCat) {
+                    const map = {
+                        'cong-nghe-thong-tin': 'công nghệ thông tin',
+                        'thiet-ke-do-hoa': 'thiết kế',
+                        'ke-toan-tai-chinh': 'kế toán',
+                        'kinh-doanh-ban-hang': 'kinh doanh',
+                        'marketing-truyen-thong': 'marketing',
+                        'nhan-su-hanh-chinh': 'nhân sự',
+                        'y-te-duoc-pham': 'y tế',
+                        'van-tai-logistics': 'vận tải'
+                    };
+                    const searchKeyword = map[isJobCat.slug] || isJobCat.name.split(' ')[0];
+                    const mappedSkillCat = await this.prisma.skillCategory.findFirst({
+                        where: { name: { contains: searchKeyword, mode: 'insensitive' } }
+                    });
+                    if (mappedSkillCat) {
+                        whereClause.categoryId = mappedSkillCat.id;
+                    }
+                }
+                else {
+                    whereClause.categoryId = categoryId;
+                }
+            }
         }
         if (search && search.trim()) {
             const q = search.trim();
@@ -88,11 +116,40 @@ let SkillsService = SkillsService_1 = class SkillsService {
         if (existing) {
             return existing;
         }
+        let resolvedCategoryId = categoryId;
+        const isSkillCat = await this.prisma.skillCategory.findUnique({ where: { id: categoryId } });
+        if (!isSkillCat) {
+            const isJobCat = await this.prisma.jobCategory.findUnique({ where: { id: categoryId } });
+            if (isJobCat) {
+                const map = {
+                    'cong-nghe-thong-tin': 'công nghệ thông tin',
+                    'thiet-ke-do-hoa': 'thiết kế',
+                    'ke-toan-tai-chinh': 'kế toán',
+                    'kinh-doanh-ban-hang': 'kinh doanh',
+                    'marketing-truyen-thong': 'marketing',
+                    'nhan-su-hanh-chinh': 'nhân sự',
+                    'y-te-duoc-pham': 'y tế',
+                    'van-tai-logistics': 'vận tải'
+                };
+                const searchKeyword = map[isJobCat.slug] || isJobCat.name.split(' ')[0];
+                const mappedSkillCat = await this.prisma.skillCategory.findFirst({
+                    where: { name: { contains: searchKeyword, mode: 'insensitive' } }
+                });
+                if (mappedSkillCat) {
+                    resolvedCategoryId = mappedSkillCat.id;
+                }
+                else {
+                    const fallback = await this.prisma.skillCategory.findFirst();
+                    if (fallback)
+                        resolvedCategoryId = fallback.id;
+                }
+            }
+        }
         return this.prisma.skill.create({
             data: {
                 name: trimmed,
                 normalizedName: normalized,
-                categoryId,
+                categoryId: resolvedCategoryId,
                 type: 'HARD',
                 status: 'ACTIVE',
             },

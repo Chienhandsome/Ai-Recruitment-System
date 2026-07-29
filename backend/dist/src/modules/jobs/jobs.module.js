@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.JobsModule = void 0;
 const common_1 = require("@nestjs/common");
 const jobs_controller_1 = require("./jobs.controller");
+const job_categories_controller_1 = require("./job-categories.controller");
 const jobs_service_1 = require("./jobs.service");
 const prisma_module_1 = require("../../database/prisma.module");
 const auth_module_1 = require("../auth/auth.module");
@@ -18,7 +19,7 @@ exports.JobsModule = JobsModule;
 exports.JobsModule = JobsModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule, auth_module_1.AuthModule],
-        controllers: [jobs_controller_1.JobsController],
+        controllers: [jobs_controller_1.JobsController, job_categories_controller_1.JobCategoriesController],
         providers: [jobs_service_1.JobsService],
         exports: [jobs_service_1.JobsService],
     })

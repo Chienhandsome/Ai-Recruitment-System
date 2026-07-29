@@ -1,33 +1,11 @@
-import { PrismaService } from '../../database/prisma.service';
-import { CandidateProfileStatus } from '@prisma/client';
+import { CandidatesService } from './candidates.service';
 import { UpdateCandidateSkillsDto } from './dto/update-candidate-skills.dto';
 import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
-export interface ResolvedCandidateProfile {
-    id: string;
-    userId: string | null;
-    status: CandidateProfileStatus;
-    fullName: string;
-    email: string;
-    phone: string | null;
-    address: string | null;
-    desiredTitle: string | null;
-    professionalSummary: string | null;
-    linkedinUrl: string | null;
-    githubUrl: string | null;
-    portfolioUrl: string | null;
-    primaryResumeId: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-}
-export declare class CandidatesService {
-    private readonly prisma;
-    private readonly logger;
-    constructor(prisma: PrismaService);
-    getResolvedProfile(candidateProfileId: string): Promise<ResolvedCandidateProfile>;
-    getResolvedProfileByUserId(userId: string): Promise<ResolvedCandidateProfile>;
-    updateProfileStatus(candidateProfileId: string, status: CandidateProfileStatus): Promise<void>;
-    setPrimaryResume(candidateProfileId: string, resumeId: string): Promise<void>;
-    updateProfile(userId: string, dto: UpdateCandidateProfileDto): Promise<{
+import type { AuthenticatedUser } from '../auth/auth.types';
+export declare class CandidatesController {
+    private readonly candidatesService;
+    constructor(candidatesService: CandidatesService);
+    updateMyProfile(user: AuthenticatedUser, dto: UpdateCandidateProfileDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -47,7 +25,7 @@ export declare class CandidatesService {
         expectedMaxSalary: import("@prisma/client/runtime/library").Decimal | null;
         preferredModel: import(".prisma/client").$Enums.WorkingModel | null;
     }>;
-    getCandidateSkills(candidateProfileId: string): Promise<({
+    getMySkills(user: AuthenticatedUser): Promise<({
         skill: {
             category: {
                 id: string;
@@ -76,7 +54,7 @@ export declare class CandidatesService {
         isPrimary: boolean;
         candidateId: string;
     })[]>;
-    updateCandidateSkills(candidateProfileId: string, dto: UpdateCandidateSkillsDto): Promise<({
+    updateMySkills(user: AuthenticatedUser, dto: UpdateCandidateSkillsDto): Promise<({
         skill: {
             category: {
                 id: string;
@@ -105,6 +83,7 @@ export declare class CandidatesService {
         isPrimary: boolean;
         candidateId: string;
     })[]>;
-    removeCandidateSkill(candidateProfileId: string, skillId: string): Promise<void>;
-    private resolveProfile;
+    removeMySkill(user: AuthenticatedUser, skillId: string): Promise<{
+        message: string;
+    }>;
 }

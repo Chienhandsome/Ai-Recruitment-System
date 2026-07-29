@@ -1,12 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { Upload, Save, Sparkles } from "lucide-react"
+import { Save, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { createClient } from "@/lib/supabase/client"
+import { updateCandidateProfile } from "@/lib/candidate-api"
+import { ResumeUpload } from "@/components/candidate/resume-upload"
 
 interface ProfileFormProps {
   fullName: string
@@ -14,18 +17,27 @@ interface ProfileFormProps {
   phone: string | null
   avatarUrl: string | null
   address: string | null
+  desiredTitle: string | null
+  professionalSummary: string | null
   githubUrl: string | null
   linkedinUrl: string | null
+  portfolioUrl: string | null
+  onCancel: () => void
+  onSaved: () => void
 }
 
 export function ProfileForm({
   fullName,
   email,
   phone,
-  avatarUrl,
   address,
+  desiredTitle,
+  professionalSummary,
   githubUrl,
   linkedinUrl,
+  portfolioUrl,
+  onCancel,
+  onSaved,
 }: ProfileFormProps) {
   const [isSaving, setIsSaving] = React.useState(false)
   const [saveMessage, setSaveMessage] = React.useState<string | null>(null)
@@ -35,13 +47,40 @@ export function ProfileForm({
     setIsSaving(true)
     setSaveMessage(null)
 
-    // TODO: Implement API call to update profile
-    // Simulate a brief delay
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    const formData = new FormData(e.currentTarget)
 
-    setIsSaving(false)
-    setSaveMessage("Đã lưu thông tin thành công!")
-    setTimeout(() => setSaveMessage(null), 3000)
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session?.access_token) {
+        setSaveMessage("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
+        setIsSaving(false)
+        return
+      }
+
+      await updateCandidateProfile(session.access_token, {
+        fullName: formData.get("fullName") as string,
+        phone: (formData.get("phone") as string) || null,
+        address: (formData.get("address") as string) || null,
+        desiredTitle: (formData.get("desiredTitle") as string) || null,
+        professionalSummary: (formData.get("professionalSummary") as string) || null,
+        linkedinUrl: (formData.get("linkedinUrl") as string) || null,
+        githubUrl: (formData.get("githubUrl") as string) || null,
+        portfolioUrl: (formData.get("portfolioUrl") as string) || null,
+      })
+
+      setSaveMessage("Đã lưu thông tin thành công!")
+      setTimeout(() => {
+        onSaved()
+      }, 1000)
+    } catch (error) {
+      setSaveMessage(
+        error instanceof Error ? error.message : "Có lỗi xảy ra khi lưu thông tin."
+      )
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -60,6 +99,7 @@ export function ProfileForm({
                 name="fullName"
                 defaultValue={fullName}
                 placeholder="Nguyễn Văn A"
+                required
               />
             </div>
             <div className="space-y-2">
@@ -113,7 +153,7 @@ export function ProfileForm({
             <Input
               id="desiredTitle"
               name="desiredTitle"
-              defaultValue=""
+              defaultValue={desiredTitle ?? ""}
               placeholder="Frontend Developer, Full-stack Engineer..."
             />
           </div>
@@ -122,7 +162,7 @@ export function ProfileForm({
             <Textarea
               id="professionalSummary"
               name="professionalSummary"
-              defaultValue=""
+              defaultValue={professionalSummary ?? ""}
               placeholder="Tóm tắt kinh nghiệm, kỹ năng nổi bật và mục tiêu nghề nghiệp của bạn..."
               rows={4}
             />
@@ -162,7 +202,7 @@ export function ProfileForm({
               id="portfolioUrl"
               name="portfolioUrl"
               type="url"
-              defaultValue=""
+              defaultValue={portfolioUrl ?? ""}
               placeholder="https://myportfolio.com"
             />
           </div>
@@ -170,49 +210,28 @@ export function ProfileForm({
       </Card>
 
       {/* CV Upload */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">CV / Resume</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-input p-6 text-center hover:border-primary/50 transition-colors">
-            <Upload className="h-10 w-10 text-muted-foreground mb-3" />
-            <p className="text-sm font-medium text-foreground">
-              Tải lên CV của bạn
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              PDF, DOC, DOCX (tối đa 5MB)
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              className="mt-4"
-              disabled
-            >
-              <Upload className="h-4 w-4" />
-              Chọn tệp
-            </Button>
-          </div>
-          <div className="flex items-start gap-2 rounded-md bg-secondary p-3">
-            <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <p className="text-xs text-secondary-foreground">
-              <span className="font-medium">Tự động cập nhật hồ sơ:</span>{" "}
-              Khi bạn upload CV, hệ thống AI sẽ tự động phân tích và cập nhật
-              thông tin hồ sơ của bạn bao gồm kỹ năng, kinh nghiệm, học vấn và
-              dự án.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <ResumeUpload />
 
-      {/* Save Button */}
+      {/* Action Buttons */}
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={isSaving}>
           <Save className="h-4 w-4" />
           {isSaving ? "Đang lưu..." : "Lưu thông tin"}
         </Button>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>
+          <X className="h-4 w-4" />
+          Hủy
+        </Button>
         {saveMessage && (
-          <p className="text-sm text-green-600 font-medium">{saveMessage}</p>
+          <p
+            className={`text-sm font-medium ${
+              saveMessage.includes("thành công")
+                ? "text-green-600"
+                : "text-destructive"
+            }`}
+          >
+            {saveMessage}
+          </p>
         )}
       </div>
     </form>

@@ -11,15 +11,15 @@ export class SkillsController {
 
   @Public()
   @Get('categories')
-  @ApiOperation({ summary: 'Get all skill categories' })
-  @ApiResponse({ status: 200, description: 'Return list of skill categories' })
+@ApiOperation({ summary: 'Get all skill categories' })
+@ApiResponse({ status: 200, description: 'Return list of skill categories' })
   async getCategories() {
     return this.skillsService.getCategories();
   }
 
   @Public()
   @Get('skills')
-  @ApiOperation({ summary: 'Get active skills by category or search term (searches name & aliases)' })
+@ApiOperation({ summary: 'Get active skills by category or search term (searches name & aliases)' })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Return list of matching skills' })

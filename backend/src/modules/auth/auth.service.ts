@@ -258,6 +258,8 @@ export class AuthService {
         ? {
             id: user.candidateProfile.id,
             address: user.candidateProfile.address,
+            desiredTitle: user.candidateProfile.desiredTitle,
+            professionalSummary: user.candidateProfile.professionalSummary,
             githubUrl: user.candidateProfile.githubUrl,
             linkedinUrl: user.candidateProfile.linkedinUrl,
             portfolioUrl: user.candidateProfile.portfolioUrl,

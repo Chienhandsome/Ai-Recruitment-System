@@ -34,7 +34,7 @@ export default async function JobsPage() {
   }
 
   return (
-    <main className="flex-1 h-screen overflow-hidden bg-slate-50 dark:bg-[#0B0E14] p-4 lg:p-6 transition-colors duration-300">
+    <main className="flex-1 h-screen overflow-hidden bg-[#F8FAFC] p-4 lg:p-6 transition-colors duration-300">
       <JobsWorkspace initialData={initialJobs} token={token} />
     </main>
   );

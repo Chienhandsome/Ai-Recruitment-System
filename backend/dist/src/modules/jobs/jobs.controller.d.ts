@@ -9,12 +9,19 @@ export declare class JobsController {
     create(user: AuthenticatedUser, createJobDto: CreateJobDto): Promise<{
         department: {
             id: string;
-            code: string;
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string;
             status: import(".prisma/client").$Enums.DepartmentStatus;
+            companyId: string;
+            code: string;
+        } | null;
+        category: {
+            id: string;
+            name: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
         } | null;
         jobSkills: ({
             skill: {
@@ -23,18 +30,18 @@ export declare class JobsController {
                 createdAt: Date;
                 updatedAt: Date;
                 status: import(".prisma/client").$Enums.SkillStatus;
-                normalizedName: string;
                 categoryId: string;
+                normalizedName: string;
                 type: import(".prisma/client").$Enums.SkillType;
             };
         } & {
             id: string;
             createdAt: Date;
-            skillId: string;
             requirementType: import(".prisma/client").$Enums.SkillRequirementType;
             minimumProficiency: import(".prisma/client").$Enums.ProficiencyLevel | null;
             weight: import("@prisma/client/runtime/library").Decimal;
             minYearsExperience: number | null;
+            skillId: string;
             jobId: string;
         })[];
         jobCertificates: {
@@ -45,25 +52,20 @@ export declare class JobsController {
         }[];
     } & {
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.JobStatus;
-        categoryId: string | null;
+        jobCode: string;
         title: string;
-        departmentId: string | null;
+        description: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
         experienceLevel: import(".prisma/client").$Enums.ExperienceLevel;
+        status: import(".prisma/client").$Enums.JobStatus;
         minSalary: import("@prisma/client/runtime/library").Decimal | null;
         maxSalary: import("@prisma/client/runtime/library").Decimal | null;
         currency: string;
         location: string | null;
-        workingModel: import(".prisma/client").$Enums.WorkingModel;
-        requiresProofOfWork: boolean;
-        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
-        expiryDate: Date | null;
         requiredExperienceYears: number | null;
         autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
         autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
@@ -72,46 +74,53 @@ export declare class JobsController {
         experienceWeight: import("@prisma/client/runtime/library").Decimal;
         educationWeight: import("@prisma/client/runtime/library").Decimal;
         otherWeight: import("@prisma/client/runtime/library").Decimal;
-        jobCode: string;
-        recruiterId: string;
+        expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        workingModel: import(".prisma/client").$Enums.WorkingModel;
+        requiresProofOfWork: boolean;
+        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
+        recruiterId: string;
+        departmentId: string | null;
+        categoryId: string | null;
     }>;
     findAll(user: AuthenticatedUser, query: QueryJobDto): Promise<{
         data: ({
-            department: {
-                id: string;
-                code: string;
-                name: string;
-                createdAt: Date;
-                updatedAt: Date;
-                companyId: string;
-                status: import(".prisma/client").$Enums.DepartmentStatus;
-            } | null;
             _count: {
                 applications: number;
             };
+            department: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date;
+                status: import(".prisma/client").$Enums.DepartmentStatus;
+                companyId: string;
+                code: string;
+            } | null;
+            category: {
+                id: string;
+                name: string;
+                slug: string;
+                createdAt: Date;
+                updatedAt: Date;
+            } | null;
         } & {
             id: string;
-            description: string;
             createdAt: Date;
             updatedAt: Date;
-            status: import(".prisma/client").$Enums.JobStatus;
-            categoryId: string | null;
+            jobCode: string;
             title: string;
-            departmentId: string | null;
+            description: string;
             requirements: string | null;
             benefits: string | null;
             employmentType: import(".prisma/client").$Enums.EmploymentType;
             experienceLevel: import(".prisma/client").$Enums.ExperienceLevel;
+            status: import(".prisma/client").$Enums.JobStatus;
             minSalary: import("@prisma/client/runtime/library").Decimal | null;
             maxSalary: import("@prisma/client/runtime/library").Decimal | null;
             currency: string;
             location: string | null;
-            workingModel: import(".prisma/client").$Enums.WorkingModel;
-            requiresProofOfWork: boolean;
-            proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
-            expiryDate: Date | null;
             requiredExperienceYears: number | null;
             autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
             autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
@@ -120,10 +129,15 @@ export declare class JobsController {
             experienceWeight: import("@prisma/client/runtime/library").Decimal;
             educationWeight: import("@prisma/client/runtime/library").Decimal;
             otherWeight: import("@prisma/client/runtime/library").Decimal;
-            jobCode: string;
-            recruiterId: string;
+            expiryDate: Date | null;
             publishedAt: Date | null;
             closedAt: Date | null;
+            workingModel: import(".prisma/client").$Enums.WorkingModel;
+            requiresProofOfWork: boolean;
+            proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
+            recruiterId: string;
+            departmentId: string | null;
+            categoryId: string | null;
         })[];
         meta: {
             total: number;
@@ -135,12 +149,19 @@ export declare class JobsController {
     findOne(user: AuthenticatedUser, id: string): Promise<{
         department: {
             id: string;
-            code: string;
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string;
             status: import(".prisma/client").$Enums.DepartmentStatus;
+            companyId: string;
+            code: string;
+        } | null;
+        category: {
+            id: string;
+            name: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
         } | null;
         jobSkills: ({
             skill: {
@@ -149,18 +170,18 @@ export declare class JobsController {
                 createdAt: Date;
                 updatedAt: Date;
                 status: import(".prisma/client").$Enums.SkillStatus;
-                normalizedName: string;
                 categoryId: string;
+                normalizedName: string;
                 type: import(".prisma/client").$Enums.SkillType;
             };
         } & {
             id: string;
             createdAt: Date;
-            skillId: string;
             requirementType: import(".prisma/client").$Enums.SkillRequirementType;
             minimumProficiency: import(".prisma/client").$Enums.ProficiencyLevel | null;
             weight: import("@prisma/client/runtime/library").Decimal;
             minYearsExperience: number | null;
+            skillId: string;
             jobId: string;
         })[];
         jobCertificates: {
@@ -171,25 +192,20 @@ export declare class JobsController {
         }[];
     } & {
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.JobStatus;
-        categoryId: string | null;
+        jobCode: string;
         title: string;
-        departmentId: string | null;
+        description: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
         experienceLevel: import(".prisma/client").$Enums.ExperienceLevel;
+        status: import(".prisma/client").$Enums.JobStatus;
         minSalary: import("@prisma/client/runtime/library").Decimal | null;
         maxSalary: import("@prisma/client/runtime/library").Decimal | null;
         currency: string;
         location: string | null;
-        workingModel: import(".prisma/client").$Enums.WorkingModel;
-        requiresProofOfWork: boolean;
-        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
-        expiryDate: Date | null;
         requiredExperienceYears: number | null;
         autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
         autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
@@ -198,20 +214,32 @@ export declare class JobsController {
         experienceWeight: import("@prisma/client/runtime/library").Decimal;
         educationWeight: import("@prisma/client/runtime/library").Decimal;
         otherWeight: import("@prisma/client/runtime/library").Decimal;
-        jobCode: string;
-        recruiterId: string;
+        expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        workingModel: import(".prisma/client").$Enums.WorkingModel;
+        requiresProofOfWork: boolean;
+        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
+        recruiterId: string;
+        departmentId: string | null;
+        categoryId: string | null;
     }>;
     update(user: AuthenticatedUser, id: string, updateJobDto: UpdateJobDto): Promise<{
         department: {
             id: string;
-            code: string;
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string;
             status: import(".prisma/client").$Enums.DepartmentStatus;
+            companyId: string;
+            code: string;
+        } | null;
+        category: {
+            id: string;
+            name: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
         } | null;
         jobSkills: ({
             skill: {
@@ -220,18 +248,18 @@ export declare class JobsController {
                 createdAt: Date;
                 updatedAt: Date;
                 status: import(".prisma/client").$Enums.SkillStatus;
-                normalizedName: string;
                 categoryId: string;
+                normalizedName: string;
                 type: import(".prisma/client").$Enums.SkillType;
             };
         } & {
             id: string;
             createdAt: Date;
-            skillId: string;
             requirementType: import(".prisma/client").$Enums.SkillRequirementType;
             minimumProficiency: import(".prisma/client").$Enums.ProficiencyLevel | null;
             weight: import("@prisma/client/runtime/library").Decimal;
             minYearsExperience: number | null;
+            skillId: string;
             jobId: string;
         })[];
         jobCertificates: {
@@ -242,25 +270,20 @@ export declare class JobsController {
         }[];
     } & {
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.JobStatus;
-        categoryId: string | null;
+        jobCode: string;
         title: string;
-        departmentId: string | null;
+        description: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
         experienceLevel: import(".prisma/client").$Enums.ExperienceLevel;
+        status: import(".prisma/client").$Enums.JobStatus;
         minSalary: import("@prisma/client/runtime/library").Decimal | null;
         maxSalary: import("@prisma/client/runtime/library").Decimal | null;
         currency: string;
         location: string | null;
-        workingModel: import(".prisma/client").$Enums.WorkingModel;
-        requiresProofOfWork: boolean;
-        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
-        expiryDate: Date | null;
         requiredExperienceYears: number | null;
         autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
         autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
@@ -269,10 +292,15 @@ export declare class JobsController {
         experienceWeight: import("@prisma/client/runtime/library").Decimal;
         educationWeight: import("@prisma/client/runtime/library").Decimal;
         otherWeight: import("@prisma/client/runtime/library").Decimal;
-        jobCode: string;
-        recruiterId: string;
+        expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        workingModel: import(".prisma/client").$Enums.WorkingModel;
+        requiresProofOfWork: boolean;
+        proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
+        recruiterId: string;
+        departmentId: string | null;
+        categoryId: string | null;
     }>;
     remove(user: AuthenticatedUser, id: string): Promise<{
         message: string;

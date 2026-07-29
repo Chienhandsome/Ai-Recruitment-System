@@ -118,34 +118,34 @@ export function RecruiterWorkspace({
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#F1F5F9] p-1 rounded-xl border border-[#E2E8F0]">
+          {/* Navigation Tabs (Design System Secondary Pill Container) */}
+          <nav className="hidden md:flex items-center gap-1 bg-[#EFF6FF] p-1.5 rounded-xl border border-blue-100">
             <button
               onClick={() => setActiveTab("dashboard")}
-              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                 activeTab === "dashboard"
-                  ? "bg-white text-[#2563EB] shadow-sm font-semibold"
-                  : "text-[#64748B] hover:text-[#0F172A]"
+                  ? "bg-[#2563EB] text-white shadow-md"
+                  : "text-[#1F2937] hover:text-[#2563EB] hover:bg-white/60"
               }`}
             >
               Dashboard Tổng quan
             </button>
             <button
               onClick={() => setActiveTab("jobs")}
-              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                 activeTab === "jobs"
-                  ? "bg-white text-[#2563EB] shadow-sm font-semibold"
-                  : "text-[#64748B] hover:text-[#0F172A]"
+                  ? "bg-[#2563EB] text-white shadow-md"
+                  : "text-[#1F2937] hover:text-[#2563EB] hover:bg-white/60"
               }`}
             >
               Quản lý Bài đăng
             </button>
             <button
               onClick={() => setActiveTab("candidates")}
-              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                 activeTab === "candidates"
-                  ? "bg-white text-[#2563EB] shadow-sm font-semibold"
-                  : "text-[#64748B] hover:text-[#0F172A]"
+                  ? "bg-[#2563EB] text-white shadow-md"
+                  : "text-[#1F2937] hover:text-[#2563EB] hover:bg-white/60"
               }`}
             >
               Xếp hạng Ứng viên AI
@@ -156,17 +156,17 @@ export function RecruiterWorkspace({
         {/* Action Controls */}
         <div className="flex items-center gap-3">
           <div className="relative hidden lg:block">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#3B82F6]" />
             <input
               type="text"
               placeholder="Tìm kiếm ứng viên, kỹ năng (CMD+K)..."
-              className="w-64 pl-9 pr-4 py-1.5 text-xs bg-[#F1F5F9] border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2563EB] text-[#0F172A] placeholder-[#94A3B8]"
+              className="w-64 pl-9 pr-4 py-2 text-xs bg-[#EFF6FF] border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] text-[#1F2937] placeholder-blue-400"
             />
           </div>
 
           <button
             onClick={() => setIsCreateJobOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold rounded-xl shadow-sm transition-all active:scale-[0.98]"
+            className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
           >
             <Plus className="w-4 h-4" />
             Tạo bài tuyển dụng bằng AI
@@ -310,51 +310,51 @@ function DashboardTab({
     <div className="space-y-6">
       {/* Hero Stats Bento Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm hover:-translate-y-[2px] transition-all">
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-semibold">
+        <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm hover:-translate-y-[2px] transition-all">
+          <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
             <span>TIN TUYỂN DỤNG ACTIVE</span>
             <Briefcase className="w-4 h-4 text-[#2563EB]" />
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-[#0F172A] tracking-tight">{stats?.totalActiveJobs ?? 0} Roles</span>
-            <span className="text-xs text-emerald-600 font-semibold flex items-center gap-0.5">
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-extrabold text-[#1F2937] tracking-tight">{stats?.totalActiveJobs ?? 0} Roles</span>
+            <span className="text-xs text-emerald-700 font-bold flex items-center gap-0.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
               <TrendingUp className="w-3 h-3" /> Dashboard Live
             </span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm hover:-translate-y-[2px] transition-all">
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-semibold">
+        <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm hover:-translate-y-[2px] transition-all">
+          <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
             <span>ỨNG VIÊN NỘP HÔM NAY</span>
             <Users className="w-4 h-4 text-[#2563EB]" />
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-[#0F172A] tracking-tight">{stats?.newApplicationsToday ?? 0} CV</span>
-            <span className="text-xs font-mono bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-semibold border border-emerald-100">
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-extrabold text-[#1F2937] tracking-tight">{stats?.newApplicationsToday ?? 0} CV</span>
+            <span className="text-xs font-mono bg-[#EFF6FF] text-[#2563EB] px-2.5 py-1 rounded-full font-bold border border-blue-200">
               Tổng số {stats?.totalCandidates ?? 0}
             </span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm hover:-translate-y-[2px] transition-all">
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-semibold">
+        <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm hover:-translate-y-[2px] transition-all">
+          <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
             <span>TỶ LỆ AI MATCH TỐT</span>
-            <BrainCircuit className="w-4 h-4 text-[#10B981]" />
+            <BrainCircuit className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-[#0F172A] tracking-tight font-mono">87.4%</span>
-            <span className="text-xs text-[#64748B]">Điểm khớp trung bình</span>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-extrabold text-[#1F2937] tracking-tight font-mono">87.4%</span>
+            <span className="text-xs text-slate-500 font-medium">Điểm khớp trung bình</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm hover:-translate-y-[2px] transition-all">
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-semibold">
+        <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm hover:-translate-y-[2px] transition-all">
+          <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
             <span>ỨNG VIÊN TIỀM NĂNG</span>
             <Sparkles className="w-4 h-4 text-amber-500" />
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-[#0F172A] tracking-tight">8 Hồ sơ</span>
-            <span className="text-xs text-blue-600 font-semibold">AI Match &gt;85%</span>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-extrabold text-[#1F2937] tracking-tight">8 Hồ sơ</span>
+            <span className="text-xs text-[#2563EB] font-bold bg-[#EFF6FF] px-2.5 py-1 rounded-full border border-blue-200">AI Match &gt;85%</span>
           </div>
         </div>
       </div>
@@ -362,115 +362,129 @@ function DashboardTab({
       {/* Main Workspace Row: 8 + 4 Asymmetric Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left 8 Cols: Candidate AI Ranking Snapshot */}
-        <div className="lg:col-span-8 bg-white rounded-2xl border border-[#E2E8F0] p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-base font-bold text-[#0F172A] tracking-tight">
-                Top Ứng Viên Khớp Điểm AI Cao Nhất
-              </h2>
-              <p className="text-xs text-[#64748B] mt-0.5">
-                Tự động sắp xếp theo điểm AI Match Score từ cao xuống thấp
-              </p>
+        <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-base font-bold text-[#1F2937] tracking-tight">
+                  Top Ứng Viên Khớp Điểm AI Cao Nhất
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Tự động sắp xếp theo điểm AI Match Score từ cao xuống thấp
+                </p>
+              </div>
+              <span className="text-xs font-mono text-[#2563EB] font-bold bg-[#EFF6FF] px-3 py-1 rounded-lg border border-blue-200">
+                Updated Live
+              </span>
             </div>
-            <span className="text-xs font-mono text-[#2563EB] font-semibold bg-blue-50 px-2 py-1 rounded-lg">
-              Updated Live
-            </span>
-          </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-[#E2E8F0] text-[#64748B] uppercase font-semibold text-[11px]">
-                  <th className="pb-3 pr-4">Ứng viên</th>
-                  <th className="pb-3 px-3">Vị trí</th>
-                  <th className="pb-3 px-3 text-center">AI Match Score</th>
-                  <th className="pb-3 px-3">Kỹ năng nổi bật</th>
-                  <th className="pb-3 pl-3 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F1F5F9]">
-                {candidates.slice(0, 3).map((cand) => (
-                  <tr key={cand.id} className="hover:bg-[#F8FAFC] transition-colors">
-                    <td className="py-3.5 pr-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={cand.avatar}
-                          alt={cand.name}
-                          className="w-9 h-9 rounded-full object-cover border border-[#CBD5E1]"
-                        />
-                        <div>
-                          <p className="font-bold text-[#0F172A]">{cand.name}</p>
-                          <p className="text-[11px] text-[#64748B]">{cand.experienceYears} năm kinh nghiệm</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-3 font-medium text-[#0F172A]">{cand.roleApplied}</td>
-                    <td className="py-3.5 px-3 text-center">
-                      <span
-                        className={`inline-block font-mono font-bold text-xs px-2.5 py-1 rounded-full ${
-                          cand.matchScore >= 85
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
-                        }`}
-                      >
-                        {cand.matchScore}%
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <div className="flex flex-wrap gap-1">
-                        {cand.skillsFit.slice(0, 2).map((s) => (
+            {candidates.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500 uppercase font-bold text-[11px]">
+                      <th className="pb-3 pr-4">Ứng viên</th>
+                      <th className="pb-3 px-3">Vị trí</th>
+                      <th className="pb-3 px-3 text-center">AI Match Score</th>
+                      <th className="pb-3 px-3">Kỹ năng nổi bật</th>
+                      <th className="pb-3 pl-3 text-right">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {candidates.slice(0, 3).map((cand) => (
+                      <tr key={cand.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-3.5 pr-4">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={cand.avatar}
+                              alt={cand.name}
+                              className="w-9 h-9 rounded-full object-cover border border-slate-200"
+                            />
+                            <div>
+                              <p className="font-bold text-[#1F2937]">{cand.name}</p>
+                              <p className="text-[11px] text-slate-500">{cand.experienceYears} năm kinh nghiệm</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-3 font-medium text-[#1F2937]">{cand.roleApplied}</td>
+                        <td className="py-3.5 px-3 text-center">
                           <span
-                            key={s.skill}
-                            className="bg-[#F1F5F9] text-[#0F172A] text-[10px] font-mono px-2 py-0.5 rounded border border-[#E2E8F0]"
+                            className={`inline-block font-mono font-bold text-xs px-2.5 py-1 rounded-full ${
+                              cand.matchScore >= 85
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                            }`}
                           >
-                            {s.skill} {s.fitScore}%
+                            {cand.matchScore}%
                           </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="py-3.5 pl-3 text-right">
-                      <button
-                        onClick={() => onOpenReport(cand)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#2563EB] font-semibold text-[11px] rounded-lg transition-colors"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        Báo cáo AI
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        </td>
+                        <td className="py-3.5 px-3">
+                          <div className="flex flex-wrap gap-1">
+                            {cand.skillsFit.slice(0, 2).map((s) => (
+                              <span
+                                key={s.skill}
+                                className="bg-[#EFF6FF] text-[#2563EB] text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-blue-200"
+                              >
+                                {s.skill} {s.fitScore}%
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-3.5 pl-3 text-right">
+                          <button
+                            onClick={() => onOpenReport(cand)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] font-bold text-[11px] rounded-lg transition-colors border border-blue-200"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            Báo cáo AI
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="py-12 text-center flex flex-col items-center justify-center bg-[#EFF6FF]/40 rounded-xl border border-dashed border-blue-200">
+                <div className="p-3 bg-white rounded-full shadow-sm border border-blue-100 mb-3">
+                  <BrainCircuit className="w-8 h-8 text-[#2563EB]" />
+                </div>
+                <h4 className="text-sm font-bold text-[#1F2937]">Chưa có hồ sơ ứng viên nộp CV</h4>
+                <p className="text-xs text-slate-500 max-w-sm mt-1">Khi ứng viên nộp hồ sơ, AI sẽ tự động phân tích kỹ năng, tính điểm Match Score và xếp hạng tại đây.</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Right 4 Cols: AI Hiring Assistant & Smart Insights */}
-        <div className="lg:col-span-4 bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-white rounded-2xl p-6 shadow-md flex flex-col justify-between">
+        {/* Right 4 Cols: AI Hiring Assistant Card (Secondary Ice Blue Palette) */}
+        <div className="lg:col-span-4 bg-[#EFF6FF] border border-blue-200 text-[#1F2937] rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[320px]">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-blue-200">
               <div className="flex items-center gap-2">
-                <Bot className="w-5 h-5 text-emerald-400" />
-                <span className="font-bold text-sm tracking-tight">AI Hiring Assistant</span>
+                <div className="p-2 bg-white rounded-xl border border-blue-200 shadow-sm">
+                  <Bot className="w-5 h-5 text-[#2563EB]" />
+                </div>
+                <span className="font-extrabold text-sm tracking-tight text-[#1F2937]">AI Hiring Assistant</span>
               </div>
-              <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">
+              <span className="text-[10px] font-mono bg-emerald-100 text-emerald-700 border border-emerald-300 px-2.5 py-0.5 rounded-full font-extrabold">
                 ACTIVE
               </span>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3 mb-4 backdrop-blur-sm">
-              <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold">
-                <Zap className="w-4 h-4" />
+            <div className="bg-white border border-blue-100 rounded-xl p-4 space-y-2 mb-4 shadow-sm">
+              <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold">
+                <Zap className="w-4 h-4 text-amber-500" />
                 <span>Gợi ý thông minh tự động</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Hệ thống phát hiện **3 ứng viên phù hợp cao** (Match Score &gt; 92%) vừa ứng tuyển vị trí Senior Frontend. Đề xuất chuyển thẳng sang vòng phỏng vấn kỹ thuật.
+              <p className="text-xs text-[#1F2937] leading-relaxed font-medium">
+                Hệ thống AI sẵn sàng phân tích CV, trích xuất kỹ năng và chấm điểm so khớp cho bài tuyển dụng của bạn.
               </p>
             </div>
           </div>
 
           <button
             onClick={onOpenCreateJob}
-            className="w-full py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+            className="w-full py-3 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
           >
             <Plus className="w-4 h-4" />
             Tạo bài tuyển dụng bằng AI Assistant

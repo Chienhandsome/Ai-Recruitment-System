@@ -262,7 +262,7 @@ export async function deleteRecruiterJob(
 }
 
 export async function getJobCategories(): Promise<JobCategoryData[]> {
-  const res = await fetch(`${API_URL}/categories`, {
+  const res = await fetch(`${API_URL}/job-categories`, {
     cache: "no-store",
   });
   if (!res.ok) return [];

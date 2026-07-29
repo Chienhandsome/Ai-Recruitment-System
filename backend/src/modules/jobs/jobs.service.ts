@@ -25,6 +25,12 @@ export class JobsService {
     return `JOB-${datePart}-${randomPart}`;
   }
 
+  async getJobCategories() {
+    return this.prisma.jobCategory.findMany({
+      orderBy: { name: 'asc' }
+    });
+  }
+
   async create(userId: string, dto: CreateJobDto) {
     const recruiter = await this.getRecruiterProfile(userId);
 
@@ -52,50 +58,67 @@ export class JobsService {
       }
     }
 
-    return this.prisma.jobPosting.create({
-      data: {
-        jobCode,
-        title: dto.title,
-        recruiterId: recruiter.id,
-        departmentId: dto.departmentId,
-        description: dto.description,
-        requirements: dto.requirements,
-        benefits: dto.benefits,
-        employmentType: dto.employmentType,
-        experienceLevel: dto.experienceLevel,
-        minSalary: dto.minSalary,
-        maxSalary: dto.maxSalary,
-        currency: dto.currency,
-        location: dto.location,
-        workingModel: dto.workingModel,
-        requiresProofOfWork: dto.requiresProofOfWork,
-        proofOfWorkType: dto.proofOfWorkType,
-        categoryId: dto.categoryId,
-        expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
-        requiredExperienceYears: dto.requiredExperienceYears,
-        autoShortlistThreshold: dto.autoShortlistThreshold,
-        autoRejectThreshold: dto.autoRejectThreshold,
-        rejectOnMissingMandatory: dto.rejectOnMissingMandatory,
-        skillWeight: dto.skillWeight,
-        experienceWeight: dto.experienceWeight,
-        educationWeight: dto.educationWeight,
-        otherWeight: dto.otherWeight,
-        status: JobStatus.DRAFT,
-        jobSkills: {
-          create: skillsData,
-        },
-        jobCertificates: {
-          create: certsData,
-        }
-      },
-      include: {
-        department: true,
-        jobSkills: {
-          include: { skill: true }
-        },
-        jobCertificates: true
+    // [FIX]: Validate category existence before creating a job
+    // This prevents Prisma P2003 Foreign Key Constraint violation if frontend sends a stale or invalid categoryId
+    if (dto.categoryId) {
+      const category = await this.prisma.jobCategory.findUnique({
+        where: { id: dto.categoryId }
+      });
+      if (!category) {
+        throw new BadRequestException(`Category with ID ${dto.categoryId} does not exist`);
       }
-    });
+    }
+
+    try {
+      return await this.prisma.jobPosting.create({
+        data: {
+          jobCode,
+          title: dto.title,
+          recruiterId: recruiter.id,
+          departmentId: dto.departmentId,
+          description: dto.description,
+          requirements: dto.requirements,
+          benefits: dto.benefits,
+          employmentType: dto.employmentType,
+          experienceLevel: dto.experienceLevel,
+          minSalary: dto.minSalary,
+          maxSalary: dto.maxSalary,
+          currency: dto.currency,
+          location: dto.location,
+          workingModel: dto.workingModel,
+          requiresProofOfWork: dto.requiresProofOfWork,
+          proofOfWorkType: dto.proofOfWorkType,
+          categoryId: dto.categoryId,
+          expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
+          requiredExperienceYears: dto.requiredExperienceYears,
+          autoShortlistThreshold: dto.autoShortlistThreshold,
+          autoRejectThreshold: dto.autoRejectThreshold,
+          rejectOnMissingMandatory: dto.rejectOnMissingMandatory,
+          skillWeight: dto.skillWeight,
+          experienceWeight: dto.experienceWeight,
+          educationWeight: dto.educationWeight,
+          otherWeight: dto.otherWeight,
+          status: JobStatus.DRAFT,
+          jobSkills: {
+            create: skillsData,
+          },
+          jobCertificates: {
+            create: certsData,
+          }
+        },
+        include: {
+          department: true,
+          category: true,
+          jobSkills: {
+            include: { skill: true }
+          },
+          jobCertificates: true
+        }
+      });
+    } catch (error: any) {
+      console.error("CREATE JOB ERROR:", error);
+      throw new BadRequestException(`Failed to create job due to DB error: ${error.message}`);
+    }
   }
 
   async findAll(userId: string, query: QueryJobDto) {
@@ -139,6 +162,7 @@ export class JobsService {
         orderBy: { createdAt: 'desc' },
         include: {
           department: true,
+          category: true,
           _count: {
             select: { applications: true }
           }
@@ -163,6 +187,7 @@ export class JobsService {
       where: { id },
       include: {
         department: true,
+        category: true,
         jobSkills: {
           include: { skill: true }
         },
@@ -256,6 +281,7 @@ export class JobsService {
       data: updateData,
       include: {
         department: true,
+        category: true,
         jobSkills: {
           include: { skill: true }
         },

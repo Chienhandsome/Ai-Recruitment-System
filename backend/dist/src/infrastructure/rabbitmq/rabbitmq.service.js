@@ -117,6 +117,48 @@ let RabbitMQService = RabbitMQService_1 = class RabbitMQService {
             return false;
         }
     }
+    async publish(routingKey, payload) {
+        if (!this.isConnected || !this.channelWrapper) {
+            this.logger.warn(`Cannot publish to '${routingKey}': RabbitMQ connection is not established.`);
+            return false;
+        }
+        try {
+            await this.channelWrapper.publish(rabbitmq_constants_1.RABBITMQ_EXCHANGE, routingKey, payload);
+            this.logger.log(`Published message to '${routingKey}'`);
+            return true;
+        }
+        catch (error) {
+            this.logger.error(`Failed to publish to '${routingKey}': ${this.getErrorMessage(error)}`);
+            return false;
+        }
+    }
+    async subscribe(queueName, routingKeys, handler) {
+        if (!this.channelWrapper) {
+            this.logger.warn(`Cannot subscribe to '${queueName}': channel not initialized.`);
+            return;
+        }
+        await this.channelWrapper.addSetup(async (channel) => {
+            await channel.assertQueue(queueName, { durable: true });
+            for (const key of routingKeys) {
+                await channel.bindQueue(queueName, rabbitmq_constants_1.RABBITMQ_EXCHANGE, key);
+            }
+            await channel.prefetch(1);
+            await channel.consume(queueName, async (msg) => {
+                if (!msg)
+                    return;
+                try {
+                    const content = JSON.parse(msg.content.toString());
+                    await handler(content);
+                    channel.ack(msg);
+                }
+                catch (error) {
+                    this.logger.error(`Error processing message from '${queueName}': ${this.getErrorMessage(error)}`);
+                    channel.nack(msg, false, false);
+                }
+            });
+            this.logger.log(`Subscribed to queue '${queueName}' with keys: [${routingKeys.join(', ')}]`);
+        });
+    }
     checkHealth() {
         if (this.isConnected && this.connection?.isConnected()) {
             return {

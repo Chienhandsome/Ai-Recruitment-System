@@ -16,15 +16,17 @@ export async function requireProfile(
     data: { session },
   } = await supabase.auth.getSession();
 
+  const fallbackRedirect = requiredRole === "ADMIN" ? "/admin" : "/login";
+
   if (!session) {
-    redirect("/login");
+    redirect(fallbackRedirect);
   }
 
   let profile: AuthProfile;
   try {
     profile = await getCurrentProfile(session.access_token);
   } catch {
-    redirect("/login");
+    redirect(fallbackRedirect);
   }
 
   if (!profile.roles.includes(requiredRole)) {

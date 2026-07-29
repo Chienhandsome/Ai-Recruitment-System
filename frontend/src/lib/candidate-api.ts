@@ -125,3 +125,58 @@ export async function updateCandidateProfile(
     throw new Error(`Không thể cập nhật hồ sơ: ${text}`);
   }
 }
+
+// ─── Resume Upload ────────────────────────────────────────────────────
+
+export interface ResumeUploadResponse {
+  id: string;
+  originalFileName: string;
+  parsingStatus: "PENDING" | "PROCESSING" | "PARSED" | "FAILED";
+  createdAt: string;
+}
+
+export interface ResumeStatusResponse {
+  id: string;
+  originalFileName: string;
+  parsingStatus: "PENDING" | "PROCESSING" | "PARSED" | "FAILED";
+  parsingErrorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function uploadResume(
+  token: string,
+  file: File
+): Promise<ResumeUploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_URL}/resumes/upload`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Upload thất bại: ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function getResumeStatus(
+  token: string,
+  resumeId: string
+): Promise<ResumeStatusResponse> {
+  const res = await fetch(`${API_URL}/resumes/${resumeId}/status`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Không thể lấy trạng thái CV");
+  }
+
+  return res.json();
+}

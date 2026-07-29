@@ -122,6 +122,53 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Subscribe to a queue bound to the exchange with the given routing keys.
+   * Calls the handler for each message received.
+   */
+  async subscribe(
+    queueName: string,
+    routingKeys: string[],
+    handler: (message: unknown) => Promise<void>,
+  ): Promise<void> {
+    if (!this.channelWrapper) {
+      this.logger.warn(
+        `Cannot subscribe to '${queueName}': channel not initialized.`,
+      );
+      return;
+    }
+
+    await this.channelWrapper.addSetup(async (channel: Channel) => {
+      await channel.assertQueue(queueName, { durable: true });
+
+      for (const key of routingKeys) {
+        await channel.bindQueue(queueName, RABBITMQ_EXCHANGE, key);
+      }
+
+      await channel.prefetch(1);
+
+      await channel.consume(queueName, async (msg) => {
+        if (!msg) return;
+
+        try {
+          const content = JSON.parse(msg.content.toString());
+          await handler(content);
+          channel.ack(msg);
+        } catch (error: unknown) {
+          this.logger.error(
+            `Error processing message from '${queueName}': ${this.getErrorMessage(error)}`,
+          );
+          // Don't requeue — failed processing will keep failing
+          channel.nack(msg, false, false);
+        }
+      });
+
+      this.logger.log(
+        `Subscribed to queue '${queueName}' with keys: [${routingKeys.join(', ')}]`,
+      );
+    });
+  }
+
   checkHealth(): {
     service: string;
     status: string;

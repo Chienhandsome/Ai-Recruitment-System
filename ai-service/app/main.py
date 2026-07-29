@@ -33,6 +33,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Register API routers
+from app.api.routes.matching import router as matching_router  # noqa: E402
+
+app.include_router(matching_router)
+
 
 class HealthResponse(BaseModel):
     service: str

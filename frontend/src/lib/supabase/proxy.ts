@@ -5,7 +5,7 @@ import { getSupabasePublicConfig } from "./config";
 const protectedPrefixes = [
   "/candidate",
   "/recruiter",
-  "/admin",
+  "/admin/",
   "/update-password",
 ];
 
@@ -45,9 +45,9 @@ export async function updateSession(request: NextRequest) {
 
   // Skip session refresh for public auth routes to avoid
   // "Invalid Refresh Token" errors from stale cookies during signup/login.
-  const isPublicAuthRoute = publicAuthPrefixes.some((prefix) =>
-    pathname.startsWith(prefix),
-  );
+  const isPublicAuthRoute =
+    pathname === "/admin" ||
+    publicAuthPrefixes.some((prefix) => pathname.startsWith(prefix));
 
   if (isPublicAuthRoute) {
     logDebug(`Public auth route ${pathname} — skipping session refresh`);
@@ -89,7 +89,7 @@ export async function updateSession(request: NextRequest) {
     );
     if (requiresAuthentication) {
       const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/login";
+      loginUrl.pathname = pathname.startsWith("/admin") ? "/admin" : "/login";
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -103,9 +103,10 @@ export async function updateSession(request: NextRequest) {
   );
 
   if (requiresAuthentication && !claims) {
-    logWarn(`Protected route ${pathname} — no valid session, redirecting to /login`);
+    const targetLogin = pathname.startsWith("/admin") ? "/admin" : "/login";
+    logWarn(`Protected route ${pathname} — no valid session, redirecting to ${targetLogin}`);
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
+    loginUrl.pathname = targetLogin;
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }

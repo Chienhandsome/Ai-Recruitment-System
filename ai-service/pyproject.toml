@@ -25,3 +25,15 @@ unfixable = []
 venvPath = "."
 venv = ".venv"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "unit: Unit tests for individual components",
+    "integration: Integration tests for services and APIs",
+    "regression: Regression tests against expected score ranges",
+    "performance: Performance and benchmark tests",
+    "slow: Tests requiring real embedding model or heavy computation",
+    "property: Property-based invariant tests using Hypothesis",
+    "api: FastAPI route and contract tests",
+]

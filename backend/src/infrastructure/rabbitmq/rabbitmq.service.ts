@@ -98,6 +98,77 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Publish a message to the exchange with the given routing key.
+   * Returns true if published successfully, false otherwise.
+   */
+  async publish(routingKey: string, payload: unknown): Promise<boolean> {
+    if (!this.isConnected || !this.channelWrapper) {
+      this.logger.warn(
+        `Cannot publish to '${routingKey}': RabbitMQ connection is not established.`,
+      );
+      return false;
+    }
+
+    try {
+      await this.channelWrapper.publish(RABBITMQ_EXCHANGE, routingKey, payload);
+      this.logger.log(`Published message to '${routingKey}'`);
+      return true;
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to publish to '${routingKey}': ${this.getErrorMessage(error)}`,
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Subscribe to a queue bound to the exchange with the given routing keys.
+   * Calls the handler for each message received.
+   */
+  async subscribe(
+    queueName: string,
+    routingKeys: string[],
+    handler: (message: unknown) => Promise<void>,
+  ): Promise<void> {
+    if (!this.channelWrapper) {
+      this.logger.warn(
+        `Cannot subscribe to '${queueName}': channel not initialized.`,
+      );
+      return;
+    }
+
+    await this.channelWrapper.addSetup(async (channel: Channel) => {
+      await channel.assertQueue(queueName, { durable: true });
+
+      for (const key of routingKeys) {
+        await channel.bindQueue(queueName, RABBITMQ_EXCHANGE, key);
+      }
+
+      await channel.prefetch(1);
+
+      await channel.consume(queueName, async (msg) => {
+        if (!msg) return;
+
+        try {
+          const content = JSON.parse(msg.content.toString());
+          await handler(content);
+          channel.ack(msg);
+        } catch (error: unknown) {
+          this.logger.error(
+            `Error processing message from '${queueName}': ${this.getErrorMessage(error)}`,
+          );
+          // Don't requeue — failed processing will keep failing
+          channel.nack(msg, false, false);
+        }
+      });
+
+      this.logger.log(
+        `Subscribed to queue '${queueName}' with keys: [${routingKeys.join(', ')}]`,
+      );
+    });
+  }
+
   checkHealth(): {
     service: string;
     status: string;

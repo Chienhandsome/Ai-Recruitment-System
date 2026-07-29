@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Upload, Save, Sparkles, X } from "lucide-react"
+import { Save, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/client"
 import { updateCandidateProfile } from "@/lib/candidate-api"
+import { ResumeUpload } from "@/components/candidate/resume-upload"
 
 interface ProfileFormProps {
   fullName: string
@@ -209,40 +210,7 @@ export function ProfileForm({
       </Card>
 
       {/* CV Upload */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">CV / Resume</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-input p-6 text-center hover:border-primary/50 transition-colors">
-            <Upload className="h-10 w-10 text-muted-foreground mb-3" />
-            <p className="text-sm font-medium text-foreground">
-              Tải lên CV của bạn
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              PDF, DOC, DOCX (tối đa 5MB)
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              className="mt-4"
-              disabled
-            >
-              <Upload className="h-4 w-4" />
-              Chọn tệp
-            </Button>
-          </div>
-          <div className="flex items-start gap-2 rounded-md bg-secondary p-3">
-            <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <p className="text-xs text-secondary-foreground">
-              <span className="font-medium">Tự động cập nhật hồ sơ:</span>{" "}
-              Khi bạn upload CV, hệ thống AI sẽ tự động phân tích và cập nhật
-              thông tin hồ sơ của bạn bao gồm kỹ năng, kinh nghiệm, học vấn và
-              dự án.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <ResumeUpload />
 
       {/* Action Buttons */}
       <div className="flex items-center gap-4">

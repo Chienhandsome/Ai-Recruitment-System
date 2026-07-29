@@ -5,6 +5,12 @@ import { ProfileView } from "@/components/candidate/profile-view"
 import { ProfileForm } from "@/components/candidate/profile-form"
 import { SkillsEditor } from "@/components/candidate/skills-editor"
 import type { CandidateSkillData } from "@/lib/candidate-api"
+import type {
+  WorkExperienceData,
+  EducationData,
+  ProjectData,
+  CertificateData,
+} from "@/types/auth"
 
 interface ProfilePageClientProps {
   fullName: string
@@ -17,6 +23,10 @@ interface ProfilePageClientProps {
   githubUrl: string | null
   linkedinUrl: string | null
   portfolioUrl: string | null
+  workExperiences?: WorkExperienceData[]
+  educations?: EducationData[]
+  projects?: ProjectData[]
+  certificates?: CertificateData[]
   initialSkills: CandidateSkillData[]
 }
 
@@ -31,6 +41,10 @@ export function ProfilePageClient({
   githubUrl,
   linkedinUrl,
   portfolioUrl,
+  workExperiences = [],
+  educations = [],
+  projects = [],
+  certificates = [],
   initialSkills,
 }: ProfilePageClientProps) {
   const [isEditing, setIsEditing] = React.useState(false)
@@ -49,6 +63,10 @@ export function ProfilePageClient({
           githubUrl={githubUrl}
           linkedinUrl={linkedinUrl}
           portfolioUrl={portfolioUrl}
+          initialWorkExperiences={workExperiences}
+          initialEducations={educations}
+          initialProjects={projects}
+          initialCertificates={certificates}
           onCancel={() => setIsEditing(false)}
           onSaved={() => {
             setIsEditing(false)
@@ -74,6 +92,10 @@ export function ProfilePageClient({
       githubUrl={githubUrl}
       linkedinUrl={linkedinUrl}
       portfolioUrl={portfolioUrl}
+      workExperiences={workExperiences}
+      educations={educations}
+      projects={projects}
+      certificates={certificates}
       skills={initialSkills}
       onEdit={() => setIsEditing(true)}
     />

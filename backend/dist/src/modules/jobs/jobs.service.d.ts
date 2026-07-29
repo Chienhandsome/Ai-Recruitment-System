@@ -22,8 +22,8 @@ export declare class JobsService {
             createdAt: Date;
             updatedAt: Date;
             code: string;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
             companyId: string;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
         } | null;
         category: {
             id: string;
@@ -39,8 +39,8 @@ export declare class JobsService {
                 createdAt: Date;
                 updatedAt: Date;
                 status: import(".prisma/client").$Enums.SkillStatus;
-                categoryId: string;
                 normalizedName: string;
+                categoryId: string;
                 type: import(".prisma/client").$Enums.SkillType;
             };
         } & {
@@ -65,6 +65,7 @@ export declare class JobsService {
         updatedAt: Date;
         description: string;
         status: import(".prisma/client").$Enums.JobStatus;
+        categoryId: string | null;
         departmentId: string | null;
         title: string;
         jobCode: string;
@@ -88,7 +89,6 @@ export declare class JobsService {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
-        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
@@ -104,8 +104,8 @@ export declare class JobsService {
                 createdAt: Date;
                 updatedAt: Date;
                 code: string;
-                status: import(".prisma/client").$Enums.DepartmentStatus;
                 companyId: string;
+                status: import(".prisma/client").$Enums.DepartmentStatus;
             } | null;
             category: {
                 id: string;
@@ -120,6 +120,7 @@ export declare class JobsService {
             updatedAt: Date;
             description: string;
             status: import(".prisma/client").$Enums.JobStatus;
+            categoryId: string | null;
             departmentId: string | null;
             title: string;
             jobCode: string;
@@ -143,7 +144,6 @@ export declare class JobsService {
             expiryDate: Date | null;
             publishedAt: Date | null;
             closedAt: Date | null;
-            categoryId: string | null;
             workingModel: import(".prisma/client").$Enums.WorkingModel;
             requiresProofOfWork: boolean;
             proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
@@ -162,8 +162,8 @@ export declare class JobsService {
             createdAt: Date;
             updatedAt: Date;
             code: string;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
             companyId: string;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
         } | null;
         category: {
             id: string;
@@ -179,8 +179,8 @@ export declare class JobsService {
                 createdAt: Date;
                 updatedAt: Date;
                 status: import(".prisma/client").$Enums.SkillStatus;
-                categoryId: string;
                 normalizedName: string;
+                categoryId: string;
                 type: import(".prisma/client").$Enums.SkillType;
             };
         } & {
@@ -205,6 +205,7 @@ export declare class JobsService {
         updatedAt: Date;
         description: string;
         status: import(".prisma/client").$Enums.JobStatus;
+        categoryId: string | null;
         departmentId: string | null;
         title: string;
         jobCode: string;
@@ -228,7 +229,6 @@ export declare class JobsService {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
-        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
@@ -240,8 +240,8 @@ export declare class JobsService {
             createdAt: Date;
             updatedAt: Date;
             code: string;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
             companyId: string;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
         } | null;
         category: {
             id: string;
@@ -257,8 +257,8 @@ export declare class JobsService {
                 createdAt: Date;
                 updatedAt: Date;
                 status: import(".prisma/client").$Enums.SkillStatus;
-                categoryId: string;
                 normalizedName: string;
+                categoryId: string;
                 type: import(".prisma/client").$Enums.SkillType;
             };
         } & {
@@ -283,6 +283,7 @@ export declare class JobsService {
         updatedAt: Date;
         description: string;
         status: import(".prisma/client").$Enums.JobStatus;
+        categoryId: string | null;
         departmentId: string | null;
         title: string;
         jobCode: string;
@@ -306,7 +307,6 @@ export declare class JobsService {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
-        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;

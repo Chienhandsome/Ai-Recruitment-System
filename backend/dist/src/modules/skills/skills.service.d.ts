@@ -28,8 +28,8 @@ export declare class SkillsService {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        categoryId: string;
         normalizedName: string;
+        categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
     })[]>;
     createSkill(name: string, categoryId: string): Promise<{
@@ -38,8 +38,8 @@ export declare class SkillsService {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        categoryId: string;
         normalizedName: string;
+        categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     updateSkill(id: string, name?: string, categoryId?: string, type?: 'HARD' | 'SOFT'): Promise<{
@@ -61,8 +61,8 @@ export declare class SkillsService {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        categoryId: string;
         normalizedName: string;
+        categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     addSkillAlias(skillId: string, aliasName: string): Promise<{
@@ -99,8 +99,8 @@ export declare class SkillsService {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        categoryId: string;
         normalizedName: string;
+        categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     rejectUnrecognizedSkill(unrecognizedId: string): Promise<{

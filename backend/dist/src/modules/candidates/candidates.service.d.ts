@@ -29,20 +29,20 @@ export declare class CandidatesService {
     setPrimaryResume(candidateProfileId: string, resumeId: string): Promise<void>;
     updateProfile(userId: string, dto: UpdateCandidateProfileDto): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        address: string | null;
-        status: import(".prisma/client").$Enums.CandidateProfileStatus;
-        email: string;
-        fullName: string;
-        phone: string | null;
         userId: string | null;
+        primaryResumeId: string | null;
+        status: import(".prisma/client").$Enums.CandidateProfileStatus;
+        fullName: string;
+        email: string;
+        phone: string | null;
+        address: string | null;
         desiredTitle: string | null;
         professionalSummary: string | null;
         linkedinUrl: string | null;
         githubUrl: string | null;
         portfolioUrl: string | null;
-        primaryResumeId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         expectedMinSalary: import("@prisma/client/runtime/library").Decimal | null;
         expectedMaxSalary: import("@prisma/client/runtime/library").Decimal | null;
         preferredModel: import(".prisma/client").$Enums.WorkingModel | null;
@@ -51,16 +51,16 @@ export declare class CandidatesService {
         skill: {
             category: {
                 id: string;
-                name: string;
                 createdAt: Date;
                 updatedAt: Date;
+                name: string;
             };
         } & {
             id: string;
-            name: string;
+            status: import(".prisma/client").$Enums.SkillStatus;
             createdAt: Date;
             updatedAt: Date;
-            status: import(".prisma/client").$Enums.SkillStatus;
+            name: string;
             normalizedName: string;
             categoryId: string;
             type: import(".prisma/client").$Enums.SkillType;
@@ -68,28 +68,28 @@ export declare class CandidatesService {
     } & {
         id: string;
         createdAt: Date;
-        skillId: string;
-        source: import(".prisma/client").$Enums.SkillSource;
+        candidateId: string;
         resumeId: string | null;
+        skillId: string;
         proficiencyLevel: import(".prisma/client").$Enums.ProficiencyLevel;
         yearsExperience: import("@prisma/client/runtime/library").Decimal | null;
         isPrimary: boolean;
-        candidateId: string;
+        source: import(".prisma/client").$Enums.SkillSource;
     })[]>;
     updateCandidateSkills(candidateProfileId: string, dto: UpdateCandidateSkillsDto): Promise<({
         skill: {
             category: {
                 id: string;
-                name: string;
                 createdAt: Date;
                 updatedAt: Date;
+                name: string;
             };
         } & {
             id: string;
-            name: string;
+            status: import(".prisma/client").$Enums.SkillStatus;
             createdAt: Date;
             updatedAt: Date;
-            status: import(".prisma/client").$Enums.SkillStatus;
+            name: string;
             normalizedName: string;
             categoryId: string;
             type: import(".prisma/client").$Enums.SkillType;
@@ -97,13 +97,13 @@ export declare class CandidatesService {
     } & {
         id: string;
         createdAt: Date;
-        skillId: string;
-        source: import(".prisma/client").$Enums.SkillSource;
+        candidateId: string;
         resumeId: string | null;
+        skillId: string;
         proficiencyLevel: import(".prisma/client").$Enums.ProficiencyLevel;
         yearsExperience: import("@prisma/client/runtime/library").Decimal | null;
         isPrimary: boolean;
-        candidateId: string;
+        source: import(".prisma/client").$Enums.SkillSource;
     })[]>;
     removeCandidateSkill(candidateProfileId: string, skillId: string): Promise<void>;
     private resolveProfile;

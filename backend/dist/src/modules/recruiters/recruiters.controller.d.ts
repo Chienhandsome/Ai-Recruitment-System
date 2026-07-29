@@ -7,21 +7,21 @@ export declare class RecruitersController {
     getProfile(user: AuthenticatedUser): Promise<{
         company: {
             id: string;
-            code: string | null;
             name: string;
-            description: string | null;
             createdAt: Date;
             updatedAt: Date;
+            code: string | null;
+            description: string | null;
             logoUrl: string | null;
             website: string | null;
             address: string | null;
         } | null;
         department: {
             id: string;
-            code: string;
             name: string;
             createdAt: Date;
             updatedAt: Date;
+            code: string;
             companyId: string;
             status: import(".prisma/client").$Enums.DepartmentStatus;
         } | null;
@@ -44,21 +44,21 @@ export declare class RecruitersController {
     updateProfile(user: AuthenticatedUser, dto: UpdateRecruiterProfileDto): Promise<{
         company: {
             id: string;
-            code: string | null;
             name: string;
-            description: string | null;
             createdAt: Date;
             updatedAt: Date;
+            code: string | null;
+            description: string | null;
             logoUrl: string | null;
             website: string | null;
             address: string | null;
         } | null;
         department: {
             id: string;
-            code: string;
             name: string;
             createdAt: Date;
             updatedAt: Date;
+            code: string;
             companyId: string;
             status: import(".prisma/client").$Enums.DepartmentStatus;
         } | null;

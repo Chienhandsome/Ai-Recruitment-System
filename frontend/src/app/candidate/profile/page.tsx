@@ -22,15 +22,17 @@ export default async function CandidateProfilePage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-          Hồ sơ cá nhân
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Cập nhật thông tin cá nhân để nhà tuyển dụng hiểu rõ hơn về bạn
-        </p>
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+            Hồ sơ cá nhân
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Thông tin chi tiết về trình độ, kỹ năng, kinh nghiệm và học vấn của bạn
+          </p>
+        </div>
 
-        <div className="mt-8">
+        <div>
           <ProfilePageClient
             fullName={profile.fullName}
             email={profile.email}
@@ -42,6 +44,10 @@ export default async function CandidateProfilePage() {
             githubUrl={profile.candidateProfile?.githubUrl ?? null}
             linkedinUrl={profile.candidateProfile?.linkedinUrl ?? null}
             portfolioUrl={profile.candidateProfile?.portfolioUrl ?? null}
+            workExperiences={profile.candidateProfile?.workExperiences ?? []}
+            educations={profile.candidateProfile?.educations ?? []}
+            projects={profile.candidateProfile?.projects ?? []}
+            certificates={profile.candidateProfile?.certificates ?? []}
             initialSkills={initialSkills}
           />
         </div>

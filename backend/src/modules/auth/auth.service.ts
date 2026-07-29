@@ -17,7 +17,14 @@ const userProfileInclude = {
       role: true,
     },
   },
-  candidateProfile: true,
+  candidateProfile: {
+    include: {
+      workExperiences: { orderBy: { startDate: 'desc' } },
+      educations: { orderBy: { startDate: 'desc' } },
+      projects: { orderBy: { startDate: 'desc' } },
+      certificates: { orderBy: { createdAt: 'desc' } },
+    },
+  },
   recruiterProfile: true,
 } satisfies Prisma.UserInclude;
 
@@ -263,6 +270,10 @@ export class AuthService {
             githubUrl: user.candidateProfile.githubUrl,
             linkedinUrl: user.candidateProfile.linkedinUrl,
             portfolioUrl: user.candidateProfile.portfolioUrl,
+            workExperiences: user.candidateProfile.workExperiences || [],
+            educations: user.candidateProfile.educations || [],
+            projects: user.candidateProfile.projects || [],
+            certificates: user.candidateProfile.certificates || [],
           }
         : null,
       recruiterProfile: user.recruiterProfile

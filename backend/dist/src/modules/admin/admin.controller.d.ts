@@ -55,6 +55,7 @@ export declare class AdminController {
         updatedAt: Date;
         description: string;
         status: import(".prisma/client").$Enums.JobStatus;
+        categoryId: string | null;
         departmentId: string | null;
         title: string;
         jobCode: string;
@@ -78,7 +79,6 @@ export declare class AdminController {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
-        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
@@ -89,6 +89,7 @@ export declare class AdminController {
         updatedAt: Date;
         description: string;
         status: import(".prisma/client").$Enums.JobStatus;
+        categoryId: string | null;
         departmentId: string | null;
         title: string;
         jobCode: string;
@@ -112,7 +113,6 @@ export declare class AdminController {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
-        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
@@ -134,24 +134,24 @@ export declare class AdminController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.AccountStatus;
         email: string;
-        phone: string | null;
         fullName: string;
         birthDay: Date | null;
+        phone: string | null;
         avatarUrl: string | null;
-        status: import(".prisma/client").$Enums.AccountStatus;
         lastLoginAt: Date | null;
     }>;
     deleteUser(id: string): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.AccountStatus;
         email: string;
-        phone: string | null;
         fullName: string;
         birthDay: Date | null;
+        phone: string | null;
         avatarUrl: string | null;
-        status: import(".prisma/client").$Enums.AccountStatus;
         lastLoginAt: Date | null;
     }>;
 }

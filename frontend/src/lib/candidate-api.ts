@@ -94,8 +94,6 @@ export async function searchSkills(search?: string): Promise<SkillItemData[]> {
   return res.json();
 }
 
-// ─── Profile Update ───────────────────────────────────────────────────
-
 export interface UpdateCandidateProfileInput {
   fullName?: string;
   phone?: string | null;
@@ -105,6 +103,36 @@ export interface UpdateCandidateProfileInput {
   linkedinUrl?: string | null;
   githubUrl?: string | null;
   portfolioUrl?: string | null;
+  workExperiences?: Array<{
+    companyName: string;
+    positionTitle: string;
+    startDate?: string;
+    endDate?: string | null;
+    isCurrent?: boolean;
+    description?: string | null;
+    achievements?: string | null;
+  }>;
+  educations?: Array<{
+    schoolName: string;
+    major?: string | null;
+    degree?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+  }>;
+  projects?: Array<{
+    projectName: string;
+    projectRole?: string | null;
+    description?: string | null;
+    technologies?: string[] | string | null;
+    projectUrl?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+  }>;
+  certificates?: Array<{
+    certificateName: string;
+    issuingOrganization?: string | null;
+    issueDate?: string | null;
+  }>;
 }
 
 export async function updateCandidateProfile(

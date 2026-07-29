@@ -27,8 +27,8 @@ export declare class SkillsController {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        categoryId: string;
         normalizedName: string;
+        categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
     })[]>;
     createSkill(body: {
@@ -40,8 +40,8 @@ export declare class SkillsController {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        categoryId: string;
         normalizedName: string;
+        categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     updateSkill(id: string, body: {
@@ -67,8 +67,8 @@ export declare class SkillsController {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        categoryId: string;
         normalizedName: string;
+        categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     addSkillAlias(id: string, body: {
@@ -111,8 +111,8 @@ export declare class SkillsController {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        categoryId: string;
         normalizedName: string;
+        categoryId: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     rejectUnrecognizedSkill(id: string): Promise<{

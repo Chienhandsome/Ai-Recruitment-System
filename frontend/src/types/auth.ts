@@ -17,6 +17,47 @@ export interface RegisterFormValues {
   acceptTerms: boolean;
 }
 
+export interface WorkExperienceData {
+  id: string;
+  companyName: string;
+  positionTitle: string;
+  startDate: string;
+  endDate: string | null;
+  isCurrent: boolean;
+  description: string | null;
+  achievements: string | null;
+}
+
+export interface EducationData {
+  id: string;
+  schoolName: string;
+  major: string | null;
+  degree: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  description: string | null;
+}
+
+export interface ProjectData {
+  id: string;
+  projectName: string;
+  projectRole: string | null;
+  description: string | null;
+  technologies: string[] | null;
+  projectUrl: string | null;
+  startDate: string | null;
+  endDate: string | null;
+}
+
+export interface CertificateData {
+  id: string;
+  certificateName: string;
+  issuingOrganization: string;
+  issueDate: string | null;
+  expiryDate: string | null;
+  credentialUrl: string | null;
+}
+
 export interface AuthProfile {
   id: string;
   email: string;
@@ -33,6 +74,10 @@ export interface AuthProfile {
     githubUrl: string | null;
     linkedinUrl: string | null;
     portfolioUrl: string | null;
+    workExperiences?: WorkExperienceData[];
+    educations?: EducationData[];
+    projects?: ProjectData[];
+    certificates?: CertificateData[];
   } | null;
   recruiterProfile: {
     id: string;

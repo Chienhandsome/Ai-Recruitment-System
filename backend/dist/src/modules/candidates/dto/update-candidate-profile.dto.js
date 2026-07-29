@@ -9,9 +9,147 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateCandidateProfileDto = void 0;
+exports.UpdateCandidateProfileDto = exports.CertificateInputDto = exports.ProjectInputDto = exports.EducationInputDto = exports.WorkExperienceInputDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+class WorkExperienceInputDto {
+    companyName;
+    positionTitle;
+    startDate;
+    endDate;
+    isCurrent;
+    description;
+    achievements;
+}
+exports.WorkExperienceInputDto = WorkExperienceInputDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], WorkExperienceInputDto.prototype, "companyName", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], WorkExperienceInputDto.prototype, "positionTitle", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], WorkExperienceInputDto.prototype, "startDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], WorkExperienceInputDto.prototype, "endDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], WorkExperienceInputDto.prototype, "isCurrent", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], WorkExperienceInputDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], WorkExperienceInputDto.prototype, "achievements", void 0);
+class EducationInputDto {
+    schoolName;
+    major;
+    degree;
+    startDate;
+    endDate;
+}
+exports.EducationInputDto = EducationInputDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EducationInputDto.prototype, "schoolName", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], EducationInputDto.prototype, "major", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], EducationInputDto.prototype, "degree", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], EducationInputDto.prototype, "startDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], EducationInputDto.prototype, "endDate", void 0);
+class ProjectInputDto {
+    projectName;
+    projectRole;
+    description;
+    technologies;
+    projectUrl;
+    startDate;
+    endDate;
+}
+exports.ProjectInputDto = ProjectInputDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ProjectInputDto.prototype, "projectName", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], ProjectInputDto.prototype, "projectRole", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], ProjectInputDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], ProjectInputDto.prototype, "technologies", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], ProjectInputDto.prototype, "projectUrl", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], ProjectInputDto.prototype, "startDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], ProjectInputDto.prototype, "endDate", void 0);
+class CertificateInputDto {
+    certificateName;
+    issuingOrganization;
+    issueDate;
+}
+exports.CertificateInputDto = CertificateInputDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CertificateInputDto.prototype, "certificateName", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], CertificateInputDto.prototype, "issuingOrganization", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Object)
+], CertificateInputDto.prototype, "issueDate", void 0);
 class UpdateCandidateProfileDto {
     fullName;
     phone;
@@ -21,6 +159,10 @@ class UpdateCandidateProfileDto {
     linkedinUrl;
     githubUrl;
     portfolioUrl;
+    workExperiences;
+    educations;
+    projects;
+    certificates;
 }
 exports.UpdateCandidateProfileDto = UpdateCandidateProfileDto;
 __decorate([
@@ -79,4 +221,24 @@ __decorate([
     (0, class_validator_1.MaxLength)(500),
     __metadata("design:type", Object)
 ], UpdateCandidateProfileDto.prototype, "portfolioUrl", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UpdateCandidateProfileDto.prototype, "workExperiences", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UpdateCandidateProfileDto.prototype, "educations", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UpdateCandidateProfileDto.prototype, "projects", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UpdateCandidateProfileDto.prototype, "certificates", void 0);
 //# sourceMappingURL=update-candidate-profile.dto.js.map

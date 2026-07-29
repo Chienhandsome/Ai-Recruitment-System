@@ -44,6 +44,23 @@ def _get_connection() -> pika.BlockingConnection:
                 raise
 
 
+def _ensure_result_queue(channel):
+    """Ensure the result queue exists and is bound so messages are not lost
+    even if the backend hasn't subscribed yet."""
+    result_queue = f"{settings.rabbitmq_queue}_results"
+    channel.queue_declare(queue=result_queue, durable=True)
+    channel.queue_bind(
+        exchange=settings.rabbitmq_exchange,
+        queue=result_queue,
+        routing_key=settings.routing_key_completed,
+    )
+    channel.queue_bind(
+        exchange=settings.rabbitmq_exchange,
+        queue=result_queue,
+        routing_key=settings.routing_key_failed,
+    )
+
+
 def _publish_result(channel, routing_key: str, payload: dict):
     """Publish a message to the exchange."""
     channel.basic_publish(
@@ -133,7 +150,10 @@ def start_worker():
         durable=True,
     )
 
-    # Declare queue
+    # Declare and bind result queue (so completed/failed messages are never lost)
+    _ensure_result_queue(channel)
+
+    # Declare queue for incoming requests
     channel.queue_declare(queue=settings.rabbitmq_queue, durable=True)
 
     # Bind queue to exchange with routing key

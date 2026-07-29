@@ -98,6 +98,30 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Publish a message to the exchange with the given routing key.
+   * Returns true if published successfully, false otherwise.
+   */
+  async publish(routingKey: string, payload: unknown): Promise<boolean> {
+    if (!this.isConnected || !this.channelWrapper) {
+      this.logger.warn(
+        `Cannot publish to '${routingKey}': RabbitMQ connection is not established.`,
+      );
+      return false;
+    }
+
+    try {
+      await this.channelWrapper.publish(RABBITMQ_EXCHANGE, routingKey, payload);
+      this.logger.log(`Published message to '${routingKey}'`);
+      return true;
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to publish to '${routingKey}': ${this.getErrorMessage(error)}`,
+      );
+      return false;
+    }
+  }
+
   checkHealth(): {
     service: string;
     status: string;

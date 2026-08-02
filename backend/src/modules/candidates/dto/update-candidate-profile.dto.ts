@@ -3,10 +3,10 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class WorkExperienceInputDto {
   @IsString()
-  companyName: string;
+  companyName!: string;
 
   @IsString()
-  positionTitle: string;
+  positionTitle!: string;
 
   @IsOptional()
   @IsString()
@@ -31,7 +31,7 @@ export class WorkExperienceInputDto {
 
 export class EducationInputDto {
   @IsString()
-  schoolName: string;
+  schoolName!: string;
 
   @IsOptional()
   @IsString()
@@ -52,7 +52,7 @@ export class EducationInputDto {
 
 export class ProjectInputDto {
   @IsString()
-  projectName: string;
+  projectName!: string;
 
   @IsOptional()
   @IsString()
@@ -80,7 +80,7 @@ export class ProjectInputDto {
 
 export class CertificateInputDto {
   @IsString()
-  certificateName: string;
+  certificateName!: string;
 
   @IsOptional()
   @IsString()

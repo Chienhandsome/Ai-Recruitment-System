@@ -4,7 +4,8 @@ import {
   bootstrapProfile,
   dashboardPathForRoles,
 } from "@/lib/auth-api";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { requireSupabasePublicConfig } from "@/lib/supabase/config";
 import type { PublicSignupRole } from "@/types/auth";
 
 function parseRole(value: string | null): PublicSignupRole | undefined {
@@ -40,7 +41,24 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient();
+    // Use a response-aware Supabase client so cookies are written into the
+    // redirect response (not just the incoming request's cookie store).
+    const { url, publishableKey } = requireSupabasePublicConfig();
+    let redirectResponse = NextResponse.redirect(new URL("/", request.url));
+
+    const supabase = createServerClient(url, publishableKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            redirectResponse.cookies.set(name, value, options);
+          });
+        },
+      },
+    });
+
     console.log("[auth/callback] Exchanging code for session...");
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
@@ -51,7 +69,10 @@ export async function GET(request: NextRequest) {
 
     if (next === "/update-password") {
       console.log("[auth/callback] Redirecting to /update-password");
-      return NextResponse.redirect(new URL("/update-password", request.url));
+      redirectResponse = NextResponse.redirect(new URL("/update-password", request.url));
+      // Re-apply cookies to the new response
+      supabase.auth.getSession(); // no-op: cookies already set above
+      return redirectResponse;
     }
 
     if (!data.session) {
@@ -67,9 +88,13 @@ export async function GET(request: NextRequest) {
 
     const destination = dashboardPathForRoles(profile.roles);
     console.log("[auth/callback] Success — redirecting to:", destination);
-    return NextResponse.redirect(
-      new URL(destination, request.url),
-    );
+
+    // Create final redirect and carry over the session cookies
+    const finalResponse = NextResponse.redirect(new URL(destination, request.url));
+    redirectResponse.cookies.getAll().forEach(({ name, value, ...options }) => {
+      finalResponse.cookies.set(name, value, options);
+    });
+    return finalResponse;
   } catch (error) {
     if (error instanceof AuthApiError && error.code === "ROLE_REQUIRED") {
       console.log("[auth/callback] Role required — redirecting to /register?complete=1");

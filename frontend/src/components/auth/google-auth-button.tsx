@@ -25,17 +25,33 @@ export function GoogleAuthButton({
 
     try {
       const supabase = createClient();
-      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      // When running locally use the actual origin so the redirectTo matches
+      // the localhost entry in Supabase's Allowed Redirect URLs.
+      // In production NEXT_PUBLIC_SITE_URL is used for a stable, known URL.
+      const isLocal =
+        typeof window !== "undefined" &&
+        (window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1");
+      const siteUrl = isLocal
+        ? window.location.origin
+        : (process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin);
+      const callbackUrl = new URL("/auth/callback", siteUrl);
       if (role) callbackUrl.searchParams.set("intent", role);
 
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: callbackUrl.toString(),
         },
       });
 
+      console.log("[google-auth] signInWithOAuth result:", { data, error });
       if (error) throw error;
+      // If data.url is returned, browser will be redirected automatically.
+      // If not, something is wrong with the Google provider config in Supabase.
+      if (!data?.url) {
+        throw new Error("Supabase không trả về OAuth URL. Kiểm tra Google provider đã được bật trong Supabase Dashboard chưa.");
+      }
     } catch (error) {
       const message =
         error instanceof Error

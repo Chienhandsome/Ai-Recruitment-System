@@ -520,11 +520,6 @@ function SkillBadge({ skill, highlight }: { skill: CandidateSkillData; highlight
       >
         {level}
       </span>
-      {skill.yearsExperience != null && (
-        <span className="text-[11px] text-[#64748B] font-medium">
-          · {skill.yearsExperience} năm
-        </span>
-      )}
     </div>
   )
 }

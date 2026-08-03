@@ -523,7 +523,6 @@ model CandidateSkill {
   skillId          String           @map("skill_id")
   skill            Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
   proficiencyLevel ProficiencyLevel @default(BEGINNER) @map("proficiency_level")
-  yearsExperience  Decimal?         @map("years_experience") @db.Decimal(4, 1)
   isPrimary        Boolean          @default(false) @map("is_primary")
   source           SkillSource      @default(EXTRACTED)
   createdAt        DateTime         @default(now()) @map("created_at")

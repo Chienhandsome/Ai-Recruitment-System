@@ -26,7 +26,7 @@ DOMAIN_SKILLS: Dict[str, Set[str]] = {
 class SkillsMatcher:
     """
     Evaluates Candidate Skills against Job Required Skills.
-    Considers mandatory vs optional skills, proficiency level, years of experience,
+    Considers mandatory vs optional skills, proficiency level,
     and domain skill transferability.
     """
 
@@ -60,7 +60,7 @@ class SkillsMatcher:
                 score = self._calc_skill_item_score(cand_s, req)
                 mandatory_scores.append(score)
                 strengths.append(
-                    f"Thành thạo kỹ năng bắt buộc: {req.skill_name} ({cand_s.proficiency_level or 'N/A'}, {cand_s.years_experience} năm)"
+                    f"Thành thạo kỹ năng bắt buộc: {req.skill_name} ({cand_s.proficiency_level or 'N/A'})"
                 )
             else:
                 domain_credit = self._calc_domain_transferability(norm_req_name, cand_norm_names, is_mandatory=True)
@@ -120,16 +120,8 @@ class SkillsMatcher:
             (req_skill.minimum_level or "BEGINNER").upper(), 1
         )
 
-        level_ratio = min(1.0, cand_level_val / float(req_level_val))
-
-        req_years = float(req_skill.minimum_years or 0.0)
-        cand_years = float(cand_skill.years_experience or 0.0)
-
-        if req_years > 0.0:
-            years_ratio = min(1.0, cand_years / req_years)
-            item_score = 0.6 * level_ratio + 0.4 * years_ratio
-        else:
-            item_score = level_ratio
+        # Score based purely on proficiency level ratio
+        item_score = min(1.0, cand_level_val / float(req_level_val))
 
         return item_score
 

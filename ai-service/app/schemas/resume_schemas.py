@@ -27,9 +27,6 @@ class ExtractedSkill(BaseModel):
         default=ProficiencyLevel.BEGINNER,
         description="Estimated proficiency level",
     )
-    years_experience: Optional[float] = Field(
-        default=None, description="Years of experience with this skill"
-    )
 
 
 class ExtractedWorkExperience(BaseModel):

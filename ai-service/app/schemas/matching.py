@@ -57,7 +57,6 @@ class CandidateSkill(BaseModel):
     candidate_profile_id: Optional[str] = None
     skill_id: Optional[str] = None
     proficiency_level: Optional[str] = None  # BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
-    years_experience: float = 0.0
     is_primary: bool = False
     skill_name: str
 

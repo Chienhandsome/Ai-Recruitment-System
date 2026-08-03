@@ -329,7 +329,6 @@ export class CandidatesService {
           },
           update: {
             proficiencyLevel: skillItem.proficiencyLevel,
-            yearsExperience: skillItem.yearsExperience ?? null,
             isPrimary: skillItem.isPrimary ?? false,
             source: SkillSource.SELF_DECLARED,
           },
@@ -337,7 +336,6 @@ export class CandidatesService {
             candidateId: candidateProfileId,
             skillId: skillItem.skillId,
             proficiencyLevel: skillItem.proficiencyLevel,
-            yearsExperience: skillItem.yearsExperience ?? null,
             isPrimary: skillItem.isPrimary ?? false,
             source: SkillSource.SELF_DECLARED,
           },

@@ -23,7 +23,6 @@ interface LocalSkill {
   skillId: string
   skillName: string
   proficiencyLevel: ProficiencyLevel
-  yearsExperience: number | null
   isPrimary: boolean
   source: "EXTRACTED" | "SELF_DECLARED" | "VERIFIED"
 }
@@ -57,7 +56,6 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
       skillId: s.skillId,
       skillName: s.skill.name,
       proficiencyLevel: s.proficiencyLevel,
-      yearsExperience: s.yearsExperience,
       isPrimary: s.isPrimary,
       source: s.source,
     }))
@@ -123,7 +121,6 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
         skillId: skill.id,
         skillName: skill.name,
         proficiencyLevel: "BEGINNER",
-        yearsExperience: null,
         isPrimary: false,
         source: "SELF_DECLARED",
       },
@@ -141,14 +138,6 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
     setSkills((prev) =>
       prev.map((s) =>
         s.skillId === skillId ? { ...s, proficiencyLevel: level } : s
-      )
-    )
-  }
-
-  const updateSkillYears = (skillId: string, years: number | null) => {
-    setSkills((prev) =>
-      prev.map((s) =>
-        s.skillId === skillId ? { ...s, yearsExperience: years } : s
       )
     )
   }
@@ -176,17 +165,11 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
 
       const selfDeclaredSkills: CandidateSkillInput[] = skills
         .filter((s) => s.source === "SELF_DECLARED")
-        .map((s) => {
-          const item: CandidateSkillInput = {
-            skillId: s.skillId,
-            proficiencyLevel: s.proficiencyLevel,
-            isPrimary: s.isPrimary,
-          }
-          if (s.yearsExperience != null && s.yearsExperience >= 0) {
-            item.yearsExperience = Number(s.yearsExperience)
-          }
-          return item
-        })
+        .map((s) => ({
+          skillId: s.skillId,
+          proficiencyLevel: s.proficiencyLevel,
+          isPrimary: s.isPrimary,
+        }))
 
       await updateCandidateSkills(session.access_token, selfDeclaredSkills)
       setSaveMessage("Đã lưu kỹ năng thành công!")
@@ -353,38 +336,6 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
                       </option>
                     ))}
                   </select>
-
-                  {/* Years experience — numeric only */}
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      min={0}
-                      max={50}
-                      step={0.5}
-                      value={skill.yearsExperience ?? ""}
-                      onChange={(e) => {
-                        const raw = e.target.value
-                        if (raw === "") {
-                          updateSkillYears(skill.skillId, null)
-                          return
-                        }
-                        const val = parseFloat(raw)
-                        if (!isNaN(val) && val >= 0 && val <= 50) {
-                          updateSkillYears(skill.skillId, val)
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (["e", "E", "+", "-"].includes(e.key)) {
-                          e.preventDefault()
-                        }
-                      }}
-                      placeholder="0"
-                      className="h-8 w-16 rounded-md border border-input bg-background px-2 text-xs text-center focus:outline-none focus:ring-2 focus:ring-ring/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      aria-label={`Số năm kinh nghiệm cho ${skill.skillName}`}
-                    />
-                    <span className="text-xs text-muted-foreground">năm</span>
-                  </div>
 
                   {/* Remove button */}
                   <button

@@ -10,8 +10,8 @@ from app.services.matching.skills_matcher import SkillsMatcher
 def test_full_skill_match():
     matcher = SkillsMatcher()
     cand_skills = [
-        CandidateSkill(skill_name="NestJS", proficiency_level="ADVANCED", years_experience=2.0),
-        CandidateSkill(skill_name="PostgreSQL", proficiency_level="ADVANCED", years_experience=2.0),
+        CandidateSkill(skill_name="NestJS", proficiency_level="ADVANCED"),
+        CandidateSkill(skill_name="PostgreSQL", proficiency_level="ADVANCED"),
     ]
     req_skills = [
         JobRequiredSkill(skill_name="NestJS", is_mandatory=True, minimum_level="INTERMEDIATE", minimum_years=1.0),
@@ -28,7 +28,7 @@ def test_full_skill_match():
 def test_missing_mandatory_skill():
     matcher = SkillsMatcher()
     cand_skills = [
-        CandidateSkill(skill_name="Docker", proficiency_level="INTERMEDIATE", years_experience=1.0),
+        CandidateSkill(skill_name="Docker", proficiency_level="INTERMEDIATE"),
     ]
     req_skills = [
         JobRequiredSkill(skill_name="NestJS", is_mandatory=True, minimum_level="INTERMEDIATE", minimum_years=1.0),
@@ -45,8 +45,8 @@ def test_missing_mandatory_skill():
 def test_alias_skill_matching():
     matcher = SkillsMatcher()
     cand_skills = [
-        CandidateSkill(skill_name="ReactJS", proficiency_level="ADVANCED", years_experience=2.0),
-        CandidateSkill(skill_name="Node JS", proficiency_level="ADVANCED", years_experience=2.0),
+        CandidateSkill(skill_name="ReactJS", proficiency_level="ADVANCED"),
+        CandidateSkill(skill_name="Node JS", proficiency_level="ADVANCED"),
     ]
     req_skills = [
         JobRequiredSkill(skill_name="React", is_mandatory=True, minimum_level="INTERMEDIATE", minimum_years=1.0),
@@ -67,10 +67,10 @@ def test_metamorphic_skill_addition():
         JobRequiredSkill(skill_name="Pandas", is_mandatory=True, minimum_level="INTERMEDIATE", minimum_years=1.0),
     ]
 
-    cand_skills_1 = [CandidateSkill(skill_name="Python", proficiency_level="ADVANCED", years_experience=2.0)]
+    cand_skills_1 = [CandidateSkill(skill_name="Python", proficiency_level="ADVANCED")]
     cand_skills_2 = [
-        CandidateSkill(skill_name="Python", proficiency_level="ADVANCED", years_experience=2.0),
-        CandidateSkill(skill_name="Pandas", proficiency_level="ADVANCED", years_experience=2.0),
+        CandidateSkill(skill_name="Python", proficiency_level="ADVANCED"),
+        CandidateSkill(skill_name="Pandas", proficiency_level="ADVANCED"),
     ]
 
     score1, _, _, _ = matcher.evaluate(cand_skills_1, req_skills)

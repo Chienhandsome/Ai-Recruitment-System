@@ -2,10 +2,8 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
-  IsNumber,
   IsOptional,
   IsUUID,
-  Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -24,13 +22,6 @@ export class CandidateSkillItemDto {
   })
   @IsEnum(ProficiencyLevel)
   proficiencyLevel!: ProficiencyLevel;
-
-  @ApiPropertyOptional({ description: 'Years of experience with this skill' })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Type(() => Number)
-  yearsExperience?: number;
 
   @ApiPropertyOptional({
     description: 'Whether this is a primary/highlight skill',

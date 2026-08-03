@@ -22,8 +22,7 @@ Given the raw text content of a resume, extract the following information and re
   "skills": [
     {
       "name": "<skill name>",
-      "proficiency_level": "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT",
-      "years_experience": <number or null>
+      "proficiency_level": "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT"
     }
   ],
   "work_experiences": [

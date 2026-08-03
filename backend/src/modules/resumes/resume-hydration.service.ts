@@ -11,7 +11,6 @@ export interface ParsedResumeData {
   skills: Array<{
     name: string;
     proficiency_level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
-    years_experience?: number | null;
   }>;
   work_experiences: Array<{
     company_name: string;
@@ -74,7 +73,6 @@ export class ResumeHydrationService {
     const resolvedSkills: Array<{
       skillId: string;
       proficiencyLevel: string;
-      yearsExperience: number | null;
     }> = [];
 
     for (const skill of parsedData.skills) {
@@ -83,7 +81,6 @@ export class ResumeHydrationService {
       resolvedSkills.push({
         skillId: dbSkill.id,
         proficiencyLevel: skill.proficiency_level,
-        yearsExperience: skill.years_experience ?? null,
       });
     }
 
@@ -143,13 +140,11 @@ export class ResumeHydrationService {
               skillId: skill.skillId,
               resumeId,
               proficiencyLevel: skill.proficiencyLevel as any,
-              yearsExperience: skill.yearsExperience,
               isPrimary: false,
               source: 'EXTRACTED',
             },
             update: {
               proficiencyLevel: skill.proficiencyLevel as any,
-              yearsExperience: skill.yearsExperience,
               resumeId,
               source: 'EXTRACTED',
             },

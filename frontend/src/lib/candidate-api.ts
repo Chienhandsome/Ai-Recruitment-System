@@ -17,7 +17,6 @@ export interface CandidateSkillData {
   candidateId: string;
   skillId: string;
   proficiencyLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
-  yearsExperience: number | null;
   isPrimary: boolean;
   source: "EXTRACTED" | "SELF_DECLARED" | "VERIFIED";
   skill: SkillItemData;
@@ -26,7 +25,6 @@ export interface CandidateSkillData {
 export interface CandidateSkillInput {
   skillId: string;
   proficiencyLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
-  yearsExperience?: number;
   isPrimary?: boolean;
 }
 

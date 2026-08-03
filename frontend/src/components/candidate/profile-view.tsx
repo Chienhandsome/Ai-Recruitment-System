@@ -94,8 +94,8 @@ export function ProfileView({
     <div className="space-y-6">
       {/* Header Banner & Profile Card - Design System Color: Hiring Blue #2563EB */}
       <Card className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm rounded-2xl">
-        <div className="h-28 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] relative">
-          <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+        <div className="h-28 bg-gradient-to-br from-[#EFF6FF] via-[#DBEAFE] to-[#E0E7FF] relative">
+          <div className="absolute inset-0 bg-[radial-gradient(#93C5FD_1px,transparent_1px)] [background-size:20px_20px] opacity-40" />
         </div>
         <CardContent className="pt-0 relative px-6 pb-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-12 mb-4">

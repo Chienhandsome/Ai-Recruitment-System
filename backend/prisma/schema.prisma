@@ -204,6 +204,7 @@ enum CandidateProfileStatus {
   EMPTY
   PROCESSING
   READY
+  NEEDS_REVIEW
   FAILED
 }
 
@@ -328,33 +329,33 @@ model JobPosting {
   currency                String           @default("VND")
   location                String?
   requiredExperienceYears Int?             @map("required_experience_years")
-  
+
   // AI Matching Configurations
-  autoShortlistThreshold  Decimal?         @map("auto_shortlist_threshold") @db.Decimal(5, 2)
-  autoRejectThreshold     Decimal?         @map("auto_reject_threshold") @db.Decimal(5, 2)
-  rejectOnMissingMandatory Boolean         @default(true) @map("reject_on_missing_mandatory")
-  
+  autoShortlistThreshold   Decimal? @map("auto_shortlist_threshold") @db.Decimal(5, 2)
+  autoRejectThreshold      Decimal? @map("auto_reject_threshold") @db.Decimal(5, 2)
+  rejectOnMissingMandatory Boolean  @default(true) @map("reject_on_missing_mandatory")
+
   // AI Scoring Weights
-  skillWeight             Decimal          @default(40.0) @map("skill_weight") @db.Decimal(5, 2)
-  experienceWeight        Decimal          @default(30.0) @map("experience_weight") @db.Decimal(5, 2)
-  educationWeight         Decimal          @default(15.0) @map("education_weight") @db.Decimal(5, 2)
-  otherWeight             Decimal          @default(15.0) @map("other_weight") @db.Decimal(5, 2)
+  skillWeight      Decimal @default(40.0) @map("skill_weight") @db.Decimal(5, 2)
+  experienceWeight Decimal @default(30.0) @map("experience_weight") @db.Decimal(5, 2)
+  educationWeight  Decimal @default(15.0) @map("education_weight") @db.Decimal(5, 2)
+  otherWeight      Decimal @default(15.0) @map("other_weight") @db.Decimal(5, 2)
 
-  expiryDate              DateTime?        @map("expiry_date")
-  publishedAt             DateTime?        @map("published_at")
-  closedAt                DateTime?        @map("closed_at")
-  createdAt               DateTime         @default(now()) @map("created_at")
-  updatedAt               DateTime         @updatedAt @map("updated_at")
+  expiryDate  DateTime? @map("expiry_date")
+  publishedAt DateTime? @map("published_at")
+  closedAt    DateTime? @map("closed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  categoryId              String?               @map("category_id")
-  category                JobCategory?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  workingModel            WorkingModel          @default(ON_SITE) @map("working_model")
-  requiresProofOfWork     Boolean               @default(false) @map("requires_proof_of_work")
-  proofOfWorkType         ProofType?            @map("proof_of_work_type")
+  categoryId          String?      @map("category_id")
+  category            JobCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  workingModel        WorkingModel @default(ON_SITE) @map("working_model")
+  requiresProofOfWork Boolean      @default(false) @map("requires_proof_of_work")
+  proofOfWorkType     ProofType?   @map("proof_of_work_type")
 
-  jobSkills          JobSkill[]
-  jobCertificates    JobCertificate[]
-  applications       Application[]
+  jobSkills       JobSkill[]
+  jobCertificates JobCertificate[]
+  applications    Application[]
 
   @@index([status])
   @@index([recruiterId])
@@ -419,11 +420,11 @@ model JobSkill {
 }
 
 model JobCategory {
-  id        String       @id @default(uuid())
-  name      String       @unique
-  slug      String       @unique
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   jobs JobPosting[]
 
@@ -440,8 +441,6 @@ model JobCertificate {
   @@unique([jobId, certificateName])
   @@map("job_certificates")
 }
-
-
 
 model CandidateProfile {
   id                  String                 @id @default(uuid())
@@ -462,9 +461,9 @@ model CandidateProfile {
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @updatedAt @map("updated_at")
 
-  expectedMinSalary     Decimal?         @map("expected_min_salary") @db.Decimal(12, 2)
-  expectedMaxSalary     Decimal?         @map("expected_max_salary") @db.Decimal(12, 2)
-  preferredModel        WorkingModel?    @map("preferred_model")
+  expectedMinSalary Decimal?      @map("expected_min_salary") @db.Decimal(12, 2)
+  expectedMaxSalary Decimal?      @map("expected_max_salary") @db.Decimal(12, 2)
+  preferredModel    WorkingModel? @map("preferred_model")
 
   resumes         Resume[]
   applications    Application[]
@@ -496,32 +495,39 @@ model Resume {
   createdAt           DateTime            @default(now()) @map("created_at")
   updatedAt           DateTime            @updatedAt @map("updated_at")
 
-  parsedData             ResumeParsedData?
-  candidateSkills        CandidateSkill[]
-  applications           Application[]
+  parsedData                 ResumeParsedData?
+  candidateSkills            CandidateSkill[]
+  applications               Application[]
   primaryForCandidateProfile CandidateProfile? @relation("PrimaryResume")
-  workExperiences        WorkExperience[]  @relation("WorkExperienceResume")
-  educations             Education[]       @relation("EducationResume")
-  projects               Project[]         @relation("ProjectResume")
-  certificates           Certificate[]     @relation("CertificateResume")
+  workExperiences            WorkExperience[]  @relation("WorkExperienceResume")
+  educations                 Education[]       @relation("EducationResume")
+  projects                   Project[]         @relation("ProjectResume")
+  certificates               Certificate[]     @relation("CertificateResume")
 
   @@index([parsingStatus])
   @@map("resumes")
 }
 
 model ResumeParsedData {
-  id                   String   @id @default(uuid())
-  resumeId             String   @unique @map("resume_id")
-  resume               Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  summary              String?
-  totalYearsExperience Decimal? @map("total_years_experience") @db.Decimal(4, 1)
-  educationData        Json?    @map("education_data")
-  experienceData       Json?    @map("experience_data")
-  certificateData      Json?    @map("certificate_data")
-  projectData          Json?    @map("project_data")
-  languageData         Json?    @map("language_data")
-  rawParsedJson        Json?    @map("raw_parsed_json")
-  parsedAt             DateTime @default(now()) @map("parsed_at")
+  id                               String   @id @default(uuid())
+  resumeId                         String   @unique @map("resume_id")
+  resume                           Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  summary                          String?
+  totalYearsExperience             Decimal? @map("total_years_experience") @db.Decimal(4, 1)
+  totalYearsExperienceIsCalculated Boolean  @default(true) @map("total_years_experience_is_calculated")
+  educationData                    Json?    @map("education_data")
+  experienceData                   Json?    @map("experience_data")
+  certificateData                  Json?    @map("certificate_data")
+  projectData                      Json?    @map("project_data")
+  languageData                     Json?    @map("language_data")
+  rawParsedJson                    Json?    @map("raw_parsed_json")
+  llmModel                         String?  @map("llm_model")
+  promptVersion                    String?  @map("prompt_version")
+  parserVersion                    String?  @map("parser_version")
+  rawTextHash                      String?  @map("raw_text_hash")
+  extractionDurationMs             Int?     @map("extraction_duration_ms")
+  overallConfidence                Decimal? @map("overall_confidence") @db.Decimal(3, 2)
+  parsedAt                         DateTime @default(now()) @map("parsed_at")
 
   @@map("resume_parsed_data")
 }
@@ -537,6 +543,8 @@ model CandidateSkill {
   proficiencyLevel ProficiencyLevel @default(BEGINNER) @map("proficiency_level")
   isPrimary        Boolean          @default(false) @map("is_primary")
   source           SkillSource      @default(EXTRACTED)
+  isInferred       Boolean          @default(false) @map("is_inferred")
+  sourceText       String?          @map("source_text")
   createdAt        DateTime         @default(now()) @map("created_at")
 
   @@unique([candidateId, skillId])
@@ -561,6 +569,8 @@ model WorkExperience {
   isCurrent          Boolean          @default(false) @map("is_current")
   description        String?
   achievements       String?
+  isInferred         Boolean          @default(false) @map("is_inferred")
+  sourceText         String?          @map("source_text")
   createdAt          DateTime         @default(now()) @map("created_at")
   updatedAt          DateTime         @updatedAt @map("updated_at")
 
@@ -583,6 +593,8 @@ model Education {
   startDate          DateTime?        @map("start_date") @db.Date
   endDate            DateTime?        @map("end_date") @db.Date
   description        String?
+  isInferred         Boolean          @default(false) @map("is_inferred")
+  sourceText         String?          @map("source_text")
   createdAt          DateTime         @default(now()) @map("created_at")
   updatedAt          DateTime         @updatedAt @map("updated_at")
 
@@ -606,6 +618,8 @@ model Project {
   projectUrl         String?          @map("project_url")
   startDate          DateTime?        @map("start_date") @db.Date
   endDate            DateTime?        @map("end_date") @db.Date
+  isInferred         Boolean          @default(false) @map("is_inferred")
+  sourceText         String?          @map("source_text")
   createdAt          DateTime         @default(now()) @map("created_at")
   updatedAt          DateTime         @updatedAt @map("updated_at")
 
@@ -627,6 +641,8 @@ model Certificate {
   issueDate           DateTime?        @map("issue_date") @db.Date
   expiryDate          DateTime?        @map("expiry_date") @db.Date
   credentialUrl       String?          @map("credential_url")
+  isInferred          Boolean          @default(false) @map("is_inferred")
+  sourceText          String?          @map("source_text")
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
 
@@ -652,10 +668,10 @@ model Application {
   appliedAt        DateTime                    @default(now()) @map("applied_at")
   updatedAt        DateTime                    @updatedAt @map("updated_at")
 
-  aiMatchingResults  AiMatchingResult[]
-  interviews         Interview[]
-  notifications      Notification[]
-  statusHistories    ApplicationStatusHistory[]
+  aiMatchingResults AiMatchingResult[]
+  interviews        Interview[]
+  notifications     Notification[]
+  statusHistories   ApplicationStatusHistory[]
 
   @@unique([jobId, candidateId])
   @@index([jobId])
@@ -692,8 +708,6 @@ model AiMatchingResult {
   @@index([overallScore])
   @@map("ai_matching_results")
 }
-
-
 
 model Interview {
   id               String          @id @default(uuid())
@@ -732,12 +746,14 @@ model Notification {
 }
 
 model UnrecognizedSkill {
-  id           String                  @id @default(uuid())
-  rawSkillName String                  @map("raw_skill_name")
-  frequency    Int                     @default(1)
-  status       UnrecognizedSkillStatus @default(PENDING)
-  createdAt    DateTime                @default(now()) @map("created_at")
-  updatedAt    DateTime                @updatedAt @map("updated_at")
+  id             String                  @id @default(uuid())
+  rawSkillName   String                  @map("raw_skill_name")
+  normalizedName String?                 @unique @map("normalized_name")
+  categoryHint   String?                 @map("category_hint")
+  frequency      Int                     @default(1)
+  status         UnrecognizedSkillStatus @default(PENDING)
+  createdAt      DateTime                @default(now()) @map("created_at")
+  updatedAt      DateTime                @updatedAt @map("updated_at")
 
   @@map("unrecognized_skills")
 }
@@ -768,8 +784,6 @@ model CandidateProof {
   @@map("candidate_proofs")
 }
 
-
-
 model AuditLog {
   id         String   @id @default(uuid())
   userId     String?  @map("user_id") @db.Uuid
@@ -783,4 +797,3 @@ model AuditLog {
 
   @@map("audit_logs")
 }
-

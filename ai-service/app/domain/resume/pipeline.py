@@ -1,7 +1,10 @@
 """Infrastructure-independent resume parsing orchestration."""
 
+import hashlib
 import logging
+import time
 
+from app.core.config import settings
 from app.domain.resume.models import ResumeParseCommand
 from app.domain.resume.steps.date_calculator import apply_experience_duration
 from app.domain.resume.steps.file_validator import validate_resume_file
@@ -28,10 +31,22 @@ class ResumeParsingPipeline:
             request.original_file_name,
         )
 
-        file_bytes = self._storage.download(request.object_path)
-        validate_resume_file(file_bytes, request.mime_type)
-        raw_text = extract_text(file_bytes, request.mime_type)
+        file_bytes = self._storage.download(
+            request.object_path,
+            request.signed_download_url,
+        )
+        detected_mime = validate_resume_file(file_bytes, request.mime_type)
+        raw_text = extract_text(file_bytes, detected_mime)
         prepared_text = preprocess_text(raw_text)
+        started_at = time.perf_counter()
         extraction = extract_structured_resume(prepared_text, self._llm)
-        extraction = apply_experience_duration(extraction)
-        return build_result(extraction)
+        duration_ms = int((time.perf_counter() - started_at) * 1000)
+        result = build_result(
+            extraction,
+            llm_model=self._llm.model_name,
+            prompt_version=settings.prompt_version,
+            parser_version=settings.parser_version,
+            raw_text_hash=hashlib.sha256(prepared_text.encode()).hexdigest(),
+            extraction_duration_ms=duration_ms,
+        )
+        return apply_experience_duration(result)

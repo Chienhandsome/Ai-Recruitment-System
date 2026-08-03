@@ -49,11 +49,15 @@ export class SkillWriter {
           proficiencyLevel: skill.proficiencyLevel,
           isPrimary: false,
           source: 'EXTRACTED',
+          isInferred: skill.isInferred,
+          sourceText: skill.sourceText,
         },
         update: {
           proficiencyLevel: skill.proficiencyLevel,
           resumeId,
           source: 'EXTRACTED',
+          isInferred: skill.isInferred,
+          sourceText: skill.sourceText,
         },
       });
     }

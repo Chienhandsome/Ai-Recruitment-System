@@ -13,7 +13,8 @@ export class ProfileWriter {
     const result = await tx.candidateProfile.updateMany({
       where: { id: candidateProfileId, primaryResumeId: resumeId },
       data: {
-        status: 'READY',
+        status:
+          (parsedData.overall_confidence ?? 1) < 0.6 ? 'NEEDS_REVIEW' : 'READY',
         professionalSummary:
           parsedData.summary !== undefined ? parsedData.summary : undefined,
         desiredTitle:

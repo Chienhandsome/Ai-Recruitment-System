@@ -75,17 +75,37 @@ export class UploadResumeUseCase {
         data: { primaryResumeId: resume.id },
       });
 
-      const published = await this.rabbitMQService.publish(
-        RABBITMQ_ROUTING_KEYS.RESUME_ANALYSIS_REQUESTED,
-        {
-          resumeId: resume.id,
-          candidateProfileId: profile.id,
-          objectPath: upload.objectPath,
-          mimeType: file.mimetype,
-          originalFileName: file.originalname,
-          requestedAt: new Date().toISOString(),
-        },
-      );
+      let published = false;
+      try {
+        const { signedUrl } = await this.storageService.createSignedDownloadUrl(
+          upload.objectPath,
+          5 * 60,
+        );
+
+        published = await this.rabbitMQService.publish(
+          RABBITMQ_ROUTING_KEYS.RESUME_ANALYSIS_REQUESTED,
+          {
+            resumeId: resume.id,
+            candidateProfileId: profile.id,
+            objectPath: upload.objectPath,
+            mimeType: file.mimetype,
+            originalFileName: file.originalname,
+            signedDownloadUrl: signedUrl,
+            requestedAt: new Date().toISOString(),
+          },
+        );
+      } catch (dispatchError) {
+        // The upload is durable and the retry scheduler can issue a fresh URL.
+        // Keep this resume PENDING instead of misclassifying dispatch as a
+        // permanent file-processing failure.
+        this.logger.warn(
+          `Resume ${resume.id} dispatch failed and will be retried: ${
+            dispatchError instanceof Error
+              ? dispatchError.message
+              : 'Unknown error'
+          }`,
+        );
+      }
 
       if (published) {
         try {

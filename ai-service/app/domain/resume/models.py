@@ -10,3 +10,4 @@ class ResumeParseCommand:
     object_path: str
     mime_type: str
     original_file_name: str
+    signed_download_url: str | None = None

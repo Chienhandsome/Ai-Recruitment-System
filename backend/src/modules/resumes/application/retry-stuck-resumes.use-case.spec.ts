@@ -20,13 +20,23 @@ describe('RetryStuckResumesUseCase', () => {
       $transaction: jest.fn().mockResolvedValue(undefined),
     } as any;
     const rabbitMQ = { publish: jest.fn().mockResolvedValue(true) } as any;
-    const useCase = new RetryStuckResumesUseCase(prisma, rabbitMQ);
+    const storage = {
+      createSignedDownloadUrl: jest.fn().mockResolvedValue({
+        signedUrl: 'https://storage.example/retry',
+      }),
+    } as any;
+    const useCase = new RetryStuckResumesUseCase(prisma, rabbitMQ, storage);
 
     await expect(
       useCase.execute(new Date('2026-08-03T00:20:00Z')),
     ).resolves.toBe(1);
 
-    expect(rabbitMQ.publish).toHaveBeenCalled();
+    expect(rabbitMQ.publish).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        signedDownloadUrl: 'https://storage.example/retry',
+      }),
+    );
     expect(prisma.resume.updateMany).toHaveBeenCalledWith({
       where: { id: 'resume', parsingStatus: 'PENDING' },
       data: { parsingStatus: 'PROCESSING' },
@@ -55,7 +65,12 @@ describe('RetryStuckResumesUseCase', () => {
       $transaction: jest.fn(),
     } as any;
     const rabbitMQ = { publish: jest.fn().mockResolvedValue(false) } as any;
-    const useCase = new RetryStuckResumesUseCase(prisma, rabbitMQ);
+    const storage = {
+      createSignedDownloadUrl: jest.fn().mockResolvedValue({
+        signedUrl: 'https://storage.example/retry',
+      }),
+    } as any;
+    const useCase = new RetryStuckResumesUseCase(prisma, rabbitMQ, storage);
 
     await expect(useCase.execute()).resolves.toBe(0);
     expect(prisma.$transaction).not.toHaveBeenCalled();

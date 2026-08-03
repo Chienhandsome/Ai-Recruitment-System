@@ -55,6 +55,7 @@ class ResumeMessageConsumer:
                     object_path=request.object_path,
                     mime_type=request.mime_type,
                     original_file_name=request.original_file_name,
+                    signed_download_url=request.signed_download_url,
                 )
             )
             completed = ResumeAnalysisCompleted(

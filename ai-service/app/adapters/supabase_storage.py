@@ -2,6 +2,7 @@
 
 import logging
 
+import httpx
 from supabase import create_client
 
 from app.core.config import settings
@@ -24,11 +25,17 @@ class SupabaseStorageAdapter:
             settings.supabase_storage_bucket,
         )
 
-    def download(self, object_path: str) -> bytes:
-        if not self._url or not self._service_role_key:
-            raise PermanentError("Supabase credentials are not configured")
+    def download(self, object_path: str, signed_url: str | None = None) -> bytes:
         if not object_path:
             raise PermanentError("Resume object path is empty")
+
+        if signed_url:
+            return self._download_signed_url(signed_url)
+
+        if not self._url or not self._service_role_key:
+            raise PermanentError(
+                "Signed URL missing and Supabase fallback credentials unavailable"
+            )
 
         try:
             client = create_client(self._url, self._service_role_key)
@@ -41,3 +48,22 @@ class SupabaseStorageAdapter:
 
         logger.info("Downloaded %d bytes from %s", len(response), object_path)
         return response
+
+    @staticmethod
+    def _download_signed_url(signed_url: str) -> bytes:
+        try:
+            response = httpx.get(signed_url, timeout=30, follow_redirects=True)
+        except httpx.RequestError as exc:
+            raise TransientError(f"Signed resume download failed: {exc}") from exc
+
+        if response.status_code >= 500:
+            raise TransientError(
+                f"Signed resume download returned {response.status_code}"
+            )
+        if response.status_code >= 400:
+            raise PermanentError(
+                f"Signed resume download returned {response.status_code}"
+            )
+        if not response.content:
+            raise PermanentError("Signed resume download returned an empty file")
+        return response.content

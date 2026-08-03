@@ -42,6 +42,17 @@ export class ResumeHydrationService {
       return;
     }
 
+    const existingResume = await this.prisma.resume.findUnique({
+      where: { id: resumeId },
+      select: { parsingStatus: true },
+    });
+    if (existingResume?.parsingStatus === 'PARSED') {
+      this.logger.debug(
+        `Resume ${resumeId} was already hydrated; skipping duplicate result.`,
+      );
+      return;
+    }
+
     // External lookups happen before the transaction so the transaction remains
     // a short, deterministic write boundary.
     const resolvedSkills = await this.skillResolver.resolveAll(
@@ -66,10 +77,14 @@ export class ResumeHydrationService {
             return false;
           }
 
-          await tx.resume.update({
-            where: { id: resumeId },
+          // This conditional update also acts as a row-level idempotency claim.
+          // Concurrent duplicate deliveries wait for the first transaction and
+          // then observe PARSED, so their writers never delete/recreate rows.
+          const claimed = await tx.resume.updateMany({
+            where: { id: resumeId, parsingStatus: { not: 'PARSED' } },
             data: { parsingStatus: 'PARSED', parsingErrorMessage: null },
           });
+          if (claimed.count === 0) return true;
 
           await this.writeParsedData(tx, resumeId, parsedData);
           await this.skillWriter.write(
@@ -174,11 +189,22 @@ export class ResumeHydrationService {
     const payload = {
       summary: parsedData.summary ?? null,
       totalYearsExperience: parsedData.total_years_experience ?? null,
-      educationData: parsedData.educations as Prisma.InputJsonValue,
-      experienceData: parsedData.work_experiences as Prisma.InputJsonValue,
-      certificateData: parsedData.certificates as Prisma.InputJsonValue,
-      projectData: parsedData.projects as Prisma.InputJsonValue,
+      totalYearsExperienceIsCalculated: true,
+      educationData: parsedData.educations as unknown as Prisma.InputJsonValue,
+      experienceData:
+        parsedData.work_experiences as unknown as Prisma.InputJsonValue,
+      certificateData:
+        parsedData.certificates as unknown as Prisma.InputJsonValue,
+      projectData: parsedData.projects as unknown as Prisma.InputJsonValue,
+      languageData: (parsedData.languages ??
+        []) as unknown as Prisma.InputJsonValue,
       rawParsedJson: parsedData as unknown as Prisma.InputJsonValue,
+      llmModel: parsedData.llm_model ?? null,
+      promptVersion: parsedData.prompt_version ?? null,
+      parserVersion: parsedData.parser_version ?? null,
+      rawTextHash: parsedData.raw_text_hash ?? null,
+      extractionDurationMs: parsedData.extraction_duration_ms ?? null,
+      overallConfidence: parsedData.overall_confidence ?? null,
     };
 
     await tx.resumeParsedData.upsert({

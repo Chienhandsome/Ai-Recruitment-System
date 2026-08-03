@@ -29,6 +29,8 @@ export class ProjectWriter {
         projectUrl: project.project_url ?? null,
         startDate: project.start_date ? new Date(project.start_date) : null,
         endDate: project.end_date ? new Date(project.end_date) : null,
+        isInferred: project.is_inferred ?? false,
+        sourceText: project.source_text ?? null,
       })),
     });
   }

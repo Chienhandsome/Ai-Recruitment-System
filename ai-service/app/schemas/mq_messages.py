@@ -12,6 +12,7 @@ class ResumeAnalysisRequest(BaseModel):
     mime_type: str = Field(..., alias="mimeType")
     original_file_name: str = Field(..., alias="originalFileName")
     requested_at: str = Field(..., alias="requestedAt")
+    signed_download_url: str | None = Field(default=None, alias="signedDownloadUrl")
 
     model_config = {"populate_by_name": True}
 

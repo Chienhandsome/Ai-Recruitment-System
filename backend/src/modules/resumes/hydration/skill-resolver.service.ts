@@ -16,25 +16,31 @@ export class SkillResolverService {
     const resolved: ResolvedResumeSkill[] = [];
 
     for (const skill of skills) {
-      const dbSkill = await this.findOrCreate(skill.name);
-      if (dbSkill) {
-        resolved.push({
-          skillId: dbSkill.id,
-          proficiencyLevel: skill.proficiency_level,
-        });
-      }
+      const dbSkill = await this.resolveOrQueue(
+        skill.name,
+        skill.category_hint,
+      );
+      if (!dbSkill) continue;
+
+      resolved.push({
+        skillId: dbSkill.id,
+        proficiencyLevel: skill.proficiency_level,
+        isInferred: skill.is_inferred ?? false,
+        sourceText: skill.source_text ?? null,
+      });
     }
 
     return resolved;
   }
 
-  private async findOrCreate(skillName: string) {
+  private async resolveOrQueue(skillName: string, categoryHint?: string) {
     const trimmed = skillName.trim();
     const normalized = this.normalizer.normalize(trimmed);
     if (!trimmed || !normalized) return null;
 
     const existing = await this.prisma.skill.findFirst({
       where: {
+        status: 'ACTIVE',
         OR: [
           { normalizedName: normalized },
           { name: { equals: trimmed, mode: 'insensitive' } },
@@ -43,35 +49,45 @@ export class SkillResolverService {
     });
     if (existing) return existing;
 
-    const category = await this.getOrCreateDefaultCategory();
-    try {
-      return await this.prisma.skill.create({
+    const queued =
+      (await this.prisma.unrecognizedSkill.findUnique({
+        where: { normalizedName: normalized },
+      })) ??
+      (await this.prisma.unrecognizedSkill.findFirst({
+        where: {
+          rawSkillName: { equals: trimmed, mode: 'insensitive' },
+        },
+      }));
+
+    if (queued) {
+      await this.prisma.unrecognizedSkill.update({
+        where: { id: queued.id },
         data: {
-          name: trimmed,
-          normalizedName: normalized,
-          categoryId: category.id,
-          type: 'HARD',
-          status: 'ACTIVE',
+          normalizedName: queued.normalizedName ?? normalized,
+          categoryHint: categoryHint ?? queued.categoryHint,
+          frequency: { increment: 1 },
         },
       });
-    } catch {
-      return this.prisma.skill.findFirst({
+      return null;
+    }
+
+    try {
+      await this.prisma.unrecognizedSkill.create({
+        data: {
+          rawSkillName: trimmed,
+          normalizedName: normalized,
+          categoryHint: categoryHint ?? null,
+          status: 'PENDING',
+        },
+      });
+    } catch (error) {
+      if ((error as { code?: string }).code !== 'P2002') throw error;
+      // Another worker may have queued the same normalized skill concurrently.
+      await this.prisma.unrecognizedSkill.update({
         where: { normalizedName: normalized },
+        data: { frequency: { increment: 1 } },
       });
     }
-  }
-
-  private async getOrCreateDefaultCategory() {
-    const preferred = await this.prisma.skillCategory.findFirst({
-      where: { name: 'Công nghệ thông tin (IT)' },
-    });
-    if (preferred) return preferred;
-
-    const fallback = await this.prisma.skillCategory.findFirst();
-    if (fallback) return fallback;
-
-    return this.prisma.skillCategory.create({
-      data: { name: 'Công nghệ thông tin (IT)' },
-    });
+    return null;
   }
 }

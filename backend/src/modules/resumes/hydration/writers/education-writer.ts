@@ -27,6 +27,8 @@ export class EducationWriter {
         startDate: education.start_date ? new Date(education.start_date) : null,
         endDate: education.end_date ? new Date(education.end_date) : null,
         description: education.description ?? null,
+        isInferred: education.is_inferred ?? false,
+        sourceText: education.source_text ?? null,
       })),
     });
   }

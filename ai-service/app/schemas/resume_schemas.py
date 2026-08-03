@@ -3,11 +3,14 @@
 from app.schemas.llm_output import (
     ExtractedCertificate,
     ExtractedEducation,
+    ExtractedLanguage,
     ExtractedProject,
     ExtractedSkill,
     ExtractedWorkExperience,
+    LLMResumeExtraction,
     ProficiencyLevel,
     ResumeExtractionResult,
+    SkillCategoryHint,
 )
 from app.schemas.mq_messages import (
     ResumeAnalysisCompleted,
@@ -18,10 +21,13 @@ from app.schemas.mq_messages import (
 __all__ = [
     "ExtractedCertificate",
     "ExtractedEducation",
+    "ExtractedLanguage",
     "ExtractedProject",
     "ExtractedSkill",
     "ExtractedWorkExperience",
     "ProficiencyLevel",
+    "SkillCategoryHint",
+    "LLMResumeExtraction",
     "ResumeAnalysisCompleted",
     "ResumeAnalysisFailed",
     "ResumeAnalysisRequest",

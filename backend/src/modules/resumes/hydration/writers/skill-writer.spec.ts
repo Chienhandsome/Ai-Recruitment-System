@@ -12,7 +12,12 @@ describe('SkillWriter', () => {
     const writer = new SkillWriter();
 
     await writer.write(tx, 'candidate', 'resume', [
-      { skillId: 'skill', proficiencyLevel: 'EXPERT' },
+      {
+        skillId: 'skill',
+        proficiencyLevel: 'EXPERT',
+        isInferred: false,
+        sourceText: 'Expert Python',
+      },
     ]);
 
     expect(tx.candidateSkill.deleteMany).toHaveBeenCalledWith({

@@ -30,6 +30,8 @@ export class CertificateWriter {
           ? new Date(certificate.expiry_date)
           : null,
         credentialUrl: certificate.credential_url ?? null,
+        isInferred: certificate.is_inferred ?? false,
+        sourceText: certificate.source_text ?? null,
       })),
     });
   }

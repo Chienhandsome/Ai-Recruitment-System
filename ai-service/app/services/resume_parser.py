@@ -8,8 +8,11 @@ from app.schemas.llm_output import ResumeExtractionResult
 from app.schemas.mq_messages import ResumeAnalysisRequest
 
 
-def download_file_from_storage(object_path: str) -> bytes:
-    return SupabaseStorageAdapter.from_settings().download(object_path)
+def download_file_from_storage(
+    object_path: str,
+    signed_url: str | None = None,
+) -> bytes:
+    return SupabaseStorageAdapter.from_settings().download(object_path, signed_url)
 
 
 def parse_resume(request: ResumeAnalysisRequest) -> ResumeExtractionResult:
@@ -24,5 +27,6 @@ def parse_resume(request: ResumeAnalysisRequest) -> ResumeExtractionResult:
             object_path=request.object_path,
             mime_type=request.mime_type,
             original_file_name=request.original_file_name,
+            signed_download_url=request.signed_download_url,
         )
     )

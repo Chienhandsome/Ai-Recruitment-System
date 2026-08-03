@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../../database/prisma.service';
 import { RabbitMQService } from '../../../infrastructure/rabbitmq/rabbitmq.service';
 import { RABBITMQ_ROUTING_KEYS } from '../../../infrastructure/rabbitmq/rabbitmq.constants';
+import { SupabaseStorageService } from '../../../infrastructure/supabase/supabase-storage.service';
 
 const STUCK_AFTER_MS = 10 * 60 * 1000;
 const MAX_BATCH_SIZE = 50;
@@ -14,6 +15,7 @@ export class RetryStuckResumesUseCase {
   constructor(
     private readonly prisma: PrismaService,
     private readonly rabbitMQService: RabbitMQService,
+    private readonly storageService: SupabaseStorageService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -42,6 +44,22 @@ export class RetryStuckResumesUseCase {
 
     let publishedCount = 0;
     for (const resume of resumes) {
+      let signedDownloadUrl: string;
+      try {
+        const signed = await this.storageService.createSignedDownloadUrl(
+          resume.objectPath,
+          5 * 60,
+        );
+        signedDownloadUrl = signed.signedUrl;
+      } catch (error) {
+        this.logger.error(
+          `Cannot refresh signed URL for resume ${resume.id}: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`,
+        );
+        continue;
+      }
+
       const published = await this.rabbitMQService.publish(
         RABBITMQ_ROUTING_KEYS.RESUME_ANALYSIS_REQUESTED,
         {
@@ -50,6 +68,7 @@ export class RetryStuckResumesUseCase {
           objectPath: resume.objectPath,
           mimeType: resume.mimeType,
           originalFileName: resume.originalFileName,
+          signedDownloadUrl,
           requestedAt: now.toISOString(),
         },
       );

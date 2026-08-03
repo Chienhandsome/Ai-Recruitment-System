@@ -33,7 +33,13 @@ class Settings:
     # LLM (Gemini)
     gemini_api_key: str = field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
     llm_model: str = field(
-        default_factory=lambda: os.getenv("LLM_MODEL", "gemini-2.0-flash")
+        default_factory=lambda: os.getenv("LLM_MODEL", "gemini-2.5-flash")
+    )
+    prompt_version: str = field(
+        default_factory=lambda: os.getenv("RESUME_PROMPT_VERSION", "2.0")
+    )
+    parser_version: str = field(
+        default_factory=lambda: os.getenv("RESUME_PARSER_VERSION", "2.0")
     )
 
     # RabbitMQ topology

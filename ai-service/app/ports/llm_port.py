@@ -2,8 +2,11 @@
 
 from typing import Protocol
 
-from app.schemas.llm_output import ResumeExtractionResult
+from app.schemas.llm_output import LLMResumeExtraction
 
 
 class LLMPort(Protocol):
-    def extract(self, resume_text: str) -> ResumeExtractionResult: ...
+    @property
+    def model_name(self) -> str: ...
+
+    def extract(self, resume_text: str) -> LLMResumeExtraction: ...

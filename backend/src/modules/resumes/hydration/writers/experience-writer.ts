@@ -14,20 +14,25 @@ export class ExperienceWriter {
       where: { candidateProfileId, source: 'EXTRACTED', resumeId },
     });
 
-    if (experiences.length === 0) return;
+    const validExperiences = experiences.filter(
+      (experience) => experience.start_date,
+    );
+    if (validExperiences.length === 0) return;
 
     await tx.workExperience.createMany({
-      data: experiences.map((experience) => ({
+      data: validExperiences.map((experience) => ({
         candidateProfileId,
         resumeId,
         source: 'EXTRACTED',
         companyName: experience.company_name,
         positionTitle: experience.position_title,
-        startDate: new Date(experience.start_date),
+        startDate: new Date(experience.start_date!),
         endDate: experience.end_date ? new Date(experience.end_date) : null,
         isCurrent: experience.is_current,
         description: experience.description ?? null,
         achievements: experience.achievements ?? null,
+        isInferred: experience.is_inferred ?? false,
+        sourceText: experience.source_text ?? null,
       })),
     });
   }

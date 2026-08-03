@@ -106,6 +106,7 @@ enum ResumeParsingStatus {
   PROCESSING
   PARSED
   FAILED
+  SUPERSEDED
 }
 
 enum ApplicationSource {
@@ -190,6 +191,13 @@ enum UnrecognizedSkillStatus {
   APPROVED
   REJECTED
   MERGED
+}
+
+// Indicates whether a profile record was created manually by the user
+// or extracted automatically from a parsed CV.
+enum DataSource {
+  MANUAL
+  EXTRACTED
 }
 
 enum CandidateProfileStatus {
@@ -492,6 +500,10 @@ model Resume {
   candidateSkills        CandidateSkill[]
   applications           Application[]
   primaryForCandidateProfile CandidateProfile? @relation("PrimaryResume")
+  workExperiences        WorkExperience[]  @relation("WorkExperienceResume")
+  educations             Education[]       @relation("EducationResume")
+  projects               Project[]         @relation("ProjectResume")
+  certificates           Certificate[]     @relation("CertificateResume")
 
   @@index([parsingStatus])
   @@map("resumes")
@@ -537,6 +549,11 @@ model WorkExperience {
   id                 String           @id @default(uuid())
   candidateProfileId String           @map("candidate_profile_id")
   candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  // A3: track whether this record was entered manually or extracted from a CV.
+  // Hydration only deletes EXTRACTED rows, never MANUAL ones.
+  source             DataSource       @default(MANUAL)
+  resumeId           String?          @map("resume_id")
+  resume             Resume?          @relation("WorkExperienceResume", fields: [resumeId], references: [id], onDelete: SetNull)
   companyName        String           @map("company_name")
   positionTitle      String           @map("position_title")
   startDate          DateTime         @map("start_date") @db.Date
@@ -548,6 +565,7 @@ model WorkExperience {
   updatedAt          DateTime         @updatedAt @map("updated_at")
 
   @@index([candidateProfileId])
+  @@index([resumeId])
   @@map("work_experiences")
 }
 
@@ -555,6 +573,10 @@ model Education {
   id                 String           @id @default(uuid())
   candidateProfileId String           @map("candidate_profile_id")
   candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  // A3: track data source — hydration only deletes EXTRACTED rows.
+  source             DataSource       @default(MANUAL)
+  resumeId           String?          @map("resume_id")
+  resume             Resume?          @relation("EducationResume", fields: [resumeId], references: [id], onDelete: SetNull)
   schoolName         String           @map("school_name")
   major              String?
   degree             String?
@@ -565,6 +587,7 @@ model Education {
   updatedAt          DateTime         @updatedAt @map("updated_at")
 
   @@index([candidateProfileId])
+  @@index([resumeId])
   @@map("educations")
 }
 
@@ -572,6 +595,10 @@ model Project {
   id                 String           @id @default(uuid())
   candidateProfileId String           @map("candidate_profile_id")
   candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  // A3: track data source — hydration only deletes EXTRACTED rows.
+  source             DataSource       @default(MANUAL)
+  resumeId           String?          @map("resume_id")
+  resume             Resume?          @relation("ProjectResume", fields: [resumeId], references: [id], onDelete: SetNull)
   projectName        String           @map("project_name")
   projectRole        String?          @map("project_role")
   description        String?
@@ -583,6 +610,7 @@ model Project {
   updatedAt          DateTime         @updatedAt @map("updated_at")
 
   @@index([candidateProfileId])
+  @@index([resumeId])
   @@map("projects")
 }
 
@@ -590,6 +618,10 @@ model Certificate {
   id                  String           @id @default(uuid())
   candidateProfileId  String           @map("candidate_profile_id")
   candidateProfile    CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  // A3: track data source — hydration only deletes EXTRACTED rows.
+  source              DataSource       @default(MANUAL)
+  resumeId            String?          @map("resume_id")
+  resume              Resume?          @relation("CertificateResume", fields: [resumeId], references: [id], onDelete: SetNull)
   certificateName     String           @map("certificate_name")
   issuingOrganization String           @map("issuing_organization")
   issueDate           DateTime?        @map("issue_date") @db.Date
@@ -599,6 +631,7 @@ model Certificate {
   updatedAt           DateTime         @updatedAt @map("updated_at")
 
   @@index([candidateProfileId])
+  @@index([resumeId])
   @@map("certificates")
 }
 

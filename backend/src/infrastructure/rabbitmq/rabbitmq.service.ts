@@ -7,8 +7,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import * as amqp from 'amqp-connection-manager';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
-import type { Channel } from 'amqplib';
-import { RABBITMQ_EXCHANGE } from './rabbitmq.constants';
+import type { ConfirmChannel } from 'amqplib';
+import {
+  RABBITMQ_DEAD_LETTER_EXCHANGE,
+  RABBITMQ_EXCHANGE,
+  RABBITMQ_QUEUES,
+  RABBITMQ_ROUTING_KEYS,
+} from './rabbitmq.constants';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
@@ -53,10 +58,22 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
       this.channelWrapper = this.connection.createChannel({
         json: true,
-        setup: async (channel: Channel) => {
+        setup: async (channel: ConfirmChannel) => {
           await channel.assertExchange(RABBITMQ_EXCHANGE, 'topic', {
             durable: true,
           });
+          await channel.assertExchange(RABBITMQ_DEAD_LETTER_EXCHANGE, 'topic', {
+            durable: true,
+          });
+          await channel.assertQueue(
+            RABBITMQ_QUEUES.RESUME_ANALYSIS_DEAD_QUEUE,
+            { durable: true },
+          );
+          await channel.bindQueue(
+            RABBITMQ_QUEUES.RESUME_ANALYSIS_DEAD_QUEUE,
+            RABBITMQ_DEAD_LETTER_EXCHANGE,
+            RABBITMQ_ROUTING_KEYS.RESUME_ANALYSIS_DEAD,
+          );
         },
       });
     } catch (error: unknown) {
@@ -138,7 +155,9 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    await this.channelWrapper.addSetup(async (channel: Channel) => {
+    await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
+      // Keep the existing queue declaration compatible with already-provisioned
+      // environments. Failed deliveries are explicitly routed to the DLX below.
       await channel.assertQueue(queueName, { durable: true });
 
       for (const key of routingKeys) {
@@ -158,8 +177,31 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
           this.logger.error(
             `Error processing message from '${queueName}': ${this.getErrorMessage(error)}`,
           );
-          // Don't requeue — failed processing will keep failing
-          channel.nack(msg, false, false);
+          try {
+            const accepted = channel.publish(
+              RABBITMQ_DEAD_LETTER_EXCHANGE,
+              RABBITMQ_ROUTING_KEYS.RESUME_ANALYSIS_DEAD,
+              msg.content,
+              {
+                persistent: true,
+                contentType: msg.properties.contentType,
+                headers: {
+                  ...msg.properties.headers,
+                  'x-original-queue': queueName,
+                },
+              },
+            );
+            if (!accepted) {
+              throw new Error('Dead-letter channel write buffer is full');
+            }
+            await channel.waitForConfirms();
+            channel.ack(msg);
+          } catch (deadLetterError: unknown) {
+            this.logger.error(
+              `Failed to dead-letter message from '${queueName}': ${this.getErrorMessage(deadLetterError)}`,
+            );
+            channel.nack(msg, false, true);
+          }
         }
       });
 

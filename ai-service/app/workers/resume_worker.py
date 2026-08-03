@@ -1,26 +1,21 @@
-"""RabbitMQ worker that consumes resume analysis requests and publishes results."""
+"""Worker bootstrap: RabbitMQ connection and dependency composition only."""
 
-import json
 import logging
 import time
-from datetime import datetime, timezone
 
 import pika
 from pika.exceptions import AMQPConnectionError
 
+from app.adapters.gemini_llm import GeminiLLMAdapter
+from app.adapters.supabase_storage import SupabaseStorageAdapter
 from app.core.config import settings
-from app.schemas.resume_schemas import (
-    ResumeAnalysisCompleted,
-    ResumeAnalysisFailed,
-    ResumeAnalysisRequest,
-)
-from app.services.resume_parser import parse_resume
+from app.domain.resume.pipeline import ResumeParsingPipeline
+from app.transport.rabbitmq.consumer import ResumeMessageConsumer
 
 logger = logging.getLogger(__name__)
 
 
 def _get_connection() -> pika.BlockingConnection:
-    """Create a RabbitMQ connection with retry logic."""
     max_retries = 5
     retry_delay = 5
 
@@ -32,152 +27,95 @@ def _get_connection() -> pika.BlockingConnection:
             connection = pika.BlockingConnection(params)
             logger.info("Connected to RabbitMQ")
             return connection
-        except AMQPConnectionError as e:
-            if attempt < max_retries:
-                logger.warning(
-                    f"RabbitMQ connection attempt {attempt}/{max_retries} failed: {e}. "
-                    f"Retrying in {retry_delay}s..."
-                )
-                time.sleep(retry_delay)
-            else:
-                logger.error(f"Failed to connect to RabbitMQ after {max_retries} attempts")
+        except AMQPConnectionError:
+            if attempt == max_retries:
                 raise
-
-
-def _ensure_result_queue(channel):
-    """Ensure the result queue exists and is bound so messages are not lost
-    even if the backend hasn't subscribed yet."""
-    result_queue = f"{settings.rabbitmq_queue}_results"
-    channel.queue_declare(queue=result_queue, durable=True)
-    channel.queue_bind(
-        exchange=settings.rabbitmq_exchange,
-        queue=result_queue,
-        routing_key=settings.routing_key_completed,
-    )
-    channel.queue_bind(
-        exchange=settings.rabbitmq_exchange,
-        queue=result_queue,
-        routing_key=settings.routing_key_failed,
-    )
-
-
-def _publish_result(channel, routing_key: str, payload: dict):
-    """Publish a message to the exchange."""
-    channel.basic_publish(
-        exchange=settings.rabbitmq_exchange,
-        routing_key=routing_key,
-        body=json.dumps(payload),
-        properties=pika.BasicProperties(
-            delivery_mode=2,  # persistent
-            content_type="application/json",
-        ),
-    )
-    logger.info(f"Published message to '{routing_key}'")
-
-
-def _process_message(channel, method, properties, body):
-    """Process a single resume analysis request."""
-    try:
-        raw = json.loads(body)
-        request = ResumeAnalysisRequest.model_validate(raw)
-
-        logger.info(
-            f"Processing resume: id={request.resume_id}, "
-            f"file={request.original_file_name}"
-        )
-
-        # Run the parsing pipeline
-        result = parse_resume(request)
-
-        # Publish success
-        completed = ResumeAnalysisCompleted(
-            resumeId=request.resume_id,
-            candidateProfileId=request.candidate_profile_id,
-            parsedData=result,
-            completedAt=datetime.now(timezone.utc).isoformat(),
-        )
-
-        _publish_result(
-            channel,
-            settings.routing_key_completed,
-            completed.model_dump(mode="json"),
-        )
-
-        # Acknowledge the message
-        channel.basic_ack(delivery_tag=method.delivery_tag)
-        logger.info(f"Resume {request.resume_id} analysis completed successfully")
-
-    except json.JSONDecodeError as e:
-        logger.error(f"Invalid JSON in message: {e}")
-        # Reject malformed messages (don't requeue)
-        channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
-
-    except Exception as e:
-        logger.error(f"Resume analysis failed: {e}", exc_info=True)
-
-        # Try to publish failure notification
-        try:
-            raw_data = json.loads(body)
-            failed = ResumeAnalysisFailed(
-                resumeId=raw_data.get("resumeId", "unknown"),
-                candidateProfileId=raw_data.get("candidateProfileId", "unknown"),
-                errorMessage=str(e)[:500],
-                failedAt=datetime.now(timezone.utc).isoformat(),
+            logger.warning(
+                "RabbitMQ connection attempt %d/%d failed; retrying in %ds",
+                attempt,
+                max_retries,
+                retry_delay,
             )
-            _publish_result(
-                channel,
-                settings.routing_key_failed,
-                failed.model_dump(mode="json"),
-            )
-        except Exception as pub_err:
-            logger.error(f"Failed to publish failure notification: {pub_err}")
+            time.sleep(retry_delay)
 
-        # Acknowledge (don't requeue failed analysis — it will keep failing)
-        channel.basic_ack(delivery_tag=method.delivery_tag)
+    raise RuntimeError("RabbitMQ connection retry loop exited unexpectedly")
 
 
-def start_worker():
-    """Start the RabbitMQ consumer loop."""
-    logger.info("Starting resume analysis worker...")
-
-    connection = _get_connection()
-    channel = connection.channel()
-
-    # Declare exchange
+def _declare_topology(channel) -> None:
     channel.exchange_declare(
         exchange=settings.rabbitmq_exchange,
         exchange_type="topic",
         durable=True,
     )
+    channel.exchange_declare(
+        exchange=settings.rabbitmq_dead_letter_exchange,
+        exchange_type="topic",
+        durable=True,
+    )
+    channel.queue_declare(
+        queue=settings.rabbitmq_dead_letter_queue,
+        durable=True,
+    )
+    channel.queue_bind(
+        exchange=settings.rabbitmq_dead_letter_exchange,
+        queue=settings.rabbitmq_dead_letter_queue,
+        routing_key=settings.routing_key_dead,
+    )
 
-    # Declare and bind result queue (so completed/failed messages are never lost)
-    _ensure_result_queue(channel)
+    result_queue = f"{settings.rabbitmq_queue}_results"
+    channel.queue_declare(
+        queue=result_queue,
+        durable=True,
+    )
+    for routing_key in (
+        settings.routing_key_completed,
+        settings.routing_key_failed,
+    ):
+        channel.queue_bind(
+            exchange=settings.rabbitmq_exchange,
+            queue=result_queue,
+            routing_key=routing_key,
+        )
 
-    # Declare queue for incoming requests
-    channel.queue_declare(queue=settings.rabbitmq_queue, durable=True)
-
-    # Bind queue to exchange with routing key
+    channel.queue_declare(
+        queue=settings.rabbitmq_queue,
+        durable=True,
+    )
     channel.queue_bind(
         exchange=settings.rabbitmq_exchange,
         queue=settings.rabbitmq_queue,
         routing_key=settings.routing_key_requested,
     )
 
-    # Only process 1 message at a time (important for CPU-intensive LLM calls)
+
+def build_consumer() -> ResumeMessageConsumer:
+    pipeline = ResumeParsingPipeline(
+        storage=SupabaseStorageAdapter.from_settings(),
+        llm=GeminiLLMAdapter.from_settings(),
+    )
+    return ResumeMessageConsumer(pipeline, settings)
+
+
+def start_worker() -> None:
+    logger.info("Starting resume analysis worker")
+    connection = _get_connection()
+    channel = connection.channel()
+    channel.confirm_delivery()
+    _declare_topology(channel)
     channel.basic_qos(prefetch_count=1)
 
-    # Start consuming
+    consumer = build_consumer()
     channel.basic_consume(
         queue=settings.rabbitmq_queue,
-        on_message_callback=_process_message,
+        on_message_callback=consumer.process_message,
         auto_ack=False,
     )
 
     logger.info(
-        f"Worker listening on queue '{settings.rabbitmq_queue}' "
-        f"(routing_key: '{settings.routing_key_requested}')"
+        "Worker listening on queue '%s' (%s)",
+        settings.rabbitmq_queue,
+        settings.routing_key_requested,
     )
-
     try:
         channel.start_consuming()
     except KeyboardInterrupt:

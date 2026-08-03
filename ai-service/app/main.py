@@ -1,8 +1,7 @@
-"""AI Recruitment Service — FastAPI app with background RabbitMQ worker."""
+"""AI Recruitment HTTP service (the RabbitMQ worker is a separate process)."""
 
 import logging
 import os
-import threading
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -46,17 +45,13 @@ class HealthResponse(BaseModel):
     worker: str
 
 
-# Track worker status
-_worker_status = "not_started"
-
-
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     return HealthResponse(
         service="ai-service",
         status="UP",
         version="0.2.0",
-        worker=_worker_status,
+        worker="separate_process",
     )
 
 
@@ -65,39 +60,8 @@ async def root():
     return {
         "message": "AI Recruitment Service is running",
         "docs_url": "/docs",
-        "worker_status": _worker_status,
+        "worker_status": "separate_process",
     }
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Start the RabbitMQ worker in a background thread on app startup."""
-    global _worker_status
-
-    # Only start worker if RabbitMQ URL is configured
-    rabbitmq_url = os.getenv("RABBITMQ_URL", "")
-    if not rabbitmq_url or "guest:guest@localhost" in rabbitmq_url:
-        logger.warning(
-            "RABBITMQ_URL not configured or using localhost default. "
-            "Resume worker will NOT start."
-        )
-        _worker_status = "disabled"
-        return
-
-    def run_worker():
-        global _worker_status
-        try:
-            _worker_status = "running"
-            logger.info("Starting resume worker in background thread...")
-            from app.workers.resume_worker import start_worker
-            start_worker()
-        except Exception as e:
-            _worker_status = f"failed: {e}"
-            logger.error(f"Resume worker failed: {e}", exc_info=True)
-
-    worker_thread = threading.Thread(target=run_worker, daemon=True, name="resume-worker")
-    worker_thread.start()
-    logger.info("Resume worker thread started")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
 
 export interface SkillCategoryData {
   id: string;
@@ -27,6 +26,8 @@ export interface SkillData {
 export interface UnrecognizedSkillData {
   id: string;
   rawSkillName: string;
+  normalizedName?: string | null;
+  categoryHint?: string | null;
   frequency: number;
   status: string;
   createdAt: string;
@@ -127,9 +128,9 @@ export async function updateAdminJobStatus(
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status })
   });
   if (!res.ok) {
     const text = await res.text();
@@ -142,8 +143,8 @@ export async function deleteAdminJob(token: string, jobId: string): Promise<void
   const res = await fetch(`${API_URL}/admin/jobs/${jobId}`, {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${token}`,
-    },
+      Authorization: `Bearer ${token}`
+    }
   });
   if (!res.ok) {
     const text = await res.text();
@@ -183,9 +184,9 @@ export async function updateAdminUserStatus(
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status })
   });
   if (!res.ok) {
     const text = await res.text();
@@ -198,8 +199,8 @@ export async function deleteAdminUser(token: string, userId: string): Promise<vo
   const res = await fetch(`${API_URL}/admin/users/${userId}`, {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${token}`,
-    },
+      Authorization: `Bearer ${token}`
+    }
   });
   if (!res.ok) {
     const text = await res.text();
@@ -223,7 +224,7 @@ export async function fetchSkills(categoryId?: string, search?: string): Promise
   const data = await res.json();
   return data.map((item: SkillData) => ({
     ...item,
-    aliases: item.skillAliases ?? item.aliases ?? [],
+    aliases: item.skillAliases ?? item.aliases ?? []
   }));
 }
 
@@ -239,14 +240,18 @@ export async function fetchCategories(): Promise<SkillCategoryData[]> {
   return res.json();
 }
 
-export async function createNewSkill(token: string, name: string, categoryId: string): Promise<SkillData> {
+export async function createNewSkill(
+  token: string,
+  name: string,
+  categoryId: string
+): Promise<SkillData> {
   const res = await fetch(`${API_URL}/skills`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ name, categoryId }),
+    body: JSON.stringify({ name, categoryId })
   });
   if (!res.ok) {
     const text = await res.text();
@@ -264,9 +269,9 @@ export async function updateSkill(
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
   if (!res.ok) {
     const text = await res.text();
@@ -275,14 +280,18 @@ export async function updateSkill(
   return res.json();
 }
 
-export async function addSkillAlias(token: string, skillId: string, aliasName: string): Promise<SkillAliasData> {
+export async function addSkillAlias(
+  token: string,
+  skillId: string,
+  aliasName: string
+): Promise<SkillAliasData> {
   const res = await fetch(`${API_URL}/skills/${skillId}/aliases`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ aliasName }),
+    body: JSON.stringify({ aliasName })
   });
   if (!res.ok) {
     const text = await res.text();
@@ -295,8 +304,8 @@ export async function deleteSkillAlias(token: string, aliasId: string): Promise<
   const res = await fetch(`${API_URL}/skills/aliases/${aliasId}`, {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${token}`,
-    },
+      Authorization: `Bearer ${token}`
+    }
   });
   if (!res.ok) {
     const text = await res.text();
@@ -316,14 +325,18 @@ export async function fetchUnrecognizedSkills(): Promise<UnrecognizedSkillData[]
   return res.json();
 }
 
-export async function mapUnrecognizedSkill(token: string, id: string, targetSkillId: string): Promise<void> {
+export async function mapUnrecognizedSkill(
+  token: string,
+  id: string,
+  targetSkillId: string
+): Promise<void> {
   const res = await fetch(`${API_URL}/skills/unrecognized/${id}/map`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ targetSkillId }),
+    body: JSON.stringify({ targetSkillId })
   });
   if (!res.ok) {
     const text = await res.text();
@@ -331,14 +344,18 @@ export async function mapUnrecognizedSkill(token: string, id: string, targetSkil
   }
 }
 
-export async function approveUnrecognizedSkill(token: string, id: string, categoryId: string): Promise<SkillData> {
+export async function approveUnrecognizedSkill(
+  token: string,
+  id: string,
+  categoryId: string
+): Promise<SkillData> {
   const res = await fetch(`${API_URL}/skills/unrecognized/${id}/approve`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ categoryId }),
+    body: JSON.stringify({ categoryId })
   });
   if (!res.ok) {
     const text = await res.text();
@@ -351,8 +368,8 @@ export async function rejectUnrecognizedSkill(token: string, id: string): Promis
   const res = await fetch(`${API_URL}/skills/unrecognized/${id}`, {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${token}`,
-    },
+      Authorization: `Bearer ${token}`
+    }
   });
   if (!res.ok) {
     const text = await res.text();

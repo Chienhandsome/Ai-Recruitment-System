@@ -28,4 +28,5 @@ class ResumeAnalysisFailed(BaseModel):
     resumeId: str
     candidateProfileId: str
     errorMessage: str
+    errorCode: str | None = None
     failedAt: str

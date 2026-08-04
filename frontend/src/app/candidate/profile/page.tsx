@@ -10,7 +10,9 @@ export default async function CandidateProfilePage() {
 
   // Fetch candidate skills server-side
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const {
+    data: { session }
+  } = await supabase.auth.getSession()
   let initialSkills: Awaited<ReturnType<typeof getCandidateSkills>> = []
   if (session?.access_token) {
     try {
@@ -34,6 +36,7 @@ export default async function CandidateProfilePage() {
 
         <div>
           <ProfilePageClient
+            profileStatus={profile.candidateProfile?.status ?? "EMPTY"}
             fullName={profile.fullName}
             email={profile.email}
             phone={profile.phone}

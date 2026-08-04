@@ -11,7 +11,7 @@ export class CertificateWriter {
     certificates: ParsedResumeData['certificates'],
   ): Promise<void> {
     await tx.certificate.deleteMany({
-      where: { candidateProfileId, source: 'EXTRACTED', resumeId },
+      where: { candidateProfileId, source: 'EXTRACTED' },
     });
 
     if (certificates.length === 0) return;

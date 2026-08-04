@@ -5,9 +5,6 @@ import {
   Save,
   X,
   User,
-  Mail,
-  Phone,
-  MapPin,
   Briefcase,
   FileText,
   Globe,
@@ -17,7 +14,7 @@ import {
   FolderGit2,
   Award,
   Plus,
-  Trash2,
+  Trash2
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -27,12 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/client"
 import { updateCandidateProfile } from "@/lib/candidate-api"
 import { ResumeUpload } from "@/components/candidate/resume-upload"
-import type {
-  WorkExperienceData,
-  EducationData,
-  ProjectData,
-  CertificateData,
-} from "@/types/auth"
+import type { WorkExperienceData, EducationData, ProjectData, CertificateData } from "@/types/auth"
 
 interface ProfileFormProps {
   fullName: string
@@ -68,7 +60,7 @@ export function ProfileForm({
   initialProjects = [],
   initialCertificates = [],
   onCancel,
-  onSaved,
+  onSaved
 }: ProfileFormProps) {
   const [isSaving, setIsSaving] = React.useState(false)
   const [saveMessage, setSaveMessage] = React.useState<string | null>(null)
@@ -100,7 +92,8 @@ export function ProfileForm({
         isCurrent: false,
         description: null,
         achievements: null,
-      },
+        source: "MANUAL"
+      }
     ])
   }
 
@@ -108,10 +101,14 @@ export function ProfileForm({
     setWorkExps((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const updateWorkExp = (index: number, field: keyof WorkExperienceData, value: any) => {
+  const updateWorkExp = <K extends keyof WorkExperienceData>(
+    index: number,
+    field: K,
+    value: WorkExperienceData[K]
+  ) => {
     setWorkExps((prev) => {
       const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
+      updated[index] = { ...updated[index], [field]: value, source: "MANUAL" }
       return updated
     })
   }
@@ -128,7 +125,8 @@ export function ProfileForm({
         startDate: null,
         endDate: null,
         description: null,
-      },
+        source: "MANUAL"
+      }
     ])
   }
 
@@ -136,10 +134,14 @@ export function ProfileForm({
     setEducations((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const updateEducation = (index: number, field: keyof EducationData, value: any) => {
+  const updateEducation = <K extends keyof EducationData>(
+    index: number,
+    field: K,
+    value: EducationData[K]
+  ) => {
     setEducations((prev) => {
       const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
+      updated[index] = { ...updated[index], [field]: value, source: "MANUAL" }
       return updated
     })
   }
@@ -157,7 +159,8 @@ export function ProfileForm({
         projectUrl: null,
         startDate: null,
         endDate: null,
-      },
+        source: "MANUAL"
+      }
     ])
   }
 
@@ -165,10 +168,14 @@ export function ProfileForm({
     setProjects((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const updateProject = (index: number, field: keyof ProjectData, value: any) => {
+  const updateProject = <K extends keyof ProjectData>(
+    index: number,
+    field: K,
+    value: ProjectData[K]
+  ) => {
     setProjects((prev) => {
       const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
+      updated[index] = { ...updated[index], [field]: value, source: "MANUAL" }
       return updated
     })
   }
@@ -184,7 +191,8 @@ export function ProfileForm({
         issueDate: null,
         expiryDate: null,
         credentialUrl: null,
-      },
+        source: "MANUAL"
+      }
     ])
   }
 
@@ -192,10 +200,14 @@ export function ProfileForm({
     setCertificates((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const updateCertificate = (index: number, field: keyof CertificateData, value: any) => {
+  const updateCertificate = <K extends keyof CertificateData>(
+    index: number,
+    field: K,
+    value: CertificateData[K]
+  ) => {
     setCertificates((prev) => {
       const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
+      updated[index] = { ...updated[index], [field]: value, source: "MANUAL" }
       return updated
     })
   }
@@ -209,7 +221,9 @@ export function ProfileForm({
 
     try {
       const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session }
+      } = await supabase.auth.getSession()
 
       if (!session?.access_token) {
         setSaveMessage("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
@@ -221,43 +235,53 @@ export function ProfileForm({
       const validWorkExps = workExps
         .filter((w) => w.companyName.trim() && w.positionTitle.trim())
         .map((w) => ({
+          id: w.id.startsWith("temp-") ? undefined : w.id,
+          source: w.source ?? "MANUAL",
           companyName: w.companyName.trim(),
           positionTitle: w.positionTitle.trim(),
           startDate: w.startDate || undefined,
           endDate: w.endDate || null,
           isCurrent: w.isCurrent,
           description: w.description || null,
-          achievements: w.achievements || null,
+          achievements: w.achievements || null
         }))
 
       const validEducations = educations
         .filter((e) => e.schoolName.trim())
         .map((e) => ({
+          id: e.id.startsWith("temp-") ? undefined : e.id,
+          source: e.source ?? "MANUAL",
           schoolName: e.schoolName.trim(),
           major: e.major || null,
           degree: e.degree || null,
           startDate: e.startDate || null,
-          endDate: e.endDate || null,
+          endDate: e.endDate || null
         }))
 
       const validProjects = projects
         .filter((p) => p.projectName.trim())
         .map((p) => ({
+          id: p.id.startsWith("temp-") ? undefined : p.id,
+          source: p.source ?? "MANUAL",
           projectName: p.projectName.trim(),
           projectRole: p.projectRole || null,
           description: p.description || null,
-          technologies: p.technologies || null,
+          technologies: p.technologies
+            ? p.technologies.map((technology) => technology.trim()).filter(Boolean)
+            : null,
           projectUrl: p.projectUrl || null,
           startDate: p.startDate || null,
-          endDate: p.endDate || null,
+          endDate: p.endDate || null
         }))
 
       const validCertificates = certificates
         .filter((c) => c.certificateName.trim())
         .map((c) => ({
+          id: c.id.startsWith("temp-") ? undefined : c.id,
+          source: c.source ?? "MANUAL",
           certificateName: c.certificateName.trim(),
           issuingOrganization: c.issuingOrganization || "Unknown",
-          issueDate: c.issueDate || null,
+          issueDate: c.issueDate || null
         }))
 
       await updateCandidateProfile(session.access_token, {
@@ -272,7 +296,7 @@ export function ProfileForm({
         workExperiences: validWorkExps,
         educations: validEducations,
         projects: validProjects,
-        certificates: validCertificates,
+        certificates: validCertificates
       })
 
       setSaveMessage("Đã lưu thông tin thành công!")
@@ -280,9 +304,7 @@ export function ProfileForm({
         onSaved()
       }, 800)
     } catch (error) {
-      setSaveMessage(
-        error instanceof Error ? error.message : "Có lỗi xảy ra khi lưu thông tin."
-      )
+      setSaveMessage(error instanceof Error ? error.message : "Có lỗi xảy ra khi lưu thông tin.")
     } finally {
       setIsSaving(false)
     }
@@ -460,11 +482,15 @@ export function ProfileForm({
         <CardContent className="space-y-4">
           {workExps.length === 0 ? (
             <p className="text-xs text-[#64748B] text-center py-4 border border-dashed border-[#E2E8F0] rounded-xl bg-[#F8FAFC]">
-              Chưa có kinh nghiệm làm việc nào. Bấm nút "Thêm kinh nghiệm" ở trên để bổ sung.
+              Chưa có kinh nghiệm làm việc nào. Bấm nút &quot;Thêm kinh nghiệm&quot; ở trên để bổ
+              sung.
             </p>
           ) : (
             workExps.map((exp, idx) => (
-              <div key={exp.id || idx} className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3 relative">
+              <div
+                key={exp.id || idx}
+                className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3 relative"
+              >
                 <Button
                   type="button"
                   onClick={() => removeWorkExp(idx)}
@@ -495,7 +521,9 @@ export function ProfileForm({
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-[#0F172A]">Mô tả công việc & Thành tựu</Label>
+                  <Label className="text-xs font-bold text-[#0F172A]">
+                    Mô tả công việc & Thành tựu
+                  </Label>
                   <Textarea
                     value={exp.description ?? ""}
                     onChange={(e) => updateWorkExp(idx, "description", e.target.value)}
@@ -532,11 +560,14 @@ export function ProfileForm({
         <CardContent className="space-y-4">
           {educations.length === 0 ? (
             <p className="text-xs text-[#64748B] text-center py-4 border border-dashed border-[#E2E8F0] rounded-xl bg-[#F8FAFC]">
-              Chưa có học vấn nào. Bấm nút "Thêm trường học" ở trên để bổ sung.
+              Chưa có học vấn nào. Bấm nút &quot;Thêm trường học&quot; ở trên để bổ sung.
             </p>
           ) : (
             educations.map((edu, idx) => (
-              <div key={edu.id || idx} className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3 relative">
+              <div
+                key={edu.id || idx}
+                className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3 relative"
+              >
                 <Button
                   type="button"
                   onClick={() => removeEducation(idx)}
@@ -602,11 +633,14 @@ export function ProfileForm({
         <CardContent className="space-y-4">
           {projects.length === 0 ? (
             <p className="text-xs text-[#64748B] text-center py-4 border border-dashed border-[#E2E8F0] rounded-xl bg-[#F8FAFC]">
-              Chưa có dự án nào. Bấm nút "Thêm dự án" ở trên để bổ sung.
+              Chưa có dự án nào. Bấm nút &quot;Thêm dự án&quot; ở trên để bổ sung.
             </p>
           ) : (
             projects.map((proj, idx) => (
-              <div key={proj.id || idx} className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3 relative">
+              <div
+                key={proj.id || idx}
+                className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3 relative"
+              >
                 <Button
                   type="button"
                   onClick={() => removeProject(idx)}
@@ -640,14 +674,22 @@ export function ProfileForm({
                   <div className="space-y-1">
                     <Label className="text-xs font-bold text-[#0F172A]">Công nghệ sử dụng</Label>
                     <Input
-                      value={Array.isArray(proj.technologies) ? proj.technologies.join(", ") : proj.technologies ?? ""}
-                      onChange={(e) => updateProject(idx, "technologies", e.target.value)}
+                      value={
+                        Array.isArray(proj.technologies)
+                          ? proj.technologies.join(", ")
+                          : (proj.technologies ?? "")
+                      }
+                      onChange={(e) =>
+                        updateProject(idx, "technologies", e.target.value.split(","))
+                      }
                       placeholder="React, Next.js, NestJS, Postgres..."
                       className="bg-white border-[#E2E8F0] text-xs rounded-xl"
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-[#0F172A]">Đường dẫn dự án (URL)</Label>
+                    <Label className="text-xs font-bold text-[#0F172A]">
+                      Đường dẫn dự án (URL)
+                    </Label>
                     <Input
                       value={proj.projectUrl ?? ""}
                       onChange={(e) => updateProject(idx, "projectUrl", e.target.value)}
@@ -695,11 +737,14 @@ export function ProfileForm({
         <CardContent className="space-y-4">
           {certificates.length === 0 ? (
             <p className="text-xs text-[#64748B] text-center py-4 border border-dashed border-[#E2E8F0] rounded-xl bg-[#F8FAFC]">
-              Chưa có chứng chỉ nào. Bấm nút "Thêm chứng chỉ" ở trên để bổ sung.
+              Chưa có chứng chỉ nào. Bấm nút &quot;Thêm chứng chỉ&quot; ở trên để bổ sung.
             </p>
           ) : (
             certificates.map((cert, idx) => (
-              <div key={cert.id || idx} className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3 relative">
+              <div
+                key={cert.id || idx}
+                className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3 relative"
+              >
                 <Button
                   type="button"
                   onClick={() => removeCertificate(idx)}
@@ -722,7 +767,9 @@ export function ProfileForm({
                     <Label className="text-xs font-bold text-[#0F172A]">Đơn vị cấp</Label>
                     <Input
                       value={cert.issuingOrganization}
-                      onChange={(e) => updateCertificate(idx, "issuingOrganization", e.target.value)}
+                      onChange={(e) =>
+                        updateCertificate(idx, "issuingOrganization", e.target.value)
+                      }
                       placeholder="Ví dụ: Amazon Web Services"
                       className="bg-white border-[#E2E8F0] text-xs rounded-xl"
                     />
@@ -747,7 +794,10 @@ export function ProfileForm({
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="linkedinUrl" className="text-xs font-bold text-[#0F172A] flex items-center gap-1">
+              <Label
+                htmlFor="linkedinUrl"
+                className="text-xs font-bold text-[#0F172A] flex items-center gap-1"
+              >
                 <Briefcase className="h-3.5 w-3.5 text-[#2563EB]" />
                 LinkedIn URL
               </Label>
@@ -762,7 +812,10 @@ export function ProfileForm({
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="githubUrl" className="text-xs font-bold text-[#0F172A] flex items-center gap-1">
+              <Label
+                htmlFor="githubUrl"
+                className="text-xs font-bold text-[#0F172A] flex items-center gap-1"
+              >
                 <Link2 className="h-3.5 w-3.5 text-[#0F172A]" />
                 GitHub URL
               </Label>
@@ -777,7 +830,10 @@ export function ProfileForm({
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="portfolioUrl" className="text-xs font-bold text-[#0F172A] flex items-center gap-1">
+              <Label
+                htmlFor="portfolioUrl"
+                className="text-xs font-bold text-[#0F172A] flex items-center gap-1"
+              >
                 <Globe className="h-3.5 w-3.5 text-[#10B981]" />
                 Portfolio / Website
               </Label>
@@ -814,15 +870,15 @@ export function ProfileForm({
         {saveMessage ? (
           <p
             className={`text-xs font-bold ${
-              saveMessage.includes("thành công")
-                ? "text-[#10B981]"
-                : "text-rose-600"
+              saveMessage.includes("thành công") ? "text-[#10B981]" : "text-rose-600"
             }`}
           >
             {saveMessage}
           </p>
         ) : (
-          <p className="text-xs text-[#64748B]">Nhấn Lưu thay đổi để hoàn tất quá trình chỉnh sửa</p>
+          <p className="text-xs text-[#64748B]">
+            Nhấn Lưu thay đổi để hoàn tất quá trình chỉnh sửa
+          </p>
         )}
 
         <div className="flex items-center gap-3">

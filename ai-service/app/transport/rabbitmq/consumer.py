@@ -106,6 +106,7 @@ class ResumeMessageConsumer:
                 resumeId=str(resume_id),
                 candidateProfileId=str(candidate_id),
                 errorMessage=str(error)[:500],
+                errorCode=getattr(error, "error_code", None),
                 failedAt=datetime.now(timezone.utc).isoformat(),
             )
             try:

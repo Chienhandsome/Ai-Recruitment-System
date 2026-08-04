@@ -4,6 +4,7 @@ import zipfile
 import pytest
 
 from app.domain.resume.exceptions import ResumeValidationError
+from app.domain.resume.steps import file_validator
 from app.domain.resume.steps.file_validator import (
     DOCX_MIME,
     PDF_MIME,
@@ -32,4 +33,14 @@ def test_rejects_declared_mime_mismatch_and_generic_zip():
     with zipfile.ZipFile(stream, "w") as archive:
         archive.writestr("notes.txt", "not a docx")
     with pytest.raises(ResumeValidationError, match="not recognized"):
+        detect_real_mime(stream.getvalue())
+
+
+def test_rejects_docx_with_unsafe_uncompressed_size(monkeypatch):
+    monkeypatch.setattr(file_validator, "MAX_DOCX_UNCOMPRESSED_BYTES", 10)
+    stream = io.BytesIO()
+    with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("word/document.xml", "A" * 11)
+
+    with pytest.raises(ResumeValidationError, match="50MB safety limit"):
         detect_real_mime(stream.getvalue())

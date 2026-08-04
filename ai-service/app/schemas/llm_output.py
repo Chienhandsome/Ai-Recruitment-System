@@ -38,23 +38,31 @@ def _valid_iso_date(value: object) -> Optional[str]:
 
 class ExtractedEvidence(BaseModel):
     is_inferred: bool = Field(
-        default=False,
+        ...,
         description="True only when this value is inferred rather than explicit",
     )
     source_text: Optional[str] = Field(
-        default=None,
+        ...,
         max_length=500,
         description="Short verbatim CV excerpt supporting this value",
     )
+
+    @model_validator(mode="after")
+    def require_inference_without_evidence(self) -> "ExtractedEvidence":
+        if self.source_text is not None:
+            self.source_text = self.source_text.strip() or None
+        if self.source_text is None:
+            self.is_inferred = True
+        return self
 
 
 class ExtractedSkill(ExtractedEvidence):
     name: str = Field(..., description="Skill name as written in CV")
     proficiency_level: ProficiencyLevel = Field(
-        default=ProficiencyLevel.BEGINNER,
+        ...,
         description="Estimated proficiency level",
     )
-    category_hint: SkillCategoryHint = Field(default=SkillCategoryHint.IT)
+    category_hint: SkillCategoryHint
 
 
 class ExtractedWorkExperience(ExtractedEvidence):
@@ -65,13 +73,13 @@ class ExtractedWorkExperience(ExtractedEvidence):
         default=None,
         description="Format: YYYY-MM-DD or null if current",
     )
-    is_current: bool = False
+    is_current: bool
     description: Optional[str] = None
     achievements: Optional[str] = None
 
-    _validate_dates = field_validator(
-        "start_date", "end_date", mode="before"
-    )(_valid_iso_date)
+    _validate_dates = field_validator("start_date", "end_date", mode="before")(
+        _valid_iso_date
+    )
 
     @model_validator(mode="after")
     def validate_date_range(self) -> "ExtractedWorkExperience":
@@ -90,9 +98,9 @@ class ExtractedEducation(ExtractedEvidence):
     end_date: Optional[str] = Field(default=None, description="Format: YYYY-MM-DD")
     description: Optional[str] = None
 
-    _validate_dates = field_validator(
-        "start_date", "end_date", mode="before"
-    )(_valid_iso_date)
+    _validate_dates = field_validator("start_date", "end_date", mode="before")(
+        _valid_iso_date
+    )
 
     @model_validator(mode="after")
     def validate_date_range(self) -> "ExtractedEducation":
@@ -110,9 +118,9 @@ class ExtractedProject(ExtractedEvidence):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
 
-    _validate_dates = field_validator(
-        "start_date", "end_date", mode="before"
-    )(_valid_iso_date)
+    _validate_dates = field_validator("start_date", "end_date", mode="before")(
+        _valid_iso_date
+    )
 
     @model_validator(mode="after")
     def validate_date_range(self) -> "ExtractedProject":
@@ -128,9 +136,9 @@ class ExtractedCertificate(ExtractedEvidence):
     expiry_date: Optional[str] = None
     credential_url: Optional[str] = None
 
-    _validate_dates = field_validator(
-        "issue_date", "expiry_date", mode="before"
-    )(_valid_iso_date)
+    _validate_dates = field_validator("issue_date", "expiry_date", mode="before")(
+        _valid_iso_date
+    )
 
     @model_validator(mode="after")
     def validate_date_range(self) -> "ExtractedCertificate":
@@ -159,6 +167,12 @@ class LLMResumeExtraction(ResumeExtractionPayload):
     """Schema sent to Gemini Structured Output."""
 
     overall_confidence: float = Field(..., ge=0.0, le=1.0)
+    skills: list[ExtractedSkill]
+    work_experiences: list[ExtractedWorkExperience]
+    educations: list[ExtractedEducation]
+    projects: list[ExtractedProject]
+    certificates: list[ExtractedCertificate]
+    languages: list[ExtractedLanguage]
 
 
 class ResumeExtractionResult(ResumeExtractionPayload):

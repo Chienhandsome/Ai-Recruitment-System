@@ -20,6 +20,12 @@ class FakeLLM:
         return LLMResumeExtraction(
             summary="Backend engineer",
             overall_confidence=0.9,
+            skills=[],
+            work_experiences=[],
+            educations=[],
+            projects=[],
+            certificates=[],
+            languages=[],
         )
 
     @property

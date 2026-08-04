@@ -18,6 +18,7 @@ interface ResumeAnalysisFailedMessage {
   resumeId: string;
   candidateProfileId: string;
   errorMessage: string;
+  errorCode?: string;
   failedAt: string;
 }
 
@@ -89,6 +90,7 @@ export class ResumeResultListener implements OnModuleInit {
       message.resumeId,
       message.candidateProfileId,
       message.errorMessage,
+      message.errorCode,
     );
   }
 }

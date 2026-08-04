@@ -1,7 +1,29 @@
-import { IsArray, IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class WorkExperienceInputDto {
+class SourcedProfileRecordInputDto {
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  id?: string;
+
+  @ApiPropertyOptional({ enum: ['MANUAL', 'EXTRACTED'] })
+  @IsOptional()
+  @IsIn(['MANUAL', 'EXTRACTED'])
+  source?: 'MANUAL' | 'EXTRACTED';
+}
+
+export class WorkExperienceInputDto extends SourcedProfileRecordInputDto {
   @IsString()
   companyName!: string;
 
@@ -29,7 +51,7 @@ export class WorkExperienceInputDto {
   achievements?: string | null;
 }
 
-export class EducationInputDto {
+export class EducationInputDto extends SourcedProfileRecordInputDto {
   @IsString()
   schoolName!: string;
 
@@ -50,7 +72,7 @@ export class EducationInputDto {
   endDate?: string | null;
 }
 
-export class ProjectInputDto {
+export class ProjectInputDto extends SourcedProfileRecordInputDto {
   @IsString()
   projectName!: string;
 
@@ -78,7 +100,7 @@ export class ProjectInputDto {
   endDate?: string | null;
 }
 
-export class CertificateInputDto {
+export class CertificateInputDto extends SourcedProfileRecordInputDto {
   @IsString()
   certificateName!: string;
 
@@ -142,17 +164,25 @@ export class UpdateCandidateProfileDto {
 
   @IsOptional()
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WorkExperienceInputDto)
   workExperiences?: WorkExperienceInputDto[];
 
   @IsOptional()
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EducationInputDto)
   educations?: EducationInputDto[];
 
   @IsOptional()
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProjectInputDto)
   projects?: ProjectInputDto[];
 
   @IsOptional()
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CertificateInputDto)
   certificates?: CertificateInputDto[];
 }

@@ -35,6 +35,13 @@ describe('SkillResolverService', () => {
         OR: [
           { normalizedName: 'python' },
           { name: { equals: 'Python', mode: 'insensitive' } },
+          {
+            skillAliases: {
+              some: {
+                aliasName: { equals: 'Python', mode: 'insensitive' },
+              },
+            },
+          },
         ],
       },
     });
@@ -119,6 +126,54 @@ describe('SkillResolverService', () => {
         categoryHint: 'IT',
         frequency: { increment: 1 },
       },
+    });
+  });
+
+  it('resolves an admin-mapped alias to its active skill', async () => {
+    const prisma = {
+      skill: { findFirst: jest.fn().mockResolvedValue({ id: 'nodejs' }) },
+      unrecognizedSkill: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+      },
+    } as any;
+    const resolver = new SkillResolverService(
+      prisma,
+      new SkillNormalizerService(),
+    );
+
+    await expect(
+      resolver.resolveAll([
+        {
+          name: 'Node JS',
+          proficiency_level: 'ADVANCED',
+          category_hint: 'IT',
+        },
+      ]),
+    ).resolves.toEqual([
+      {
+        skillId: 'nodejs',
+        proficiencyLevel: 'ADVANCED',
+        isInferred: false,
+        sourceText: null,
+      },
+    ]);
+
+    expect(prisma.skill.findFirst).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        status: 'ACTIVE',
+        OR: expect.arrayContaining([
+          {
+            skillAliases: {
+              some: {
+                aliasName: { equals: 'Node JS', mode: 'insensitive' },
+              },
+            },
+          },
+        ]),
+      }),
     });
   });
 });

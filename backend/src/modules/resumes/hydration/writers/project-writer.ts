@@ -11,7 +11,7 @@ export class ProjectWriter {
     projects: ParsedResumeData['projects'],
   ): Promise<void> {
     await tx.project.deleteMany({
-      where: { candidateProfileId, source: 'EXTRACTED', resumeId },
+      where: { candidateProfileId, source: 'EXTRACTED' },
     });
 
     if (projects.length === 0) return;

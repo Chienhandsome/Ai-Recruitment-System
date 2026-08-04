@@ -18,9 +18,7 @@ def _extract_pdf_text(file_bytes: bytes) -> tuple[str, int]:
     reader = PdfReader(io.BytesIO(file_bytes))
     page_count = len(reader.pages)
     pages_text = [
-        text
-        for page in reader.pages[:MAX_PDF_PAGES]
-        if (text := page.extract_text())
+        text for page in reader.pages[:MAX_PDF_PAGES] if (text := page.extract_text())
     ]
     return "\n\n".join(pages_text), page_count
 
@@ -35,12 +33,14 @@ def _extract_pdf_with_ocr(file_bytes: bytes) -> str:
     try:
         images = convert_from_bytes(
             file_bytes,
-            dpi=300,
+            dpi=250,
             first_page=1,
             last_page=MAX_PDF_PAGES,
+            thread_count=1,
+            timeout=60,
         )
         return "\n\n".join(
-            image_to_string(image, lang="vie+eng") for image in images
+            image_to_string(image, lang="vie+eng", timeout=30) for image in images
         )
     except Exception as exc:
         raise ResumeValidationError(f"PDF OCR failed: {exc}") from exc

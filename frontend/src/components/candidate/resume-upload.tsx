@@ -4,11 +4,7 @@ import * as React from "react"
 import { Upload, FileText, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  uploadResume,
-  getResumeStatus,
-  type ResumeStatusResponse,
-} from "@/lib/candidate-api"
+import { uploadResume, getResumeStatus, type ResumeStatusResponse } from "@/lib/candidate-api"
 import { createClient } from "@/lib/supabase/client"
 
 // ─── Types ────────────────────────────────────────────────────────────
@@ -37,7 +33,9 @@ export function ResumeUpload() {
 
   const getToken = async (): Promise<string | null> => {
     const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
+    const {
+      data: { session }
+    } = await supabase.auth.getSession()
     return session?.access_token ?? null
   }
 
@@ -45,7 +43,7 @@ export function ResumeUpload() {
     // Validate client-side
     const allowedTypes = [
       "application/pdf",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ]
     if (!allowedTypes.includes(file.type)) {
       setState({ step: "error", message: "Chỉ chấp nhận file PDF hoặc DOCX." })
@@ -73,7 +71,7 @@ export function ResumeUpload() {
       setState({
         step: "error",
         message: error instanceof Error ? error.message : "Upload thất bại.",
-        fileName: file.name,
+        fileName: file.name
       })
     }
   }
@@ -95,7 +93,14 @@ export function ResumeUpload() {
           setState({
             step: "error",
             message: status.parsingErrorMessage || "Phân tích CV thất bại.",
-            fileName,
+            fileName
+          })
+        } else if (status.parsingStatus === "SUPERSEDED") {
+          if (pollingRef.current) clearInterval(pollingRef.current)
+          setState({
+            step: "error",
+            message: "CV này đã được thay thế bởi một CV mới hơn.",
+            fileName
           })
         }
         // PENDING / PROCESSING → keep polling
@@ -137,23 +142,22 @@ export function ResumeUpload() {
               role="button"
               tabIndex={0}
               onDrop={handleDrop}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setDragOver(true)
+              }}
               onDragLeave={() => setDragOver(false)}
               onClick={() => fileInputRef.current?.click()}
-              onKeyDown={(e) => { if (e.key === "Enter") fileInputRef.current?.click() }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") fileInputRef.current?.click()
+              }}
               className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-colors cursor-pointer ${
-                dragOver
-                  ? "border-primary bg-primary/5"
-                  : "border-input hover:border-primary/50"
+                dragOver ? "border-primary bg-primary/5" : "border-input hover:border-primary/50"
               }`}
             >
               <Upload className="h-10 w-10 text-muted-foreground mb-3" />
-              <p className="text-sm font-medium text-foreground">
-                Kéo thả hoặc nhấn để tải lên CV
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                PDF, DOCX (tối đa 5MB)
-              </p>
+              <p className="text-sm font-medium text-foreground">Kéo thả hoặc nhấn để tải lên CV</p>
+              <p className="text-xs text-muted-foreground mt-1">PDF, DOCX (tối đa 5MB)</p>
             </div>
 
             <input
@@ -214,9 +218,7 @@ export function ResumeUpload() {
             <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
               <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
               <div className="min-w-0 flex-1">
-                {state.fileName && (
-                  <p className="text-sm font-medium truncate">{state.fileName}</p>
-                )}
+                {state.fileName && <p className="text-sm font-medium truncate">{state.fileName}</p>}
                 <p className="text-xs text-destructive">{state.message}</p>
               </div>
               <Button variant="outline" size="sm" onClick={reset}>
@@ -231,9 +233,9 @@ export function ResumeUpload() {
           <div className="flex items-start gap-2 rounded-md bg-secondary p-3">
             <FileText className="h-4 w-4 text-primary mt-0.5 shrink-0" />
             <p className="text-xs text-secondary-foreground">
-              <span className="font-medium">Tự động cập nhật hồ sơ:</span>{" "}
-              Khi bạn upload CV, hệ thống AI sẽ tự động phân tích và cập nhật
-              kỹ năng, kinh nghiệm, học vấn và dự án của bạn.
+              <span className="font-medium">Tự động cập nhật hồ sơ:</span> Khi bạn upload CV, hệ
+              thống AI sẽ tự động phân tích và cập nhật kỹ năng, kinh nghiệm, học vấn và dự án của
+              bạn.
             </p>
           </div>
         )}

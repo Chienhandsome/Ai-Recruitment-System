@@ -70,7 +70,9 @@ export class AuthService {
     this.logger.debug(`bootstrap: No existing user — creating new profile`);
 
     if (!dto.role) {
-      this.logger.warn(`bootstrap: No role provided for new user ${authUser.email}`);
+      this.logger.warn(
+        `bootstrap: No role provided for new user ${authUser.email}`,
+      );
       throw new BadRequestException({
         code: 'ROLE_REQUIRED',
         message:
@@ -264,16 +266,29 @@ export class AuthService {
       candidateProfile: user.candidateProfile
         ? {
             id: user.candidateProfile.id,
+            status: user.candidateProfile.status,
             address: user.candidateProfile.address,
             desiredTitle: user.candidateProfile.desiredTitle,
             professionalSummary: user.candidateProfile.professionalSummary,
             githubUrl: user.candidateProfile.githubUrl,
             linkedinUrl: user.candidateProfile.linkedinUrl,
             portfolioUrl: user.candidateProfile.portfolioUrl,
-            workExperiences: user.candidateProfile.workExperiences || [],
-            educations: user.candidateProfile.educations || [],
-            projects: user.candidateProfile.projects || [],
-            certificates: user.candidateProfile.certificates || [],
+            workExperiences: this.currentProfileRecords(
+              user.candidateProfile.workExperiences,
+              user.candidateProfile.primaryResumeId,
+            ),
+            educations: this.currentProfileRecords(
+              user.candidateProfile.educations,
+              user.candidateProfile.primaryResumeId,
+            ),
+            projects: this.currentProfileRecords(
+              user.candidateProfile.projects,
+              user.candidateProfile.primaryResumeId,
+            ),
+            certificates: this.currentProfileRecords(
+              user.candidateProfile.certificates,
+              user.candidateProfile.primaryResumeId,
+            ),
           }
         : null,
       recruiterProfile: user.recruiterProfile
@@ -284,6 +299,16 @@ export class AuthService {
           }
         : null,
     };
+  }
+
+  private currentProfileRecords<
+    T extends { source: 'MANUAL' | 'EXTRACTED'; resumeId: string | null },
+  >(records: T[], primaryResumeId: string | null): T[] {
+    return records.filter(
+      (record) =>
+        record.source === 'MANUAL' ||
+        (primaryResumeId !== null && record.resumeId === primaryResumeId),
+    );
   }
 
   private assertAccountIsActive(status: AccountStatus): void {

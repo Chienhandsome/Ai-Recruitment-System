@@ -44,6 +44,13 @@ export class SkillResolverService {
         OR: [
           { normalizedName: normalized },
           { name: { equals: trimmed, mode: 'insensitive' } },
+          {
+            skillAliases: {
+              some: {
+                aliasName: { equals: trimmed, mode: 'insensitive' },
+              },
+            },
+          },
         ],
       },
     });

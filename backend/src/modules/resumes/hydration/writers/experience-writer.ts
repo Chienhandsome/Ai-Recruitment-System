@@ -11,7 +11,7 @@ export class ExperienceWriter {
     experiences: ParsedResumeData['work_experiences'],
   ): Promise<void> {
     await tx.workExperience.deleteMany({
-      where: { candidateProfileId, source: 'EXTRACTED', resumeId },
+      where: { candidateProfileId, source: 'EXTRACTED' },
     });
 
     const validExperiences = experiences.filter(

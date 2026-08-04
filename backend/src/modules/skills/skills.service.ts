@@ -1,5 +1,12 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { normalizeSkillName } from '../../common/skill-name.util';
+import type { Prisma } from '@prisma/client';
 
 @Injectable()
 export class SkillsService {
@@ -13,7 +20,9 @@ export class SkillsService {
     });
 
     if (categories.length === 0) {
-      this.logger.log('No skill categories found. Seeding default skill categories...');
+      this.logger.log(
+        'No skill categories found. Seeding default skill categories...',
+      );
       const defaultCategories = [
         'Công nghệ thông tin (IT & Software)',
         'Thiết kế, 3D & Truyền thông (Design & Media)',
@@ -42,16 +51,20 @@ export class SkillsService {
   }
 
   async getSkills(categoryId?: string, search?: string) {
-    const whereClause: any = { status: 'ACTIVE' };
+    const whereClause: Prisma.SkillWhereInput = { status: 'ACTIVE' };
 
     if (categoryId) {
       // Check if it's a valid SkillCategory
-      const isSkillCat = await this.prisma.skillCategory.findUnique({ where: { id: categoryId } });
+      const isSkillCat = await this.prisma.skillCategory.findUnique({
+        where: { id: categoryId },
+      });
       if (isSkillCat) {
         whereClause.categoryId = categoryId;
       } else {
         // It might be a JobCategory ID (since frontend sends JobCategory ID for skills)
-        const isJobCat = await this.prisma.jobCategory.findUnique({ where: { id: categoryId } });
+        const isJobCat = await this.prisma.jobCategory.findUnique({
+          where: { id: categoryId },
+        });
         if (isJobCat) {
           const map: Record<string, string> = {
             'cong-nghe-thong-tin': 'công nghệ thông tin',
@@ -61,11 +74,12 @@ export class SkillsService {
             'marketing-truyen-thong': 'marketing',
             'nhan-su-hanh-chinh': 'nhân sự',
             'y-te-duoc-pham': 'y tế',
-            'van-tai-logistics': 'vận tải'
+            'van-tai-logistics': 'vận tải',
           };
-          const searchKeyword = map[isJobCat.slug] || isJobCat.name.split(' ')[0];
+          const searchKeyword =
+            map[isJobCat.slug] || isJobCat.name.split(' ')[0];
           const mappedSkillCat = await this.prisma.skillCategory.findFirst({
-             where: { name: { contains: searchKeyword, mode: 'insensitive' } }
+            where: { name: { contains: searchKeyword, mode: 'insensitive' } },
           });
           if (mappedSkillCat) {
             whereClause.categoryId = mappedSkillCat.id;
@@ -80,7 +94,11 @@ export class SkillsService {
       const q = search.trim();
       whereClause.OR = [
         { name: { contains: q, mode: 'insensitive' } },
-        { skillAliases: { some: { aliasName: { contains: q, mode: 'insensitive' } } } },
+        {
+          skillAliases: {
+            some: { aliasName: { contains: q, mode: 'insensitive' } },
+          },
+        },
       ];
     }
 
@@ -103,7 +121,7 @@ export class SkillsService {
       throw new BadRequestException('Tên kỹ năng không được để trống');
     }
 
-    const normalized = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const normalized = normalizeSkillName(trimmed);
 
     const existing = await this.prisma.skill.findFirst({
       where: {
@@ -119,9 +137,13 @@ export class SkillsService {
     }
 
     let resolvedCategoryId = categoryId;
-    const isSkillCat = await this.prisma.skillCategory.findUnique({ where: { id: categoryId } });
+    const isSkillCat = await this.prisma.skillCategory.findUnique({
+      where: { id: categoryId },
+    });
     if (!isSkillCat) {
-      const isJobCat = await this.prisma.jobCategory.findUnique({ where: { id: categoryId } });
+      const isJobCat = await this.prisma.jobCategory.findUnique({
+        where: { id: categoryId },
+      });
       if (isJobCat) {
         const map: Record<string, string> = {
           'cong-nghe-thong-tin': 'công nghệ thông tin',
@@ -131,11 +153,11 @@ export class SkillsService {
           'marketing-truyen-thong': 'marketing',
           'nhan-su-hanh-chinh': 'nhân sự',
           'y-te-duoc-pham': 'y tế',
-          'van-tai-logistics': 'vận tải'
+          'van-tai-logistics': 'vận tải',
         };
         const searchKeyword = map[isJobCat.slug] || isJobCat.name.split(' ')[0];
         const mappedSkillCat = await this.prisma.skillCategory.findFirst({
-           where: { name: { contains: searchKeyword, mode: 'insensitive' } }
+          where: { name: { contains: searchKeyword, mode: 'insensitive' } },
         });
         if (mappedSkillCat) {
           resolvedCategoryId = mappedSkillCat.id;
@@ -161,17 +183,22 @@ export class SkillsService {
     });
   }
 
-  async updateSkill(id: string, name?: string, categoryId?: string, type?: 'HARD' | 'SOFT') {
+  async updateSkill(
+    id: string,
+    name?: string,
+    categoryId?: string,
+    type?: 'HARD' | 'SOFT',
+  ) {
     const skill = await this.prisma.skill.findUnique({ where: { id } });
     if (!skill) {
       throw new NotFoundException('Không tìm thấy kỹ năng');
     }
 
-    const data: any = {};
+    const data: Prisma.SkillUncheckedUpdateInput = {};
     if (name && name.trim()) {
       const trimmed = name.trim();
       data.name = trimmed;
-      data.normalizedName = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      data.normalizedName = normalizeSkillName(trimmed);
     }
     if (categoryId) {
       data.categoryId = categoryId;
@@ -196,7 +223,9 @@ export class SkillsService {
       throw new BadRequestException('Alias name cannot be empty');
     }
 
-    const skill = await this.prisma.skill.findUnique({ where: { id: skillId } });
+    const skill = await this.prisma.skill.findUnique({
+      where: { id: skillId },
+    });
     if (!skill) {
       throw new NotFoundException('Skill not found');
     }
@@ -209,7 +238,9 @@ export class SkillsService {
       if (existing.skillId === skillId) {
         return existing;
       }
-      throw new BadRequestException(`Alias "${trimmed}" đã thuộc về kỹ năng khác`);
+      throw new BadRequestException(
+        `Alias "${trimmed}" đã thuộc về kỹ năng khác`,
+      );
     }
 
     return this.prisma.skillAlias.create({
@@ -221,7 +252,9 @@ export class SkillsService {
   }
 
   async deleteSkillAlias(aliasId: string) {
-    const existing = await this.prisma.skillAlias.findUnique({ where: { id: aliasId } });
+    const existing = await this.prisma.skillAlias.findUnique({
+      where: { id: aliasId },
+    });
     if (!existing) {
       throw new NotFoundException('Alias not found');
     }
@@ -287,7 +320,10 @@ export class SkillsService {
       throw new NotFoundException('Unrecognized skill not found');
     }
 
-    const createdSkill = await this.createSkill(unrecognized.rawSkillName, categoryId);
+    const createdSkill = await this.createSkill(
+      unrecognized.rawSkillName,
+      categoryId,
+    );
 
     await this.prisma.unrecognizedSkill.update({
       where: { id: unrecognizedId },

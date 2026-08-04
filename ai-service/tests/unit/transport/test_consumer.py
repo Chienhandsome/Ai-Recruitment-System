@@ -2,7 +2,7 @@ import json
 from types import SimpleNamespace
 
 from app.core.config import Settings
-from app.domain.resume.exceptions import TransientError
+from app.domain.resume.exceptions import SignedUrlExpiredError, TransientError
 from app.schemas.llm_output import ResumeExtractionResult
 from app.transport.rabbitmq.consumer import ResumeMessageConsumer
 from app.transport.rabbitmq.retry_policy import RetryPolicy
@@ -33,6 +33,11 @@ class SuccessfulPipeline:
 class TransientPipeline:
     def run(self, command):
         raise TransientError(f"temporary failure for {command.resume_id}")
+
+
+class ExpiredUrlPipeline:
+    def run(self, command):
+        raise SignedUrlExpiredError("signed URL expired")
 
 
 def request_body() -> bytes:
@@ -100,3 +105,19 @@ def test_malformed_message_is_explicitly_dead_lettered():
     assert channel.published[0]["exchange"] == "ai_recruitment_dlx"
     assert channel.published[0]["routing_key"] == "resume.analysis.dead"
     assert channel.acked == [{"delivery_tag": 3}]
+
+
+def test_expired_signed_url_publishes_a_refreshable_failure_code():
+    channel = FakeChannel()
+    consumer = ResumeMessageConsumer(ExpiredUrlPipeline(), Settings())
+
+    consumer.process_message(
+        channel,
+        SimpleNamespace(delivery_tag=4),
+        SimpleNamespace(headers={}),
+        request_body(),
+    )
+
+    failed = json.loads(channel.published[0]["body"])
+    assert failed["errorCode"] == "SIGNED_URL_EXPIRED"
+    assert channel.published[0]["routing_key"] == "resume.analysis.failed"

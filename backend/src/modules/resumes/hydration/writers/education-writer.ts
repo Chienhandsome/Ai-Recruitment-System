@@ -11,7 +11,7 @@ export class EducationWriter {
     educations: ParsedResumeData['educations'],
   ): Promise<void> {
     await tx.education.deleteMany({
-      where: { candidateProfileId, source: 'EXTRACTED', resumeId },
+      where: { candidateProfileId, source: 'EXTRACTED' },
     });
 
     if (educations.length === 0) return;

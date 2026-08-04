@@ -156,27 +156,98 @@ export class ResumeHydrationService {
     resumeId: string,
     candidateProfileId: string,
     errorMessage: string,
+    errorCode?: string,
   ): Promise<void> {
     this.logger.warn(`Resume ${resumeId} analysis failed: ${errorMessage}`);
 
-    const profileUpdate = await this.prisma.$transaction(async (tx) => {
-      await tx.resume.update({
-        where: { id: resumeId },
+    if (errorCode === 'SIGNED_URL_EXPIRED') {
+      await this.requeueAfterExpiredSignedUrl(
+        resumeId,
+        candidateProfileId,
+        errorMessage,
+      );
+      return;
+    }
+
+    const outcome = await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.resume.updateMany({
+        where: {
+          id: resumeId,
+          candidateId: candidateProfileId,
+          parsingStatus: { in: ['PENDING', 'PROCESSING'] },
+        },
         data: {
           parsingStatus: 'FAILED',
           parsingErrorMessage: errorMessage,
         },
       });
+      if (claimed.count === 0) return 'IGNORED' as const;
 
-      return tx.candidateProfile.updateMany({
+      const profileUpdate = await tx.candidateProfile.updateMany({
         where: { id: candidateProfileId, primaryResumeId: resumeId },
         data: { status: 'FAILED' },
       });
+      if (profileUpdate.count === 0) {
+        await tx.resume.updateMany({
+          where: { id: resumeId, parsingStatus: 'FAILED' },
+          data: { parsingStatus: 'SUPERSEDED' },
+        });
+        return 'SUPERSEDED' as const;
+      }
+      return 'FAILED' as const;
     });
 
-    if (profileUpdate.count === 0) {
+    if (outcome === 'SUPERSEDED') {
       this.logger.warn(
         `Resume ${resumeId} is stale; candidate ${candidateProfileId} remains unchanged.`,
+      );
+    } else if (outcome === 'IGNORED') {
+      this.logger.debug(
+        `Ignoring late failure for terminal resume ${resumeId}.`,
+      );
+    }
+  }
+
+  private async requeueAfterExpiredSignedUrl(
+    resumeId: string,
+    candidateProfileId: string,
+    errorMessage: string,
+  ): Promise<void> {
+    const outcome = await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.resume.updateMany({
+        where: {
+          id: resumeId,
+          candidateId: candidateProfileId,
+          parsingStatus: { in: ['PENDING', 'PROCESSING'] },
+        },
+        data: {
+          parsingStatus: 'PENDING',
+          parsingErrorMessage: errorMessage,
+        },
+      });
+      if (claimed.count === 0) return 'IGNORED' as const;
+
+      const profileUpdate = await tx.candidateProfile.updateMany({
+        where: { id: candidateProfileId, primaryResumeId: resumeId },
+        data: { status: 'PROCESSING' },
+      });
+      if (profileUpdate.count === 0) {
+        await tx.resume.updateMany({
+          where: { id: resumeId, parsingStatus: 'PENDING' },
+          data: { parsingStatus: 'SUPERSEDED' },
+        });
+        return 'SUPERSEDED' as const;
+      }
+      return 'REQUEUED' as const;
+    });
+
+    if (outcome === 'REQUEUED') {
+      this.logger.warn(
+        `Resume ${resumeId} returned to PENDING so the scheduler can issue a fresh signed URL.`,
+      );
+    } else if (outcome === 'IGNORED') {
+      this.logger.debug(
+        `Ignoring late signed URL failure for terminal resume ${resumeId}.`,
       );
     }
   }

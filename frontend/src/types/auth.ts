@@ -3,6 +3,7 @@ export const PUBLIC_SIGNUP_ROLES = ["RECRUITER", "CANDIDATE"] as const;
 
 export type AuthRole = (typeof AUTH_ROLES)[number];
 export type PublicSignupRole = (typeof PUBLIC_SIGNUP_ROLES)[number];
+export type ProfileDataSource = "MANUAL" | "EXTRACTED";
 
 export interface LoginFormValues {
   email: string;
@@ -26,6 +27,7 @@ export interface WorkExperienceData {
   isCurrent: boolean;
   description: string | null;
   achievements: string | null;
+  source?: ProfileDataSource;
 }
 
 export interface EducationData {
@@ -36,6 +38,7 @@ export interface EducationData {
   startDate: string | null;
   endDate: string | null;
   description: string | null;
+  source?: ProfileDataSource;
 }
 
 export interface ProjectData {
@@ -47,6 +50,7 @@ export interface ProjectData {
   projectUrl: string | null;
   startDate: string | null;
   endDate: string | null;
+  source?: ProfileDataSource;
 }
 
 export interface CertificateData {
@@ -56,6 +60,7 @@ export interface CertificateData {
   issueDate: string | null;
   expiryDate: string | null;
   credentialUrl: string | null;
+  source?: ProfileDataSource;
 }
 
 export interface AuthProfile {
@@ -68,6 +73,7 @@ export interface AuthProfile {
   roles: AuthRole[];
   candidateProfile: {
     id: string;
+    status: "EMPTY" | "PROCESSING" | "READY" | "NEEDS_REVIEW" | "FAILED";
     address: string | null;
     desiredTitle: string | null;
     professionalSummary: string | null;

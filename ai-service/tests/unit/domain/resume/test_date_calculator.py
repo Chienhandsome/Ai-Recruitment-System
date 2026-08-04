@@ -13,12 +13,18 @@ def test_experience_duration_merges_overlapping_intervals():
                 position_title="Engineer",
                 start_date="2020-01-01",
                 end_date="2021-01-01",
+                is_current=False,
+                is_inferred=False,
+                source_text="Engineer at A, 2020-2021",
             ),
             ExtractedWorkExperience(
                 company_name="B",
                 position_title="Engineer",
                 start_date="2020-06-01",
                 end_date="2022-01-01",
+                is_current=False,
+                is_inferred=False,
+                source_text="Engineer at B, 2020-2022",
             ),
         ]
     )
@@ -34,6 +40,9 @@ def test_experience_duration_ignores_missing_dates():
             ExtractedWorkExperience(
                 company_name="A",
                 position_title="Engineer",
+                is_current=False,
+                is_inferred=True,
+                source_text=None,
             )
         ]
     )

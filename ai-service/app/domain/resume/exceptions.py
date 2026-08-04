@@ -15,3 +15,9 @@ class PermanentError(ResumePipelineError):
 
 class ResumeValidationError(PermanentError):
     """The resume request or document failed validation."""
+
+
+class SignedUrlExpiredError(PermanentError):
+    """The backend must issue a fresh signed download URL."""
+
+    error_code = "SIGNED_URL_EXPIRED"

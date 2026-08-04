@@ -4,15 +4,13 @@ import React, { useState, useEffect } from "react";
 import {
   Search,
   Plus,
-  Filter,
   ArrowRightLeft,
   X,
   Loader2,
   Check,
   AlertCircle,
   Edit2,
-  Tag,
-  Trash2
+  Tag
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -28,7 +26,7 @@ import {
   rejectUnrecognizedSkill,
   SkillData,
   SkillCategoryData,
-  UnrecognizedSkillData,
+  UnrecognizedSkillData
 } from "@/lib/admin-api";
 
 export default function AdminSkillsPage() {
@@ -49,7 +47,7 @@ export default function AdminSkillsPage() {
   const [targetSkillId, setTargetSkillId] = useState("");
   const [approvingItem, setApprovingItem] = useState<UnrecognizedSkillData | null>(null);
   const [newSkillCategory, setNewSkillCategory] = useState("");
-  
+
   // Manual Create Modal
   const [isManualCreateOpen, setIsManualCreateOpen] = useState(false);
   const [manualSkillName, setManualSkillName] = useState("");
@@ -79,7 +77,7 @@ export default function AdminSkillsPage() {
       const [skillsData, categoriesData, unrecData] = await Promise.all([
         fetchSkills(selectedCategoryFilter || undefined, searchQuery || undefined),
         fetchCategories(),
-        fetchUnrecognizedSkills(),
+        fetchUnrecognizedSkills()
       ]);
       setSkills(skillsData);
       setCategories(categoriesData);
@@ -93,7 +91,12 @@ export default function AdminSkillsPage() {
   };
 
   useEffect(() => {
-    loadData();
+    const timeoutId = window.setTimeout(() => {
+      void loadData();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+    // Search is intentionally applied only by handleSearchSubmit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategoryFilter]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -112,7 +115,7 @@ export default function AdminSkillsPage() {
       const token = await getAuthToken();
       await updateSkill(token, editingSkill.id, {
         name: editSkillName.trim(),
-        categoryId: editCategoryId,
+        categoryId: editCategoryId
       });
       setSuccessMsg(`Đã cập nhật kỹ năng "${editSkillName}" thành công!`);
       setEditingSkill(null);
@@ -236,7 +239,9 @@ export default function AdminSkillsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Master Data & AI Skills</h1>
+          <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">
+            Master Data & AI Skills
+          </h1>
           <p className="text-xs text-[#64748B] mt-0.5">
             Quản lý từ điển kỹ năng, phân loại ngành nghề và các từ khóa phụ (Aliases)
           </p>
@@ -247,7 +252,9 @@ export default function AdminSkillsPage() {
             <button
               onClick={() => setActiveTab("database")}
               className={`px-4 py-1.5 rounded-lg transition-all ${
-                activeTab === "database" ? "bg-white text-[#2563EB] font-bold shadow-sm" : "text-[#64748B]"
+                activeTab === "database"
+                  ? "bg-white text-[#2563EB] font-bold shadow-sm"
+                  : "text-[#64748B]"
               }`}
             >
               Từ điển Kỹ năng ({skills.length})
@@ -255,7 +262,9 @@ export default function AdminSkillsPage() {
             <button
               onClick={() => setActiveTab("unrecognized")}
               className={`px-4 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
-                activeTab === "unrecognized" ? "bg-white text-rose-600 font-bold shadow-sm" : "text-[#64748B]"
+                activeTab === "unrecognized"
+                  ? "bg-white text-rose-600 font-bold shadow-sm"
+                  : "text-[#64748B]"
               }`}
             >
               Chờ xử lý
@@ -285,7 +294,9 @@ export default function AdminSkillsPage() {
             <AlertCircle className="w-4 h-4 text-rose-600" />
             <span>{errorMsg}</span>
           </div>
-          <button onClick={() => setErrorMsg("")} className="text-rose-400 hover:text-rose-700"><X className="w-4 h-4" /></button>
+          <button onClick={() => setErrorMsg("")} className="text-rose-400 hover:text-rose-700">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -295,7 +306,12 @@ export default function AdminSkillsPage() {
             <Check className="w-4 h-4 text-emerald-600" />
             <span>{successMsg}</span>
           </div>
-          <button onClick={() => setSuccessMsg("")} className="text-emerald-400 hover:text-emerald-700"><X className="w-4 h-4" /></button>
+          <button
+            onClick={() => setSuccessMsg("")}
+            className="text-emerald-400 hover:text-emerald-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -303,12 +319,17 @@ export default function AdminSkillsPage() {
       {isLoading ? (
         <div className="py-20 flex flex-col items-center justify-center bg-white rounded-2xl border border-blue-100 shadow-sm">
           <Loader2 className="w-8 h-8 animate-spin text-[#2563EB] mb-3" />
-          <p className="text-xs font-semibold text-[#64748B]">Đang kết nối CSDL và tìm kiếm kỹ năng...</p>
+          <p className="text-xs font-semibold text-[#64748B]">
+            Đang kết nối CSDL và tìm kiếm kỹ năng...
+          </p>
         </div>
       ) : activeTab === "database" ? (
         <div className="bg-white rounded-2xl border border-blue-100 p-6 shadow-sm space-y-6">
           {/* Controls: Search & Category Filter */}
-          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center gap-3">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex flex-col sm:flex-row items-center gap-3"
+          >
             <div className="relative flex-1 w-full">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
               <input
@@ -362,7 +383,9 @@ export default function AdminSkillsPage() {
                     <tr key={skill.id} className="hover:bg-slate-50 transition-colors">
                       <td className="py-4 px-2">
                         <p className="font-bold text-[#0F172A] text-sm">{skill.name}</p>
-                        <p className="text-[11px] font-mono text-slate-400">{skill.normalizedName}</p>
+                        <p className="text-[11px] font-mono text-slate-400">
+                          {skill.normalizedName}
+                        </p>
                       </td>
                       <td className="py-4 px-2">
                         <span className="text-xs bg-[#EFF6FF] text-[#2563EB] px-2.5 py-1 rounded-md font-semibold border border-blue-100 inline-block">
@@ -426,7 +449,8 @@ export default function AdminSkillsPage() {
           <div className="mb-6 pb-4 border-b border-[#E2E8F0]">
             <h2 className="text-base font-bold text-[#0F172A]">Từ khóa AI chưa nhận diện</h2>
             <p className="text-xs text-[#64748B] mt-0.5">
-              Danh sách từ khóa do AI trích xuất từ CV hoặc bài đăng tuyển dụng nhưng chưa có trong hệ thống.
+              Danh sách từ khóa do AI trích xuất từ CV hoặc bài đăng tuyển dụng nhưng chưa có trong
+              hệ thống.
             </p>
           </div>
 
@@ -448,6 +472,11 @@ export default function AdminSkillsPage() {
                         Tần suất: {item.frequency} lần
                       </span>
                     </div>
+                    {item.categoryHint && (
+                      <p className="mt-1 text-xs text-slate-500">
+                        Gợi ý phân loại: <span className="font-semibold">{item.categoryHint}</span>
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -488,16 +517,23 @@ export default function AdminSkillsPage() {
       {/* Modal 1: Edit Skill */}
       {editingSkill && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleEditSkillSubmit} className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xl w-full max-w-md p-6 space-y-4">
+          <form
+            onSubmit={handleEditSkillSubmit}
+            className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xl w-full max-w-md p-6 space-y-4"
+          >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="font-bold text-base text-[#0F172A] flex items-center gap-2">
                 <Edit2 className="w-4 h-4 text-[#2563EB]" /> Sửa Thông Tin Kỹ Năng
               </h3>
-              <button type="button" onClick={() => setEditingSkill(null)} className="text-slate-400 hover:text-[#0F172A]">
+              <button
+                type="button"
+                onClick={() => setEditingSkill(null)}
+                className="text-slate-400 hover:text-[#0F172A]"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            
+
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-[#0F172A]">Tên Kỹ năng</label>
               <input
@@ -549,12 +585,19 @@ export default function AdminSkillsPage() {
       {/* Modal 2: Add Alias to Skill */}
       {addingAliasSkill && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleAddAliasSubmit} className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xl w-full max-w-md p-6 space-y-4">
+          <form
+            onSubmit={handleAddAliasSubmit}
+            className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xl w-full max-w-md p-6 space-y-4"
+          >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="font-bold text-base text-[#0F172A] flex items-center gap-2">
                 <Tag className="w-4 h-4 text-[#2563EB]" /> Thêm Alias Cho Kỹ Năng
               </h3>
-              <button type="button" onClick={() => setAddingAliasSkill(null)} className="text-slate-400 hover:text-[#0F172A]">
+              <button
+                type="button"
+                onClick={() => setAddingAliasSkill(null)}
+                className="text-slate-400 hover:text-[#0F172A]"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -564,7 +607,9 @@ export default function AdminSkillsPage() {
             </p>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#0F172A]">Tên từ khóa đồng nghĩa (Alias)</label>
+              <label className="text-xs font-bold text-[#0F172A]">
+                Tên từ khóa đồng nghĩa (Alias)
+              </label>
               <input
                 type="text"
                 required
@@ -599,7 +644,10 @@ export default function AdminSkillsPage() {
       {/* Modal 3: Manual Create Skill */}
       {isManualCreateOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleManualCreate} className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xl w-full max-w-md p-6 space-y-4">
+          <form
+            onSubmit={handleManualCreate}
+            className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xl w-full max-w-md p-6 space-y-4"
+          >
             <h3 className="font-bold text-base text-[#0F172A]">Thêm Kỹ Năng Mới Vào CSDL</h3>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-[#0F172A]">Tên Kỹ năng</label>

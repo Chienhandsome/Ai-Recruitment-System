@@ -9,6 +9,7 @@ PDF_MIME = "application/pdf"
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 SUPPORTED_MIME_TYPES = frozenset({PDF_MIME, DOCX_MIME})
 MAX_FILE_BYTES = 5 * 1024 * 1024
+MAX_DOCX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024
 
 
 def detect_real_mime(file_bytes: bytes) -> str:
@@ -18,7 +19,13 @@ def detect_real_mime(file_bytes: bytes) -> str:
     if file_bytes.startswith(b"PK\x03\x04"):
         try:
             with zipfile.ZipFile(io.BytesIO(file_bytes)) as archive:
-                if "word/document.xml" in archive.namelist():
+                entries = archive.infolist()
+                uncompressed_size = sum(entry.file_size for entry in entries)
+                if uncompressed_size > MAX_DOCX_UNCOMPRESSED_BYTES:
+                    raise ResumeValidationError(
+                        "DOCX expands beyond the 50MB safety limit"
+                    )
+                if "word/document.xml" in {entry.filename for entry in entries}:
                     return DOCX_MIME
         except zipfile.BadZipFile as exc:
             raise ResumeValidationError("Invalid DOCX archive") from exc

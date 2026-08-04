@@ -132,10 +132,7 @@ export class CandidatesService {
   /**
    * Update candidate profile info and optionally the linked User's name/phone.
    */
-  async updateProfile(
-    userId: string,
-    dto: UpdateCandidateProfileDto,
-  ) {
+  async updateProfile(userId: string, dto: UpdateCandidateProfileDto) {
     const profile = await this.prisma.candidateProfile.findUnique({
       where: { userId },
     });
@@ -163,11 +160,16 @@ export class CandidatesService {
     if (dto.fullName) profileData.fullName = dto.fullName;
     if (dto.phone !== undefined) profileData.phone = dto.phone || null;
     if (dto.address !== undefined) profileData.address = dto.address || null;
-    if (dto.desiredTitle !== undefined) profileData.desiredTitle = dto.desiredTitle || null;
-    if (dto.professionalSummary !== undefined) profileData.professionalSummary = dto.professionalSummary || null;
-    if (dto.linkedinUrl !== undefined) profileData.linkedinUrl = dto.linkedinUrl || null;
-    if (dto.githubUrl !== undefined) profileData.githubUrl = dto.githubUrl || null;
-    if (dto.portfolioUrl !== undefined) profileData.portfolioUrl = dto.portfolioUrl || null;
+    if (dto.desiredTitle !== undefined)
+      profileData.desiredTitle = dto.desiredTitle || null;
+    if (dto.professionalSummary !== undefined)
+      profileData.professionalSummary = dto.professionalSummary || null;
+    if (dto.linkedinUrl !== undefined)
+      profileData.linkedinUrl = dto.linkedinUrl || null;
+    if (dto.githubUrl !== undefined)
+      profileData.githubUrl = dto.githubUrl || null;
+    if (dto.portfolioUrl !== undefined)
+      profileData.portfolioUrl = dto.portfolioUrl || null;
 
     const updated = await this.prisma.$transaction(async (tx) => {
       // 1. Update Profile scalars
@@ -178,13 +180,44 @@ export class CandidatesService {
 
       // 2. Update Work Experiences if provided
       if (Array.isArray(dto.workExperiences)) {
+        const requestedExtractedIds = dto.workExperiences
+          .filter((item) => item.source === 'EXTRACTED' && item.id)
+          .map((item) => item.id!);
+        const preservedExtractedIds = new Set(
+          (
+            await tx.workExperience.findMany({
+              where: {
+                candidateProfileId: profile.id,
+                source: 'EXTRACTED',
+                id: { in: requestedExtractedIds },
+              },
+              select: { id: true },
+            })
+          ).map((item) => item.id),
+        );
         await tx.workExperience.deleteMany({
-          where: { candidateProfileId: profile.id },
+          where: {
+            candidateProfileId: profile.id,
+            OR: [
+              { source: 'MANUAL' },
+              {
+                source: 'EXTRACTED',
+                ...(preservedExtractedIds.size > 0
+                  ? { id: { notIn: [...preservedExtractedIds] } }
+                  : {}),
+              },
+            ],
+          },
         });
-        if (dto.workExperiences.length > 0) {
+        const manualExperiences = dto.workExperiences.filter(
+          (item) => !item.id || !preservedExtractedIds.has(item.id),
+        );
+        if (manualExperiences.length > 0) {
           await tx.workExperience.createMany({
-            data: dto.workExperiences.map((exp) => ({
+            data: manualExperiences.map((exp) => ({
               candidateProfileId: profile.id,
+              source: 'MANUAL',
+              resumeId: null,
               companyName: exp.companyName,
               positionTitle: exp.positionTitle,
               startDate: exp.startDate ? new Date(exp.startDate) : new Date(),
@@ -199,13 +232,44 @@ export class CandidatesService {
 
       // 3. Update Educations if provided
       if (Array.isArray(dto.educations)) {
+        const requestedExtractedIds = dto.educations
+          .filter((item) => item.source === 'EXTRACTED' && item.id)
+          .map((item) => item.id!);
+        const preservedExtractedIds = new Set(
+          (
+            await tx.education.findMany({
+              where: {
+                candidateProfileId: profile.id,
+                source: 'EXTRACTED',
+                id: { in: requestedExtractedIds },
+              },
+              select: { id: true },
+            })
+          ).map((item) => item.id),
+        );
         await tx.education.deleteMany({
-          where: { candidateProfileId: profile.id },
+          where: {
+            candidateProfileId: profile.id,
+            OR: [
+              { source: 'MANUAL' },
+              {
+                source: 'EXTRACTED',
+                ...(preservedExtractedIds.size > 0
+                  ? { id: { notIn: [...preservedExtractedIds] } }
+                  : {}),
+              },
+            ],
+          },
         });
-        if (dto.educations.length > 0) {
+        const manualEducations = dto.educations.filter(
+          (item) => !item.id || !preservedExtractedIds.has(item.id),
+        );
+        if (manualEducations.length > 0) {
           await tx.education.createMany({
-            data: dto.educations.map((edu) => ({
+            data: manualEducations.map((edu) => ({
               candidateProfileId: profile.id,
+              source: 'MANUAL',
+              resumeId: null,
               schoolName: edu.schoolName,
               major: edu.major || null,
               degree: edu.degree || null,
@@ -218,25 +282,59 @@ export class CandidatesService {
 
       // 4. Update Projects if provided
       if (Array.isArray(dto.projects)) {
+        const requestedExtractedIds = dto.projects
+          .filter((item) => item.source === 'EXTRACTED' && item.id)
+          .map((item) => item.id!);
+        const preservedExtractedIds = new Set(
+          (
+            await tx.project.findMany({
+              where: {
+                candidateProfileId: profile.id,
+                source: 'EXTRACTED',
+                id: { in: requestedExtractedIds },
+              },
+              select: { id: true },
+            })
+          ).map((item) => item.id),
+        );
         await tx.project.deleteMany({
-          where: { candidateProfileId: profile.id },
+          where: {
+            candidateProfileId: profile.id,
+            OR: [
+              { source: 'MANUAL' },
+              {
+                source: 'EXTRACTED',
+                ...(preservedExtractedIds.size > 0
+                  ? { id: { notIn: [...preservedExtractedIds] } }
+                  : {}),
+              },
+            ],
+          },
         });
-        if (dto.projects.length > 0) {
+        const manualProjects = dto.projects.filter(
+          (item) => !item.id || !preservedExtractedIds.has(item.id),
+        );
+        if (manualProjects.length > 0) {
           await tx.project.createMany({
-            data: dto.projects.map((proj) => {
+            data: manualProjects.map((proj) => {
               let techs: string[] | null = null;
               if (Array.isArray(proj.technologies)) {
                 techs = proj.technologies;
               } else if (typeof proj.technologies === 'string') {
-                techs = proj.technologies.split(',').map((t) => t.trim()).filter(Boolean);
+                techs = proj.technologies
+                  .split(',')
+                  .map((t) => t.trim())
+                  .filter(Boolean);
               }
 
               return {
                 candidateProfileId: profile.id,
+                source: 'MANUAL' as const,
+                resumeId: null,
                 projectName: proj.projectName,
                 projectRole: proj.projectRole || null,
                 description: proj.description || null,
-                technologies: (techs ?? undefined) as any,
+                technologies: techs ?? undefined,
                 projectUrl: proj.projectUrl || null,
                 startDate: proj.startDate ? new Date(proj.startDate) : null,
                 endDate: proj.endDate ? new Date(proj.endDate) : null,
@@ -248,13 +346,44 @@ export class CandidatesService {
 
       // 5. Update Certificates if provided
       if (Array.isArray(dto.certificates)) {
+        const requestedExtractedIds = dto.certificates
+          .filter((item) => item.source === 'EXTRACTED' && item.id)
+          .map((item) => item.id!);
+        const preservedExtractedIds = new Set(
+          (
+            await tx.certificate.findMany({
+              where: {
+                candidateProfileId: profile.id,
+                source: 'EXTRACTED',
+                id: { in: requestedExtractedIds },
+              },
+              select: { id: true },
+            })
+          ).map((item) => item.id),
+        );
         await tx.certificate.deleteMany({
-          where: { candidateProfileId: profile.id },
+          where: {
+            candidateProfileId: profile.id,
+            OR: [
+              { source: 'MANUAL' },
+              {
+                source: 'EXTRACTED',
+                ...(preservedExtractedIds.size > 0
+                  ? { id: { notIn: [...preservedExtractedIds] } }
+                  : {}),
+              },
+            ],
+          },
         });
-        if (dto.certificates.length > 0) {
+        const manualCertificates = dto.certificates.filter(
+          (item) => !item.id || !preservedExtractedIds.has(item.id),
+        );
+        if (manualCertificates.length > 0) {
           await tx.certificate.createMany({
-            data: dto.certificates.map((cert) => ({
+            data: manualCertificates.map((cert) => ({
               candidateProfileId: profile.id,
+              source: 'MANUAL',
+              resumeId: null,
               certificateName: cert.certificateName,
               issuingOrganization: cert.issuingOrganization || 'Unknown',
               issueDate: cert.issueDate ? new Date(cert.issueDate) : null,
@@ -331,6 +460,9 @@ export class CandidatesService {
             proficiencyLevel: skillItem.proficiencyLevel,
             isPrimary: skillItem.isPrimary ?? false,
             source: SkillSource.SELF_DECLARED,
+            resumeId: null,
+            isInferred: false,
+            sourceText: null,
           },
           create: {
             candidateId: candidateProfileId,
@@ -400,30 +532,28 @@ export class CandidatesService {
    * This implements the service-layer deduplication: User is the source of truth for
    * registered candidates, while profile fields serve anonymous/HR-uploaded candidates.
    */
-  private resolveProfile(
-    profile: {
-      id: string;
-      userId: string | null;
-      status: CandidateProfileStatus;
+  private resolveProfile(profile: {
+    id: string;
+    userId: string | null;
+    status: CandidateProfileStatus;
+    fullName: string;
+    email: string;
+    phone: string | null;
+    address: string | null;
+    desiredTitle: string | null;
+    professionalSummary: string | null;
+    linkedinUrl: string | null;
+    githubUrl: string | null;
+    portfolioUrl: string | null;
+    primaryResumeId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    user: {
       fullName: string;
       email: string;
       phone: string | null;
-      address: string | null;
-      desiredTitle: string | null;
-      professionalSummary: string | null;
-      linkedinUrl: string | null;
-      githubUrl: string | null;
-      portfolioUrl: string | null;
-      primaryResumeId: string | null;
-      createdAt: Date;
-      updatedAt: Date;
-      user: {
-        fullName: string;
-        email: string;
-        phone: string | null;
-      } | null;
-    },
-  ): ResolvedCandidateProfile {
+    } | null;
+  }): ResolvedCandidateProfile {
     const hasLinkedUser = profile.user !== null;
 
     return {

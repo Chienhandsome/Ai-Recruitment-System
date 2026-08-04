@@ -2,6 +2,7 @@
 
 import logging
 
+import httpx
 from google import genai
 from google.genai import errors, types
 from pydantic import ValidationError
@@ -50,10 +51,7 @@ class GeminiLLMAdapter:
         return self._model_name
 
     def extract(self, resume_text: str) -> LLMResumeExtraction:
-        contents = (
-            f"{EXTRACTION_PROMPT}\n\n"
-            f"---BEGIN CV---\n{resume_text}\n---END CV---"
-        )
+        contents = f"{EXTRACTION_PROMPT}\n\n---BEGIN CV---\n{resume_text}\n---END CV---"
 
         try:
             response = self._client.models.generate_content(
@@ -78,9 +76,7 @@ class GeminiLLMAdapter:
         except errors.APIError as exc:
             code = int(getattr(exc, "code", 0) or 0)
             error_type = (
-                TransientError
-                if code in TRANSIENT_STATUS_CODES
-                else PermanentError
+                TransientError if code in TRANSIENT_STATUS_CODES else PermanentError
             )
             raise error_type(f"Gemini API error ({code}): {exc}") from exc
         except ValidationError as exc:
@@ -89,5 +85,7 @@ class GeminiLLMAdapter:
             ) from exc
         except (TransientError, PermanentError):
             raise
+        except (httpx.RequestError, TimeoutError, ConnectionError) as exc:
+            raise TransientError(f"Gemini transport temporarily failed: {exc}") from exc
         except Exception as exc:
             raise PermanentError(f"Gemini extraction failed: {exc}") from exc

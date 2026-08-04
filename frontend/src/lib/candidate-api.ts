@@ -1,6 +1,5 @@
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://ai-recruitment-system-test-deploy.onrender.com/api";
+  process.env.NEXT_PUBLIC_API_URL ?? "https://ai-recruitment-system-test-deploy.onrender.com/api";
 
 // ─── Types ────────────────────────────────────────────────────────────
 
@@ -30,12 +29,10 @@ export interface CandidateSkillInput {
 
 // ─── API Functions ────────────────────────────────────────────────────
 
-export async function getCandidateSkills(
-  token: string
-): Promise<CandidateSkillData[]> {
+export async function getCandidateSkills(token: string): Promise<CandidateSkillData[]> {
   const res = await fetch(`${API_URL}/candidates/me/skills`, {
     headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
+    cache: "no-store"
   });
 
   if (!res.ok) {
@@ -53,9 +50,9 @@ export async function updateCandidateSkills(
     method: "PUT",
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify({ skills }),
+    body: JSON.stringify({ skills })
   });
 
   if (!res.ok) {
@@ -66,13 +63,10 @@ export async function updateCandidateSkills(
   return res.json();
 }
 
-export async function removeCandidateSkill(
-  token: string,
-  skillId: string
-): Promise<void> {
+export async function removeCandidateSkill(token: string, skillId: string): Promise<void> {
   const res = await fetch(`${API_URL}/candidates/me/skills/${skillId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}` }
   });
 
   if (!res.ok) {
@@ -85,7 +79,7 @@ export async function searchSkills(search?: string): Promise<SkillItemData[]> {
   if (search) query.append("search", search);
 
   const res = await fetch(`${API_URL}/skills?${query.toString()}`, {
-    cache: "no-store",
+    cache: "no-store"
   });
 
   if (!res.ok) return [];
@@ -102,6 +96,8 @@ export interface UpdateCandidateProfileInput {
   githubUrl?: string | null;
   portfolioUrl?: string | null;
   workExperiences?: Array<{
+    id?: string;
+    source?: "MANUAL" | "EXTRACTED";
     companyName: string;
     positionTitle: string;
     startDate?: string;
@@ -111,6 +107,8 @@ export interface UpdateCandidateProfileInput {
     achievements?: string | null;
   }>;
   educations?: Array<{
+    id?: string;
+    source?: "MANUAL" | "EXTRACTED";
     schoolName: string;
     major?: string | null;
     degree?: string | null;
@@ -118,6 +116,8 @@ export interface UpdateCandidateProfileInput {
     endDate?: string | null;
   }>;
   projects?: Array<{
+    id?: string;
+    source?: "MANUAL" | "EXTRACTED";
     projectName: string;
     projectRole?: string | null;
     description?: string | null;
@@ -127,6 +127,8 @@ export interface UpdateCandidateProfileInput {
     endDate?: string | null;
   }>;
   certificates?: Array<{
+    id?: string;
+    source?: "MANUAL" | "EXTRACTED";
     certificateName: string;
     issuingOrganization?: string | null;
     issueDate?: string | null;
@@ -141,9 +143,9 @@ export async function updateCandidateProfile(
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
   if (!res.ok) {
@@ -157,30 +159,27 @@ export async function updateCandidateProfile(
 export interface ResumeUploadResponse {
   id: string;
   originalFileName: string;
-  parsingStatus: "PENDING" | "PROCESSING" | "PARSED" | "FAILED";
+  parsingStatus: "PENDING" | "PROCESSING" | "PARSED" | "SUPERSEDED" | "FAILED";
   createdAt: string;
 }
 
 export interface ResumeStatusResponse {
   id: string;
   originalFileName: string;
-  parsingStatus: "PENDING" | "PROCESSING" | "PARSED" | "FAILED";
+  parsingStatus: "PENDING" | "PROCESSING" | "PARSED" | "SUPERSEDED" | "FAILED";
   parsingErrorMessage: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-export async function uploadResume(
-  token: string,
-  file: File
-): Promise<ResumeUploadResponse> {
+export async function uploadResume(token: string, file: File): Promise<ResumeUploadResponse> {
   const formData = new FormData();
   formData.append("file", file);
 
   const res = await fetch(`${API_URL}/resumes/upload`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
-    body: formData,
+    body: formData
   });
 
   if (!res.ok) {
@@ -197,7 +196,7 @@ export async function getResumeStatus(
 ): Promise<ResumeStatusResponse> {
   const res = await fetch(`${API_URL}/resumes/${resumeId}/status`, {
     headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
+    cache: "no-store"
   });
 
   if (!res.ok) {

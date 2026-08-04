@@ -85,7 +85,7 @@ describe('ResumeHydrationService', () => {
 
   it('does not fail the profile when a non-primary resume fails', async () => {
     const tx = {
-      resume: { update: jest.fn().mockResolvedValue(undefined) },
+      resume: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
       candidateProfile: {
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
@@ -102,6 +102,74 @@ describe('ResumeHydrationService', () => {
       where: { id: 'candidate', primaryResumeId: 'old-resume' },
       data: { status: 'FAILED' },
     });
+    expect(tx.resume.updateMany).toHaveBeenLastCalledWith({
+      where: { id: 'old-resume', parsingStatus: 'FAILED' },
+      data: { parsingStatus: 'SUPERSEDED' },
+    });
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a late failure after the resume reached a terminal state', async () => {
+    const tx = {
+      resume: { updateMany: jest.fn().mockResolvedValue({ count: 0 }) },
+      candidateProfile: { updateMany: jest.fn() },
+    };
+    const { service } = createService({
+      $transaction: jest
+        .fn()
+        .mockImplementation(async (callback) => callback(tx)),
+    });
+
+    await service.handleFailure('resume', 'candidate', 'late failure');
+
+    expect(tx.resume.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: 'resume',
+        candidateId: 'candidate',
+        parsingStatus: { in: ['PENDING', 'PROCESSING'] },
+      },
+      data: {
+        parsingStatus: 'FAILED',
+        parsingErrorMessage: 'late failure',
+      },
+    });
+    expect(tx.candidateProfile.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('returns an expired signed URL failure to PENDING for refresh', async () => {
+    const tx = {
+      resume: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+      candidateProfile: {
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+    };
+    const { service } = createService({
+      $transaction: jest
+        .fn()
+        .mockImplementation(async (callback) => callback(tx)),
+    });
+
+    await service.handleFailure(
+      'resume',
+      'candidate',
+      'signed URL expired',
+      'SIGNED_URL_EXPIRED',
+    );
+
+    expect(tx.resume.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: 'resume',
+        candidateId: 'candidate',
+        parsingStatus: { in: ['PENDING', 'PROCESSING'] },
+      },
+      data: {
+        parsingStatus: 'PENDING',
+        parsingErrorMessage: 'signed URL expired',
+      },
+    });
+    expect(tx.candidateProfile.updateMany).toHaveBeenCalledWith({
+      where: { id: 'candidate', primaryResumeId: 'resume' },
+      data: { status: 'PROCESSING' },
+    });
   });
 });

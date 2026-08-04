@@ -50,7 +50,7 @@ export default async function CandidateJobDetailPage({
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <Link
-        href="/candidate/jobs"
+        href="/candidate"
         className="inline-flex items-center gap-2 rounded-md text-sm font-semibold text-muted-foreground outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
       >
         <ArrowLeft className="size-4" strokeWidth={1.8} />

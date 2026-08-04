@@ -10,7 +10,7 @@ export default async function CandidateLayout({
   const profile = await requireProfile("CANDIDATE")
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       <CandidateHeader
         fullName={profile.fullName}
         avatarUrl={profile.avatarUrl}

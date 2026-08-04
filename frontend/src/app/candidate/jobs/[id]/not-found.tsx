@@ -12,7 +12,7 @@ export default function CandidateJobNotFound() {
           Vị trí có thể đã hết hạn hoặc được nhà tuyển dụng đóng lại.
         </p>
         <Button asChild className="mt-6">
-          <Link href="/candidate/jobs">Xem việc làm khác</Link>
+          <Link href="/candidate">Xem việc làm khác</Link>
         </Button>
       </div>
     </div>

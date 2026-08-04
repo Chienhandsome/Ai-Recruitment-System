@@ -108,7 +108,7 @@ export function dashboardPathForRoles(roles: AuthRole[]) {
     ? "/admin/dashboard"
     : roles.includes("RECRUITER")
       ? "/recruiter/dashboard"
-      : "/candidate/dashboard";
+      : "/candidate";
   log.debug(`dashboardPathForRoles: roles=[${roles.join(",")}] → ${path}`);
   return path;
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, Search, Plus, Star } from "lucide-react"
+import { Plus, Search, ShieldCheck, Sparkles, Star, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,6 +32,15 @@ interface SkillsEditorProps {
   isEditing: boolean
 }
 
+const toLocalSkills = (candidateSkills: CandidateSkillData[]): LocalSkill[] =>
+  candidateSkills.map((skill) => ({
+    skillId: skill.skillId,
+    skillName: skill.skill.name,
+    proficiencyLevel: skill.proficiencyLevel,
+    isPrimary: skill.isPrimary,
+    source: skill.source,
+  }))
+
 // ─── Constants ────────────────────────────────────────────────────────
 
 const PROFICIENCY_LABELS: Record<ProficiencyLevel, string> = {
@@ -41,25 +50,12 @@ const PROFICIENCY_LABELS: Record<ProficiencyLevel, string> = {
   EXPERT: "Chuyên gia",
 }
 
-const PROFICIENCY_OPTIONS: ProficiencyLevel[] = [
-  "BEGINNER",
-  "INTERMEDIATE",
-  "ADVANCED",
-  "EXPERT",
-]
+const PROFICIENCY_OPTIONS: ProficiencyLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"]
 
 // ─── Component ────────────────────────────────────────────────────────
 
 export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
-  const [skills, setSkills] = React.useState<LocalSkill[]>(() =>
-    initialSkills.map((s) => ({
-      skillId: s.skillId,
-      skillName: s.skill.name,
-      proficiencyLevel: s.proficiencyLevel,
-      isPrimary: s.isPrimary,
-      source: s.source,
-    }))
-  )
+  const [skills, setSkills] = React.useState<LocalSkill[]>(() => toLocalSkills(initialSkills))
 
   const [searchQuery, setSearchQuery] = React.useState("")
   const [searchResults, setSearchResults] = React.useState<SkillItemData[]>([])
@@ -74,10 +70,7 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
   // Close dropdown when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDropdown(false)
       }
     }
@@ -137,16 +130,28 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
   const updateSkillProficiency = (skillId: string, level: ProficiencyLevel) => {
     setSkills((prev) =>
       prev.map((s) =>
-        s.skillId === skillId ? { ...s, proficiencyLevel: level } : s
-      )
+        s.skillId === skillId && s.source !== "VERIFIED"
+          ? {
+              ...s,
+              proficiencyLevel: level,
+              source: s.source === "EXTRACTED" ? "SELF_DECLARED" : s.source,
+            }
+          : s,
+      ),
     )
   }
 
   const togglePrimary = (skillId: string) => {
     setSkills((prev) =>
       prev.map((s) =>
-        s.skillId === skillId ? { ...s, isPrimary: !s.isPrimary } : s
-      )
+        s.skillId === skillId && s.source !== "VERIFIED"
+          ? {
+              ...s,
+              isPrimary: !s.isPrimary,
+              source: s.source === "EXTRACTED" ? "SELF_DECLARED" : s.source,
+            }
+          : s,
+      ),
     )
   }
 
@@ -156,35 +161,31 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
 
     try {
       const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
 
       if (!session?.access_token) {
         setSaveMessage("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
         return
       }
 
-      const selfDeclaredSkills: CandidateSkillInput[] = skills
-        .filter((s) => s.source === "SELF_DECLARED")
-        .map((s) => ({
-          skillId: s.skillId,
-          proficiencyLevel: s.proficiencyLevel,
-          isPrimary: s.isPrimary,
-        }))
+      const skillInputs: CandidateSkillInput[] = skills.map((skill) => ({
+        skillId: skill.skillId,
+        proficiencyLevel: skill.proficiencyLevel,
+        isPrimary: skill.isPrimary,
+      }))
 
-      await updateCandidateSkills(session.access_token, selfDeclaredSkills)
+      const savedSkills = await updateCandidateSkills(session.access_token, skillInputs)
+      setSkills(toLocalSkills(savedSkills))
       setSaveMessage("Đã lưu kỹ năng thành công!")
       setTimeout(() => setSaveMessage(null), 3000)
     } catch (error) {
-      setSaveMessage(
-        error instanceof Error ? error.message : "Có lỗi xảy ra khi lưu kỹ năng."
-      )
+      setSaveMessage(error instanceof Error ? error.message : "Có lỗi xảy ra khi lưu kỹ năng.")
     } finally {
       setIsSaving(false)
     }
   }
-
-  const selfDeclaredSkills = skills.filter((s) => s.source === "SELF_DECLARED")
-  const extractedSkills = skills.filter((s) => s.source !== "SELF_DECLARED")
 
   // ─── View mode (not editing) ───────────────────────────────────────
   if (!isEditing) {
@@ -250,104 +251,87 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
           )}
         </div>
 
-        {/* Extracted Skills (from CV - read only) */}
-        {extractedSkills.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Từ CV (tự động nhận diện)
+        {skills.length > 0 && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Kỹ năng do AI đề xuất có thể chỉnh sửa. Sau khi bạn thay đổi, thông tin của bạn sẽ
+              được ưu tiên hơn kết quả từ CV.
             </p>
-            <div className="flex flex-wrap gap-2">
-              {extractedSkills.map((skill) => (
-                <div
-                  key={skill.skillId}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm dark:border-blue-800 dark:bg-blue-950"
-                >
-                  <span className="font-medium text-blue-700 dark:text-blue-300">
-                    {skill.skillName}
-                  </span>
-                  <span className="text-xs text-blue-500 dark:text-blue-400">
-                    {PROFICIENCY_LABELS[skill.proficiencyLevel]}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Self-Declared Skills (editable) */}
-        {selfDeclaredSkills.length > 0 && (
-          <div className="space-y-2">
-            {extractedSkills.length > 0 && (
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Tự khai báo
-              </p>
-            )}
             <div className="space-y-2">
-              {selfDeclaredSkills.map((skill) => (
-                <div
-                  key={skill.skillId}
-                  className="flex items-center gap-2 rounded-lg border border-input p-3"
-                >
-                  {/* Primary toggle */}
-                  <button
-                    type="button"
-                    onClick={() => togglePrimary(skill.skillId)}
-                    className={`shrink-0 ${
-                      skill.isPrimary
-                        ? "text-amber-500"
-                        : "text-muted-foreground hover:text-amber-400"
-                    }`}
-                    title={
-                      skill.isPrimary
-                        ? "Bỏ đánh dấu kỹ năng chính"
-                        : "Đánh dấu là kỹ năng chính"
-                    }
-                    aria-label={
-                      skill.isPrimary
-                        ? "Bỏ đánh dấu kỹ năng chính"
-                        : "Đánh dấu là kỹ năng chính"
-                    }
-                  >
-                    <Star
-                      className="h-4 w-4"
-                      fill={skill.isPrimary ? "currentColor" : "none"}
-                    />
-                  </button>
+              {skills.map((skill) => {
+                const isVerified = skill.source === "VERIFIED"
 
-                  <span className="font-medium text-sm min-w-0 truncate">
-                    {skill.skillName}
-                  </span>
-
-                  {/* Proficiency selector */}
-                  <select
-                    value={skill.proficiencyLevel}
-                    onChange={(e) =>
-                      updateSkillProficiency(
-                        skill.skillId,
-                        e.target.value as ProficiencyLevel
-                      )
-                    }
-                    className="ml-auto h-8 rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring/20"
-                    aria-label={`Mức độ thành thạo cho ${skill.skillName}`}
+                return (
+                  <div
+                    key={skill.skillId}
+                    className="flex flex-wrap items-center gap-2 rounded-lg border border-input p-3 transition-colors focus-within:border-primary/50"
                   >
-                    {PROFICIENCY_OPTIONS.map((level) => (
-                      <option key={level} value={level}>
-                        {PROFICIENCY_LABELS[level]}
-                      </option>
-                    ))}
-                  </select>
+                    <button
+                      type="button"
+                      onClick={() => togglePrimary(skill.skillId)}
+                      disabled={isVerified}
+                      className={`shrink-0 rounded-sm transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
+                        skill.isPrimary
+                          ? "text-amber-500"
+                          : "text-muted-foreground hover:text-amber-400"
+                      }`}
+                      title={
+                        skill.isPrimary ? "Bỏ đánh dấu kỹ năng chính" : "Đánh dấu là kỹ năng chính"
+                      }
+                      aria-label={
+                        skill.isPrimary ? "Bỏ đánh dấu kỹ năng chính" : "Đánh dấu là kỹ năng chính"
+                      }
+                    >
+                      <Star className="h-4 w-4" fill={skill.isPrimary ? "currentColor" : "none"} />
+                    </button>
 
-                  {/* Remove button */}
-                  <button
-                    type="button"
-                    onClick={() => removeSkill(skill.skillId)}
-                    className="shrink-0 text-muted-foreground hover:text-destructive transition-colors"
-                    aria-label={`Xóa kỹ năng ${skill.skillName}`}
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="truncate text-sm font-medium">{skill.skillName}</span>
+                        {skill.source === "EXTRACTED" && (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                            <Sparkles className="h-3 w-3" aria-hidden="true" />
+                            AI đề xuất
+                          </span>
+                        )}
+                        {skill.source === "VERIFIED" && (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                            <ShieldCheck className="h-3 w-3" aria-hidden="true" />
+                            Đã xác thực
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <select
+                      value={skill.proficiencyLevel}
+                      disabled={isVerified}
+                      onChange={(e) =>
+                        updateSkillProficiency(skill.skillId, e.target.value as ProficiencyLevel)
+                      }
+                      className="order-last h-9 w-full rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-60 sm:order-none sm:ml-auto sm:w-auto"
+                      aria-label={`Mức độ thành thạo cho ${skill.skillName}`}
+                    >
+                      {PROFICIENCY_OPTIONS.map((level) => (
+                        <option key={level} value={level}>
+                          {PROFICIENCY_LABELS[level]}
+                        </option>
+                      ))}
+                    </select>
+
+                    {!isVerified && (
+                      <button
+                        type="button"
+                        onClick={() => removeSkill(skill.skillId)}
+                        className="shrink-0 rounded-sm text-muted-foreground transition-all hover:text-destructive active:scale-95"
+                        aria-label={`Xóa kỹ năng ${skill.skillName}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
@@ -361,20 +345,13 @@ export function SkillsEditor({ initialSkills, isEditing }: SkillsEditorProps) {
 
         {/* Save button */}
         <div className="flex items-center gap-4 pt-2">
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            size="sm"
-          >
+          <Button type="button" onClick={handleSave} disabled={isSaving} size="sm">
             {isSaving ? "Đang lưu..." : "Lưu kỹ năng"}
           </Button>
           {saveMessage && (
             <p
               className={`text-sm font-medium ${
-                saveMessage.includes("thành công")
-                  ? "text-green-600"
-                  : "text-destructive"
+                saveMessage.includes("thành công") ? "text-green-600" : "text-destructive"
               }`}
             >
               {saveMessage}

@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CandidateProfileStatus, SkillSource } from '@prisma/client';
 import { UpdateCandidateSkillsDto } from './dto/update-candidate-skills.dto';
@@ -417,9 +422,11 @@ export class CandidatesService {
   }
 
   /**
-   * Replace all SELF_DECLARED skills for a candidate.
-   * Skills that were EXTRACTED from CV parsing are preserved.
-   * Uses upsert to handle the unique [candidateId, skillId] constraint.
+   * Save the candidate's effective skill list.
+   *
+   * Unchanged EXTRACTED rows keep their CV evidence. Once the candidate edits
+   * an extracted skill, that row becomes SELF_DECLARED so future CV hydration
+   * cannot overwrite the user's correction. VERIFIED rows are always protected.
    */
   async updateCandidateSkills(
     candidateProfileId: string,
@@ -436,19 +443,49 @@ export class CandidatesService {
       );
     }
 
+    const submittedSkills = [
+      ...new Map(dto.skills.map((skill) => [skill.skillId, skill])).values(),
+    ];
+    const submittedSkillIds = submittedSkills.map((skill) => skill.skillId);
+
     await this.prisma.$transaction(async (tx) => {
-      // 1. Remove all existing SELF_DECLARED skills that are NOT in the new list
-      //    This allows upsert to handle skills that remain
+      const existingSkills = await tx.candidateSkill.findMany({
+        where: { candidateId: candidateProfileId },
+        select: {
+          skillId: true,
+          proficiencyLevel: true,
+          isPrimary: true,
+          source: true,
+        },
+      });
+      const existingBySkillId = new Map(
+        existingSkills.map((skill) => [skill.skillId, skill]),
+      );
+
+      // Missing editable rows were removed from the unified editor. VERIFIED
+      // rows remain even if a stale or malicious client omits them.
       await tx.candidateSkill.deleteMany({
         where: {
           candidateId: candidateProfileId,
-          source: SkillSource.SELF_DECLARED,
-          skillId: { notIn: dto.skills.map((s) => s.skillId) },
+          source: {
+            in: [SkillSource.EXTRACTED, SkillSource.SELF_DECLARED],
+          },
+          skillId: { notIn: submittedSkillIds },
         },
       });
 
-      // 2. Upsert each skill in the new list
-      for (const skillItem of dto.skills) {
+      for (const skillItem of submittedSkills) {
+        const existing = existingBySkillId.get(skillItem.skillId);
+        const isPrimary = skillItem.isPrimary ?? false;
+
+        if (existing?.source === SkillSource.VERIFIED) continue;
+
+        const unchangedExtractedSkill =
+          existing?.source === SkillSource.EXTRACTED &&
+          existing.proficiencyLevel === skillItem.proficiencyLevel &&
+          existing.isPrimary === isPrimary;
+        if (unchangedExtractedSkill) continue;
+
         await tx.candidateSkill.upsert({
           where: {
             candidateId_skillId: {
@@ -458,7 +495,7 @@ export class CandidatesService {
           },
           update: {
             proficiencyLevel: skillItem.proficiencyLevel,
-            isPrimary: skillItem.isPrimary ?? false,
+            isPrimary,
             source: SkillSource.SELF_DECLARED,
             resumeId: null,
             isInferred: false,
@@ -468,7 +505,7 @@ export class CandidatesService {
             candidateId: candidateProfileId,
             skillId: skillItem.skillId,
             proficiencyLevel: skillItem.proficiencyLevel,
-            isPrimary: skillItem.isPrimary ?? false,
+            isPrimary,
             source: SkillSource.SELF_DECLARED,
           },
         });
@@ -476,7 +513,7 @@ export class CandidatesService {
     });
 
     this.logger.log(
-      `CandidateProfile ${candidateProfileId}: updated ${dto.skills.length} SELF_DECLARED skills`,
+      `CandidateProfile ${candidateProfileId}: saved ${submittedSkills.length} skills`,
     );
 
     return this.getCandidateSkills(candidateProfileId);
@@ -484,7 +521,8 @@ export class CandidatesService {
 
   /**
    * Remove a single skill from a candidate's profile.
-   * Only SELF_DECLARED skills can be removed by the candidate.
+   * Candidate-owned and AI-extracted skills can be removed. VERIFIED skills
+   * are protected because their provenance is managed outside this editor.
    */
   async removeCandidateSkill(
     candidateProfileId: string,
@@ -505,9 +543,9 @@ export class CandidatesService {
       );
     }
 
-    if (existing.source !== SkillSource.SELF_DECLARED) {
-      throw new NotFoundException(
-        `Only self-declared skills can be removed. This skill was ${existing.source}.`,
+    if (existing.source === SkillSource.VERIFIED) {
+      throw new ForbiddenException(
+        'Verified skills cannot be removed by the candidate.',
       );
     }
 

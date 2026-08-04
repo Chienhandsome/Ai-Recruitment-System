@@ -45,31 +45,40 @@ export class CandidatesController {
 
   @Get('me/skills')
   @ApiOperation({ summary: 'Get current candidate skills' })
-  @ApiResponse({ status: 200, description: 'List of candidate skills with skill details' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of candidate skills with skill details',
+  })
   async getMySkills(@CurrentUser() user: AuthenticatedUser) {
-    const profile = await this.candidatesService.getResolvedProfileByUserId(user.id);
+    const profile = await this.candidatesService.getResolvedProfileByUserId(
+      user.id,
+    );
     return this.candidatesService.getCandidateSkills(profile.id);
   }
 
   @Put('me/skills')
-  @ApiOperation({ summary: 'Update candidate self-declared skills (replace all)' })
+  @ApiOperation({ summary: 'Update the candidate unified skill list' })
   @ApiResponse({ status: 200, description: 'Updated list of candidate skills' })
   async updateMySkills(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateCandidateSkillsDto,
   ) {
-    const profile = await this.candidatesService.getResolvedProfileByUserId(user.id);
+    const profile = await this.candidatesService.getResolvedProfileByUserId(
+      user.id,
+    );
     return this.candidatesService.updateCandidateSkills(profile.id, dto);
   }
 
   @Delete('me/skills/:skillId')
-  @ApiOperation({ summary: 'Remove a single self-declared skill' })
+  @ApiOperation({ summary: 'Remove a candidate-owned or AI-extracted skill' })
   @ApiResponse({ status: 200, description: 'Skill removed successfully' })
   async removeMySkill(
     @CurrentUser() user: AuthenticatedUser,
     @Param('skillId', ParseUUIDPipe) skillId: string,
   ) {
-    const profile = await this.candidatesService.getResolvedProfileByUserId(user.id);
+    const profile = await this.candidatesService.getResolvedProfileByUserId(
+      user.id,
+    );
     await this.candidatesService.removeCandidateSkill(profile.id, skillId);
     return { message: 'Skill removed successfully' };
   }

@@ -36,7 +36,8 @@ export class CandidateSkillItemDto {
 export class UpdateCandidateSkillsDto {
   @ApiProperty({
     type: [CandidateSkillItemDto],
-    description: 'Array of skills to set for the candidate (replaces SELF_DECLARED skills)',
+    description:
+      'Complete editable skill list. Changed EXTRACTED skills become SELF_DECLARED; VERIFIED skills are preserved.',
   })
   @IsArray()
   @ValidateNested({ each: true })

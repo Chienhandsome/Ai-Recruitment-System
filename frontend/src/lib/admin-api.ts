@@ -91,10 +91,13 @@ export interface AdminUserData {
   lastLoginAt?: string;
 }
 
-export async function fetchAdminDashboardStats(): Promise<AdminDashboardStatsData> {
+export async function fetchAdminDashboardStats(token: string): Promise<AdminDashboardStatsData> {
   const url = `${API_URL}/admin/stats`;
   console.log("[admin-api] Fetching Admin Dashboard stats from:", url);
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store"
+  });
   if (!res.ok) {
     const text = await res.text();
     console.error("[admin-api] fetchAdminDashboardStats failed:", res.status, text);
@@ -103,14 +106,21 @@ export async function fetchAdminDashboardStats(): Promise<AdminDashboardStatsDat
   return res.json();
 }
 
-export async function fetchAdminJobs(status?: string, search?: string): Promise<AdminJobData[]> {
+export async function fetchAdminJobs(
+  token: string,
+  status?: string,
+  search?: string
+): Promise<AdminJobData[]> {
   const params = new URLSearchParams();
   if (status && status !== "ALL") params.append("status", status);
   if (search) params.append("search", search);
 
   const url = `${API_URL}/admin/jobs?${params.toString()}`;
   console.log("[admin-api] Fetching Admin jobs from:", url);
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store"
+  });
   if (!res.ok) {
     const text = await res.text();
     console.error("[admin-api] fetchAdminJobs failed:", res.status, text);
@@ -155,6 +165,7 @@ export async function deleteAdminJob(token: string, jobId: string): Promise<void
 // --- USER MANAGEMENT FETCHERS ---
 
 export async function fetchAdminUsers(
+  token: string,
   role?: string,
   status?: string,
   search?: string
@@ -166,7 +177,10 @@ export async function fetchAdminUsers(
 
   const url = `${API_URL}/admin/users?${params.toString()}`;
   console.log("[admin-api] Fetching Admin users from:", url);
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store"
+  });
   if (!res.ok) {
     const text = await res.text();
     console.error("[admin-api] fetchAdminUsers failed:", res.status, text);

@@ -2,24 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Users,
   Search,
-  Filter,
   ShieldAlert,
-  ShieldCheck,
   Lock,
   Unlock,
   Trash2,
   Building2,
   Mail,
-  Phone,
   UserCheck,
   UserX,
   Loader2,
   Check,
   AlertCircle,
-  Clock,
-  Sparkles,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -51,7 +45,10 @@ export default function AdminUsersPage() {
     setIsLoading(true);
     setErrorMsg("");
     try {
+      const token = await getAuthToken();
+      if (!token) throw new Error("Phiên đăng nhập quản trị đã hết hạn");
       const data = await fetchAdminUsers(
+        token,
         selectedRoleFilter,
         selectedStatusFilter,
         searchQuery
@@ -70,7 +67,11 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
-    loadUsersData();
+    const timeoutId = window.setTimeout(() => {
+      void loadUsersData();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRoleFilter, selectedStatusFilter]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {

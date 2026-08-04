@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Search,
-  Filter,
   CheckCircle2,
   AlertTriangle,
   XCircle,
@@ -11,11 +10,9 @@ import {
   Building2,
   MapPin,
   DollarSign,
-  Briefcase,
   Loader2,
   Check,
   AlertCircle,
-  Eye,
   RefreshCw,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -47,7 +44,9 @@ export default function AdminJobsPage() {
     setIsLoading(true);
     setErrorMsg("");
     try {
-      const data = await fetchAdminJobs(selectedStatusFilter, searchQuery);
+      const token = await getAuthToken();
+      if (!token) throw new Error("Phiên đăng nhập quản trị đã hết hạn");
+      const data = await fetchAdminJobs(token, selectedStatusFilter, searchQuery);
       setJobs(data);
     } catch (err: unknown) {
       console.error("[AdminJobs] Error loading jobs:", err);
@@ -58,7 +57,11 @@ export default function AdminJobsPage() {
   };
 
   useEffect(() => {
-    loadJobsData();
+    const timeoutId = window.setTimeout(() => {
+      void loadJobsData();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedStatusFilter]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {

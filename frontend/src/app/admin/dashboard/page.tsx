@@ -6,18 +6,16 @@ import {
   Users,
   Briefcase,
   BrainCircuit,
-  FileText,
   Building2,
   TrendingUp,
   AlertCircle,
   ArrowRight,
   Loader2,
-  CheckCircle2,
-  Clock,
   Sparkles,
   Layers,
 } from "lucide-react";
 import { fetchAdminDashboardStats, AdminDashboardStatsData } from "@/lib/admin-api";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<AdminDashboardStatsData | null>(null);
@@ -28,7 +26,11 @@ export default function AdminDashboardPage() {
     setIsLoading(true);
     setError("");
     try {
-      const data = await fetchAdminDashboardStats();
+      const supabase = createClient();
+      const { data: authData } = await supabase.auth.getSession();
+      const token = authData.session?.access_token;
+      if (!token) throw new Error("Phiên đăng nhập quản trị đã hết hạn");
+      const data = await fetchAdminDashboardStats(token);
       setStats(data);
     } catch (err: unknown) {
       console.error("[AdminDashboard] Failed to load stats:", err);
@@ -39,7 +41,10 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
-    loadDashboardData();
+    const timeoutId = window.setTimeout(() => {
+      void loadDashboardData();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   if (isLoading) {

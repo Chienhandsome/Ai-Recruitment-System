@@ -1,9 +1,52 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { QueryJobDto } from './dto/query-job.dto';
 import { Prisma, JobStatus } from '@prisma/client';
+import { QueryCandidateJobDto } from './dto/query-candidate-job.dto';
+
+const candidateJobListInclude = {
+  recruiter: {
+    select: {
+      company: {
+        select: { id: true, name: true, logoUrl: true },
+      },
+    },
+  },
+  department: { select: { id: true, name: true } },
+  category: { select: { id: true, name: true, slug: true } },
+  jobSkills: {
+    select: {
+      requirementType: true,
+      skill: { select: { id: true, name: true } },
+    },
+  },
+} satisfies Prisma.JobPostingInclude;
+
+const candidateJobDetailInclude = {
+  ...candidateJobListInclude,
+  jobCertificates: {
+    select: {
+      id: true,
+      certificateName: true,
+      requirementType: true,
+    },
+  },
+} satisfies Prisma.JobPostingInclude;
+
+type CandidateJobListRecord = Prisma.JobPostingGetPayload<{
+  include: typeof candidateJobListInclude;
+}>;
+
+type CandidateJobDetailRecord = Prisma.JobPostingGetPayload<{
+  include: typeof candidateJobDetailInclude;
+}>;
 
 @Injectable()
 export class JobsService {
@@ -27,7 +70,7 @@ export class JobsService {
 
   async getJobCategories() {
     return this.prisma.jobCategory.findMany({
-      orderBy: { name: 'asc' }
+      orderBy: { name: 'asc' },
     });
   }
 
@@ -35,22 +78,26 @@ export class JobsService {
     const recruiter = await this.getRecruiterProfile(userId);
 
     // Prepare skills data if provided
-    const skillsData = dto.skills?.map(s => ({
-      skillId: s.skillId,
-      requirementType: s.requirementType,
-    })) || [];
+    const skillsData =
+      dto.skills?.map((s) => ({
+        skillId: s.skillId,
+        requirementType: s.requirementType,
+      })) || [];
 
     // Prepare certs data if provided
-    const certsData = dto.certificates?.map(c => ({
-      certificateName: c.certificateName,
-      requirementType: c.requirementType,
-    })) || [];
+    const certsData =
+      dto.certificates?.map((c) => ({
+        certificateName: c.certificateName,
+        requirementType: c.requirementType,
+      })) || [];
 
     // Ensure job code is unique
     let jobCode = this.generateJobCode();
     let isUnique = false;
     while (!isUnique) {
-      const existing = await this.prisma.jobPosting.findUnique({ where: { jobCode } });
+      const existing = await this.prisma.jobPosting.findUnique({
+        where: { jobCode },
+      });
       if (!existing) {
         isUnique = true;
       } else {
@@ -62,10 +109,12 @@ export class JobsService {
     // This prevents Prisma P2003 Foreign Key Constraint violation if frontend sends a stale or invalid categoryId
     if (dto.categoryId) {
       const category = await this.prisma.jobCategory.findUnique({
-        where: { id: dto.categoryId }
+        where: { id: dto.categoryId },
       });
       if (!category) {
-        throw new BadRequestException(`Category with ID ${dto.categoryId} does not exist`);
+        throw new BadRequestException(
+          `Category with ID ${dto.categoryId} does not exist`,
+        );
       }
     }
 
@@ -104,20 +153,23 @@ export class JobsService {
           },
           jobCertificates: {
             create: certsData,
-          }
+          },
         },
         include: {
           department: true,
           category: true,
           jobSkills: {
-            include: { skill: true }
+            include: { skill: true },
           },
-          jobCertificates: true
-        }
+          jobCertificates: true,
+        },
       });
-    } catch (error: any) {
-      console.error("CREATE JOB ERROR:", error);
-      throw new BadRequestException(`Failed to create job due to DB error: ${error.message}`);
+    } catch (error: unknown) {
+      console.error('CREATE JOB ERROR:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(
+        `Failed to create job due to DB error: ${message}`,
+      );
     }
   }
 
@@ -127,16 +179,23 @@ export class JobsService {
     // If recruiter belongs to a company, they should see all jobs from all recruiters in that company
     // If not, they only see their own jobs
     let recruiterIds: string[] = [recruiter.id];
-    
+
     if (recruiter.companyId) {
       const peers = await this.prisma.recruiterProfile.findMany({
         where: { companyId: recruiter.companyId },
         select: { id: true },
       });
-      recruiterIds = peers.map(p => p.id);
+      recruiterIds = peers.map((p) => p.id);
     }
 
-    const { search, departmentId, status, employmentType, page = 1, limit = 10 } = query;
+    const {
+      search,
+      departmentId,
+      status,
+      employmentType,
+      page = 1,
+      limit = 10,
+    } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.JobPostingWhereInput = {
@@ -164,10 +223,10 @@ export class JobsService {
           department: true,
           category: true,
           _count: {
-            select: { applications: true }
-          }
-        }
-      })
+            select: { applications: true },
+          },
+        },
+      }),
     ]);
 
     return {
@@ -177,7 +236,133 @@ export class JobsService {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
-      }
+      },
+    };
+  }
+
+  async findCandidateJobs(query: QueryCandidateJobDto) {
+    const {
+      search,
+      categoryId,
+      employmentType,
+      workingModel,
+      location,
+      page = 1,
+      limit = 12,
+    } = query;
+    const now = new Date();
+    const where: Prisma.JobPostingWhereInput = {
+      status: JobStatus.PUBLISHED,
+      OR: [{ expiryDate: null }, { expiryDate: { gt: now } }],
+    };
+
+    if (search?.trim()) {
+      const term = search.trim();
+      where.AND = [
+        {
+          OR: [
+            { title: { contains: term, mode: 'insensitive' } },
+            { description: { contains: term, mode: 'insensitive' } },
+            { requirements: { contains: term, mode: 'insensitive' } },
+            {
+              recruiter: {
+                company: { name: { contains: term, mode: 'insensitive' } },
+              },
+            },
+            {
+              jobSkills: {
+                some: {
+                  skill: { name: { contains: term, mode: 'insensitive' } },
+                },
+              },
+            },
+          ],
+        },
+      ];
+    }
+    if (categoryId) where.categoryId = categoryId;
+    if (employmentType) where.employmentType = employmentType;
+    if (workingModel) where.workingModel = workingModel;
+    if (location?.trim()) {
+      where.location = { contains: location.trim(), mode: 'insensitive' };
+    }
+
+    const [total, jobs] = await Promise.all([
+      this.prisma.jobPosting.count({ where }),
+      this.prisma.jobPosting.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+        include: candidateJobListInclude,
+      }),
+    ]);
+
+    return {
+      data: jobs.map((job) => this.toCandidateJobSummary(job)),
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async findCandidateJobById(id: string) {
+    const job = await this.prisma.jobPosting.findFirst({
+      where: {
+        id,
+        status: JobStatus.PUBLISHED,
+        OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
+      },
+      include: candidateJobDetailInclude,
+    });
+
+    if (!job) {
+      throw new NotFoundException('Job posting is unavailable');
+    }
+
+    return {
+      ...this.toCandidateJobSummary(job),
+      description: job.description,
+      requirements: job.requirements,
+      benefits: job.benefits,
+      requiredExperienceYears: job.requiredExperienceYears,
+      requiresProofOfWork: job.requiresProofOfWork,
+      proofOfWorkType: job.proofOfWorkType,
+      certificates: job.jobCertificates.map((certificate) => ({
+        id: certificate.id,
+        name: certificate.certificateName,
+        requirementType: certificate.requirementType,
+      })),
+    };
+  }
+
+  private toCandidateJobSummary(
+    job: CandidateJobListRecord | CandidateJobDetailRecord,
+  ) {
+    return {
+      id: job.id,
+      jobCode: job.jobCode,
+      title: job.title,
+      company: job.recruiter.company,
+      department: job.department,
+      category: job.category,
+      employmentType: job.employmentType,
+      experienceLevel: job.experienceLevel,
+      workingModel: job.workingModel,
+      location: job.location,
+      minSalary: job.minSalary === null ? null : Number(job.minSalary),
+      maxSalary: job.maxSalary === null ? null : Number(job.maxSalary),
+      currency: job.currency,
+      publishedAt: job.publishedAt ?? job.createdAt,
+      expiryDate: job.expiryDate,
+      skills: job.jobSkills.map((jobSkill) => ({
+        id: jobSkill.skill.id,
+        name: jobSkill.skill.name,
+        requirementType: jobSkill.requirementType,
+      })),
     };
   }
 
@@ -189,10 +374,10 @@ export class JobsService {
         department: true,
         category: true,
         jobSkills: {
-          include: { skill: true }
+          include: { skill: true },
         },
-        jobCertificates: true
-      }
+        jobCertificates: true,
+      },
     });
 
     if (!job) {
@@ -206,10 +391,14 @@ export class JobsService {
         select: { companyId: true },
       });
       if (jobRecruiter?.companyId !== recruiter.companyId) {
-        throw new ForbiddenException('You do not have access to this job posting');
+        throw new ForbiddenException(
+          'You do not have access to this job posting',
+        );
       }
     } else if (job.recruiterId !== recruiter.id) {
-      throw new ForbiddenException('You do not have access to this job posting');
+      throw new ForbiddenException(
+        'You do not have access to this job posting',
+      );
     }
 
     return job;
@@ -247,7 +436,10 @@ export class JobsService {
 
     if (dto.status) {
       updateData.status = dto.status;
-      if (dto.status === JobStatus.PUBLISHED && job.status === JobStatus.DRAFT) {
+      if (
+        dto.status === JobStatus.PUBLISHED &&
+        job.status === JobStatus.DRAFT
+      ) {
         updateData.publishedAt = new Date();
       } else if (dto.status === JobStatus.CLOSED) {
         updateData.closedAt = new Date();
@@ -258,7 +450,7 @@ export class JobsService {
     if (dto.skills) {
       updateData.jobSkills = {
         deleteMany: {},
-        create: dto.skills.map(s => ({
+        create: dto.skills.map((s) => ({
           skillId: s.skillId,
           requirementType: s.requirementType,
         })),
@@ -269,7 +461,7 @@ export class JobsService {
     if (dto.certificates) {
       updateData.jobCertificates = {
         deleteMany: {},
-        create: dto.certificates.map(c => ({
+        create: dto.certificates.map((c) => ({
           certificateName: c.certificateName,
           requirementType: c.requirementType,
         })),
@@ -283,10 +475,10 @@ export class JobsService {
         department: true,
         category: true,
         jobSkills: {
-          include: { skill: true }
+          include: { skill: true },
         },
-        jobCertificates: true
-      }
+        jobCertificates: true,
+      },
     });
   }
 

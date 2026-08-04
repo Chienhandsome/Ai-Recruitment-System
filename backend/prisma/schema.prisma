@@ -358,6 +358,7 @@ model JobPosting {
   applications    Application[]
 
   @@index([status])
+  @@index([status, expiryDate, publishedAt])
   @@index([recruiterId])
   @@index([departmentId])
   @@map("job_postings")

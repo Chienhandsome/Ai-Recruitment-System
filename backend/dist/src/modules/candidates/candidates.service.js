@@ -101,13 +101,38 @@ let CandidatesService = CandidatesService_1 = class CandidatesService {
                 data: profileData,
             });
             if (Array.isArray(dto.workExperiences)) {
+                const requestedExtractedIds = dto.workExperiences
+                    .filter((item) => item.source === 'EXTRACTED' && item.id)
+                    .map((item) => item.id);
+                const preservedExtractedIds = new Set((await tx.workExperience.findMany({
+                    where: {
+                        candidateProfileId: profile.id,
+                        source: 'EXTRACTED',
+                        id: { in: requestedExtractedIds },
+                    },
+                    select: { id: true },
+                })).map((item) => item.id));
                 await tx.workExperience.deleteMany({
-                    where: { candidateProfileId: profile.id },
+                    where: {
+                        candidateProfileId: profile.id,
+                        OR: [
+                            { source: 'MANUAL' },
+                            {
+                                source: 'EXTRACTED',
+                                ...(preservedExtractedIds.size > 0
+                                    ? { id: { notIn: [...preservedExtractedIds] } }
+                                    : {}),
+                            },
+                        ],
+                    },
                 });
-                if (dto.workExperiences.length > 0) {
+                const manualExperiences = dto.workExperiences.filter((item) => !item.id || !preservedExtractedIds.has(item.id));
+                if (manualExperiences.length > 0) {
                     await tx.workExperience.createMany({
-                        data: dto.workExperiences.map((exp) => ({
+                        data: manualExperiences.map((exp) => ({
                             candidateProfileId: profile.id,
+                            source: 'MANUAL',
+                            resumeId: null,
                             companyName: exp.companyName,
                             positionTitle: exp.positionTitle,
                             startDate: exp.startDate ? new Date(exp.startDate) : new Date(),
@@ -120,13 +145,38 @@ let CandidatesService = CandidatesService_1 = class CandidatesService {
                 }
             }
             if (Array.isArray(dto.educations)) {
+                const requestedExtractedIds = dto.educations
+                    .filter((item) => item.source === 'EXTRACTED' && item.id)
+                    .map((item) => item.id);
+                const preservedExtractedIds = new Set((await tx.education.findMany({
+                    where: {
+                        candidateProfileId: profile.id,
+                        source: 'EXTRACTED',
+                        id: { in: requestedExtractedIds },
+                    },
+                    select: { id: true },
+                })).map((item) => item.id));
                 await tx.education.deleteMany({
-                    where: { candidateProfileId: profile.id },
+                    where: {
+                        candidateProfileId: profile.id,
+                        OR: [
+                            { source: 'MANUAL' },
+                            {
+                                source: 'EXTRACTED',
+                                ...(preservedExtractedIds.size > 0
+                                    ? { id: { notIn: [...preservedExtractedIds] } }
+                                    : {}),
+                            },
+                        ],
+                    },
                 });
-                if (dto.educations.length > 0) {
+                const manualEducations = dto.educations.filter((item) => !item.id || !preservedExtractedIds.has(item.id));
+                if (manualEducations.length > 0) {
                     await tx.education.createMany({
-                        data: dto.educations.map((edu) => ({
+                        data: manualEducations.map((edu) => ({
                             candidateProfileId: profile.id,
+                            source: 'MANUAL',
+                            resumeId: null,
                             schoolName: edu.schoolName,
                             major: edu.major || null,
                             degree: edu.degree || null,
@@ -137,25 +187,53 @@ let CandidatesService = CandidatesService_1 = class CandidatesService {
                 }
             }
             if (Array.isArray(dto.projects)) {
+                const requestedExtractedIds = dto.projects
+                    .filter((item) => item.source === 'EXTRACTED' && item.id)
+                    .map((item) => item.id);
+                const preservedExtractedIds = new Set((await tx.project.findMany({
+                    where: {
+                        candidateProfileId: profile.id,
+                        source: 'EXTRACTED',
+                        id: { in: requestedExtractedIds },
+                    },
+                    select: { id: true },
+                })).map((item) => item.id));
                 await tx.project.deleteMany({
-                    where: { candidateProfileId: profile.id },
+                    where: {
+                        candidateProfileId: profile.id,
+                        OR: [
+                            { source: 'MANUAL' },
+                            {
+                                source: 'EXTRACTED',
+                                ...(preservedExtractedIds.size > 0
+                                    ? { id: { notIn: [...preservedExtractedIds] } }
+                                    : {}),
+                            },
+                        ],
+                    },
                 });
-                if (dto.projects.length > 0) {
+                const manualProjects = dto.projects.filter((item) => !item.id || !preservedExtractedIds.has(item.id));
+                if (manualProjects.length > 0) {
                     await tx.project.createMany({
-                        data: dto.projects.map((proj) => {
+                        data: manualProjects.map((proj) => {
                             let techs = null;
                             if (Array.isArray(proj.technologies)) {
                                 techs = proj.technologies;
                             }
                             else if (typeof proj.technologies === 'string') {
-                                techs = proj.technologies.split(',').map((t) => t.trim()).filter(Boolean);
+                                techs = proj.technologies
+                                    .split(',')
+                                    .map((t) => t.trim())
+                                    .filter(Boolean);
                             }
                             return {
                                 candidateProfileId: profile.id,
+                                source: 'MANUAL',
+                                resumeId: null,
                                 projectName: proj.projectName,
                                 projectRole: proj.projectRole || null,
                                 description: proj.description || null,
-                                technologies: (techs ?? undefined),
+                                technologies: techs ?? undefined,
                                 projectUrl: proj.projectUrl || null,
                                 startDate: proj.startDate ? new Date(proj.startDate) : null,
                                 endDate: proj.endDate ? new Date(proj.endDate) : null,
@@ -165,13 +243,38 @@ let CandidatesService = CandidatesService_1 = class CandidatesService {
                 }
             }
             if (Array.isArray(dto.certificates)) {
+                const requestedExtractedIds = dto.certificates
+                    .filter((item) => item.source === 'EXTRACTED' && item.id)
+                    .map((item) => item.id);
+                const preservedExtractedIds = new Set((await tx.certificate.findMany({
+                    where: {
+                        candidateProfileId: profile.id,
+                        source: 'EXTRACTED',
+                        id: { in: requestedExtractedIds },
+                    },
+                    select: { id: true },
+                })).map((item) => item.id));
                 await tx.certificate.deleteMany({
-                    where: { candidateProfileId: profile.id },
+                    where: {
+                        candidateProfileId: profile.id,
+                        OR: [
+                            { source: 'MANUAL' },
+                            {
+                                source: 'EXTRACTED',
+                                ...(preservedExtractedIds.size > 0
+                                    ? { id: { notIn: [...preservedExtractedIds] } }
+                                    : {}),
+                            },
+                        ],
+                    },
                 });
-                if (dto.certificates.length > 0) {
+                const manualCertificates = dto.certificates.filter((item) => !item.id || !preservedExtractedIds.has(item.id));
+                if (manualCertificates.length > 0) {
                     await tx.certificate.createMany({
-                        data: dto.certificates.map((cert) => ({
+                        data: manualCertificates.map((cert) => ({
                             candidateProfileId: profile.id,
+                            source: 'MANUAL',
+                            resumeId: null,
                             certificateName: cert.certificateName,
                             issuingOrganization: cert.issuingOrganization || 'Unknown',
                             issueDate: cert.issueDate ? new Date(cert.issueDate) : null,
@@ -202,15 +305,40 @@ let CandidatesService = CandidatesService_1 = class CandidatesService {
         if (!profile) {
             throw new common_1.NotFoundException(`Candidate profile ${candidateProfileId} not found.`);
         }
+        const submittedSkills = [
+            ...new Map(dto.skills.map((skill) => [skill.skillId, skill])).values(),
+        ];
+        const submittedSkillIds = submittedSkills.map((skill) => skill.skillId);
         await this.prisma.$transaction(async (tx) => {
+            const existingSkills = await tx.candidateSkill.findMany({
+                where: { candidateId: candidateProfileId },
+                select: {
+                    skillId: true,
+                    proficiencyLevel: true,
+                    isPrimary: true,
+                    source: true,
+                },
+            });
+            const existingBySkillId = new Map(existingSkills.map((skill) => [skill.skillId, skill]));
             await tx.candidateSkill.deleteMany({
                 where: {
                     candidateId: candidateProfileId,
-                    source: client_1.SkillSource.SELF_DECLARED,
-                    skillId: { notIn: dto.skills.map((s) => s.skillId) },
+                    source: {
+                        in: [client_1.SkillSource.EXTRACTED, client_1.SkillSource.SELF_DECLARED],
+                    },
+                    skillId: { notIn: submittedSkillIds },
                 },
             });
-            for (const skillItem of dto.skills) {
+            for (const skillItem of submittedSkills) {
+                const existing = existingBySkillId.get(skillItem.skillId);
+                const isPrimary = skillItem.isPrimary ?? false;
+                if (existing?.source === client_1.SkillSource.VERIFIED)
+                    continue;
+                const unchangedExtractedSkill = existing?.source === client_1.SkillSource.EXTRACTED &&
+                    existing.proficiencyLevel === skillItem.proficiencyLevel &&
+                    existing.isPrimary === isPrimary;
+                if (unchangedExtractedSkill)
+                    continue;
                 await tx.candidateSkill.upsert({
                     where: {
                         candidateId_skillId: {
@@ -220,22 +348,23 @@ let CandidatesService = CandidatesService_1 = class CandidatesService {
                     },
                     update: {
                         proficiencyLevel: skillItem.proficiencyLevel,
-                        yearsExperience: skillItem.yearsExperience ?? null,
-                        isPrimary: skillItem.isPrimary ?? false,
+                        isPrimary,
                         source: client_1.SkillSource.SELF_DECLARED,
+                        resumeId: null,
+                        isInferred: false,
+                        sourceText: null,
                     },
                     create: {
                         candidateId: candidateProfileId,
                         skillId: skillItem.skillId,
                         proficiencyLevel: skillItem.proficiencyLevel,
-                        yearsExperience: skillItem.yearsExperience ?? null,
-                        isPrimary: skillItem.isPrimary ?? false,
+                        isPrimary,
                         source: client_1.SkillSource.SELF_DECLARED,
                     },
                 });
             }
         });
-        this.logger.log(`CandidateProfile ${candidateProfileId}: updated ${dto.skills.length} SELF_DECLARED skills`);
+        this.logger.log(`CandidateProfile ${candidateProfileId}: saved ${submittedSkills.length} skills`);
         return this.getCandidateSkills(candidateProfileId);
     }
     async removeCandidateSkill(candidateProfileId, skillId) {
@@ -250,8 +379,8 @@ let CandidatesService = CandidatesService_1 = class CandidatesService {
         if (!existing) {
             throw new common_1.NotFoundException(`Skill ${skillId} not found on candidate profile ${candidateProfileId}.`);
         }
-        if (existing.source !== client_1.SkillSource.SELF_DECLARED) {
-            throw new common_1.NotFoundException(`Only self-declared skills can be removed. This skill was ${existing.source}.`);
+        if (existing.source === client_1.SkillSource.VERIFIED) {
+            throw new common_1.ForbiddenException('Verified skills cannot be removed by the candidate.');
         }
         await this.prisma.candidateSkill.delete({
             where: {

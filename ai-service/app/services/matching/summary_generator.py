@@ -15,7 +15,7 @@ class SummaryGenerator:
         skills_score: float,
         experience_score: float,
         education_score: float,
-        project_score: float,
+        other_score: float,
         missing_required_skills: List[str],
         strengths: List[str],
         gaps: List[str],

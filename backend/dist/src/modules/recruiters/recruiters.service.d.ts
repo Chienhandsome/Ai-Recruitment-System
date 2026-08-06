@@ -4,78 +4,78 @@ export declare class RecruitersService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     getProfile(userId: string): Promise<{
-        company: {
-            id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            code: string | null;
-            description: string | null;
-            logoUrl: string | null;
-            website: string | null;
-            address: string | null;
-        } | null;
-        department: {
-            id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            code: string;
-            companyId: string;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
-        } | null;
         user: {
-            email: string;
             fullName: string;
-            birthDay: Date | null;
+            email: string;
             phone: string | null;
+            birthDay: Date | null;
             avatarUrl: string | null;
         };
+        department: {
+            id: string;
+            updatedAt: Date;
+            name: string;
+            createdAt: Date;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
+            code: string;
+            companyId: string;
+        } | null;
+        company: {
+            id: string;
+            updatedAt: Date;
+            name: string;
+            createdAt: Date;
+            address: string | null;
+            description: string | null;
+            code: string | null;
+            logoUrl: string | null;
+            website: string | null;
+        } | null;
     } & {
         id: string;
-        createdAt: Date;
         updatedAt: Date;
-        companyId: string | null;
+        createdAt: Date;
         userId: string;
-        departmentId: string | null;
         title: string | null;
+        departmentId: string | null;
+        companyId: string | null;
     }>;
     updateProfile(userId: string, dto: UpdateRecruiterProfileDto): Promise<{
-        company: {
-            id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            code: string | null;
-            description: string | null;
-            logoUrl: string | null;
-            website: string | null;
-            address: string | null;
-        } | null;
-        department: {
-            id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            code: string;
-            companyId: string;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
-        } | null;
         user: {
-            email: string;
             fullName: string;
-            birthDay: Date | null;
+            email: string;
             phone: string | null;
+            birthDay: Date | null;
             avatarUrl: string | null;
         };
+        department: {
+            id: string;
+            updatedAt: Date;
+            name: string;
+            createdAt: Date;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
+            code: string;
+            companyId: string;
+        } | null;
+        company: {
+            id: string;
+            updatedAt: Date;
+            name: string;
+            createdAt: Date;
+            address: string | null;
+            description: string | null;
+            code: string | null;
+            logoUrl: string | null;
+            website: string | null;
+        } | null;
     } & {
         id: string;
-        createdAt: Date;
         updatedAt: Date;
-        companyId: string | null;
+        createdAt: Date;
         userId: string;
-        departmentId: string | null;
         title: string | null;
+        departmentId: string | null;
+        companyId: string | null;
     }>;
     getDashboardStats(userId: string): Promise<{
         totalActiveJobs: number;

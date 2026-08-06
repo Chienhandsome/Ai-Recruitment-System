@@ -699,7 +699,9 @@ model AiMatchingResult {
   strengths             Json?
   gaps                  Json?
   weaknesses            Json?
-  reasoningSummary      String?     @map("reasoning_summary")
+  evidence              Json?       @map("evidence")
+  confidenceScore       Decimal?    @map("confidence_score") @db.Decimal(3, 2)
+  reasoningSummary      String?     @map("reasoning_summary") @db.Text
   inputSnapshot         Json?       @map("input_snapshot")
   modelVersion          String?     @map("model_version")
   createdAt             DateTime    @default(now()) @map("created_at")

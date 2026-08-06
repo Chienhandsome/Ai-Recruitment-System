@@ -561,7 +561,7 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobD
                       <input type="number" name="educationWeight" value={formData.educationWeight} onChange={handleChange} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-[#1F2937] outline-none focus:border-[#2563EB]" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Tiêu chí khác</label>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">Ngoại ngữ / Chứng chỉ</label>
                       <input type="number" name="otherWeight" value={formData.otherWeight} onChange={handleChange} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-[#1F2937] outline-none focus:border-[#2563EB]" />
                     </div>
                   </div>

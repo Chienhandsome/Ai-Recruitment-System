@@ -1,4 +1,8 @@
-export declare class WorkExperienceInputDto {
+declare class SourcedProfileRecordInputDto {
+    id?: string;
+    source?: 'MANUAL' | 'EXTRACTED';
+}
+export declare class WorkExperienceInputDto extends SourcedProfileRecordInputDto {
     companyName: string;
     positionTitle: string;
     startDate?: string;
@@ -7,14 +11,14 @@ export declare class WorkExperienceInputDto {
     description?: string | null;
     achievements?: string | null;
 }
-export declare class EducationInputDto {
+export declare class EducationInputDto extends SourcedProfileRecordInputDto {
     schoolName: string;
     major?: string | null;
     degree?: string | null;
     startDate?: string | null;
     endDate?: string | null;
 }
-export declare class ProjectInputDto {
+export declare class ProjectInputDto extends SourcedProfileRecordInputDto {
     projectName: string;
     projectRole?: string | null;
     description?: string | null;
@@ -23,7 +27,7 @@ export declare class ProjectInputDto {
     startDate?: string | null;
     endDate?: string | null;
 }
-export declare class CertificateInputDto {
+export declare class CertificateInputDto extends SourcedProfileRecordInputDto {
     certificateName: string;
     issuingOrganization?: string | null;
     issueDate?: string | null;
@@ -42,3 +46,4 @@ export declare class UpdateCandidateProfileDto {
     projects?: ProjectInputDto[];
     certificates?: CertificateInputDto[];
 }
+export {};

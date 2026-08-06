@@ -50,15 +50,14 @@ export declare class AdminService {
     }[]>;
     updateJobStatus(id: string, status: JobStatus): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
-        description: string;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.JobStatus;
-        categoryId: string | null;
-        departmentId: string | null;
-        title: string;
         jobCode: string;
+        title: string;
         recruiterId: string;
+        departmentId: string | null;
+        description: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -78,21 +77,21 @@ export declare class AdminService {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
     }>;
     deleteJob(id: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
-        description: string;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.JobStatus;
-        categoryId: string | null;
-        departmentId: string | null;
-        title: string;
         jobCode: string;
+        title: string;
         recruiterId: string;
+        departmentId: string | null;
+        description: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -112,6 +111,7 @@ export declare class AdminService {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
@@ -129,25 +129,25 @@ export declare class AdminService {
     }[]>;
     updateUserStatus(id: string, status: AccountStatus): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.AccountStatus;
-        email: string;
         fullName: string;
-        birthDay: Date | null;
+        email: string;
         phone: string | null;
+        birthDay: Date | null;
         avatarUrl: string | null;
         lastLoginAt: Date | null;
     }>;
     deleteUser(id: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.AccountStatus;
-        email: string;
         fullName: string;
-        birthDay: Date | null;
+        email: string;
         phone: string | null;
+        birthDay: Date | null;
         avatarUrl: string | null;
         lastLoginAt: Date | null;
     }>;

@@ -13,6 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SkillsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../database/prisma.service");
+const skill_name_util_1 = require("../../common/skill-name.util");
 let SkillsService = SkillsService_1 = class SkillsService {
     prisma;
     logger = new common_1.Logger(SkillsService_1.name);
@@ -51,12 +52,16 @@ let SkillsService = SkillsService_1 = class SkillsService {
     async getSkills(categoryId, search) {
         const whereClause = { status: 'ACTIVE' };
         if (categoryId) {
-            const isSkillCat = await this.prisma.skillCategory.findUnique({ where: { id: categoryId } });
+            const isSkillCat = await this.prisma.skillCategory.findUnique({
+                where: { id: categoryId },
+            });
             if (isSkillCat) {
                 whereClause.categoryId = categoryId;
             }
             else {
-                const isJobCat = await this.prisma.jobCategory.findUnique({ where: { id: categoryId } });
+                const isJobCat = await this.prisma.jobCategory.findUnique({
+                    where: { id: categoryId },
+                });
                 if (isJobCat) {
                     const map = {
                         'cong-nghe-thong-tin': 'công nghệ thông tin',
@@ -66,11 +71,11 @@ let SkillsService = SkillsService_1 = class SkillsService {
                         'marketing-truyen-thong': 'marketing',
                         'nhan-su-hanh-chinh': 'nhân sự',
                         'y-te-duoc-pham': 'y tế',
-                        'van-tai-logistics': 'vận tải'
+                        'van-tai-logistics': 'vận tải',
                     };
                     const searchKeyword = map[isJobCat.slug] || isJobCat.name.split(' ')[0];
                     const mappedSkillCat = await this.prisma.skillCategory.findFirst({
-                        where: { name: { contains: searchKeyword, mode: 'insensitive' } }
+                        where: { name: { contains: searchKeyword, mode: 'insensitive' } },
                     });
                     if (mappedSkillCat) {
                         whereClause.categoryId = mappedSkillCat.id;
@@ -85,7 +90,11 @@ let SkillsService = SkillsService_1 = class SkillsService {
             const q = search.trim();
             whereClause.OR = [
                 { name: { contains: q, mode: 'insensitive' } },
-                { skillAliases: { some: { aliasName: { contains: q, mode: 'insensitive' } } } },
+                {
+                    skillAliases: {
+                        some: { aliasName: { contains: q, mode: 'insensitive' } },
+                    },
+                },
             ];
         }
         const skills = await this.prisma.skill.findMany({
@@ -104,7 +113,7 @@ let SkillsService = SkillsService_1 = class SkillsService {
         if (!trimmed) {
             throw new common_1.BadRequestException('Tên kỹ năng không được để trống');
         }
-        const normalized = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const normalized = (0, skill_name_util_1.normalizeSkillName)(trimmed);
         const existing = await this.prisma.skill.findFirst({
             where: {
                 OR: [
@@ -117,9 +126,13 @@ let SkillsService = SkillsService_1 = class SkillsService {
             return existing;
         }
         let resolvedCategoryId = categoryId;
-        const isSkillCat = await this.prisma.skillCategory.findUnique({ where: { id: categoryId } });
+        const isSkillCat = await this.prisma.skillCategory.findUnique({
+            where: { id: categoryId },
+        });
         if (!isSkillCat) {
-            const isJobCat = await this.prisma.jobCategory.findUnique({ where: { id: categoryId } });
+            const isJobCat = await this.prisma.jobCategory.findUnique({
+                where: { id: categoryId },
+            });
             if (isJobCat) {
                 const map = {
                     'cong-nghe-thong-tin': 'công nghệ thông tin',
@@ -129,11 +142,11 @@ let SkillsService = SkillsService_1 = class SkillsService {
                     'marketing-truyen-thong': 'marketing',
                     'nhan-su-hanh-chinh': 'nhân sự',
                     'y-te-duoc-pham': 'y tế',
-                    'van-tai-logistics': 'vận tải'
+                    'van-tai-logistics': 'vận tải',
                 };
                 const searchKeyword = map[isJobCat.slug] || isJobCat.name.split(' ')[0];
                 const mappedSkillCat = await this.prisma.skillCategory.findFirst({
-                    where: { name: { contains: searchKeyword, mode: 'insensitive' } }
+                    where: { name: { contains: searchKeyword, mode: 'insensitive' } },
                 });
                 if (mappedSkillCat) {
                     resolvedCategoryId = mappedSkillCat.id;
@@ -168,7 +181,7 @@ let SkillsService = SkillsService_1 = class SkillsService {
         if (name && name.trim()) {
             const trimmed = name.trim();
             data.name = trimmed;
-            data.normalizedName = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            data.normalizedName = (0, skill_name_util_1.normalizeSkillName)(trimmed);
         }
         if (categoryId) {
             data.categoryId = categoryId;
@@ -190,7 +203,9 @@ let SkillsService = SkillsService_1 = class SkillsService {
         if (!trimmed) {
             throw new common_1.BadRequestException('Alias name cannot be empty');
         }
-        const skill = await this.prisma.skill.findUnique({ where: { id: skillId } });
+        const skill = await this.prisma.skill.findUnique({
+            where: { id: skillId },
+        });
         if (!skill) {
             throw new common_1.NotFoundException('Skill not found');
         }
@@ -211,7 +226,9 @@ let SkillsService = SkillsService_1 = class SkillsService {
         });
     }
     async deleteSkillAlias(aliasId) {
-        const existing = await this.prisma.skillAlias.findUnique({ where: { id: aliasId } });
+        const existing = await this.prisma.skillAlias.findUnique({
+            where: { id: aliasId },
+        });
         if (!existing) {
             throw new common_1.NotFoundException('Alias not found');
         }

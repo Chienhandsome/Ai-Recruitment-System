@@ -85,6 +85,25 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
             RABBITMQ_DEAD_LETTER_EXCHANGE,
             RABBITMQ_ROUTING_KEYS.RESUME_ANALYSIS_DEAD,
           );
+
+          // Evaluation queues
+          await channel.assertQueue(RABBITMQ_QUEUES.EVALUATION_QUEUE, {
+            durable: true,
+          });
+          await channel.bindQueue(
+            RABBITMQ_QUEUES.EVALUATION_QUEUE,
+            RABBITMQ_EXCHANGE,
+            RABBITMQ_ROUTING_KEYS.EVALUATION_REQUESTED,
+          );
+          await channel.assertQueue(
+            RABBITMQ_QUEUES.EVALUATION_DEAD_QUEUE,
+            { durable: true },
+          );
+          await channel.bindQueue(
+            RABBITMQ_QUEUES.EVALUATION_DEAD_QUEUE,
+            RABBITMQ_DEAD_LETTER_EXCHANGE,
+            RABBITMQ_ROUTING_KEYS.EVALUATION_DEAD,
+          );
         },
       });
     } catch (error: unknown) {

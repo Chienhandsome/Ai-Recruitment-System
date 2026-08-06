@@ -48,6 +48,8 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const amqp = __importStar(require("amqp-connection-manager"));
 const rabbitmq_constants_1 = require("./rabbitmq.constants");
+const MAX_HANDLER_RETRIES = 3;
+const DEFAULT_HANDLER_RETRY_DELAY_MS = 5_000;
 let RabbitMQService = RabbitMQService_1 = class RabbitMQService {
     configService;
     logger = new common_1.Logger(RabbitMQService_1.name);
@@ -84,6 +86,21 @@ let RabbitMQService = RabbitMQService_1 = class RabbitMQService {
                     await channel.assertExchange(rabbitmq_constants_1.RABBITMQ_EXCHANGE, 'topic', {
                         durable: true,
                     });
+                    await channel.assertExchange(rabbitmq_constants_1.RABBITMQ_DEAD_LETTER_EXCHANGE, 'topic', {
+                        durable: true,
+                    });
+                    await channel.assertQueue(rabbitmq_constants_1.RABBITMQ_QUEUES.RESUME_ANALYSIS_QUEUE, {
+                        durable: true,
+                    });
+                    await channel.bindQueue(rabbitmq_constants_1.RABBITMQ_QUEUES.RESUME_ANALYSIS_QUEUE, rabbitmq_constants_1.RABBITMQ_EXCHANGE, rabbitmq_constants_1.RABBITMQ_ROUTING_KEYS.RESUME_ANALYSIS_REQUESTED);
+                    await channel.assertQueue(rabbitmq_constants_1.RABBITMQ_QUEUES.RESUME_ANALYSIS_DEAD_QUEUE, { durable: true });
+                    await channel.bindQueue(rabbitmq_constants_1.RABBITMQ_QUEUES.RESUME_ANALYSIS_DEAD_QUEUE, rabbitmq_constants_1.RABBITMQ_DEAD_LETTER_EXCHANGE, rabbitmq_constants_1.RABBITMQ_ROUTING_KEYS.RESUME_ANALYSIS_DEAD);
+                    await channel.assertQueue(rabbitmq_constants_1.RABBITMQ_QUEUES.EVALUATION_QUEUE, {
+                        durable: true,
+                    });
+                    await channel.bindQueue(rabbitmq_constants_1.RABBITMQ_QUEUES.EVALUATION_QUEUE, rabbitmq_constants_1.RABBITMQ_EXCHANGE, rabbitmq_constants_1.RABBITMQ_ROUTING_KEYS.EVALUATION_REQUESTED);
+                    await channel.assertQueue(rabbitmq_constants_1.RABBITMQ_QUEUES.EVALUATION_DEAD_QUEUE, { durable: true });
+                    await channel.bindQueue(rabbitmq_constants_1.RABBITMQ_QUEUES.EVALUATION_DEAD_QUEUE, rabbitmq_constants_1.RABBITMQ_DEAD_LETTER_EXCHANGE, rabbitmq_constants_1.RABBITMQ_ROUTING_KEYS.EVALUATION_DEAD);
                 },
             });
         }
@@ -108,7 +125,11 @@ let RabbitMQService = RabbitMQService_1 = class RabbitMQService {
             return false;
         }
         try {
-            await this.channelWrapper.publish(rabbitmq_constants_1.RABBITMQ_EXCHANGE, routingKey, payload);
+            await this.channelWrapper.publish(rabbitmq_constants_1.RABBITMQ_EXCHANGE, routingKey, payload, {
+                persistent: true,
+                mandatory: true,
+                contentType: 'application/json',
+            });
             this.logger.log(`Published test message to key '${routingKey}'`);
             return true;
         }
@@ -123,7 +144,11 @@ let RabbitMQService = RabbitMQService_1 = class RabbitMQService {
             return false;
         }
         try {
-            await this.channelWrapper.publish(rabbitmq_constants_1.RABBITMQ_EXCHANGE, routingKey, payload);
+            await this.channelWrapper.publish(rabbitmq_constants_1.RABBITMQ_EXCHANGE, routingKey, payload, {
+                persistent: true,
+                mandatory: true,
+                contentType: 'application/json',
+            });
             this.logger.log(`Published message to '${routingKey}'`);
             return true;
         }
@@ -143,18 +168,68 @@ let RabbitMQService = RabbitMQService_1 = class RabbitMQService {
                 await channel.bindQueue(queueName, rabbitmq_constants_1.RABBITMQ_EXCHANGE, key);
             }
             await channel.prefetch(1);
-            await channel.consume(queueName, async (msg) => {
+            await channel.consume(queueName, (msg) => {
                 if (!msg)
                     return;
-                try {
-                    const content = JSON.parse(msg.content.toString());
-                    await handler(content);
-                    channel.ack(msg);
-                }
-                catch (error) {
-                    this.logger.error(`Error processing message from '${queueName}': ${this.getErrorMessage(error)}`);
-                    channel.nack(msg, false, false);
-                }
+                void (async () => {
+                    try {
+                        const content = JSON.parse(msg.content.toString());
+                        await handler(content);
+                        channel.ack(msg);
+                    }
+                    catch (error) {
+                        this.logger.error(`Error processing message from '${queueName}': ${this.getErrorMessage(error)}`);
+                        const retryCount = this.getRetryCount(msg.properties.headers);
+                        if (retryCount < MAX_HANDLER_RETRIES) {
+                            try {
+                                await this.waitForHandlerRetry(retryCount);
+                                const accepted = channel.publish(rabbitmq_constants_1.RABBITMQ_EXCHANGE, msg.fields.routingKey, msg.content, {
+                                    ...msg.properties,
+                                    persistent: true,
+                                    mandatory: true,
+                                    headers: {
+                                        ...msg.properties.headers,
+                                        'x-retry-count': retryCount + 1,
+                                    },
+                                });
+                                if (!accepted) {
+                                    throw new Error('Retry channel write buffer is full');
+                                }
+                                await channel.waitForConfirms();
+                                channel.ack(msg);
+                                this.logger.warn(`Republished failed message from '${queueName}' (attempt ${retryCount + 1}/${MAX_HANDLER_RETRIES}).`);
+                                return;
+                            }
+                            catch (retryError) {
+                                this.logger.error(`Failed to republish message from '${queueName}': ${this.getErrorMessage(retryError)}`);
+                                channel.nack(msg, false, true);
+                                return;
+                            }
+                        }
+                        try {
+                            const contentType = typeof msg.properties.contentType === 'string'
+                                ? msg.properties.contentType
+                                : 'application/json';
+                            const accepted = channel.publish(rabbitmq_constants_1.RABBITMQ_DEAD_LETTER_EXCHANGE, rabbitmq_constants_1.RABBITMQ_ROUTING_KEYS.RESUME_ANALYSIS_DEAD, msg.content, {
+                                persistent: true,
+                                contentType,
+                                headers: {
+                                    ...msg.properties.headers,
+                                    'x-original-queue': queueName,
+                                },
+                            });
+                            if (!accepted) {
+                                throw new Error('Dead-letter channel write buffer is full');
+                            }
+                            await channel.waitForConfirms();
+                            channel.ack(msg);
+                        }
+                        catch (deadLetterError) {
+                            this.logger.error(`Failed to dead-letter message from '${queueName}': ${this.getErrorMessage(deadLetterError)}`);
+                            channel.nack(msg, false, true);
+                        }
+                    }
+                })();
             });
             this.logger.log(`Subscribed to queue '${queueName}' with keys: [${routingKeys.join(', ')}]`);
         });
@@ -174,6 +249,20 @@ let RabbitMQService = RabbitMQService_1 = class RabbitMQService {
     }
     getErrorMessage(error) {
         return error instanceof Error ? error.message : 'Unknown RabbitMQ error';
+    }
+    getRetryCount(headers) {
+        const value = Number(headers?.['x-retry-count'] ?? 0);
+        return Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
+    }
+    async waitForHandlerRetry(retryCount) {
+        const configuredDelay = Number(this.configService.get('RABBITMQ_HANDLER_RETRY_BASE_DELAY_MS', DEFAULT_HANDLER_RETRY_DELAY_MS));
+        const baseDelay = Number.isFinite(configuredDelay)
+            ? Math.max(0, configuredDelay)
+            : DEFAULT_HANDLER_RETRY_DELAY_MS;
+        const delayMs = baseDelay * 2 ** retryCount;
+        if (delayMs === 0)
+            return;
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
 };
 exports.RabbitMQService = RabbitMQService;

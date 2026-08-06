@@ -1,0 +1,28 @@
+{
+  "domain": "IT",
+  "evidence_schemas": {
+    "Project": {
+      "type": "object",
+      "properties": {
+        "Project_Name": { "type": "string" },
+        "Role": { "type": "string" },
+        "Complexity": {
+          "type": "string",
+          "description": "Microservices, Monolithic, số lượng user, tải hệ thống"
+        },
+        "Outcome_Metrics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Tối ưu hiệu năng, giảm thời gian phản hồi, tiết kiệm chi phí server"
+          }
+        },
+        "Tools_Used": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ngôn ngữ lập trình, Framework, Database, Cloud (React, Node, AWS)"
+        }
+      }
+    }
+  }
+}

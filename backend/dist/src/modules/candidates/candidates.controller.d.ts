@@ -7,8 +7,9 @@ export declare class CandidatesController {
     constructor(candidatesService: CandidatesService);
     updateMyProfile(user: AuthenticatedUser, dto: UpdateCandidateProfileDto): Promise<{
         id: string;
+        updatedAt: Date;
+        createdAt: Date;
         userId: string | null;
-        primaryResumeId: string | null;
         status: import(".prisma/client").$Enums.CandidateProfileStatus;
         fullName: string;
         email: string;
@@ -19,8 +20,7 @@ export declare class CandidatesController {
         linkedinUrl: string | null;
         githubUrl: string | null;
         portfolioUrl: string | null;
-        createdAt: Date;
-        updatedAt: Date;
+        primaryResumeId: string | null;
         expectedMinSalary: import("@prisma/client/runtime/library").Decimal | null;
         expectedMaxSalary: import("@prisma/client/runtime/library").Decimal | null;
         preferredModel: import(".prisma/client").$Enums.WorkingModel | null;
@@ -29,59 +29,61 @@ export declare class CandidatesController {
         skill: {
             category: {
                 id: string;
-                createdAt: Date;
                 updatedAt: Date;
                 name: string;
+                createdAt: Date;
             };
         } & {
             id: string;
-            status: import(".prisma/client").$Enums.SkillStatus;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
-            normalizedName: string;
+            createdAt: Date;
+            status: import(".prisma/client").$Enums.SkillStatus;
             categoryId: string;
+            normalizedName: string;
             type: import(".prisma/client").$Enums.SkillType;
         };
     } & {
         id: string;
-        createdAt: Date;
         candidateId: string;
         resumeId: string | null;
+        source: import(".prisma/client").$Enums.SkillSource;
+        createdAt: Date;
         skillId: string;
         proficiencyLevel: import(".prisma/client").$Enums.ProficiencyLevel;
-        yearsExperience: import("@prisma/client/runtime/library").Decimal | null;
         isPrimary: boolean;
-        source: import(".prisma/client").$Enums.SkillSource;
+        isInferred: boolean;
+        sourceText: string | null;
     })[]>;
     updateMySkills(user: AuthenticatedUser, dto: UpdateCandidateSkillsDto): Promise<({
         skill: {
             category: {
                 id: string;
-                createdAt: Date;
                 updatedAt: Date;
                 name: string;
+                createdAt: Date;
             };
         } & {
             id: string;
-            status: import(".prisma/client").$Enums.SkillStatus;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
-            normalizedName: string;
+            createdAt: Date;
+            status: import(".prisma/client").$Enums.SkillStatus;
             categoryId: string;
+            normalizedName: string;
             type: import(".prisma/client").$Enums.SkillType;
         };
     } & {
         id: string;
-        createdAt: Date;
         candidateId: string;
         resumeId: string | null;
+        source: import(".prisma/client").$Enums.SkillSource;
+        createdAt: Date;
         skillId: string;
         proficiencyLevel: import(".prisma/client").$Enums.ProficiencyLevel;
-        yearsExperience: import("@prisma/client/runtime/library").Decimal | null;
         isPrimary: boolean;
-        source: import(".prisma/client").$Enums.SkillSource;
+        isInferred: boolean;
+        sourceText: string | null;
     })[]>;
     removeMySkill(user: AuthenticatedUser, skillId: string): Promise<{
         message: string;

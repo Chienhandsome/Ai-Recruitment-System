@@ -15,6 +15,8 @@ import {
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../auth/auth.types';
 import { QueryCandidateJobDto } from './dto/query-candidate-job.dto';
 import { JobsService } from './jobs.service';
 
@@ -40,7 +42,10 @@ export class CandidateJobsController {
     description: 'Return candidate-safe job details',
   })
   @ApiResponse({ status: 404, description: 'Job is unavailable' })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.jobsService.findCandidateJobById(id);
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.jobsService.findCandidateJobById(id, user.id);
   }
 }

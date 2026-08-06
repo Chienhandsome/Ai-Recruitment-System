@@ -19,6 +19,11 @@ export interface CandidateEvaluationData {
   preferredModel?: string;
   appliedDate: string;
   status: "APPLIED" | "SHORTLISTED" | "INTERVIEW_SCHEDULED" | "REJECTED" | "HIRED";
+  processingStatus?: "PENDING" | "MATCHING" | "COMPLETED" | "FAILED";
+  confidenceScore?: number;
+  evidence?: { skillName: string; evidenceText: string; source: string }[];
+  strengths?: string[];
+  gaps?: string[];
   
   // 12 AI Evaluation Pillars
   aiScore: number;
@@ -113,6 +118,11 @@ export function CandidateDetailModal({
                 <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${getScoreColor(candidate.aiScore)}`}>
                   {candidate.aiScore} / 100 Điểm AI
                 </span>
+                {candidate.confidenceScore !== undefined && (
+                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${candidate.confidenceScore >= 0.8 ? 'text-emerald-700 bg-emerald-100 border-emerald-300' : candidate.confidenceScore >= 0.5 ? 'text-amber-700 bg-amber-100 border-amber-300' : 'text-rose-700 bg-rose-100 border-rose-300'}`} title="Độ tin cậy của AI dựa trên lượng dữ liệu hồ sơ">
+                    Độ tin cậy: {Math.round(candidate.confidenceScore * 100)}%
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-3">
                 <span>📧 {candidate.email}</span>
@@ -128,7 +138,15 @@ export function CandidateDetailModal({
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 relative">
+          
+          {/* Loading Overlay if MATCHING */}
+          {candidate.processingStatus === "MATCHING" && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-b-2xl">
+              <div className="w-10 h-10 border-4 border-[#2563EB] border-t-transparent rounded-full animate-spin"></div>
+              <p className="mt-4 text-[#1F2937] font-bold">AI đang phân tích hồ sơ...</p>
+            </div>
+          )}
           
           {/* Missing Requirements Warning Banner */}
           {candidate.missingRequirements && candidate.missingRequirements.length > 0 && (
@@ -215,19 +233,30 @@ export function CandidateDetailModal({
                 <div>
                   <span className="text-xs font-bold text-emerald-700 block mb-1">Kỹ năng khớp (Matched):</span>
                   <div className="flex flex-wrap gap-1">
-                    {candidate.matchedSkills.map((sk, idx) => (
-                      <span key={idx} className="px-2 py-0.5 text-xs rounded font-bold bg-emerald-100 text-emerald-800">
-                        ✓ {sk.name}
-                      </span>
-                    ))}
+                    {candidate.matchedSkills?.map((sk, idx) => {
+                      const ev = candidate.evidence?.find(e => e.skillName === sk.name);
+                      return (
+                        <div key={idx} className="group relative inline-block">
+                          <span className="px-2 py-0.5 text-xs rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 cursor-help inline-block">
+                            ✓ {sk.name}
+                          </span>
+                          {ev && (
+                            <div className="absolute z-50 left-0 bottom-full mb-1 hidden group-hover:block w-64 p-2 bg-slate-800 text-white text-xs rounded shadow-lg pointer-events-none">
+                              <p className="font-bold text-blue-300 mb-1">Bằng chứng từ: {ev.source}</p>
+                              <p className="italic">"...{ev.evidenceText}..."</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-                {candidate.missingSkills.length > 0 && (
+                {candidate.missingSkills && candidate.missingSkills.length > 0 && (
                   <div>
                     <span className="text-xs font-bold text-rose-600 block mb-1">Kỹ năng thiếu (Missing):</span>
                     <div className="flex flex-wrap gap-1">
-                      {candidate.missingSkills.map((sk, idx) => (
-                        <span key={idx} className={`px-2 py-0.5 text-xs rounded ${sk.isMandatory ? 'bg-rose-100 text-rose-800 font-bold border border-rose-300' : 'bg-slate-200 text-slate-700'}`}>
+                      {candidate.missingSkills?.map((sk, idx) => (
+                        <span key={idx} className={`px-2 py-0.5 text-xs rounded font-bold border ${sk.isMandatory ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-amber-100 text-amber-800 border-amber-200'}`}>
                           ✕ {sk.name} {sk.isMandatory && '(Bắt buộc)'}
                         </span>
                       ))}
@@ -244,8 +273,8 @@ export function CandidateDetailModal({
                   <Briefcase className="w-4 h-4 text-[#2563EB]" /> Kinh nghiệm (Experience)
                 </h3>
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
-                  <p className="font-bold text-[#2563EB]">{candidate.experienceAnalysis.totalYears} năm kinh nghiệm thực tế</p>
-                  <p className="mt-1">{candidate.experienceAnalysis.summary}</p>
+                  <p className="font-bold text-[#2563EB]">{candidate.experienceAnalysis?.totalYears ?? (candidate.scoreBreakdown?.experienceScore ? "Đã tính" : 0)} năm kinh nghiệm thực tế</p>
+                  <p className="mt-1">{candidate.experienceAnalysis?.summary || "Không có tóm tắt kinh nghiệm."}</p>
                 </div>
               </div>
 
@@ -254,8 +283,8 @@ export function CandidateDetailModal({
                   <GraduationCap className="w-4 h-4 text-[#2563EB]" /> Học vấn & Chứng chỉ
                 </h3>
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 space-y-1">
-                  <p>🎓 <strong>Bằng cấp:</strong> {candidate.educationAnalysis.degreeLevel} - {candidate.educationAnalysis.schoolName || "Đã xác minh"}</p>
-                  <p>📜 <strong>Chứng chỉ:</strong> {candidate.certificateAnalysis.matchedCertificates.join(", ") || "Chưa ghi nhận"}</p>
+                  <p>🎓 <strong>Bằng cấp:</strong> {candidate.educationAnalysis?.degreeLevel || "Đại học"} - {candidate.educationAnalysis?.schoolName || "Đã xác minh"}</p>
+                  <p>📜 <strong>Chứng chỉ:</strong> {candidate.certificateAnalysis?.matchedCertificates?.join(", ") || "Chưa ghi nhận"}</p>
                 </div>
               </div>
             </div>
@@ -270,7 +299,7 @@ export function CandidateDetailModal({
                   <ThumbsUp className="w-4 h-4" /> Điểm mạnh nổi bật (Strengths)
                 </span>
                 <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                  {candidate.aiExplanation.strengths.map((str, idx) => (
+                  {(candidate.aiExplanation?.strengths || candidate.strengths || []).map((str, idx) => (
                     <li key={idx}>{str}</li>
                   ))}
                 </ul>
@@ -281,14 +310,14 @@ export function CandidateDetailModal({
                   <ThumbsDown className="w-4 h-4" /> Điểm hạn chế (Gaps & Weaknesses)
                 </span>
                 <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                  {candidate.aiExplanation.gaps.map((gap, idx) => (
+                  {(candidate.aiExplanation?.gaps || candidate.gaps || []).map((gap, idx) => (
                     <li key={idx}>{gap}</li>
                   ))}
                 </ul>
               </div>
             </div>
             <p className="text-xs text-slate-600 italic p-3 bg-[#EFF6FF] rounded-xl border border-blue-200">
-              💬 <strong>Lý do chấm điểm:</strong> {candidate.aiExplanation.reasoningSummary}
+              💬 <strong>Lý do chấm điểm:</strong> {candidate.aiExplanation?.reasoningSummary || candidate.resumeSummary || "Không có thông tin lý giải chi tiết."}
             </p>
           </div>
 

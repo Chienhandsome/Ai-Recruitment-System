@@ -22,6 +22,7 @@ import {
   workingModelLabels,
 } from '@/lib/job-display';
 import { createClient } from '@/lib/supabase/server';
+import { ApplyButton } from '@/components/candidate/apply-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -173,13 +174,23 @@ export default async function CandidateJobDetailPage({
           </section>
 
           <section className="rounded-2xl border bg-secondary p-5">
-            <h2 className="font-bold text-foreground">Chuẩn bị hồ sơ nổi bật</h2>
+            <h2 className="font-bold text-foreground">
+              {job.hasApplied ? 'Trạng thái ứng tuyển' : 'Ứng tuyển ngay'}
+            </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Cập nhật CV và kỹ năng để sẵn sàng khi tính năng ứng tuyển được mở.
+              {job.hasApplied
+                ? 'Hồ sơ của bạn đã được gửi tới nhà tuyển dụng và AI đã hoàn tất việc đánh giá.'
+                : 'Bạn đã sẵn sàng cho vị trí này? Cập nhật CV mới nhất của bạn và gửi ngay cho chúng tôi.'}
             </p>
-            <Button asChild className="mt-4 w-full active:translate-y-px">
-              <Link href="/candidate/profile">Cập nhật hồ sơ</Link>
-            </Button>
+            <ApplyButton
+              jobId={job.id}
+              hasApplied={job.hasApplied}
+            />
+            {!job.hasApplied && (
+              <Button asChild variant="outline" className="mt-3 w-full">
+                <Link href="/candidate/profile">Cập nhật hồ sơ của tôi</Link>
+              </Button>
+            )}
           </section>
         </aside>
       </div>

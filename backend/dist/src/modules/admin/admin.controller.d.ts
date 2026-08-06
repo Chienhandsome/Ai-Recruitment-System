@@ -1,5 +1,5 @@
 import { AdminService } from './admin.service';
-import { JobStatus, AccountStatus } from '@prisma/client';
+import { UpdateAdminAccountStatusDto, UpdateAdminJobStatusDto } from './dto/update-admin-status.dto';
 export declare class AdminController {
     private readonly adminService;
     constructor(adminService: AdminService);
@@ -47,19 +47,16 @@ export declare class AdminController {
         postedDate: Date;
         skills: string[];
     }[]>;
-    updateJobStatus(id: string, body: {
-        status: JobStatus;
-    }): Promise<{
+    updateJobStatus(id: string, body: UpdateAdminJobStatusDto): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
-        description: string;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.JobStatus;
-        categoryId: string | null;
-        departmentId: string | null;
-        title: string;
         jobCode: string;
+        title: string;
         recruiterId: string;
+        departmentId: string | null;
+        description: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -79,21 +76,21 @@ export declare class AdminController {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
     }>;
     deleteJob(id: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
-        description: string;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.JobStatus;
-        categoryId: string | null;
-        departmentId: string | null;
-        title: string;
         jobCode: string;
+        title: string;
         recruiterId: string;
+        departmentId: string | null;
+        description: string;
         requirements: string | null;
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
@@ -113,6 +110,7 @@ export declare class AdminController {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
@@ -128,29 +126,27 @@ export declare class AdminController {
         createdAt: Date;
         lastLoginAt: Date | null;
     }[]>;
-    updateUserStatus(id: string, body: {
-        status: AccountStatus;
-    }): Promise<{
+    updateUserStatus(id: string, body: UpdateAdminAccountStatusDto): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.AccountStatus;
-        email: string;
         fullName: string;
-        birthDay: Date | null;
+        email: string;
         phone: string | null;
+        birthDay: Date | null;
         avatarUrl: string | null;
         lastLoginAt: Date | null;
     }>;
     deleteUser(id: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.AccountStatus;
-        email: string;
         fullName: string;
-        birthDay: Date | null;
+        email: string;
         phone: string | null;
+        birthDay: Date | null;
         avatarUrl: string | null;
         lastLoginAt: Date | null;
     }>;

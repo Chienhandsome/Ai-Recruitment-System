@@ -94,7 +94,13 @@ export class RetryStuckResumesUseCase {
             error instanceof Error ? error.message : 'Unknown error'
           }`,
         );
-        await this.releaseClaim(resume.id);
+        await this.prisma.resume.updateMany({
+          where: { id: resume.id, parsingStatus: 'PROCESSING' },
+          data: {
+            parsingStatus: 'FAILED',
+            parsingErrorMessage: 'File not found in storage. Cannot create signed URL.',
+          },
+        });
         continue;
       }
 

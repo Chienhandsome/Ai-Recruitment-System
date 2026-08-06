@@ -191,10 +191,18 @@ npm run start:dev
 ### 5. AI Service Setup
 ```bash
 cd ai-service
-# Windows
-py -m venv .venv
-.venv\Scripts\activate
+# Khởi tạo môi trường ảo (Windows)
+py -m venv venv
+.\venv\Scripts\activate
+
+# Cài đặt thư viện
 pip install -r requirements.txt
+
+# [QUAN TRỌNG] Đăng nhập Hugging Face (Chỉ cần thiết nếu Model của bạn để Private)
+# Chạy lệnh dưới đây và nhập Access Token (Write/Read) của bạn:
+huggingface-cli login
+
+# Khởi chạy AI Service (Sẽ mất vài phút ở lần đầu tiên để tải mô hình Embedding ~500MB từ HF Hub)
 python app/main.py
 ```
 

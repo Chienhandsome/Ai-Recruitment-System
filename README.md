@@ -1,194 +1,273 @@
-# AI Recruitment System
+# SmartRecruit AI
 
-An advanced recruitment system powered by Artificial Intelligence, structured as a clean monorepo. This repository contains the scaffolding for the frontend interface, the core business backend, and a specialized Python-based AI service.
+SmartRecruit AI is an AI-assisted recruitment platform for candidates, recruiters, and administrators. The monorepo combines a Vietnamese Next.js web application, a NestJS business API, and a Python AI service for asynchronous resume parsing and candidate-job matching.
 
----
+## Current capabilities
 
-## Architecture Overview & Core Services
+- Supabase authentication with email/password, email OTP, password recovery, and Google OAuth.
+- Role-based access for `CANDIDATE`, `RECRUITER`, and `ADMIN` accounts.
+- Candidate profile and skill management, public job browsing, and job detail pages.
+- Resume upload to private Supabase Storage (`PDF` or `DOCX`, up to 5 MB).
+- Asynchronous resume parsing through RabbitMQ, including retry/dead-letter handling, Gemini extraction, OCR fallback for scanned PDFs, and profile hydration.
+- Recruiter profile, dashboard statistics, and job posting CRUD/status management.
+- Admin dashboards for users, jobs, skills, aliases, and unrecognized skills.
+- Candidate-job evaluation by skills, experience, education, and projects.
+- Prisma schema and migrations for the broader recruitment domain.
 
-The system is split into three main components:
+> [!NOTE]
+> Applications, screenings, interviews, and notifications have database models/module scaffolding but are not yet complete end-to-end workflows. Some public landing-page content still uses mock data; authenticated candidate job browsing uses the backend API.
 
-1. **Frontend (`/frontend`)**: 
-   * Built with **Next.js**, **TypeScript**, and **Tailwind CSS**.
-   * Responsible for the user experience, candidate application flows, recruiter dashboards, and resume uploading.
-2. **Backend (`/backend`)**:
-   * Built with **NestJS**, **TypeScript**, **Prisma ORM**, **Supabase Storage**, and **RabbitMQ client**.
-   * Serves as the central gateway orchestrating business rules, authentication, user data, job postings, object storage, event queue management, and serving Swagger documentation.
-3. **AI Service (`/ai-service`)**:
-   * Built with **FastAPI**, **Pydantic**, and **Uvicorn** using Python.
-   * Dedicated engine for parsing CVs, matching profiles, and generating insights using large language models.
+## Architecture
 
----
-
-## Directory Structure
-
-```text
-ai-recruitment-system/
-├── frontend/                     # Next.js Frontend Application
-│   ├── src/
-│   │   ├── app/                  # App Router Pages (Home, Layout, CSS)
-│   │   ├── components/           # Reusable UI components
-│   │   ├── services/             # API request wrappers / hooks communication
-│   │   ├── hooks/                # Custom React hooks
-│   │   ├── types/                # TS type declarations
-│   │   ├── utils/                # Utility helpers
-│   │   └── config/               # App configuration files
-│   ├── .env.example              # Frontend environment template
-│   └── tsconfig.json             # TS Config (Strict mode enabled)
-├── backend/                      # NestJS Core Backend API
-│   ├── prisma/
-│   │   └── schema.prisma         # Prisma Schema (Supabase PostgreSQL)
-│   ├── src/
-│   │   ├── common/               # Shared guards, interceptors, and filters
-│   │   ├── config/               # App configuration schemas
-│   │   ├── database/             # Prisma database service & module
-│   │   ├── infrastructure/       # Storage (Supabase) & Message Queue (RabbitMQ)
-│   │   ├── modules/              # Domain-specific modules (auth, users, jobs, cvs)
-│   │   ├── main.ts               # Main bootstrap (global prefix, validation, CORS, Swagger)
-│   │   └── app.module.ts         # Root module with Global ConfigModule
-│   └── .env.example              # Backend environment template
-├── ai-service/                   # FastAPI Python AI Service
-│   ├── app/
-│   │   ├── api/routes/           # API routes endpoints (health checks, models)
-│   │   ├── core/                 # Core configs and settings
-│   │   ├── schemas/              # Request/response validation schemas
-│   │   ├── services/             # Business services (AI analysis, parsing placeholders)
-│   │   ├── workers/              # Background queue processing tasks
-│   │   └── main.py               # Main Uvicorn bootstrap & entry point
-│   ├── tests/                    # Service tests folder
-│   ├── requirements.txt          # Python packages list
-│   └── pyproject.toml            # Ruff linter/formatter config
-├── infrastructure/               # Infrastructure configs (Docker Compose)
-├── documents/                    # Documentation, specifications, and architecture notes
-│   ├── infrastructure-supabase.md
-│   ├── storage-conventions.md
-│   └── week-01-report.md
-├── scripts/                      # System-wide helper scripts (RabbitMQ, DB/Storage checks)
-├── docker-compose.yml            # Docker Compose configuration (RabbitMQ)
-├── .gitignore                    # Monorepo gitignore
-├── .env.example                  # Master environment variables template
-└── README.md                     # Master Readme (this file)
+```mermaid
+flowchart LR
+    USER["Candidate / Recruiter / Admin"] --> WEB["Next.js frontend"]
+    WEB --> AUTH["Supabase Auth"]
+    WEB --> API["NestJS API"]
+    API --> DB["Supabase PostgreSQL"]
+    API --> STORAGE["Private Supabase Storage"]
+    API -- "resume.analysis.requested" --> MQ["RabbitMQ"]
+    MQ --> WORKER["Python resume worker"]
+    WORKER --> STORAGE
+    WORKER --> GEMINI["Gemini API"]
+    WORKER -- "completed / failed" --> MQ
+    MQ -- "result events" --> API
+    API -. "health check" .-> AIHTTP["FastAPI matching service"]
 ```
 
----
+The Python service has two separate processes:
 
-## Supabase & Infrastructure Setup (Phase 2)
+- The FastAPI process exposes health and matching endpoints.
+- The RabbitMQ worker downloads resumes, parses them, calls Gemini, and publishes result events for the backend to persist.
 
-### 1. Supabase Project Configuration
-Follow these steps to obtain real Supabase parameters:
-1. Log in to your [Supabase Dashboard](https://supabase.com/dashboard).
-2. Create a new Supabase Project.
-3. In **Project Settings > API**, copy:
-   * **Project URL** (`SUPABASE_URL`)
-   * **Project Reference**
-   * **Publishable Key** (`SUPABASE_PUBLISHABLE_KEY`)
-   * **Secret Key** (`SUPABASE_SECRET_KEY`) *(Keep secret!)*
-4. In **Project Settings > Database > Connection String**, copy:
-   * **Transaction Pooler URL** (`DATABASE_URL` with `pgbouncer=true` on port `6543`).
-   * **Direct Connection URL** (`DIRECT_URL` on port `5432`).
-5. Create each service environment file from its own template:
-   * Root `.env.example` → `.env` for local Docker infrastructure.
-   * `frontend/.env.example` → `frontend/.env.local`.
-   * `backend/.env.example` → `backend/.env`.
-   * `ai-service/.env.example` → `ai-service/.env`.
-6. The backend will automatically create the private bucket `resumes` on startup via `SupabaseStorageService.ensureResumeBucket()`.
+## Technology stack
 
----
+| Layer | Main technologies |
+| --- | --- |
+| Frontend | Next.js 16, React 19, TypeScript, Tailwind CSS 4, Supabase SSR, React Hook Form, Zod |
+| Backend | NestJS 11, TypeScript, Prisma 6, Supabase, RabbitMQ, Swagger |
+| AI service | FastAPI, Pydantic, Google GenAI, pypdf, python-docx, Tesseract OCR, RapidFuzz |
+| Infrastructure | Supabase PostgreSQL/Auth/Storage, RabbitMQ, Docker Compose |
 
-## Infrastructure Component Details
+## Repository structure
 
-### Database Architecture
 ```text
-NestJS Backend → Prisma ORM (v6.4.0) → Supabase PostgreSQL
+.
+|-- frontend/                 # Next.js application and role-based dashboards
+|   `-- src/
+|       |-- app/              # App Router pages and route handlers
+|       |-- components/       # UI and feature components
+|       `-- lib/              # API clients and Supabase helpers
+|-- backend/                  # NestJS REST API
+|   |-- prisma/               # Schema, migrations, and seed data
+|   `-- src/
+|       |-- database/         # Prisma integration
+|       |-- infrastructure/   # RabbitMQ and Supabase Storage
+|       `-- modules/          # Auth and recruitment domains
+|-- ai-service/               # FastAPI app and resume worker
+|   |-- app/
+|   |   |-- domain/resume/    # Resume parsing pipeline
+|   |   |-- services/matching/# Candidate-job scoring engine
+|   |   `-- transport/        # RabbitMQ consumer/publisher
+|   `-- tests/                # Unit, integration, property, regression, performance
+|-- docs/                     # Resume pipeline architecture and plans
+|-- documents/                # Database, storage, and Supabase Auth guides
+|-- scripts/                  # Local infrastructure helpers
+`-- docker-compose.yml        # RabbitMQ for local development
 ```
-- Multi-string datasource configured using `DATABASE_URL` (Pooler) and `DIRECT_URL` (Direct).
-- Health check executes light `SELECT 1` queries via `PrismaService.checkHealth()`.
 
-### Storage Architecture
-```text
-Frontend → NestJS Backend → Supabase Storage (Private 'resumes' Bucket)
-```
-- Bucket is strictly **PRIVATE** (`public: false`).
-- Maximum file size: 5 MB (`MAX_RESUME_FILE_SIZE_MB`).
-- Permitted MIME types: PDF (`application/pdf`) and DOCX (`application/vnd.openxmlformats-officedocument.wordprocessingml.document`).
-- Download access uses short-lived **Signed URLs** (`SUPABASE_SIGNED_URL_EXPIRES_IN=300`).
+## Prerequisites
 
-### RabbitMQ Message Broker
-```text
-RabbitMQ Broker (Local Docker Container)
-```
-- Managed via `docker-compose.yml`.
-- AMQP port: `5672` | Management UI port: `15672`.
+- Node.js 20+ and npm.
+- Python 3.10+.
+- Docker Desktop or another Docker Compose-compatible runtime.
+- A Supabase project.
+- A Gemini API key for resume extraction.
+- Optional for scanned-PDF OCR: Poppler and Tesseract installed and available on `PATH`.
 
----
+## Local setup
 
-## Important Local & Service URLs
+### 1. Clone the repository
 
-### Production
-
-* **Frontend**: [https://ai-recruitment-system-test-deploy.vercel.app](https://ai-recruitment-system-test-deploy.vercel.app)
-* **NestJS Backend API**: [https://ai-recruitment-system-test-deploy.onrender.com/api](https://ai-recruitment-system-test-deploy.onrender.com/api)
-* **System Health Check**: [https://ai-recruitment-system-test-deploy.onrender.com/api/health](https://ai-recruitment-system-test-deploy.onrender.com/api/health)
-
-### Local
-
-* **Frontend**: [http://localhost:3000](http://localhost:3000)
-* **NestJS Backend API**: [http://localhost:3001/api](http://localhost:3001/api)
-* **System Health Check**: [http://localhost:3001/api/health](http://localhost:3001/api/health)
-* **Swagger Documentation**: [http://localhost:3001/api/docs](http://localhost:3001/api/docs)
-* **RabbitMQ Management UI**: [http://localhost:15672](http://localhost:15672) *(Credentials: guest / guest)*
-* **AI Service (FastAPI)**: [http://localhost:8000](http://localhost:8000)
-* **Supabase Dashboard**: Accessible directly via your Supabase account.
-
----
-
-## Security Warnings
-
-> [!CAUTION]
-> 1. **NEVER** expose or pass `SUPABASE_SECRET_KEY` (or legacy `SUPABASE_SERVICE_ROLE_KEY`) to the Next.js frontend app. It must remain strictly in backend environment variables.
-> 2. **NEVER** commit `.env` files or secret credentials to Git.
-> 3. **DO NOT** toggle the `resumes` bucket to public mode.
-> 4. **DO NOT** store signed URLs in the database permanently because they expire.
-> 5. **DO NOT** use default development passwords (`guest` / `postgres`) in production.
-
----
-
-## Setup & Running Instructions
-
-Each component owns its environment variables. Do not move backend secrets into the
-root or frontend environment files.
-
-### 1. Prerequisites
-* **Node.js** (v18+ recommended) & `npm`
-* **Python** (v3.10+)
-* **Docker Desktop** (for RabbitMQ container)
-
-### 2. Running RabbitMQ
-Start the RabbitMQ container via script or Docker Compose:
 ```bash
-# Using PowerShell script (Windows)
-.\scripts\start-rabbitmq.ps1
+git clone https://github.com/Chienhandsome/Ai-Recruitment-System.git
+cd Ai-Recruitment-System
+```
 
-# Or using Docker Compose directly
+### 2. Configure Supabase
+
+Create a Supabase project, then collect:
+
+- Project URL and publishable key.
+- Server-side secret/service-role key.
+- Transaction Pooler URL for `DATABASE_URL`.
+- Direct or Session Pooler URL on port `5432` for `DIRECT_URL` and migrations.
+
+Configure the authentication site URL, redirect URLs, email provider, and Google OAuth provider by following [documents/supabase-auth-setup.md](documents/supabase-auth-setup.md).
+
+### 3. Start RabbitMQ
+
+The Docker Compose defaults are `guest` / `guest` and should only be used locally.
+
+```bash
 docker compose up -d rabbitmq
 ```
 
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
+Windows PowerShell users can instead run:
+
+```powershell
+.\scripts\start-rabbitmq.ps1
 ```
 
-### 4. Backend Setup
-```bash
+RabbitMQ will listen on `localhost:5672`; its management UI is available at [http://localhost:15672](http://localhost:15672).
+
+### 4. Configure and start the backend
+
+```powershell
 cd backend
-npm install
+Copy-Item .env.example .env
+npm ci
 npx prisma generate
+npx prisma migrate deploy
+npx prisma db seed
 npm run start:dev
 ```
 
-### 5. AI Service Setup
+Update `backend/.env` before running migrations. The checked-in template documents all backend variables; the minimum full-stack configuration is:
+
+```env
+PORT=3001
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
+FRONTEND_SITE_URL=http://localhost:3000
+AI_SERVICE_URL=http://localhost:8000
+
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_PUBLISHABLE_KEY=<publishable-key>
+SUPABASE_SECRET_KEY=<server-side-secret-key>
+SUPABASE_JWKS_URL=https://<project-ref>.supabase.co/auth/v1/.well-known/jwks.json
+
+DATABASE_URL=<transaction-pooler-url>
+DIRECT_URL=<direct-or-session-pooler-url-on-port-5432>
+
+SUPABASE_STORAGE_BUCKET=resumes
+SUPABASE_SIGNED_URL_EXPIRES_IN=300
+MAX_RESUME_FILE_SIZE_MB=5
+RABBITMQ_URL=amqp://guest:guest@localhost:5672
+```
+
+### 5. Configure and start the AI service
+
+From `ai-service`, create `.env` with:
+
+```env
+AI_SERVICE_HOST=127.0.0.1
+AI_SERVICE_PORT=8000
+RABBITMQ_URL=amqp://guest:guest@localhost:5672
+
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<server-side-service-role-key>
+SUPABASE_STORAGE_BUCKET=resumes
+
+GEMINI_API_KEY=<gemini-api-key>
+LLM_MODEL=gemini-2.5-flash
+RESUME_PROMPT_VERSION=2.0
+RESUME_PARSER_VERSION=2.0
+```
+
+Install the Python dependencies:
+
+```powershell
+cd ai-service
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Start the HTTP API and resume worker in separate terminals:
+
+```powershell
+# Terminal 1: FastAPI
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
+# Terminal 2: RabbitMQ worker
+python worker_main.py
+```
+
+### 6. Configure and start the frontend
+
+Create `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable-key>
+```
+
+Then start Next.js:
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+## Local endpoints
+
+| Service | URL |
+| --- | --- |
+| Frontend | [http://localhost:3000](http://localhost:3000) |
+| Backend API | [http://localhost:3001/api](http://localhost:3001/api) |
+| Backend health | [http://localhost:3001/api/health](http://localhost:3001/api/health) |
+| Swagger UI | [http://localhost:3001/api/docs](http://localhost:3001/api/docs) |
+| AI service | [http://localhost:8000](http://localhost:8000) |
+| AI service docs | [http://localhost:8000/docs](http://localhost:8000/docs) |
+| Matching endpoint | `POST http://localhost:8000/api/v1/matching/evaluate` |
+| RabbitMQ management | [http://localhost:15672](http://localhost:15672) |
+
+Configured deployments:
+
+- Frontend: [https://ai-recruitment-system-test-deploy-1.vercel.app](https://ai-recruitment-system-test-deploy-1.vercel.app)
+- Backend: [https://ai-recruitment-system-test-deploy.onrender.com/api](https://ai-recruitment-system-test-deploy.onrender.com/api)
+
+## First administrator
+
+After migrations and seeding, create a user in Supabase Authentication, copy its UUID, and run this from `backend`:
+
+```powershell
+$env:ADMIN_USER_ID="<supabase-auth-user-uuid>"
+npm run auth:bootstrap-admin
+Remove-Item Env:ADMIN_USER_ID
+```
+
+The bootstrap script verifies the Supabase user, creates the application user, assigns the `ADMIN` role, and writes an audit log. Existing admins can invite additional admins through the protected API.
+
+## Testing and quality checks
+
+Run each command from the corresponding service directory.
+
+```bash
+# Backend
+cd backend
+npm test
+npm run test:e2e
+npm run build
+
+# Frontend
+cd ../frontend
+npm run lint
+npm run build
+
+# AI service
+cd ../ai-service
+python -m pytest tests -m "not slow"
+python -m ruff check app tests
+```
+
+With all local services running, check the aggregated infrastructure status:
+
 ```bash
 cd ai-service
 # Khởi tạo môi trường ảo (Windows)
@@ -206,23 +285,32 @@ huggingface-cli login
 python app/main.py
 ```
 
----
+## Resume processing flow
 
-## Project Status
+1. An authenticated candidate uploads a PDF or DOCX resume to `POST /api/resumes/upload`.
+2. The backend validates the file, stores it in the private `resumes` bucket, creates a database record, and publishes a RabbitMQ event.
+3. The Python worker validates the real file type, extracts text (with OCR fallback where available), and asks Gemini for structured resume data.
+4. The worker publishes either a completed or failed result. Transient errors are retried; exhausted/permanent failures are dead-lettered.
+5. The backend consumes the result and hydrates the candidate profile, skills, experience, education, projects, and certificates.
 
-### Completed in Phase 1:
-- Monorepo folder organization, root config, and Next.js / NestJS / FastAPI scaffolding.
+See [docs/cv-parse-pipeline-architecture.md](docs/cv-parse-pipeline-architecture.md) for the detailed design.
 
-### Completed in Phase 2:
-- Supabase PostgreSQL setup with Prisma ORM (`schema.prisma`, `PrismaService`, `PrismaModule`).
-- Supabase Storage setup with private `resumes` bucket (`SupabaseStorageService`, dev test endpoints).
-- RabbitMQ setup via Docker Compose and NestJS client (`RabbitMQService`).
-- Aggregated system-wide health check at `GET /api/health`.
-- Infrastructure scripts (`scripts/start-rabbitmq.ps1`, `check-supabase-database.js`, `check-supabase-storage.js`, `check-infrastructure.js`).
-- Documentation files in `documents/`.
+## Security notes
 
-### Out of Scope (Phase 3+ Roadmap):
-- Full Prisma ERD schema (Users, Roles, Jobs, Applications).
-- Database migrations (`npx prisma migrate dev`) & seeding.
-- Authentication & Authorization (JWT, Role Guards).
-- Complete recruitment business workflows & AI processing.
+> [!CAUTION]
+> - Never expose `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY`, or database credentials to the frontend.
+> - Never commit `.env` or `.env.local` files.
+> - Keep the `resumes` storage bucket private and use short-lived signed URLs.
+> - Do not persist signed URLs; they expire.
+> - Replace RabbitMQ default credentials outside local development.
+> - Use a dedicated SMTP provider and restricted production redirect URLs before a production launch.
+
+## Additional documentation
+
+- [Database schema](documents/database-schema.md)
+- [Database conventions](documents/database-conventions.md)
+- [Storage conventions](documents/storage-conventions.md)
+- [Supabase infrastructure](documents/infrastructure-supabase.md)
+- [Supabase Auth setup](documents/supabase-auth-setup.md)
+- [CV parsing architecture](docs/cv-parse-pipeline-architecture.md)
+- [CV parsing improvement plan](docs/cv-parse-pipeline-improvement-plan.md)

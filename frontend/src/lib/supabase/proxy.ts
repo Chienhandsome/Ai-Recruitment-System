@@ -54,6 +54,13 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
+  // Fast-path: If visiting a non-protected route and user has no Supabase cookies, skip network call
+  const isProtectedRoute = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
+  const hasSupabaseCookies = request.cookies.getAll().some((c) => c.name.startsWith("sb-"));
+  if (!isProtectedRoute && !hasSupabaseCookies) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
   const supabase = createServerClient(config.url, config.publishableKey, {
     cookies: {
@@ -72,7 +79,23 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const { data, error } = await supabase.auth.getClaims();
+  let data: any = null;
+  let error: any = null;
+  try {
+    const claimsPromise = supabase.auth.getClaims();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Supabase auth timeout")), 1500)
+    );
+    const res: any = await Promise.race([claimsPromise, timeoutPromise]);
+    data = res.data;
+    error = res.error;
+  } catch (err: any) {
+    logWarn(`Supabase auth check timed out or failed: ${err.message}`);
+    // Fallback: If not a protected route, let the user load the page immediately
+    if (!isProtectedRoute) {
+      return NextResponse.next({ request });
+    }
+  }
 
   // If refresh token is invalid/not found, clear the stale session cookies
   // and let the request proceed (user will be treated as unauthenticated).

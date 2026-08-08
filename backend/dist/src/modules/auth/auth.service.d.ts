@@ -9,5 +9,6 @@ export declare class AuthService {
     getMe(userId: string): Promise<ReturnType<AuthService['toAuthResponse']>>;
     provisionAdmin(createdByUserId: string, invitedUser: AuthenticatedUser): Promise<ReturnType<AuthService['toAuthResponse']>>;
     private toAuthResponse;
+    private currentProfileRecords;
     private assertAccountIsActive;
 }

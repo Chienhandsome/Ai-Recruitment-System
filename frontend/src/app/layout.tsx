@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { BackendHelloLogger } from "@/components/common/backend-hello-logger";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <BackendHelloLogger />
         {children}
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

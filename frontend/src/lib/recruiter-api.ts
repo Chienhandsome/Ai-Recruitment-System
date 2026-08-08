@@ -46,6 +46,7 @@ export interface JobPostingData {
   expiryDate?: string;
   createdAt: string;
   jobSkills?: JobSkillData[];
+  applications?: any[];
   _count?: {
     applications: number;
   };

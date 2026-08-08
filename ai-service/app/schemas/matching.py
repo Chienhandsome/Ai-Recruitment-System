@@ -53,6 +53,10 @@ class CandidateProject(BaseModel):
     end_date: Optional[str] = None
 
 
+class CandidateCertificate(BaseModel):
+    certificate_name: str
+    issuing_organization: Optional[str] = None
+
 class CandidateSkill(BaseModel):
     candidate_profile_id: Optional[str] = None
     skill_id: Optional[str] = None
@@ -66,6 +70,7 @@ class CandidateProfilePayload(BaseModel):
     work_experiences: List[WorkExperience] = Field(default_factory=list)
     educations: List[Education] = Field(default_factory=list)
     projects: List[CandidateProject] = Field(default_factory=list)
+    certificates: List[CandidateCertificate] = Field(default_factory=list)
     skills: List[CandidateSkill] = Field(default_factory=list)
 
 
@@ -80,11 +85,16 @@ class JobRequiredSkill(BaseModel):
     skill_name: str
 
 
+class JobRequiredCertificate(BaseModel):
+    certificate_name: str
+    is_mandatory: bool = True
+
+
 class JobWeightsConfig(BaseModel):
     skills: float = 40.0
     experience: float = 30.0
     education: float = 15.0
-    projects: float = 15.0
+    other: float = 15.0
 
 
 class JobPayload(BaseModel):
@@ -107,6 +117,7 @@ class JobPayload(BaseModel):
     updated_at: Optional[str] = None
     closed_at: Optional[str] = None
     required_skills: List[JobRequiredSkill] = Field(default_factory=list)
+    required_certificates: List[JobRequiredCertificate] = Field(default_factory=list)
 
 
 # --- Request Payload ---
@@ -120,14 +131,27 @@ class EvaluationRequest(BaseModel):
 
 # --- Response Payload ---
 
+class SkillInfo(BaseModel):
+    name: str
+    isMandatory: Optional[bool] = False
+
+class EvidenceInfo(BaseModel):
+    skillName: str
+    evidenceText: str
+    source: Optional[str] = "Context"
+
 class EvaluationResponse(BaseModel):
     overall_score: float
     match_level: str  # HIGH, MEDIUM, LOW
     skills_score: float
     experience_score: float
     education_score: float
-    project_score: float
+    other_score: float
     strengths: List[str] = Field(default_factory=list)
     gaps: List[str] = Field(default_factory=list)
+    matched_skills: List[SkillInfo] = Field(default_factory=list)
+    missing_skills: List[SkillInfo] = Field(default_factory=list)
     missing_required_skills: List[str] = Field(default_factory=list)
+    evidence: List[EvidenceInfo] = Field(default_factory=list)
+    confidence_score: float = 1.0
     summary: str

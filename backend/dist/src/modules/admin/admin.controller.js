@@ -16,8 +16,10 @@ exports.AdminController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const admin_service_1 = require("./admin.service");
-const public_decorator_1 = require("../auth/decorators/public.decorator");
 const supabase_auth_guard_1 = require("../auth/guards/supabase-auth.guard");
+const roles_guard_1 = require("../auth/guards/roles.guard");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
+const update_admin_status_dto_1 = require("./dto/update-admin-status.dto");
 let AdminController = class AdminController {
     adminService;
     constructor(adminService) {
@@ -47,16 +49,17 @@ let AdminController = class AdminController {
 };
 exports.AdminController = AdminController;
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('stats'),
     (0, swagger_1.ApiOperation)({ summary: 'Get real-time Admin Dashboard statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Return real-time metrics overview' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Return real-time metrics overview',
+    }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getDashboardStats", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('jobs'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all jobs for Admin moderation' }),
     (0, swagger_1.ApiQuery)({ name: 'status', required: false, type: String }),
@@ -69,17 +72,17 @@ __decorate([
 ], AdminController.prototype, "getAdminJobs", null);
 __decorate([
     (0, common_1.Patch)('jobs/:id/status'),
-    (0, common_1.UseGuards)(supabase_auth_guard_1.SupabaseAuthGuard),
-    (0, swagger_1.ApiOperation)({ summary: 'Moderate job status (PUBLISHED, PAUSED, CLOSED, DRAFT)' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Moderate job status (PUBLISHED, PAUSED, CLOSED, DRAFT)',
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, update_admin_status_dto_1.UpdateAdminJobStatusDto]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateJobStatus", null);
 __decorate([
     (0, common_1.Delete)('jobs/:id'),
-    (0, common_1.UseGuards)(supabase_auth_guard_1.SupabaseAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Delete a job posting by Admin' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -87,7 +90,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "deleteJob", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('users'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all users for Admin management' }),
     (0, swagger_1.ApiQuery)({ name: 'role', required: false, type: String }),
@@ -102,17 +104,17 @@ __decorate([
 ], AdminController.prototype, "getAdminUsers", null);
 __decorate([
     (0, common_1.Patch)('users/:id/status'),
-    (0, common_1.UseGuards)(supabase_auth_guard_1.SupabaseAuthGuard),
-    (0, swagger_1.ApiOperation)({ summary: 'Update user account status (ACTIVE, SUSPENDED, LOCKED)' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Update user account status (ACTIVE, SUSPENDED, LOCKED)',
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, update_admin_status_dto_1.UpdateAdminAccountStatusDto]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateUserStatus", null);
 __decorate([
     (0, common_1.Delete)('users/:id'),
-    (0, common_1.UseGuards)(supabase_auth_guard_1.SupabaseAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Delete a user account' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -121,6 +123,9 @@ __decorate([
 ], AdminController.prototype, "deleteUser", null);
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('Admin Workspace'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(supabase_auth_guard_1.SupabaseAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMIN'),
     (0, common_1.Controller)('admin'),
     __metadata("design:paramtypes", [admin_service_1.AdminService])
 ], AdminController);

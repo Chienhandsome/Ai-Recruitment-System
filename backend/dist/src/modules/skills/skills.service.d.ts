@@ -5,110 +5,116 @@ export declare class SkillsService {
     constructor(prisma: PrismaService);
     getCategories(): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
     }[]>;
     getSkills(categoryId?: string, search?: string): Promise<({
         category: {
             id: string;
+            updatedAt: Date;
             name: string;
             createdAt: Date;
-            updatedAt: Date;
         };
         skillAliases: {
             id: string;
             createdAt: Date;
-            aliasName: string;
             skillId: string;
+            aliasName: string;
         }[];
     } & {
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        normalizedName: string;
         categoryId: string;
+        normalizedName: string;
         type: import(".prisma/client").$Enums.SkillType;
     })[]>;
     createSkill(name: string, categoryId: string): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        normalizedName: string;
         categoryId: string;
+        normalizedName: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     updateSkill(id: string, name?: string, categoryId?: string, type?: 'HARD' | 'SOFT'): Promise<{
         category: {
             id: string;
+            updatedAt: Date;
             name: string;
             createdAt: Date;
-            updatedAt: Date;
         };
         skillAliases: {
             id: string;
             createdAt: Date;
-            aliasName: string;
             skillId: string;
+            aliasName: string;
         }[];
     } & {
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        normalizedName: string;
         categoryId: string;
+        normalizedName: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     addSkillAlias(skillId: string, aliasName: string): Promise<{
         id: string;
         createdAt: Date;
-        aliasName: string;
         skillId: string;
+        aliasName: string;
     }>;
     deleteSkillAlias(aliasId: string): Promise<{
         id: string;
         createdAt: Date;
-        aliasName: string;
         skillId: string;
+        aliasName: string;
     }>;
     getUnrecognizedSkills(): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.UnrecognizedSkillStatus;
+        normalizedName: string | null;
         rawSkillName: string;
+        categoryHint: string | null;
         frequency: number;
     }[]>;
     mapUnrecognizedSkill(unrecognizedId: string, targetSkillId: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.UnrecognizedSkillStatus;
+        normalizedName: string | null;
         rawSkillName: string;
+        categoryHint: string | null;
         frequency: number;
     }>;
     approveUnrecognizedSkill(unrecognizedId: string, categoryId: string): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        normalizedName: string;
         categoryId: string;
+        normalizedName: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     rejectUnrecognizedSkill(unrecognizedId: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.UnrecognizedSkillStatus;
+        normalizedName: string | null;
         rawSkillName: string;
+        categoryHint: string | null;
         frequency: number;
     }>;
 }

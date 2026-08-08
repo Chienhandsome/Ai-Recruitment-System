@@ -162,6 +162,27 @@ export class JobsService {
             include: { skill: true },
           },
           jobCertificates: true,
+          applications: {
+            include: {
+              aiMatchingResults: { take: 1, orderBy: { version: 'desc' } },
+              candidate: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      email: true,
+                      fullName: true,
+                      avatarUrl: true,
+                      phone: true,
+                    }
+                  }
+                }
+              }
+            },
+            orderBy: {
+              appliedAt: 'desc'
+            }
+          },
         },
       });
     } catch (error: unknown) {
@@ -309,7 +330,7 @@ export class JobsService {
     };
   }
 
-  async findCandidateJobById(id: string) {
+  async findCandidateJobById(id: string, userId: string) {
     const job = await this.prisma.jobPosting.findFirst({
       where: {
         id,
@@ -321,6 +342,35 @@ export class JobsService {
 
     if (!job) {
       throw new NotFoundException('Job posting is unavailable');
+    }
+
+    let application = null;
+    let aiScore = null;
+    let matchLevel = null;
+
+    const profile = await this.prisma.candidateProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+
+    if (profile) {
+      const app = await this.prisma.application.findUnique({
+        where: {
+          jobId_candidateId: {
+            jobId: id,
+            candidateId: profile.id,
+          },
+        },
+        include: { aiMatchingResults: true },
+      });
+
+      if (app) {
+        application = {
+          id: app.id,
+          status: app.processingStatus,
+          createdAt: app.appliedAt,
+        };
+      }
     }
 
     return {
@@ -336,6 +386,8 @@ export class JobsService {
         name: certificate.certificateName,
         requirementType: certificate.requirementType,
       })),
+      hasApplied: !!application,
+      application,
     };
   }
 
@@ -377,6 +429,31 @@ export class JobsService {
           include: { skill: true },
         },
         jobCertificates: true,
+        applications: {
+          include: {
+            aiMatchingResults: { take: 1, orderBy: { version: 'desc' } },
+            candidate: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    fullName: true,
+                    avatarUrl: true,
+                    phone: true,
+                  }
+                },
+                workExperiences: { orderBy: { startDate: 'desc' } },
+                educations: { orderBy: { startDate: 'desc' } },
+                projects: true,
+                candidateSkills: { include: { skill: true } }
+              }
+            }
+          },
+          orderBy: {
+            appliedAt: 'desc'
+          }
+        },
       },
     });
 

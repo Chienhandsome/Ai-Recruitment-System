@@ -1,18 +1,11 @@
 import { PrismaService } from '../../database/prisma.service';
-import { SupabaseStorageService } from '../../infrastructure/supabase/supabase-storage.service';
-import { RabbitMQService } from '../../infrastructure/rabbitmq/rabbitmq.service';
+import { ResumeUploadFile, UploadResumeUseCase } from './application/upload-resume.use-case';
 export declare class ResumesService {
     private readonly prisma;
-    private readonly storageService;
-    private readonly rabbitMQService;
-    private readonly logger;
-    constructor(prisma: PrismaService, storageService: SupabaseStorageService, rabbitMQService: RabbitMQService);
-    uploadResume(userId: string, file: {
-        buffer: Buffer;
-        originalname: string;
-        mimetype: string;
-        size: number;
-    }): Promise<{
+    private readonly uploadResumeUseCase;
+    constructor(prisma: PrismaService, uploadResumeUseCase: UploadResumeUseCase);
+    uploadResume(userId: string, file: ResumeUploadFile): Promise<{
+        warning?: string | undefined;
         id: string;
         originalFileName: string;
         parsingStatus: string;
@@ -20,18 +13,18 @@ export declare class ResumesService {
     }>;
     getResumeStatus(userId: string, resumeId: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         originalFileName: string;
         parsingStatus: import(".prisma/client").$Enums.ResumeParsingStatus;
         parsingErrorMessage: string | null;
     }>;
     getMyResumes(userId: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
-        mimeType: string;
+        createdAt: Date;
         originalFileName: string;
+        mimeType: string;
         fileSizeBytes: number;
         parsingStatus: import(".prisma/client").$Enums.ResumeParsingStatus;
         parsingErrorMessage: string | null;

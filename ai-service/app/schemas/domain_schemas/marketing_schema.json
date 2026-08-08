@@ -1,0 +1,28 @@
+{
+  "domain": "Marketing",
+  "evidence_schemas": {
+    "Project": {
+      "type": "object",
+      "properties": {
+        "Campaign_Name": { "type": "string" },
+        "Role": { "type": "string" },
+        "Complexity": {
+          "type": "string",
+          "description": "Ngân sách, quy mô chiến dịch, đa kênh hay đơn kênh"
+        },
+        "Outcome_Metrics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Các chỉ số đo lường hiệu quả như ROAS, CPA, Leads, Doanh thu"
+          }
+        },
+        "Tools_Used": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Các công cụ sử dụng (Facebook Ads, TikTok Ads, Google Analytics)"
+        }
+      }
+    }
+  }
+}

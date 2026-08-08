@@ -10,9 +10,26 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateCandidateProfileDto = exports.CertificateInputDto = exports.ProjectInputDto = exports.EducationInputDto = exports.WorkExperienceInputDto = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
-class WorkExperienceInputDto {
+class SourcedProfileRecordInputDto {
+    id;
+    source;
+}
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ format: 'uuid' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], SourcedProfileRecordInputDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: ['MANUAL', 'EXTRACTED'] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['MANUAL', 'EXTRACTED']),
+    __metadata("design:type", String)
+], SourcedProfileRecordInputDto.prototype, "source", void 0);
+class WorkExperienceInputDto extends SourcedProfileRecordInputDto {
     companyName;
     positionTitle;
     startDate;
@@ -55,7 +72,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", Object)
 ], WorkExperienceInputDto.prototype, "achievements", void 0);
-class EducationInputDto {
+class EducationInputDto extends SourcedProfileRecordInputDto {
     schoolName;
     major;
     degree;
@@ -87,7 +104,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", Object)
 ], EducationInputDto.prototype, "endDate", void 0);
-class ProjectInputDto {
+class ProjectInputDto extends SourcedProfileRecordInputDto {
     projectName;
     projectRole;
     description;
@@ -130,7 +147,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", Object)
 ], ProjectInputDto.prototype, "endDate", void 0);
-class CertificateInputDto {
+class CertificateInputDto extends SourcedProfileRecordInputDto {
     certificateName;
     issuingOrganization;
     issueDate;
@@ -224,21 +241,29 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => WorkExperienceInputDto),
     __metadata("design:type", Array)
 ], UpdateCandidateProfileDto.prototype, "workExperiences", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => EducationInputDto),
     __metadata("design:type", Array)
 ], UpdateCandidateProfileDto.prototype, "educations", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => ProjectInputDto),
     __metadata("design:type", Array)
 ], UpdateCandidateProfileDto.prototype, "projects", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => CertificateInputDto),
     __metadata("design:type", Array)
 ], UpdateCandidateProfileDto.prototype, "certificates", void 0);
 //# sourceMappingURL=update-candidate-profile.dto.js.map

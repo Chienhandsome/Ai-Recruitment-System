@@ -221,16 +221,17 @@ let AuthService = AuthService_1 = class AuthService {
             candidateProfile: user.candidateProfile
                 ? {
                     id: user.candidateProfile.id,
+                    status: user.candidateProfile.status,
                     address: user.candidateProfile.address,
                     desiredTitle: user.candidateProfile.desiredTitle,
                     professionalSummary: user.candidateProfile.professionalSummary,
                     githubUrl: user.candidateProfile.githubUrl,
                     linkedinUrl: user.candidateProfile.linkedinUrl,
                     portfolioUrl: user.candidateProfile.portfolioUrl,
-                    workExperiences: user.candidateProfile.workExperiences || [],
-                    educations: user.candidateProfile.educations || [],
-                    projects: user.candidateProfile.projects || [],
-                    certificates: user.candidateProfile.certificates || [],
+                    workExperiences: this.currentProfileRecords(user.candidateProfile.workExperiences, user.candidateProfile.primaryResumeId),
+                    educations: this.currentProfileRecords(user.candidateProfile.educations, user.candidateProfile.primaryResumeId),
+                    projects: this.currentProfileRecords(user.candidateProfile.projects, user.candidateProfile.primaryResumeId),
+                    certificates: this.currentProfileRecords(user.candidateProfile.certificates, user.candidateProfile.primaryResumeId),
                 }
                 : null,
             recruiterProfile: user.recruiterProfile
@@ -241,6 +242,10 @@ let AuthService = AuthService_1 = class AuthService {
                 }
                 : null,
         };
+    }
+    currentProfileRecords(records, primaryResumeId) {
+        return records.filter((record) => record.source === 'MANUAL' ||
+            (primaryResumeId !== null && record.resumeId === primaryResumeId));
     }
     assertAccountIsActive(status) {
         if (status !== 'ACTIVE') {

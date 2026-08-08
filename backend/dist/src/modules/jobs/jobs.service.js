@@ -13,6 +13,33 @@ exports.JobsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../database/prisma.service");
 const client_1 = require("@prisma/client");
+const candidateJobListInclude = {
+    recruiter: {
+        select: {
+            company: {
+                select: { id: true, name: true, logoUrl: true },
+            },
+        },
+    },
+    department: { select: { id: true, name: true } },
+    category: { select: { id: true, name: true, slug: true } },
+    jobSkills: {
+        select: {
+            requirementType: true,
+            skill: { select: { id: true, name: true } },
+        },
+    },
+};
+const candidateJobDetailInclude = {
+    ...candidateJobListInclude,
+    jobCertificates: {
+        select: {
+            id: true,
+            certificateName: true,
+            requirementType: true,
+        },
+    },
+};
 let JobsService = class JobsService {
     prisma;
     constructor(prisma) {
@@ -34,23 +61,25 @@ let JobsService = class JobsService {
     }
     async getJobCategories() {
         return this.prisma.jobCategory.findMany({
-            orderBy: { name: 'asc' }
+            orderBy: { name: 'asc' },
         });
     }
     async create(userId, dto) {
         const recruiter = await this.getRecruiterProfile(userId);
-        const skillsData = dto.skills?.map(s => ({
+        const skillsData = dto.skills?.map((s) => ({
             skillId: s.skillId,
             requirementType: s.requirementType,
         })) || [];
-        const certsData = dto.certificates?.map(c => ({
+        const certsData = dto.certificates?.map((c) => ({
             certificateName: c.certificateName,
             requirementType: c.requirementType,
         })) || [];
         let jobCode = this.generateJobCode();
         let isUnique = false;
         while (!isUnique) {
-            const existing = await this.prisma.jobPosting.findUnique({ where: { jobCode } });
+            const existing = await this.prisma.jobPosting.findUnique({
+                where: { jobCode },
+            });
             if (!existing) {
                 isUnique = true;
             }
@@ -60,7 +89,7 @@ let JobsService = class JobsService {
         }
         if (dto.categoryId) {
             const category = await this.prisma.jobCategory.findUnique({
-                where: { id: dto.categoryId }
+                where: { id: dto.categoryId },
             });
             if (!category) {
                 throw new common_1.BadRequestException(`Category with ID ${dto.categoryId} does not exist`);
@@ -101,21 +130,43 @@ let JobsService = class JobsService {
                     },
                     jobCertificates: {
                         create: certsData,
-                    }
+                    },
                 },
                 include: {
                     department: true,
                     category: true,
                     jobSkills: {
-                        include: { skill: true }
+                        include: { skill: true },
                     },
-                    jobCertificates: true
-                }
+                    jobCertificates: true,
+                    applications: {
+                        include: {
+                            aiMatchingResults: { take: 1, orderBy: { version: 'desc' } },
+                            candidate: {
+                                include: {
+                                    user: {
+                                        select: {
+                                            id: true,
+                                            email: true,
+                                            fullName: true,
+                                            avatarUrl: true,
+                                            phone: true,
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        orderBy: {
+                            appliedAt: 'desc'
+                        }
+                    },
+                },
             });
         }
         catch (error) {
-            console.error("CREATE JOB ERROR:", error);
-            throw new common_1.BadRequestException(`Failed to create job due to DB error: ${error.message}`);
+            console.error('CREATE JOB ERROR:', error);
+            const message = error instanceof Error ? error.message : 'Unknown error';
+            throw new common_1.BadRequestException(`Failed to create job due to DB error: ${message}`);
         }
     }
     async findAll(userId, query) {
@@ -126,9 +177,9 @@ let JobsService = class JobsService {
                 where: { companyId: recruiter.companyId },
                 select: { id: true },
             });
-            recruiterIds = peers.map(p => p.id);
+            recruiterIds = peers.map((p) => p.id);
         }
-        const { search, departmentId, status, employmentType, page = 1, limit = 10 } = query;
+        const { search, departmentId, status, employmentType, page = 1, limit = 10, } = query;
         const skip = (page - 1) * limit;
         const where = {
             recruiterId: { in: recruiterIds },
@@ -156,10 +207,10 @@ let JobsService = class JobsService {
                     department: true,
                     category: true,
                     _count: {
-                        select: { applications: true }
-                    }
-                }
-            })
+                        select: { applications: true },
+                    },
+                },
+            }),
         ]);
         return {
             data: items,
@@ -168,7 +219,145 @@ let JobsService = class JobsService {
                 page,
                 limit,
                 totalPages: Math.ceil(total / limit),
+            },
+        };
+    }
+    async findCandidateJobs(query) {
+        const { search, categoryId, employmentType, workingModel, location, page = 1, limit = 12, } = query;
+        const now = new Date();
+        const where = {
+            status: client_1.JobStatus.PUBLISHED,
+            OR: [{ expiryDate: null }, { expiryDate: { gt: now } }],
+        };
+        if (search?.trim()) {
+            const term = search.trim();
+            where.AND = [
+                {
+                    OR: [
+                        { title: { contains: term, mode: 'insensitive' } },
+                        { description: { contains: term, mode: 'insensitive' } },
+                        { requirements: { contains: term, mode: 'insensitive' } },
+                        {
+                            recruiter: {
+                                company: { name: { contains: term, mode: 'insensitive' } },
+                            },
+                        },
+                        {
+                            jobSkills: {
+                                some: {
+                                    skill: { name: { contains: term, mode: 'insensitive' } },
+                                },
+                            },
+                        },
+                    ],
+                },
+            ];
+        }
+        if (categoryId)
+            where.categoryId = categoryId;
+        if (employmentType)
+            where.employmentType = employmentType;
+        if (workingModel)
+            where.workingModel = workingModel;
+        if (location?.trim()) {
+            where.location = { contains: location.trim(), mode: 'insensitive' };
+        }
+        const [total, jobs] = await Promise.all([
+            this.prisma.jobPosting.count({ where }),
+            this.prisma.jobPosting.findMany({
+                where,
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+                include: candidateJobListInclude,
+            }),
+        ]);
+        return {
+            data: jobs.map((job) => this.toCandidateJobSummary(job)),
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
+    }
+    async findCandidateJobById(id, userId) {
+        const job = await this.prisma.jobPosting.findFirst({
+            where: {
+                id,
+                status: client_1.JobStatus.PUBLISHED,
+                OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
+            },
+            include: candidateJobDetailInclude,
+        });
+        if (!job) {
+            throw new common_1.NotFoundException('Job posting is unavailable');
+        }
+        let application = null;
+        let aiScore = null;
+        let matchLevel = null;
+        const profile = await this.prisma.candidateProfile.findUnique({
+            where: { userId },
+            select: { id: true },
+        });
+        if (profile) {
+            const app = await this.prisma.application.findUnique({
+                where: {
+                    jobId_candidateId: {
+                        jobId: id,
+                        candidateId: profile.id,
+                    },
+                },
+                include: { aiMatchingResults: true },
+            });
+            if (app) {
+                application = {
+                    id: app.id,
+                    status: app.processingStatus,
+                    createdAt: app.appliedAt,
+                };
             }
+        }
+        return {
+            ...this.toCandidateJobSummary(job),
+            description: job.description,
+            requirements: job.requirements,
+            benefits: job.benefits,
+            requiredExperienceYears: job.requiredExperienceYears,
+            requiresProofOfWork: job.requiresProofOfWork,
+            proofOfWorkType: job.proofOfWorkType,
+            certificates: job.jobCertificates.map((certificate) => ({
+                id: certificate.id,
+                name: certificate.certificateName,
+                requirementType: certificate.requirementType,
+            })),
+            hasApplied: !!application,
+            application,
+        };
+    }
+    toCandidateJobSummary(job) {
+        return {
+            id: job.id,
+            jobCode: job.jobCode,
+            title: job.title,
+            company: job.recruiter.company,
+            department: job.department,
+            category: job.category,
+            employmentType: job.employmentType,
+            experienceLevel: job.experienceLevel,
+            workingModel: job.workingModel,
+            location: job.location,
+            minSalary: job.minSalary === null ? null : Number(job.minSalary),
+            maxSalary: job.maxSalary === null ? null : Number(job.maxSalary),
+            currency: job.currency,
+            publishedAt: job.publishedAt ?? job.createdAt,
+            expiryDate: job.expiryDate,
+            skills: job.jobSkills.map((jobSkill) => ({
+                id: jobSkill.skill.id,
+                name: jobSkill.skill.name,
+                requirementType: jobSkill.requirementType,
+            })),
         };
     }
     async findOne(userId, id) {
@@ -179,10 +368,35 @@ let JobsService = class JobsService {
                 department: true,
                 category: true,
                 jobSkills: {
-                    include: { skill: true }
+                    include: { skill: true },
                 },
-                jobCertificates: true
-            }
+                jobCertificates: true,
+                applications: {
+                    include: {
+                        aiMatchingResults: { take: 1, orderBy: { version: 'desc' } },
+                        candidate: {
+                            include: {
+                                user: {
+                                    select: {
+                                        id: true,
+                                        email: true,
+                                        fullName: true,
+                                        avatarUrl: true,
+                                        phone: true,
+                                    }
+                                },
+                                workExperiences: { orderBy: { startDate: 'desc' } },
+                                educations: { orderBy: { startDate: 'desc' } },
+                                projects: true,
+                                candidateSkills: { include: { skill: true } }
+                            }
+                        }
+                    },
+                    orderBy: {
+                        appliedAt: 'desc'
+                    }
+                },
+            },
         });
         if (!job) {
             throw new common_1.NotFoundException('Job posting not found');
@@ -231,7 +445,8 @@ let JobsService = class JobsService {
         };
         if (dto.status) {
             updateData.status = dto.status;
-            if (dto.status === client_1.JobStatus.PUBLISHED && job.status === client_1.JobStatus.DRAFT) {
+            if (dto.status === client_1.JobStatus.PUBLISHED &&
+                job.status === client_1.JobStatus.DRAFT) {
                 updateData.publishedAt = new Date();
             }
             else if (dto.status === client_1.JobStatus.CLOSED) {
@@ -241,7 +456,7 @@ let JobsService = class JobsService {
         if (dto.skills) {
             updateData.jobSkills = {
                 deleteMany: {},
-                create: dto.skills.map(s => ({
+                create: dto.skills.map((s) => ({
                     skillId: s.skillId,
                     requirementType: s.requirementType,
                 })),
@@ -250,7 +465,7 @@ let JobsService = class JobsService {
         if (dto.certificates) {
             updateData.jobCertificates = {
                 deleteMany: {},
-                create: dto.certificates.map(c => ({
+                create: dto.certificates.map((c) => ({
                     certificateName: c.certificateName,
                     requirementType: c.requirementType,
                 })),
@@ -263,10 +478,10 @@ let JobsService = class JobsService {
                 department: true,
                 category: true,
                 jobSkills: {
-                    include: { skill: true }
+                    include: { skill: true },
                 },
-                jobCertificates: true
-            }
+                jobCertificates: true,
+            },
         });
     }
     async remove(userId, id) {

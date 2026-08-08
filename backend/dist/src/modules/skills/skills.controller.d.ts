@@ -4,31 +4,31 @@ export declare class SkillsController {
     constructor(skillsService: SkillsService);
     getCategories(): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
     }[]>;
     getSkills(categoryId?: string, search?: string): Promise<({
         category: {
             id: string;
+            updatedAt: Date;
             name: string;
             createdAt: Date;
-            updatedAt: Date;
         };
         skillAliases: {
             id: string;
             createdAt: Date;
-            aliasName: string;
             skillId: string;
+            aliasName: string;
         }[];
     } & {
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        normalizedName: string;
         categoryId: string;
+        normalizedName: string;
         type: import(".prisma/client").$Enums.SkillType;
     })[]>;
     createSkill(body: {
@@ -36,12 +36,12 @@ export declare class SkillsController {
         categoryId: string;
     }): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        normalizedName: string;
         categoryId: string;
+        normalizedName: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     updateSkill(id: string, body: {
@@ -51,24 +51,24 @@ export declare class SkillsController {
     }): Promise<{
         category: {
             id: string;
+            updatedAt: Date;
             name: string;
             createdAt: Date;
-            updatedAt: Date;
         };
         skillAliases: {
             id: string;
             createdAt: Date;
-            aliasName: string;
             skillId: string;
+            aliasName: string;
         }[];
     } & {
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        normalizedName: string;
         categoryId: string;
+        normalizedName: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     addSkillAlias(id: string, body: {
@@ -76,51 +76,57 @@ export declare class SkillsController {
     }): Promise<{
         id: string;
         createdAt: Date;
-        aliasName: string;
         skillId: string;
+        aliasName: string;
     }>;
     deleteSkillAlias(aliasId: string): Promise<{
         id: string;
         createdAt: Date;
-        aliasName: string;
         skillId: string;
+        aliasName: string;
     }>;
     getUnrecognizedSkills(): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.UnrecognizedSkillStatus;
+        normalizedName: string | null;
         rawSkillName: string;
+        categoryHint: string | null;
         frequency: number;
     }[]>;
     mapUnrecognizedSkill(id: string, body: {
         targetSkillId: string;
     }): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.UnrecognizedSkillStatus;
+        normalizedName: string | null;
         rawSkillName: string;
+        categoryHint: string | null;
         frequency: number;
     }>;
     approveUnrecognizedSkill(id: string, body: {
         categoryId: string;
     }): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
         status: import(".prisma/client").$Enums.SkillStatus;
-        normalizedName: string;
         categoryId: string;
+        normalizedName: string;
         type: import(".prisma/client").$Enums.SkillType;
     }>;
     rejectUnrecognizedSkill(id: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.UnrecognizedSkillStatus;
+        normalizedName: string | null;
         rawSkillName: string;
+        categoryHint: string | null;
         frequency: number;
     }>;
 }

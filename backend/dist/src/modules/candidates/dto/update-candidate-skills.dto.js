@@ -17,7 +17,6 @@ const swagger_1 = require("@nestjs/swagger");
 class CandidateSkillItemDto {
     skillId;
     proficiencyLevel;
-    yearsExperience;
     isPrimary;
 }
 exports.CandidateSkillItemDto = CandidateSkillItemDto;
@@ -36,14 +35,6 @@ __decorate([
     __metadata("design:type", String)
 ], CandidateSkillItemDto.prototype, "proficiencyLevel", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ description: 'Years of experience with this skill' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_transformer_1.Type)(() => Number),
-    __metadata("design:type", Number)
-], CandidateSkillItemDto.prototype, "yearsExperience", void 0);
-__decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Whether this is a primary/highlight skill',
         default: false,
@@ -60,7 +51,7 @@ exports.UpdateCandidateSkillsDto = UpdateCandidateSkillsDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: [CandidateSkillItemDto],
-        description: 'Array of skills to set for the candidate (replaces SELF_DECLARED skills)',
+        description: 'Complete editable skill list. Changed EXTRACTED skills become SELF_DECLARED; VERIFIED skills are preserved.',
     }),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),

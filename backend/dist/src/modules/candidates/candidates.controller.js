@@ -56,7 +56,10 @@ __decorate([
 __decorate([
     (0, common_1.Get)('me/skills'),
     (0, swagger_1.ApiOperation)({ summary: 'Get current candidate skills' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of candidate skills with skill details' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'List of candidate skills with skill details',
+    }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -64,7 +67,7 @@ __decorate([
 ], CandidatesController.prototype, "getMySkills", null);
 __decorate([
     (0, common_1.Put)('me/skills'),
-    (0, swagger_1.ApiOperation)({ summary: 'Update candidate self-declared skills (replace all)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Update the candidate unified skill list' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Updated list of candidate skills' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Body)()),
@@ -74,7 +77,7 @@ __decorate([
 ], CandidatesController.prototype, "updateMySkills", null);
 __decorate([
     (0, common_1.Delete)('me/skills/:skillId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Remove a single self-declared skill' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Remove a candidate-owned or AI-extracted skill' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Skill removed successfully' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Param)('skillId', common_1.ParseUUIDPipe)),

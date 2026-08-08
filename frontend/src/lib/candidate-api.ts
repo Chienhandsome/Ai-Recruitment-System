@@ -67,6 +67,12 @@ export interface CandidateJobDetail extends CandidateJobSummary {
     name: string;
     requirementType: 'MANDATORY' | 'PREFERRED' | 'NICE_TO_HAVE';
   }>;
+  hasApplied?: boolean;
+  application?: {
+    id: string;
+    status: string;
+    createdAt: string;
+  } | null;
 }
 
 export interface CandidateJobsResponse {
@@ -138,6 +144,30 @@ export async function getCandidateJobCategories(): Promise<CandidateJobCategory[
   });
   if (!response.ok) return [];
   return response.json();
+}
+
+export async function applyForJob(
+  token: string,
+  jobId: string,
+  resumeId?: string,
+): Promise<{ message: string; applicationId: string; overallScore?: number; matchLevel?: string }> {
+  const res = await fetch(`${API_URL}/applications`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ jobId, resumeId }),
+  });
+
+  if (!res.ok) {
+    throw new CandidateApiError(
+      await readApiError(res, 'Không thể ứng tuyển công việc này'),
+      res.status,
+    );
+  }
+
+  return res.json();
 }
 
 // ─── Types ────────────────────────────────────────────────────────────

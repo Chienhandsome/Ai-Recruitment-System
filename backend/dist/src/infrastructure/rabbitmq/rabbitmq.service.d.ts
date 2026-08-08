@@ -20,4 +20,6 @@ export declare class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         message?: string;
     };
     private getErrorMessage;
+    private getRetryCount;
+    private waitForHandlerRetry;
 }

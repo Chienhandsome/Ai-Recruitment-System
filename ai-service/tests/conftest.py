@@ -94,4 +94,6 @@ def mock_semantic_matcher(monkeypatch):
     from app.services.matching.semantic import semantic_matcher
     monkeypatch.setattr(semantic_matcher, "compute_similarity", fake_similarity)
     monkeypatch.setattr(semantic_matcher, "compute_best_similarity", fake_best_similarity)
+    monkeypatch.setattr(semantic_matcher, "prefetch", lambda texts: None)
+    monkeypatch.setattr(semantic_matcher, "clear_cache", lambda: None)
     return semantic_matcher

@@ -45,6 +45,24 @@ class Settings:
         default_factory=lambda: os.getenv("RESUME_PARSER_VERSION", "2.0")
     )
 
+    # Embedding provider. Keep local as the development default; production can
+    # switch to the authenticated Modal endpoint without changing scoring code.
+    embedding_provider: str = field(
+        default_factory=lambda: os.getenv("EMBEDDING_PROVIDER", "local")
+    )
+    modal_embedding_url: str = field(
+        default_factory=lambda: os.getenv("MODAL_EMBEDDING_URL", "")
+    )
+    modal_proxy_token_id: str = field(
+        default_factory=lambda: os.getenv("MODAL_PROXY_TOKEN_ID", "")
+    )
+    modal_proxy_token_secret: str = field(
+        default_factory=lambda: os.getenv("MODAL_PROXY_TOKEN_SECRET", "")
+    )
+    embedding_timeout_seconds: float = field(
+        default_factory=lambda: float(os.getenv("EMBEDDING_TIMEOUT_SECONDS", "300"))
+    )
+
     # RabbitMQ topology
     rabbitmq_exchange: str = "ai_recruitment_events"
     rabbitmq_queue: str = "resume_analysis_queue"

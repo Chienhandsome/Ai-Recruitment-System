@@ -1,23 +1,82 @@
-from typing import Dict, Any, List
+from datetime import datetime
+from typing import Any, Dict, List
+
 from app.schemas.matching import CandidateProfilePayload, JobPayload
 from app.services.matching.semantic import semantic_matcher
 from app.utils.normalizer import normalize_skill_name
-from datetime import datetime
 
 class GenericMatchingEngine:
     """
     Evaluates evidence (Candidate Profile) against requirements (Job)
     using exact match and semantic similarity.
-    Returns raw match metrics (0.0 - 1.0) without applying any weights or text generation.
+    Returns raw match metrics (0.0 - 1.0) without applying weights or generating text.
     """
-    
-    def evaluate(self, cand_profile: CandidateProfilePayload, job: JobPayload) -> Dict[str, Any]:
-        return {
-            "skills": self._match_skills(cand_profile, job),
-            "experience": self._match_experience(cand_profile, job),
-            "education": self._match_education(cand_profile, job),
-            "other": self._match_certificates(cand_profile, job),
-        }
+
+    def evaluate(
+        self, cand_profile: CandidateProfilePayload, job: JobPayload
+    ) -> Dict[str, Any]:
+        semantic_matcher.prefetch(self._collect_semantic_texts(cand_profile, job))
+        try:
+            return {
+                "skills": self._match_skills(cand_profile, job),
+                "experience": self._match_experience(cand_profile, job),
+                "education": self._match_education(cand_profile, job),
+                "other": self._match_certificates(cand_profile, job),
+            }
+        finally:
+            semantic_matcher.clear_cache()
+
+    def _collect_semantic_texts(
+        self, cand_profile: CandidateProfilePayload, job: JobPayload
+    ) -> List[str]:
+        """Collect every text used by semantic scoring for one batch request."""
+        texts: List[str] = []
+
+        def add(*values: str | None) -> None:
+            texts.extend(value for value in values if value and value.strip())
+
+        job_full_text = (
+            f"{job.title}. {job.description or ''}. {job.requirements or ''}"
+        )
+        job_education_text = f"{job.title} {job.description or ''}"
+        add(job.title, job_full_text, job_education_text)
+
+        for skill in job.required_skills:
+            add(skill.skill_name)
+        for skill in cand_profile.skills:
+            add(normalize_skill_name(skill.skill_name))
+
+        for experience in cand_profile.work_experiences:
+            context_text = (
+                f"{experience.position_title} {experience.description} "
+                f"{experience.achievements}"
+            )
+            description_text = (
+                f"{experience.position_title}: {experience.description or ''} "
+                f"{experience.achievements or ''}"
+            )
+            add(experience.position_title, context_text, description_text)
+
+        for education in cand_profile.educations:
+            add(education.major)
+
+        for project in cand_profile.projects:
+            technologies = " ".join(project.technologies)
+            context_text = (
+                f"{project.project_name} {project.description} {technologies}"
+            )
+            description_text = (
+                f"{project.project_name} ({project.project_role}): "
+                f"{project.description}"
+            )
+            add(project.project_role, context_text, description_text)
+
+        for certificate in job.required_certificates:
+            add(certificate.certificate_name)
+        for certificate in cand_profile.certificates:
+            add(certificate.certificate_name)
+
+        return texts
 
     def _match_skills(self, cand_profile: CandidateProfilePayload, job: JobPayload) -> Dict[str, Any]:
         job_req_skills = job.required_skills

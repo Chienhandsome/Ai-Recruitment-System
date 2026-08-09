@@ -1,0 +1,2 @@
+# Local deployment tooling for the Modal embedding service.
+modal==1.5.3

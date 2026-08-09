@@ -1,0 +1,4 @@
+-r requirements.txt
+
+# Optional local embedding provider for offline development only.
+sentence-transformers>=2.5.0

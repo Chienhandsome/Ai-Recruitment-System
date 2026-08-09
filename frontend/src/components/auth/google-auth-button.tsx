@@ -25,14 +25,10 @@ export function GoogleAuthButton({
 
     try {
       const supabase = createClient();
-      const isLocal =
-        typeof window !== "undefined" &&
-        (window.location.hostname === "localhost" ||
-          window.location.hostname === "127.0.0.1");
-      const siteUrl = isLocal
-        ? window.location.origin
-        : (process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin);
-      const callbackUrl = new URL("/auth/callback", siteUrl);
+      // The PKCE verifier is stored in a cookie for the origin that starts the
+      // OAuth flow. Returning to a configured canonical URL from a preview or
+      // alias domain would make that cookie unavailable to the callback.
+      const callbackUrl = new URL("/auth/callback", window.location.origin);
       if (role) callbackUrl.searchParams.set("intent", role);
 
       const { data, error } = await supabase.auth.signInWithOAuth({

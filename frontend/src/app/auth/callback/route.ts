@@ -4,13 +4,19 @@ import {
   bootstrapProfile,
   dashboardPathForRoles,
 } from "@/lib/auth-api";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { requireSupabasePublicConfig } from "@/lib/supabase/config";
 import type { PublicSignupRole } from "@/types/auth";
 
 function parseRole(value: string | null): PublicSignupRole | undefined {
   return value === "CANDIDATE" || value === "RECRUITER" ? value : undefined;
 }
+
+type PendingCookie = {
+  name: string;
+  value: string;
+  options: CookieOptions;
+};
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
@@ -40,21 +46,34 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  const pendingCookies: PendingCookie[] = [];
+  const pendingHeaders: Record<string, string> = {};
+
+  const redirectWithAuthState = (destination: URL) => {
+    const response = NextResponse.redirect(destination);
+
+    pendingCookies.forEach(({ name, value, options }) => {
+      response.cookies.set(name, value, options);
+    });
+    Object.entries(pendingHeaders).forEach(([name, value]) => {
+      response.headers.set(name, value);
+    });
+
+    return response;
+  };
+
   try {
     // Use a response-aware Supabase client so cookies are written into the
     // redirect response (not just the incoming request's cookie store).
     const { url, publishableKey } = requireSupabasePublicConfig();
-    let redirectResponse = NextResponse.redirect(new URL("/", request.url));
-
     const supabase = createServerClient(url, publishableKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            redirectResponse.cookies.set(name, value, options);
-          });
+        setAll(cookiesToSet, headersToSet) {
+          pendingCookies.push(...cookiesToSet);
+          Object.assign(pendingHeaders, headersToSet);
         },
       },
     });
@@ -69,10 +88,7 @@ export async function GET(request: NextRequest) {
 
     if (next === "/update-password") {
       console.log("[auth/callback] Redirecting to /update-password");
-      redirectResponse = NextResponse.redirect(new URL("/update-password", request.url));
-      // Re-apply cookies to the new response
-      supabase.auth.getSession(); // no-op: cookies already set above
-      return redirectResponse;
+      return redirectWithAuthState(new URL("/update-password", request.url));
     }
 
     if (!data.session) {
@@ -89,22 +105,19 @@ export async function GET(request: NextRequest) {
     const destination = dashboardPathForRoles(profile.roles);
     console.log("[auth/callback] Success — redirecting to:", destination);
 
-    // Create final redirect and carry over the session cookies
-    const finalResponse = NextResponse.redirect(new URL(destination, request.url));
-    redirectResponse.cookies.getAll().forEach(({ name, value, ...options }) => {
-      finalResponse.cookies.set(name, value, options);
-    });
-    return finalResponse;
+    return redirectWithAuthState(new URL(destination, request.url));
   } catch (error) {
     if (error instanceof AuthApiError && error.code === "ROLE_REQUIRED") {
       console.log("[auth/callback] Role required — redirecting to /register?complete=1");
-      return NextResponse.redirect(new URL("/register?complete=1", request.url));
+      return redirectWithAuthState(
+        new URL("/register?complete=1", request.url),
+      );
     }
 
     const message = error instanceof Error ? error.message : "OAuth callback thất bại.";
     console.error("[auth/callback] Unhandled error:", message);
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("error", message);
-    return NextResponse.redirect(loginUrl);
+    return redirectWithAuthState(loginUrl);
   }
 }

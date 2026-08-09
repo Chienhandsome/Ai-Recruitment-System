@@ -13,7 +13,9 @@ export const EvidenceSchema = z.object({
 
 export const AiResultSchema = z.object({
   overall_score: z.number().default(0),
-  match_level: z.enum(['LOW', 'MEDIUM', 'HIGH', 'EXCELLENT', 'GOOD', 'FAIR', 'POOR']).default('LOW'),
+  match_level: z
+    .enum(['LOW', 'MEDIUM', 'HIGH', 'EXCELLENT', 'GOOD', 'FAIR', 'POOR'])
+    .default('LOW'),
   skills_score: z.number().default(0),
   experience_score: z.number().default(0),
   education_score: z.number().default(0),

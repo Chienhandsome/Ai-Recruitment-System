@@ -653,21 +653,24 @@ model Certificate {
 }
 
 model Application {
-  id               String                      @id @default(uuid())
-  jobId            String                      @map("job_id")
-  job              JobPosting                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  candidateId      String                      @map("candidate_id")
-  candidate        CandidateProfile            @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  resumeId         String                      @map("resume_id")
-  resume           Resume                      @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  source           ApplicationSource           @default(DIRECT_APPLY)
-  profileSnapshot  Json?                       @map("profile_snapshot")
-  processingStatus ApplicationProcessingStatus @default(UPLOADED) @map("processing_status")
-  currentStage     ApplicationStage            @default(RECEIVED) @map("current_stage")
-  hrDecision       HrDecision                  @default(PENDING) @map("hr_decision")
-  hrNotes          String?                     @map("hr_notes")
-  appliedAt        DateTime                    @default(now()) @map("applied_at")
-  updatedAt        DateTime                    @updatedAt @map("updated_at")
+  id                    String                      @id @default(uuid())
+  jobId                 String                      @map("job_id")
+  job                   JobPosting                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateId           String                      @map("candidate_id")
+  candidate             CandidateProfile            @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  resumeId              String                      @map("resume_id")
+  resume                Resume                      @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  source                ApplicationSource           @default(DIRECT_APPLY)
+  profileSnapshot       Json?                       @map("profile_snapshot")
+  processingStatus      ApplicationProcessingStatus @default(UPLOADED) @map("processing_status")
+  evaluationAttempts    Int                         @default(0) @map("evaluation_attempts")
+  nextEvaluationRetryAt DateTime?                   @map("next_evaluation_retry_at")
+  evaluationError       String?                     @map("evaluation_error") @db.Text
+  currentStage          ApplicationStage            @default(RECEIVED) @map("current_stage")
+  hrDecision            HrDecision                  @default(PENDING) @map("hr_decision")
+  hrNotes               String?                     @map("hr_notes")
+  appliedAt             DateTime                    @default(now()) @map("applied_at")
+  updatedAt             DateTime                    @updatedAt @map("updated_at")
 
   aiMatchingResults AiMatchingResult[]
   interviews        Interview[]
@@ -678,6 +681,7 @@ model Application {
   @@index([jobId])
   @@index([candidateId])
   @@index([processingStatus])
+  @@index([processingStatus, nextEvaluationRetryAt])
   @@index([currentStage])
   @@map("applications")
 }

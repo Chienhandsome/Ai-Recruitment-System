@@ -1,15 +1,59 @@
 import {
-  Injectable,
-  NotFoundException,
   BadRequestException,
-  InternalServerErrorException,
+  ConflictException,
+  Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
+import {
+  ApplicationProcessingStatus,
+  ApplicationStage,
+  JobStatus,
+  Prisma,
+  ResumeParsingStatus,
+} from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
-import { RabbitMQService } from '../../infrastructure/rabbitmq/rabbitmq.service';
-import { RABBITMQ_ROUTING_KEYS } from '../../infrastructure/rabbitmq/rabbitmq.constants';
 import { CreateApplicationDto } from './dto/create-application.dto';
-import { ApplicationProcessingStatus, ApplicationStage, MatchLevel } from '@prisma/client';
+import { ApplicationEvaluationService } from './application-evaluation.service';
+import {
+  APPLICATION_SNAPSHOT_VERSION,
+  type ApplicationProfileSnapshot,
+  toPrismaJson,
+} from './application-evaluation.snapshot';
+
+const candidateProfileInclude = {
+  workExperiences: true,
+  educations: true,
+  projects: true,
+  certificates: true,
+  candidateSkills: { include: { skill: true } },
+} satisfies Prisma.CandidateProfileInclude;
+
+const jobEvaluationInclude = {
+  jobSkills: { include: { skill: true } },
+  jobCertificates: true,
+} satisfies Prisma.JobPostingInclude;
+
+const resumeSnapshotSelect = {
+  id: true,
+  candidateId: true,
+  source: true,
+  originalFileName: true,
+  mimeType: true,
+  fileSizeBytes: true,
+  parsingStatus: true,
+  createdAt: true,
+} satisfies Prisma.ResumeSelect;
+
+type CandidateForApplication = Prisma.CandidateProfileGetPayload<{
+  include: typeof candidateProfileInclude;
+}>;
+type JobForApplication = Prisma.JobPostingGetPayload<{
+  include: typeof jobEvaluationInclude;
+}>;
+type ResumeForApplication = Prisma.ResumeGetPayload<{
+  select: typeof resumeSnapshotSelect;
+}>;
 
 @Injectable()
 export class ApplicationsService {
@@ -17,35 +61,47 @@ export class ApplicationsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly rabbitMQService: RabbitMQService,
+    private readonly evaluationService: ApplicationEvaluationService,
   ) {}
 
-  async applyForJob(userId: string, createApplicationDto: CreateApplicationDto) {
-    // 1. Get Candidate Profile
+  async applyForJob(
+    userId: string,
+    createApplicationDto: CreateApplicationDto,
+    now = new Date(),
+  ) {
     const candidateProfile = await this.prisma.candidateProfile.findUnique({
       where: { userId },
-      include: {
-        primaryResume: true,
-        workExperiences: true,
-        educations: true,
-        projects: true,
-        certificates: true,
-        candidateSkills: {
-          include: { skill: true },
-        },
-      },
+      include: candidateProfileInclude,
     });
-
     if (!candidateProfile) {
       throw new NotFoundException('Candidate profile not found.');
     }
 
-    const resumeId = createApplicationDto.resumeId || candidateProfile.primaryResumeId;
+    const resumeId =
+      createApplicationDto.resumeId ?? candidateProfile.primaryResumeId;
     if (!resumeId) {
-      throw new BadRequestException('A resume is required to apply for this job.');
+      throw new BadRequestException(
+        'A parsed resume is required to apply for this job.',
+      );
     }
 
-    // 2. Check if already applied
+    // Scope the lookup by candidateId so another candidate's resume UUID can
+    // never be attached to this application.
+    const resume = await this.prisma.resume.findFirst({
+      where: { id: resumeId, candidateId: candidateProfile.id },
+      select: resumeSnapshotSelect,
+    });
+    if (!resume) {
+      throw new BadRequestException(
+        'The selected resume is unavailable for this candidate.',
+      );
+    }
+    if (resume.parsingStatus !== ResumeParsingStatus.PARSED) {
+      throw new BadRequestException(
+        'The selected resume must finish processing before you can apply.',
+      );
+    }
+
     const existingApplication = await this.prisma.application.findUnique({
       where: {
         jobId_candidateId: {
@@ -53,145 +109,229 @@ export class ApplicationsService {
           candidateId: candidateProfile.id,
         },
       },
+      select: { id: true },
     });
-
     if (existingApplication) {
-      throw new BadRequestException('You have already applied for this job.');
+      throw new ConflictException('You have already applied for this job.');
     }
 
-    // 3. Get Job details for matching
-    const job = await this.prisma.jobPosting.findUnique({
-      where: { id: createApplicationDto.jobId },
-      include: {
-        jobSkills: { include: { skill: true } },
-        jobCertificates: true,
+    const job = await this.prisma.jobPosting.findFirst({
+      where: {
+        id: createApplicationDto.jobId,
+        status: JobStatus.PUBLISHED,
+        OR: [{ expiryDate: null }, { expiryDate: { gt: now } }],
       },
+      include: jobEvaluationInclude,
     });
-
     if (!job) {
-      throw new NotFoundException('Job posting not found.');
-    }
-
-    // 4. Create Application record
-    const application = await this.prisma.application.create({
-      data: {
-        jobId: job.id,
-        candidateId: candidateProfile.id,
-        resumeId,
-        source: 'DIRECT_APPLY',
-        currentStage: ApplicationStage.RECEIVED,
-        processingStatus: ApplicationProcessingStatus.MATCHING,
-        profileSnapshot: {
-          fullName: candidateProfile.fullName,
-          email: candidateProfile.email,
-        },
-      },
-    });
-
-    // 5. Build AI Matching Request Payload
-    const evaluationRequest = this.buildEvaluationRequest(application.id, candidateProfile, job);
-
-    // 6. Push Job to RabbitMQ for Async Processing
-    try {
-      this.logger.log(`Publishing AI Evaluation job for application ${application.id} to RabbitMQ...`);
-      
-      const payload = {
-        applicationId: application.id,
-        ...evaluationRequest,
-      };
-
-      const published = await this.rabbitMQService.publish(
-        RABBITMQ_ROUTING_KEYS.EVALUATION_REQUESTED,
-        payload,
+      throw new NotFoundException(
+        'Job posting is not published or is no longer accepting applications.',
       );
-
-      if (!published) {
-        throw new Error('Failed to publish message to RabbitMQ');
-      }
-
-      this.logger.log(`Successfully queued AI Evaluation for application ${application.id}`);
-
-      return {
-        message: 'Ứng tuyển thành công. Đang phân tích hồ sơ...',
-        applicationId: application.id,
-      };
-    } catch (error) {
-      this.logger.error(`Failed to publish AI Matching for application ${application.id}`, error);
-      
-      // Update application to FAILED
-      await this.prisma.application.update({
-        where: { id: application.id },
-        data: { processingStatus: ApplicationProcessingStatus.FAILED },
-      });
-
-      return {
-        message: 'Ứng tuyển thành công, nhưng hệ thống AI đang bận. Sẽ chấm điểm sau.',
-        applicationId: application.id,
-      };
     }
+
+    const profileSnapshot = this.buildProfileSnapshot(
+      candidateProfile,
+      resume,
+      job,
+      now,
+    );
+
+    let application: { id: string };
+    try {
+      application = await this.prisma.application.create({
+        data: {
+          jobId: job.id,
+          candidateId: candidateProfile.id,
+          resumeId: resume.id,
+          source: 'DIRECT_APPLY',
+          currentStage: ApplicationStage.RECEIVED,
+          processingStatus: ApplicationProcessingStatus.QUEUED,
+          profileSnapshot: toPrismaJson(profileSnapshot),
+        },
+        select: { id: true },
+      });
+    } catch (error) {
+      // The unique constraint is the final authority under concurrent POSTs;
+      // the earlier lookup only provides a fast, friendly path.
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('You have already applied for this job.');
+      }
+      throw error;
+    }
+
+    let published = false;
+    try {
+      published = await this.evaluationService.dispatchNewApplication(
+        application.id,
+        now,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Could not dispatch evaluation for application ${application.id}: ${this.errorMessage(error)}`,
+      );
+      await this.evaluationService.markForRetry(
+        application.id,
+        'Evaluation dispatch failed and will be retried.',
+        0,
+        now,
+      );
+    }
+
+    return {
+      message: published
+        ? 'Ứng tuyển thành công. Đang phân tích hồ sơ...'
+        : 'Ứng tuyển thành công. Đánh giá AI đã được lên lịch thử lại.',
+      applicationId: application.id,
+      evaluationStatus: published ? 'QUEUED' : 'RETRY_SCHEDULED',
+    };
   }
 
-  private buildEvaluationRequest(applicationId: string, profile: any, job: any) {
-    return {
-      application_id: applicationId,
-      candidate_profile: {
-        profile: {
-          id: profile.id,
-          candidate_user_id: profile.userId,
-          desired_title: profile.desiredTitle,
-          professional_summary: profile.professionalSummary,
-        },
-        work_experiences: profile.workExperiences.map((ex: any) => ({
-          company_name: ex.companyName,
-          position_title: ex.positionTitle,
-          start_date: ex.startDate ? ex.startDate.toISOString() : undefined,
-          end_date: ex.endDate ? ex.endDate.toISOString() : undefined,
-          is_current: ex.isCurrent,
-          description: ex.description,
-        })),
-        educations: profile.educations.map((ed: any) => ({
-          school_name: ed.schoolName,
-          major: ed.major,
-          degree: ed.degree,
-        })),
-        projects: profile.projects.map((pr: any) => ({
-          project_name: pr.projectName,
-          project_role: pr.projectRole,
-          description: pr.description,
-        })),
-        certificates: profile.certificates?.map((cert: any) => ({
-          certificate_name: cert.certificateName,
-          issuing_organization: cert.issuingOrganization,
-        })) || [],
-        skills: profile.candidateSkills.map((cs: any) => ({
-          skill_id: cs.skillId,
-          skill_name: cs.skill?.name,
-          proficiency_level: cs.proficiencyLevel,
-        })),
-      },
-      job: {
-        id: job.id,
-        title: job.title,
-        description: job.description,
-        requirements: job.requirements,
-        required_experience_years: job.requiredExperienceYears || 0,
-        required_skills: job.jobSkills.map((js: any) => ({
-          skill_id: js.skillId,
-          skill_name: js.skill?.name,
-          is_mandatory: js.requirementType === 'MANDATORY',
-          minimum_level: js.minimumProficiency || 'BEGINNER',
-        })),
-        required_certificates: job.jobCertificates?.map((jc: any) => ({
-          certificate_name: jc.certificateName,
-          is_mandatory: jc.requirementType === 'MANDATORY',
-        })) || [],
-      },
-      weights: {
-        skills: Number(job.skillWeight) || 40.0,
-        experience: Number(job.experienceWeight) || 30.0,
-        education: Number(job.educationWeight) || 15.0,
-        other: Number(job.otherWeight) || 15.0,
-      }
+  private buildProfileSnapshot(
+    profile: CandidateForApplication,
+    resume: ResumeForApplication,
+    job: JobForApplication,
+    capturedAt: Date,
+  ): ApplicationProfileSnapshot {
+    const weights = {
+      skills: Number(job.skillWeight) || 40,
+      experience: Number(job.experienceWeight) || 30,
+      education: Number(job.educationWeight) || 15,
+      other: Number(job.otherWeight) || 15,
     };
+
+    return {
+      schemaVersion: APPLICATION_SNAPSHOT_VERSION,
+      capturedAt: capturedAt.toISOString(),
+      candidateIdentity: {
+        id: profile.id,
+        userId: profile.userId,
+        fullName: profile.fullName,
+        email: profile.email,
+        phone: profile.phone,
+      },
+      resume: {
+        id: resume.id,
+        source: resume.source,
+        originalFileName: resume.originalFileName,
+        mimeType: resume.mimeType,
+        fileSizeBytes: resume.fileSizeBytes,
+        parsingStatus: resume.parsingStatus,
+        createdAt: resume.createdAt.toISOString(),
+      },
+      evaluationInput: {
+        candidate_profile: {
+          profile: {
+            id: profile.id,
+            candidate_user_id: profile.userId,
+            desired_title: profile.desiredTitle,
+            professional_summary: profile.professionalSummary,
+            github_url: profile.githubUrl,
+            linkedin_url: profile.linkedinUrl,
+            portfolio_url: profile.portfolioUrl,
+            address: profile.address,
+            created_at: profile.createdAt.toISOString(),
+            updated_at: profile.updatedAt.toISOString(),
+          },
+          work_experiences: profile.workExperiences.map((experience) => ({
+            id: experience.id,
+            candidate_profile_id: profile.id,
+            company_name: experience.companyName,
+            position_title: experience.positionTitle,
+            start_date: experience.startDate.toISOString(),
+            end_date: experience.endDate?.toISOString() ?? null,
+            is_current: experience.isCurrent,
+            description: experience.description,
+            achievements: experience.achievements,
+          })),
+          educations: profile.educations.map((education) => ({
+            id: education.id,
+            candidate_profile_id: profile.id,
+            school_name: education.schoolName,
+            major: education.major,
+            degree: education.degree,
+            start_date: education.startDate?.toISOString() ?? null,
+            end_date: education.endDate?.toISOString() ?? null,
+            description: education.description,
+          })),
+          projects: profile.projects.map((project) => ({
+            id: project.id,
+            candidate_profile_id: profile.id,
+            project_name: project.projectName,
+            project_role: project.projectRole,
+            description: project.description,
+            technologies: this.toStringArray(project.technologies),
+            project_url: project.projectUrl,
+            start_date: project.startDate?.toISOString() ?? null,
+            end_date: project.endDate?.toISOString() ?? null,
+          })),
+          certificates: profile.certificates.map((certificate) => ({
+            certificate_name: certificate.certificateName,
+            issuing_organization: certificate.issuingOrganization,
+            issue_date: certificate.issueDate?.toISOString() ?? null,
+            expiry_date: certificate.expiryDate?.toISOString() ?? null,
+            credential_url: certificate.credentialUrl,
+          })),
+          skills: profile.candidateSkills.map((candidateSkill) => ({
+            candidate_profile_id: profile.id,
+            skill_id: candidateSkill.skillId,
+            skill_name: candidateSkill.skill.name,
+            proficiency_level: candidateSkill.proficiencyLevel,
+            is_primary: candidateSkill.isPrimary,
+            source: candidateSkill.source,
+          })),
+        },
+        job: {
+          id: job.id,
+          title: job.title,
+          employment_type: job.employmentType,
+          work_mode: job.workingModel,
+          salary_min: job.minSalary === null ? null : Number(job.minSalary),
+          salary_max: job.maxSalary === null ? null : Number(job.maxSalary),
+          location: job.location,
+          required_experience_years: job.requiredExperienceYears ?? 0,
+          description: job.description,
+          requirements: job.requirements,
+          benefits: job.benefits,
+          status: job.status,
+          published_at: job.publishedAt?.toISOString() ?? null,
+          created_at: job.createdAt.toISOString(),
+          updated_at: job.updatedAt.toISOString(),
+          closed_at: job.closedAt?.toISOString() ?? null,
+          required_skills: job.jobSkills.map((jobSkill) => ({
+            job_id: job.id,
+            skill_id: jobSkill.skillId,
+            skill_name: jobSkill.skill.name,
+            is_mandatory: jobSkill.requirementType === 'MANDATORY',
+            minimum_level: jobSkill.minimumProficiency ?? 'BEGINNER',
+          })),
+          required_certificates: job.jobCertificates.map((certificate) => ({
+            certificate_name: certificate.certificateName,
+            is_mandatory: certificate.requirementType === 'MANDATORY',
+          })),
+          ai_weights_config: weights,
+        },
+        weights,
+      },
+    };
+  }
+
+  private toStringArray(value: Prisma.JsonValue | null): string[] {
+    if (Array.isArray(value)) {
+      return value.filter((item): item is string => typeof item === 'string');
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+    return [];
+  }
+
+  private errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : 'Unknown error';
   }
 }

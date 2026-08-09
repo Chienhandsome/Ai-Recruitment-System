@@ -112,10 +112,11 @@ describe('JobsService candidate browsing', () => {
   it('returns candidate-safe details for an available job', async () => {
     const prisma = {
       jobPosting: { findFirst: jest.fn().mockResolvedValue(publishedJob) },
+      candidateProfile: { findUnique: jest.fn().mockResolvedValue(null) },
     } as any;
     const service = new JobsService(prisma);
 
-    const result = await service.findCandidateJobById('job-1');
+    const result = await service.findCandidateJobById('job-1', 'user-1');
 
     expect(prisma.jobPosting.findFirst).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -149,7 +150,7 @@ describe('JobsService candidate browsing', () => {
     const service = new JobsService(prisma);
 
     await expect(
-      service.findCandidateJobById('unavailable-job'),
+      service.findCandidateJobById('unavailable-job', 'user-1'),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 });

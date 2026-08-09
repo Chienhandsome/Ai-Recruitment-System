@@ -1,9 +1,21 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ApplicationProcessingStatus, MatchLevel } from '@prisma/client';
+import { z } from 'zod';
 import { PrismaService } from '../../database/prisma.service';
 import { RabbitMQService } from '../../infrastructure/rabbitmq/rabbitmq.service';
-import { RABBITMQ_QUEUES, RABBITMQ_ROUTING_KEYS } from '../../infrastructure/rabbitmq/rabbitmq.constants';
-import { ApplicationProcessingStatus, MatchLevel } from '@prisma/client';
+import {
+  RABBITMQ_QUEUES,
+  RABBITMQ_ROUTING_KEYS,
+} from '../../infrastructure/rabbitmq/rabbitmq.constants';
+import { ApplicationEvaluationService } from './application-evaluation.service';
 import { AiResultSchema } from './dto/ai-result.dto';
+
+const EvaluationResultMessageSchema = z.object({
+  applicationId: z.string().min(1),
+  status: z.enum(['COMPLETED', 'FAILED']),
+  result: z.unknown().optional(),
+  error: z.string().optional(),
+});
 
 @Injectable()
 export class ApplicationsConsumer implements OnModuleInit {
@@ -12,37 +24,46 @@ export class ApplicationsConsumer implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly rabbitMQService: RabbitMQService,
+    private readonly evaluationService: ApplicationEvaluationService,
   ) {}
 
-  onModuleInit() {
-    this.rabbitMQService.subscribe(
-      RABBITMQ_QUEUES.EVALUATION_QUEUE + '_result',
-      [
-        RABBITMQ_ROUTING_KEYS.EVALUATION_COMPLETED,
-        RABBITMQ_ROUTING_KEYS.EVALUATION_FAILED,
-      ],
-      this.handleMessage.bind(this),
-    ).catch(err => {
-        this.logger.error('Failed to subscribe to RabbitMQ', err);
-    });
+  onModuleInit(): void {
+    this.rabbitMQService
+      .subscribe(
+        `${RABBITMQ_QUEUES.EVALUATION_QUEUE}_result`,
+        [
+          RABBITMQ_ROUTING_KEYS.EVALUATION_COMPLETED,
+          RABBITMQ_ROUTING_KEYS.EVALUATION_FAILED,
+        ],
+        this.handleMessage.bind(this),
+      )
+      .catch((error: unknown) => {
+        this.logger.error(
+          `Failed to subscribe to RabbitMQ: ${this.errorMessage(error)}`,
+        );
+      });
   }
 
-  async handleMessage(message: any) {
-    this.logger.log(`Received AI Evaluation result for application ${message.applicationId}`);
-
-    if (!message.applicationId) {
-      this.logger.error('Message is missing applicationId');
+  async handleMessage(rawMessage: unknown): Promise<void> {
+    const parsedMessage = EvaluationResultMessageSchema.safeParse(rawMessage);
+    if (!parsedMessage.success) {
+      this.logger.error('Invalid AI evaluation result message');
       return;
     }
 
-    const { applicationId, status, result, error } = message;
+    const { applicationId, status, result, error } = parsedMessage.data;
+    this.logger.log(
+      `Received AI evaluation result for application ${applicationId}`,
+    );
 
     if (status === 'COMPLETED' && result) {
       try {
-        // Zod validation with default fallbacks
         const validatedResult = AiResultSchema.parse(result);
-
-        const matchLevel = (['HIGH', 'MEDIUM', 'LOW'].includes(validatedResult.match_level) ? validatedResult.match_level : 'LOW') as MatchLevel;
+        const matchLevel = (
+          ['HIGH', 'MEDIUM', 'LOW'].includes(validatedResult.match_level)
+            ? validatedResult.match_level
+            : 'LOW'
+        ) as MatchLevel;
 
         await this.prisma.$transaction(async (prisma) => {
           await prisma.aiMatchingResult.deleteMany({
@@ -64,36 +85,50 @@ export class ApplicationsConsumer implements OnModuleInit {
               missingSkills: validatedResult.missing_skills,
               missingRequiredSkills: validatedResult.missing_required_skills,
               reasoningSummary: validatedResult.summary,
-              // @ts-ignore: Fields added in recent migration but Prisma Client may not be generated due to EPERM
               evidence: validatedResult.evidence,
-              // @ts-ignore
               confidenceScore: validatedResult.confidence_score,
             },
           });
 
           await prisma.application.update({
             where: { id: applicationId },
-            data: { processingStatus: ApplicationProcessingStatus.COMPLETED },
+            data: {
+              processingStatus: ApplicationProcessingStatus.COMPLETED,
+              nextEvaluationRetryAt: null,
+              evaluationError: null,
+            },
           });
         });
-        this.logger.log(`Successfully updated AI Evaluation for application ${applicationId}`);
-      } catch (err: any) {
-        this.logger.error(`Failed to update DB for application ${applicationId}: ${err?.message || err}`, err?.stack);
-        await this.prisma.application.update({
-          where: { id: applicationId },
-          data: { processingStatus: ApplicationProcessingStatus.FAILED },
-        });
+        this.logger.log(
+          `Successfully updated AI evaluation for application ${applicationId}`,
+        );
+      } catch (caughtError: unknown) {
+        this.logger.error(
+          `Failed to persist AI evaluation for application ${applicationId}: ${this.errorMessage(caughtError)}`,
+          caughtError instanceof Error ? caughtError.stack : undefined,
+        );
+        await this.evaluationService.markForRetry(
+          applicationId,
+          this.errorMessage(caughtError),
+        );
       }
-    } else {
-      this.logger.warn(`AI Evaluation failed for application ${applicationId}: ${error}`);
-      try {
-        await this.prisma.application.update({
-          where: { id: applicationId },
-          data: { processingStatus: ApplicationProcessingStatus.FAILED },
-        });
-      } catch (err) {
-        this.logger.error(`Failed to update FAILED status for application ${applicationId}`, err);
-      }
+      return;
     }
+
+    const failureReason = error ?? 'AI evaluation failed without a reason.';
+    this.logger.warn(
+      `AI evaluation failed for application ${applicationId}: ${failureReason}`,
+    );
+    try {
+      await this.evaluationService.markForRetry(applicationId, failureReason);
+    } catch (caughtError: unknown) {
+      this.logger.error(
+        `Failed to schedule retry for application ${applicationId}: ${this.errorMessage(caughtError)}`,
+      );
+    }
+  }
+
+  private errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : 'Unknown error';
   }
 }

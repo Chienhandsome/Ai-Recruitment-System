@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateApplicationDto {
   @ApiProperty({
@@ -11,7 +11,8 @@ export class CreateApplicationDto {
   jobId!: string;
 
   @ApiPropertyOptional({
-    description: 'Specific resume ID to use. If omitted, the primary resume is used.',
+    description:
+      'Specific resume ID to use. If omitted, the primary resume is used.',
     example: 'uuid-resume-1234',
   })
   @IsUUID()

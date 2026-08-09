@@ -150,7 +150,11 @@ export async function applyForJob(
   token: string,
   jobId: string,
   resumeId?: string,
-): Promise<{ message: string; applicationId: string; overallScore?: number; matchLevel?: string }> {
+): Promise<{
+  message: string;
+  applicationId: string;
+  evaluationStatus: 'QUEUED' | 'RETRY_SCHEDULED';
+}> {
   const res = await fetch(`${API_URL}/applications`, {
     method: 'POST',
     headers: {

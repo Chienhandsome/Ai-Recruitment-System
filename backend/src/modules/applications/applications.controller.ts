@@ -6,7 +6,12 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -26,8 +31,22 @@ export class ApplicationsController {
   @Roles('CANDIDATE')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Apply for a job as a candidate' })
-  @ApiResponse({ status: 201, description: 'Application submitted successfully.' })
-  @ApiResponse({ status: 400, description: 'Bad Request (e.g. already applied, missing resume).' })
+  @ApiResponse({
+    status: 201,
+    description: 'Application submitted successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Missing, unprocessed, or unauthorized resume.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Candidate profile or active job not found.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Candidate already applied for this job.',
+  })
   async apply(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateApplicationDto,

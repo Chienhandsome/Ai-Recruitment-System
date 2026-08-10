@@ -11,9 +11,9 @@ export declare const EvidenceSchema: z.ZodObject<{
 export declare const AiResultSchema: z.ZodObject<{
     overall_score: z.ZodDefault<z.ZodNumber>;
     match_level: z.ZodDefault<z.ZodEnum<{
-        LOW: "LOW";
-        MEDIUM: "MEDIUM";
         HIGH: "HIGH";
+        MEDIUM: "MEDIUM";
+        LOW: "LOW";
         EXCELLENT: "EXCELLENT";
         GOOD: "GOOD";
         FAIR: "FAIR";

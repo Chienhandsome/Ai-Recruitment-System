@@ -7,5 +7,6 @@ export declare class ApplicationsController {
     apply(user: AuthenticatedUser, dto: CreateApplicationDto): Promise<{
         message: string;
         applicationId: string;
+        evaluationStatus: string;
     }>;
 }

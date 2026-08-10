@@ -13,6 +13,8 @@ const applications_service_1 = require("./applications.service");
 const applications_consumer_1 = require("./applications.consumer");
 const auth_module_1 = require("../auth/auth.module");
 const rabbitmq_module_1 = require("../../infrastructure/rabbitmq/rabbitmq.module");
+const application_evaluation_service_1 = require("./application-evaluation.service");
+const retry_application_evaluations_use_case_1 = require("./retry-application-evaluations.use-case");
 let ApplicationsModule = class ApplicationsModule {
 };
 exports.ApplicationsModule = ApplicationsModule;
@@ -20,7 +22,12 @@ exports.ApplicationsModule = ApplicationsModule = __decorate([
     (0, common_1.Module)({
         imports: [auth_module_1.AuthModule, rabbitmq_module_1.RabbitMQModule],
         controllers: [applications_controller_1.ApplicationsController],
-        providers: [applications_service_1.ApplicationsService, applications_consumer_1.ApplicationsConsumer],
+        providers: [
+            applications_service_1.ApplicationsService,
+            applications_consumer_1.ApplicationsConsumer,
+            application_evaluation_service_1.ApplicationEvaluationService,
+            retry_application_evaluations_use_case_1.RetryApplicationEvaluationsUseCase,
+        ],
         exports: [applications_service_1.ApplicationsService, applications_consumer_1.ApplicationsConsumer],
     })
 ], ApplicationsModule);

@@ -13,16 +13,16 @@ export declare class ResumesService {
     }>;
     getResumeStatus(userId: string, resumeId: string): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         originalFileName: string;
         parsingStatus: import(".prisma/client").$Enums.ResumeParsingStatus;
         parsingErrorMessage: string | null;
     }>;
     getMyResumes(userId: string): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         originalFileName: string;
         mimeType: string;
         fileSizeBytes: number;

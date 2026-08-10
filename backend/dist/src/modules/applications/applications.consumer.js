@@ -12,38 +12,53 @@ var ApplicationsConsumer_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApplicationsConsumer = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
+const zod_1 = require("zod");
 const prisma_service_1 = require("../../database/prisma.service");
 const rabbitmq_service_1 = require("../../infrastructure/rabbitmq/rabbitmq.service");
 const rabbitmq_constants_1 = require("../../infrastructure/rabbitmq/rabbitmq.constants");
-const client_1 = require("@prisma/client");
+const application_evaluation_service_1 = require("./application-evaluation.service");
 const ai_result_dto_1 = require("./dto/ai-result.dto");
+const EvaluationResultMessageSchema = zod_1.z.object({
+    applicationId: zod_1.z.string().min(1),
+    status: zod_1.z.enum(['COMPLETED', 'FAILED']),
+    result: zod_1.z.unknown().optional(),
+    error: zod_1.z.string().optional(),
+});
 let ApplicationsConsumer = ApplicationsConsumer_1 = class ApplicationsConsumer {
     prisma;
     rabbitMQService;
+    evaluationService;
     logger = new common_1.Logger(ApplicationsConsumer_1.name);
-    constructor(prisma, rabbitMQService) {
+    constructor(prisma, rabbitMQService, evaluationService) {
         this.prisma = prisma;
         this.rabbitMQService = rabbitMQService;
+        this.evaluationService = evaluationService;
     }
     onModuleInit() {
-        this.rabbitMQService.subscribe(rabbitmq_constants_1.RABBITMQ_QUEUES.EVALUATION_QUEUE + '_result', [
+        this.rabbitMQService
+            .subscribe(`${rabbitmq_constants_1.RABBITMQ_QUEUES.EVALUATION_QUEUE}_result`, [
             rabbitmq_constants_1.RABBITMQ_ROUTING_KEYS.EVALUATION_COMPLETED,
             rabbitmq_constants_1.RABBITMQ_ROUTING_KEYS.EVALUATION_FAILED,
-        ], this.handleMessage.bind(this)).catch(err => {
-            this.logger.error('Failed to subscribe to RabbitMQ', err);
+        ], this.handleMessage.bind(this))
+            .catch((error) => {
+            this.logger.error(`Failed to subscribe to RabbitMQ: ${this.errorMessage(error)}`);
         });
     }
-    async handleMessage(message) {
-        this.logger.log(`Received AI Evaluation result for application ${message.applicationId}`);
-        if (!message.applicationId) {
-            this.logger.error('Message is missing applicationId');
+    async handleMessage(rawMessage) {
+        const parsedMessage = EvaluationResultMessageSchema.safeParse(rawMessage);
+        if (!parsedMessage.success) {
+            this.logger.error('Invalid AI evaluation result message');
             return;
         }
-        const { applicationId, status, result, error } = message;
+        const { applicationId, status, result, error } = parsedMessage.data;
+        this.logger.log(`Received AI evaluation result for application ${applicationId}`);
         if (status === 'COMPLETED' && result) {
             try {
                 const validatedResult = ai_result_dto_1.AiResultSchema.parse(result);
-                const matchLevel = (['HIGH', 'MEDIUM', 'LOW'].includes(validatedResult.match_level) ? validatedResult.match_level : 'LOW');
+                const matchLevel = (['HIGH', 'MEDIUM', 'LOW'].includes(validatedResult.match_level)
+                    ? validatedResult.match_level
+                    : 'LOW');
                 await this.prisma.$transaction(async (prisma) => {
                     await prisma.aiMatchingResult.deleteMany({
                         where: { applicationId },
@@ -69,37 +84,39 @@ let ApplicationsConsumer = ApplicationsConsumer_1 = class ApplicationsConsumer {
                     });
                     await prisma.application.update({
                         where: { id: applicationId },
-                        data: { processingStatus: client_1.ApplicationProcessingStatus.COMPLETED },
+                        data: {
+                            processingStatus: client_1.ApplicationProcessingStatus.COMPLETED,
+                            nextEvaluationRetryAt: null,
+                            evaluationError: null,
+                        },
                     });
                 });
-                this.logger.log(`Successfully updated AI Evaluation for application ${applicationId}`);
+                this.logger.log(`Successfully updated AI evaluation for application ${applicationId}`);
             }
-            catch (err) {
-                this.logger.error(`Failed to update DB for application ${applicationId}: ${err?.message || err}`, err?.stack);
-                await this.prisma.application.update({
-                    where: { id: applicationId },
-                    data: { processingStatus: client_1.ApplicationProcessingStatus.FAILED },
-                });
+            catch (caughtError) {
+                this.logger.error(`Failed to persist AI evaluation for application ${applicationId}: ${this.errorMessage(caughtError)}`, caughtError instanceof Error ? caughtError.stack : undefined);
+                await this.evaluationService.markForRetry(applicationId, this.errorMessage(caughtError));
             }
+            return;
         }
-        else {
-            this.logger.warn(`AI Evaluation failed for application ${applicationId}: ${error}`);
-            try {
-                await this.prisma.application.update({
-                    where: { id: applicationId },
-                    data: { processingStatus: client_1.ApplicationProcessingStatus.FAILED },
-                });
-            }
-            catch (err) {
-                this.logger.error(`Failed to update FAILED status for application ${applicationId}`, err);
-            }
+        const failureReason = error ?? 'AI evaluation failed without a reason.';
+        this.logger.warn(`AI evaluation failed for application ${applicationId}: ${failureReason}`);
+        try {
+            await this.evaluationService.markForRetry(applicationId, failureReason);
         }
+        catch (caughtError) {
+            this.logger.error(`Failed to schedule retry for application ${applicationId}: ${this.errorMessage(caughtError)}`);
+        }
+    }
+    errorMessage(error) {
+        return error instanceof Error ? error.message : 'Unknown error';
     }
 };
 exports.ApplicationsConsumer = ApplicationsConsumer;
 exports.ApplicationsConsumer = ApplicationsConsumer = ApplicationsConsumer_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        rabbitmq_service_1.RabbitMQService])
+        rabbitmq_service_1.RabbitMQService,
+        application_evaluation_service_1.ApplicationEvaluationService])
 ], ApplicationsConsumer);
 //# sourceMappingURL=applications.consumer.js.map

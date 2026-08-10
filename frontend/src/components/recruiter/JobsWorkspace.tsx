@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Plus, Search, Filter, MoreHorizontal, Eye, Copy, Pencil, Play, Pause, XCircle } from "lucide-react";
 import type { JobsResponse, JobPostingData } from "@/lib/recruiter-api";
 import { updateRecruiterJob, getRecruiterJobs } from "@/lib/recruiter-api";
@@ -21,6 +21,7 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
   const [activeTab, setActiveTab] = useState("ALL");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [editingJob, setEditingJob] = useState<JobPostingData | null>(null);
+  const isFirstMount = useRef(true);
 
   const tabs = [
     { id: "ALL", label: "Tất cả" },
@@ -48,6 +49,12 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
   };
 
   useEffect(() => {
+    // Skip initial fetch since initialData is loaded from SSR
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+
     // Only fetch if tab or search changes (debounce could be added for search)
     const timeoutId = setTimeout(() => {
       loadJobs(activeTab, search);

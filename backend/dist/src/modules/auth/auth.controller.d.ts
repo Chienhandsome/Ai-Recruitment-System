@@ -26,13 +26,13 @@ export declare class AuthController {
             portfolioUrl: string | null;
             workExperiences: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 companyName: string;
                 positionTitle: string;
@@ -43,13 +43,13 @@ export declare class AuthController {
             }[];
             educations: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -59,13 +59,13 @@ export declare class AuthController {
             }[];
             projects: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -76,13 +76,13 @@ export declare class AuthController {
             }[];
             certificates: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 expiryDate: Date | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 certificateName: string;
                 issuingOrganization: string;
@@ -115,13 +115,13 @@ export declare class AuthController {
             portfolioUrl: string | null;
             workExperiences: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 companyName: string;
                 positionTitle: string;
@@ -132,13 +132,13 @@ export declare class AuthController {
             }[];
             educations: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -148,13 +148,13 @@ export declare class AuthController {
             }[];
             projects: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -165,13 +165,13 @@ export declare class AuthController {
             }[];
             certificates: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 expiryDate: Date | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 certificateName: string;
                 issuingOrganization: string;
@@ -204,13 +204,13 @@ export declare class AuthController {
             portfolioUrl: string | null;
             workExperiences: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 companyName: string;
                 positionTitle: string;
@@ -221,13 +221,13 @@ export declare class AuthController {
             }[];
             educations: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -237,13 +237,13 @@ export declare class AuthController {
             }[];
             projects: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -254,13 +254,13 @@ export declare class AuthController {
             }[];
             certificates: {
                 id: string;
-                resumeId: string | null;
-                source: import(".prisma/client").$Enums.DataSource;
-                updatedAt: Date;
-                createdAt: Date;
                 expiryDate: Date | null;
+                createdAt: Date;
+                updatedAt: Date;
+                source: import(".prisma/client").$Enums.DataSource;
                 isInferred: boolean;
                 sourceText: string | null;
+                resumeId: string | null;
                 candidateProfileId: string;
                 certificateName: string;
                 issuingOrganization: string;

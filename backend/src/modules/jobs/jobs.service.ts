@@ -283,8 +283,6 @@ export class JobsService {
         {
           OR: [
             { title: { contains: term, mode: 'insensitive' } },
-            { description: { contains: term, mode: 'insensitive' } },
-            { requirements: { contains: term, mode: 'insensitive' } },
             {
               recruiter: {
                 company: { name: { contains: term, mode: 'insensitive' } },

@@ -11,110 +11,43 @@ export declare class JobsService {
     private generateJobCode;
     getJobCategories(): Promise<{
         id: string;
+        createdAt: Date;
         updatedAt: Date;
         name: string;
         slug: string;
-        createdAt: Date;
     }[]>;
     create(userId: string, dto: CreateJobDto): Promise<{
-        applications: ({
-            candidate: {
-                user: {
-                    id: string;
-                    fullName: string;
-                    email: string;
-                    phone: string | null;
-                    avatarUrl: string | null;
-                } | null;
-            } & {
-                id: string;
-                updatedAt: Date;
-                createdAt: Date;
-                userId: string | null;
-                status: import(".prisma/client").$Enums.CandidateProfileStatus;
-                fullName: string;
-                email: string;
-                phone: string | null;
-                address: string | null;
-                desiredTitle: string | null;
-                professionalSummary: string | null;
-                linkedinUrl: string | null;
-                githubUrl: string | null;
-                portfolioUrl: string | null;
-                primaryResumeId: string | null;
-                expectedMinSalary: Prisma.Decimal | null;
-                expectedMaxSalary: Prisma.Decimal | null;
-                preferredModel: import(".prisma/client").$Enums.WorkingModel | null;
-            };
-            aiMatchingResults: {
-                id: string;
-                updatedAt: Date;
-                createdAt: Date;
-                applicationId: string;
-                version: number;
-                overallScore: Prisma.Decimal;
-                matchLevel: import(".prisma/client").$Enums.MatchLevel;
-                skillScore: Prisma.Decimal | null;
-                experienceScore: Prisma.Decimal | null;
-                educationScore: Prisma.Decimal | null;
-                projectScore: Prisma.Decimal | null;
-                matchedSkills: Prisma.JsonValue | null;
-                missingSkills: Prisma.JsonValue | null;
-                missingRequiredSkills: Prisma.JsonValue | null;
-                strengths: Prisma.JsonValue | null;
-                gaps: Prisma.JsonValue | null;
-                weaknesses: Prisma.JsonValue | null;
-                evidence: Prisma.JsonValue | null;
-                confidenceScore: Prisma.Decimal | null;
-                reasoningSummary: string | null;
-                inputSnapshot: Prisma.JsonValue | null;
-                modelVersion: string | null;
-            }[];
-        } & {
-            id: string;
-            jobId: string;
-            candidateId: string;
-            resumeId: string;
-            source: import(".prisma/client").$Enums.ApplicationSource;
-            profileSnapshot: Prisma.JsonValue | null;
-            processingStatus: import(".prisma/client").$Enums.ApplicationProcessingStatus;
-            currentStage: import(".prisma/client").$Enums.ApplicationStage;
-            hrDecision: import(".prisma/client").$Enums.HrDecision;
-            hrNotes: string | null;
-            appliedAt: Date;
-            updatedAt: Date;
-        })[];
         department: {
             id: string;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
+            createdAt: Date;
             updatedAt: Date;
             name: string;
-            createdAt: Date;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
             code: string;
             companyId: string;
         } | null;
         category: {
             id: string;
+            createdAt: Date;
             updatedAt: Date;
             name: string;
             slug: string;
-            createdAt: Date;
         } | null;
         jobSkills: ({
             skill: {
                 id: string;
-                updatedAt: Date;
-                name: string;
-                createdAt: Date;
                 status: import(".prisma/client").$Enums.SkillStatus;
+                createdAt: Date;
+                updatedAt: Date;
                 categoryId: string;
+                name: string;
                 normalizedName: string;
                 type: import(".prisma/client").$Enums.SkillType;
             };
         } & {
             id: string;
-            jobId: string;
             createdAt: Date;
+            jobId: string;
             skillId: string;
             requirementType: import(".prisma/client").$Enums.SkillRequirementType;
             minimumProficiency: import(".prisma/client").$Enums.ProficiencyLevel | null;
@@ -127,11 +60,78 @@ export declare class JobsService {
             requirementType: import(".prisma/client").$Enums.SkillRequirementType;
             certificateName: string;
         }[];
+        applications: ({
+            candidate: {
+                user: {
+                    id: string;
+                    phone: string | null;
+                    email: string;
+                    fullName: string;
+                    avatarUrl: string | null;
+                } | null;
+            } & {
+                id: string;
+                status: import(".prisma/client").$Enums.CandidateProfileStatus;
+                createdAt: Date;
+                updatedAt: Date;
+                phone: string | null;
+                email: string;
+                fullName: string;
+                userId: string | null;
+                primaryResumeId: string | null;
+                address: string | null;
+                desiredTitle: string | null;
+                professionalSummary: string | null;
+                linkedinUrl: string | null;
+                githubUrl: string | null;
+                portfolioUrl: string | null;
+                expectedMinSalary: Prisma.Decimal | null;
+                expectedMaxSalary: Prisma.Decimal | null;
+                preferredModel: import(".prisma/client").$Enums.WorkingModel | null;
+            };
+            aiMatchingResults: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                applicationId: string;
+                version: number;
+                strengths: Prisma.JsonValue | null;
+                gaps: Prisma.JsonValue | null;
+                evidence: Prisma.JsonValue | null;
+                overallScore: Prisma.Decimal;
+                matchLevel: import(".prisma/client").$Enums.MatchLevel;
+                skillScore: Prisma.Decimal | null;
+                experienceScore: Prisma.Decimal | null;
+                educationScore: Prisma.Decimal | null;
+                projectScore: Prisma.Decimal | null;
+                matchedSkills: Prisma.JsonValue | null;
+                missingSkills: Prisma.JsonValue | null;
+                missingRequiredSkills: Prisma.JsonValue | null;
+                weaknesses: Prisma.JsonValue | null;
+                confidenceScore: Prisma.Decimal | null;
+                reasoningSummary: string | null;
+                inputSnapshot: Prisma.JsonValue | null;
+                modelVersion: string | null;
+            }[];
+        } & {
+            id: string;
+            updatedAt: Date;
+            jobId: string;
+            candidateId: string;
+            source: import(".prisma/client").$Enums.ApplicationSource;
+            resumeId: string;
+            profileSnapshot: Prisma.JsonValue | null;
+            processingStatus: import(".prisma/client").$Enums.ApplicationProcessingStatus;
+            evaluationAttempts: number;
+            nextEvaluationRetryAt: Date | null;
+            evaluationError: string | null;
+            currentStage: import(".prisma/client").$Enums.ApplicationStage;
+            hrDecision: import(".prisma/client").$Enums.HrDecision;
+            hrNotes: string | null;
+            appliedAt: Date;
+        })[];
     } & {
         id: string;
-        updatedAt: Date;
-        createdAt: Date;
-        status: import(".prisma/client").$Enums.JobStatus;
         jobCode: string;
         title: string;
         recruiterId: string;
@@ -141,6 +141,7 @@ export declare class JobsService {
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
         experienceLevel: import(".prisma/client").$Enums.ExperienceLevel;
+        status: import(".prisma/client").$Enums.JobStatus;
         minSalary: Prisma.Decimal | null;
         maxSalary: Prisma.Decimal | null;
         currency: string;
@@ -156,6 +157,8 @@ export declare class JobsService {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
         categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
@@ -163,30 +166,27 @@ export declare class JobsService {
     }>;
     findAll(userId: string, query: QueryJobDto): Promise<{
         data: ({
-            _count: {
-                applications: number;
-            };
             department: {
                 id: string;
+                status: import(".prisma/client").$Enums.DepartmentStatus;
+                createdAt: Date;
                 updatedAt: Date;
                 name: string;
-                createdAt: Date;
-                status: import(".prisma/client").$Enums.DepartmentStatus;
                 code: string;
                 companyId: string;
             } | null;
             category: {
                 id: string;
+                createdAt: Date;
                 updatedAt: Date;
                 name: string;
                 slug: string;
-                createdAt: Date;
             } | null;
+            _count: {
+                applications: number;
+            };
         } & {
             id: string;
-            updatedAt: Date;
-            createdAt: Date;
-            status: import(".prisma/client").$Enums.JobStatus;
             jobCode: string;
             title: string;
             recruiterId: string;
@@ -196,6 +196,7 @@ export declare class JobsService {
             benefits: string | null;
             employmentType: import(".prisma/client").$Enums.EmploymentType;
             experienceLevel: import(".prisma/client").$Enums.ExperienceLevel;
+            status: import(".prisma/client").$Enums.JobStatus;
             minSalary: Prisma.Decimal | null;
             maxSalary: Prisma.Decimal | null;
             currency: string;
@@ -211,6 +212,8 @@ export declare class JobsService {
             expiryDate: Date | null;
             publishedAt: Date | null;
             closedAt: Date | null;
+            createdAt: Date;
+            updatedAt: Date;
             categoryId: string | null;
             workingModel: import(".prisma/client").$Enums.WorkingModel;
             requiresProofOfWork: boolean;
@@ -316,47 +319,90 @@ export declare class JobsService {
     }>;
     private toCandidateJobSummary;
     findOne(userId: string, id: string): Promise<{
+        department: {
+            id: string;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            code: string;
+            companyId: string;
+        } | null;
+        category: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            slug: string;
+        } | null;
+        jobSkills: ({
+            skill: {
+                id: string;
+                status: import(".prisma/client").$Enums.SkillStatus;
+                createdAt: Date;
+                updatedAt: Date;
+                categoryId: string;
+                name: string;
+                normalizedName: string;
+                type: import(".prisma/client").$Enums.SkillType;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            jobId: string;
+            skillId: string;
+            requirementType: import(".prisma/client").$Enums.SkillRequirementType;
+            minimumProficiency: import(".prisma/client").$Enums.ProficiencyLevel | null;
+            weight: Prisma.Decimal;
+            minYearsExperience: number | null;
+        })[];
+        jobCertificates: {
+            id: string;
+            jobId: string;
+            requirementType: import(".prisma/client").$Enums.SkillRequirementType;
+            certificateName: string;
+        }[];
         applications: ({
             candidate: {
-                user: {
-                    id: string;
-                    fullName: string;
-                    email: string;
-                    phone: string | null;
-                    avatarUrl: string | null;
-                } | null;
                 candidateSkills: ({
                     skill: {
                         id: string;
-                        updatedAt: Date;
-                        name: string;
-                        createdAt: Date;
                         status: import(".prisma/client").$Enums.SkillStatus;
+                        createdAt: Date;
+                        updatedAt: Date;
                         categoryId: string;
+                        name: string;
                         normalizedName: string;
                         type: import(".prisma/client").$Enums.SkillType;
                     };
                 } & {
                     id: string;
-                    candidateId: string;
-                    resumeId: string | null;
-                    source: import(".prisma/client").$Enums.SkillSource;
                     createdAt: Date;
                     skillId: string;
+                    candidateId: string;
+                    source: import(".prisma/client").$Enums.SkillSource;
                     proficiencyLevel: import(".prisma/client").$Enums.ProficiencyLevel;
                     isPrimary: boolean;
                     isInferred: boolean;
                     sourceText: string | null;
+                    resumeId: string | null;
                 })[];
+                user: {
+                    id: string;
+                    phone: string | null;
+                    email: string;
+                    fullName: string;
+                    avatarUrl: string | null;
+                } | null;
                 workExperiences: {
                     id: string;
-                    resumeId: string | null;
-                    source: import(".prisma/client").$Enums.DataSource;
-                    updatedAt: Date;
-                    createdAt: Date;
                     description: string | null;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    source: import(".prisma/client").$Enums.DataSource;
                     isInferred: boolean;
                     sourceText: string | null;
+                    resumeId: string | null;
                     candidateProfileId: string;
                     companyName: string;
                     positionTitle: string;
@@ -367,13 +413,13 @@ export declare class JobsService {
                 }[];
                 educations: {
                     id: string;
-                    resumeId: string | null;
-                    source: import(".prisma/client").$Enums.DataSource;
-                    updatedAt: Date;
-                    createdAt: Date;
                     description: string | null;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    source: import(".prisma/client").$Enums.DataSource;
                     isInferred: boolean;
                     sourceText: string | null;
+                    resumeId: string | null;
                     candidateProfileId: string;
                     startDate: Date | null;
                     endDate: Date | null;
@@ -383,13 +429,13 @@ export declare class JobsService {
                 }[];
                 projects: {
                     id: string;
-                    resumeId: string | null;
-                    source: import(".prisma/client").$Enums.DataSource;
-                    updatedAt: Date;
-                    createdAt: Date;
                     description: string | null;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    source: import(".prisma/client").$Enums.DataSource;
                     isInferred: boolean;
                     sourceText: string | null;
+                    resumeId: string | null;
                     candidateProfileId: string;
                     startDate: Date | null;
                     endDate: Date | null;
@@ -400,30 +446,33 @@ export declare class JobsService {
                 }[];
             } & {
                 id: string;
-                updatedAt: Date;
-                createdAt: Date;
-                userId: string | null;
                 status: import(".prisma/client").$Enums.CandidateProfileStatus;
-                fullName: string;
-                email: string;
+                createdAt: Date;
+                updatedAt: Date;
                 phone: string | null;
+                email: string;
+                fullName: string;
+                userId: string | null;
+                primaryResumeId: string | null;
                 address: string | null;
                 desiredTitle: string | null;
                 professionalSummary: string | null;
                 linkedinUrl: string | null;
                 githubUrl: string | null;
                 portfolioUrl: string | null;
-                primaryResumeId: string | null;
                 expectedMinSalary: Prisma.Decimal | null;
                 expectedMaxSalary: Prisma.Decimal | null;
                 preferredModel: import(".prisma/client").$Enums.WorkingModel | null;
             };
             aiMatchingResults: {
                 id: string;
-                updatedAt: Date;
                 createdAt: Date;
+                updatedAt: Date;
                 applicationId: string;
                 version: number;
+                strengths: Prisma.JsonValue | null;
+                gaps: Prisma.JsonValue | null;
+                evidence: Prisma.JsonValue | null;
                 overallScore: Prisma.Decimal;
                 matchLevel: import(".prisma/client").$Enums.MatchLevel;
                 skillScore: Prisma.Decimal | null;
@@ -433,10 +482,7 @@ export declare class JobsService {
                 matchedSkills: Prisma.JsonValue | null;
                 missingSkills: Prisma.JsonValue | null;
                 missingRequiredSkills: Prisma.JsonValue | null;
-                strengths: Prisma.JsonValue | null;
-                gaps: Prisma.JsonValue | null;
                 weaknesses: Prisma.JsonValue | null;
-                evidence: Prisma.JsonValue | null;
                 confidenceScore: Prisma.Decimal | null;
                 reasoningSummary: string | null;
                 inputSnapshot: Prisma.JsonValue | null;
@@ -444,66 +490,23 @@ export declare class JobsService {
             }[];
         } & {
             id: string;
+            updatedAt: Date;
             jobId: string;
             candidateId: string;
-            resumeId: string;
             source: import(".prisma/client").$Enums.ApplicationSource;
+            resumeId: string;
             profileSnapshot: Prisma.JsonValue | null;
             processingStatus: import(".prisma/client").$Enums.ApplicationProcessingStatus;
+            evaluationAttempts: number;
+            nextEvaluationRetryAt: Date | null;
+            evaluationError: string | null;
             currentStage: import(".prisma/client").$Enums.ApplicationStage;
             hrDecision: import(".prisma/client").$Enums.HrDecision;
             hrNotes: string | null;
             appliedAt: Date;
-            updatedAt: Date;
         })[];
-        department: {
-            id: string;
-            updatedAt: Date;
-            name: string;
-            createdAt: Date;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
-            code: string;
-            companyId: string;
-        } | null;
-        category: {
-            id: string;
-            updatedAt: Date;
-            name: string;
-            slug: string;
-            createdAt: Date;
-        } | null;
-        jobSkills: ({
-            skill: {
-                id: string;
-                updatedAt: Date;
-                name: string;
-                createdAt: Date;
-                status: import(".prisma/client").$Enums.SkillStatus;
-                categoryId: string;
-                normalizedName: string;
-                type: import(".prisma/client").$Enums.SkillType;
-            };
-        } & {
-            id: string;
-            jobId: string;
-            createdAt: Date;
-            skillId: string;
-            requirementType: import(".prisma/client").$Enums.SkillRequirementType;
-            minimumProficiency: import(".prisma/client").$Enums.ProficiencyLevel | null;
-            weight: Prisma.Decimal;
-            minYearsExperience: number | null;
-        })[];
-        jobCertificates: {
-            id: string;
-            jobId: string;
-            requirementType: import(".prisma/client").$Enums.SkillRequirementType;
-            certificateName: string;
-        }[];
     } & {
         id: string;
-        updatedAt: Date;
-        createdAt: Date;
-        status: import(".prisma/client").$Enums.JobStatus;
         jobCode: string;
         title: string;
         recruiterId: string;
@@ -513,6 +516,7 @@ export declare class JobsService {
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
         experienceLevel: import(".prisma/client").$Enums.ExperienceLevel;
+        status: import(".prisma/client").$Enums.JobStatus;
         minSalary: Prisma.Decimal | null;
         maxSalary: Prisma.Decimal | null;
         currency: string;
@@ -528,6 +532,8 @@ export declare class JobsService {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
         categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;
@@ -536,35 +542,35 @@ export declare class JobsService {
     update(userId: string, id: string, dto: UpdateJobDto): Promise<{
         department: {
             id: string;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
+            createdAt: Date;
             updatedAt: Date;
             name: string;
-            createdAt: Date;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
             code: string;
             companyId: string;
         } | null;
         category: {
             id: string;
+            createdAt: Date;
             updatedAt: Date;
             name: string;
             slug: string;
-            createdAt: Date;
         } | null;
         jobSkills: ({
             skill: {
                 id: string;
-                updatedAt: Date;
-                name: string;
-                createdAt: Date;
                 status: import(".prisma/client").$Enums.SkillStatus;
+                createdAt: Date;
+                updatedAt: Date;
                 categoryId: string;
+                name: string;
                 normalizedName: string;
                 type: import(".prisma/client").$Enums.SkillType;
             };
         } & {
             id: string;
-            jobId: string;
             createdAt: Date;
+            jobId: string;
             skillId: string;
             requirementType: import(".prisma/client").$Enums.SkillRequirementType;
             minimumProficiency: import(".prisma/client").$Enums.ProficiencyLevel | null;
@@ -579,9 +585,6 @@ export declare class JobsService {
         }[];
     } & {
         id: string;
-        updatedAt: Date;
-        createdAt: Date;
-        status: import(".prisma/client").$Enums.JobStatus;
         jobCode: string;
         title: string;
         recruiterId: string;
@@ -591,6 +594,7 @@ export declare class JobsService {
         benefits: string | null;
         employmentType: import(".prisma/client").$Enums.EmploymentType;
         experienceLevel: import(".prisma/client").$Enums.ExperienceLevel;
+        status: import(".prisma/client").$Enums.JobStatus;
         minSalary: Prisma.Decimal | null;
         maxSalary: Prisma.Decimal | null;
         currency: string;
@@ -606,6 +610,8 @@ export declare class JobsService {
         expiryDate: Date | null;
         publishedAt: Date | null;
         closedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
         categoryId: string | null;
         workingModel: import(".prisma/client").$Enums.WorkingModel;
         requiresProofOfWork: boolean;

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JobCategoriesController = void 0;
 const common_1 = require("@nestjs/common");
+const cache_manager_1 = require("@nestjs/cache-manager");
 const swagger_1 = require("@nestjs/swagger");
 const jobs_service_1 = require("./jobs.service");
 const public_decorator_1 = require("../auth/decorators/public.decorator");
@@ -26,6 +27,7 @@ let JobCategoriesController = class JobCategoriesController {
 exports.JobCategoriesController = JobCategoriesController;
 __decorate([
     (0, public_decorator_1.Public)(),
+    (0, common_1.UseInterceptors)(cache_manager_1.CacheInterceptor),
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all job categories' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Return list of job categories' }),

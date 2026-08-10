@@ -16,8 +16,10 @@ export default async function RecruiterDashboardPage() {
   
   if (session) {
     try {
-      profile = await getRecruiterProfile(session.access_token);
-      stats = await getRecruiterDashboardStats(session.access_token);
+      [profile, stats] = await Promise.all([
+        getRecruiterProfile(session.access_token),
+        getRecruiterDashboardStats(session.access_token)
+      ]);
     } catch (e) {
       console.error("Failed to load recruiter data", e);
     }

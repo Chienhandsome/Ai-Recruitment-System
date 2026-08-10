@@ -14,6 +14,8 @@ const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const prisma_service_1 = require("../../../database/prisma.service");
 const auth_constants_1 = require("../auth.constants");
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const roleCache = new Map();
 let RolesGuard = class RolesGuard {
     reflector;
     prisma;
@@ -30,26 +32,37 @@ let RolesGuard = class RolesGuard {
         if (!request.authUser) {
             throw new common_1.UnauthorizedException('Authenticated user is unavailable.');
         }
-        const user = await this.prisma.user.findUnique({
-            where: { id: request.authUser.id },
-            select: {
-                status: true,
-                userRoles: {
-                    select: {
-                        role: {
-                            select: { code: true },
-                        },
-                    },
+        const userId = request.authUser.id;
+        const now = Date.now();
+        let cacheEntry = roleCache.get(userId);
+        if (roleCache.size > 10000) {
+            for (const [key, val] of roleCache.entries()) {
+                if (val.expiresAt < now)
+                    roleCache.delete(key);
+            }
+        }
+        if (!cacheEntry || cacheEntry.expiresAt < now) {
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+                select: {
+                    status: true,
+                    userRoles: { select: { role: { select: { code: true } } } },
                 },
-            },
-        });
-        if (!user) {
-            throw new common_1.ForbiddenException('The application profile has not been initialized.');
+            });
+            if (!user) {
+                throw new common_1.ForbiddenException('The application profile has not been initialized.');
+            }
+            cacheEntry = {
+                status: user.status,
+                assignedRoles: user.userRoles.map((ur) => ur.role.code),
+                expiresAt: now + CACHE_TTL_MS,
+            };
+            roleCache.set(userId, cacheEntry);
         }
-        if (user.status !== 'ACTIVE') {
-            throw new common_1.ForbiddenException(`This account is ${user.status.toLowerCase()}.`);
+        if (cacheEntry.status !== 'ACTIVE') {
+            throw new common_1.ForbiddenException(`This account is ${cacheEntry.status.toLowerCase()}.`);
         }
-        const assignedRoles = new Set(user.userRoles.map((userRole) => userRole.role.code));
+        const assignedRoles = new Set(cacheEntry.assignedRoles);
         if (!requiredRoles.some((role) => assignedRoles.has(role))) {
             throw new common_1.ForbiddenException('You do not have permission to access this resource.');
         }

@@ -185,13 +185,14 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Start the HTTP API and resume worker in separate terminals:
+Start the HTTP API and RabbitMQ workers in separate terminals. The worker
+entrypoint supervises both resume parsing and candidate-job evaluation:
 
 ```powershell
 # Terminal 1: FastAPI
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
-# Terminal 2: RabbitMQ worker
+# Terminal 2: Resume parsing + AI evaluation workers
 python worker_main.py
 ```
 

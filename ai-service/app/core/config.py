@@ -2,6 +2,7 @@
 
 import os
 from dataclasses import dataclass, field
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -72,6 +73,14 @@ class Settings:
     routing_key_dead: str = "resume.analysis.dead"
     rabbitmq_dead_letter_exchange: str = "ai_recruitment_dlx"
     rabbitmq_dead_letter_queue: str = "resume_analysis_dead_queue"
+
+    evaluation_queue: str = "evaluation_queue"
+    evaluation_result_queue: str = "evaluation_queue_result"
+    evaluation_dead_letter_queue: str = "evaluation_dead_queue"
+    evaluation_routing_key_requested: str = "evaluation.requested"
+    evaluation_routing_key_completed: str = "evaluation.completed"
+    evaluation_routing_key_failed: str = "evaluation.failed"
+    evaluation_routing_key_dead: str = "evaluation.dead"
 
 
 settings = Settings()

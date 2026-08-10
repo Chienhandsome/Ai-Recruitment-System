@@ -18,6 +18,19 @@ interface JobDetailViewProps {
   onJobDeleted: () => void;
 }
 
+const AI_PENDING_STATUSES = new Set([
+  "UPLOADED",
+  "QUEUED",
+  "PARSING",
+  "NORMALIZING",
+  "MATCHING",
+  "SCORING",
+]);
+
+function isAiEvaluationPending(status: unknown): boolean {
+  return typeof status === "string" && AI_PENDING_STATUSES.has(status);
+}
+
 export function JobDetailView({
   jobId,
   token,
@@ -55,6 +68,35 @@ export function JobDetailView({
   useEffect(() => {
     fetchJobDetail();
   }, [jobId]);
+
+  const hasPendingEvaluations =
+    job?.applications?.some(
+      (application: {
+        processingStatus?: unknown;
+        aiMatchingResults?: unknown[];
+      }) =>
+        isAiEvaluationPending(application.processingStatus) &&
+        !application.aiMatchingResults?.[0],
+    ) ?? false;
+
+  useEffect(() => {
+    if (!hasPendingEvaluations) return;
+
+    let cancelled = false;
+    const intervalId = window.setInterval(async () => {
+      try {
+        const data = await getRecruiterJobDetail(token, jobId);
+        if (!cancelled) setJob(data);
+      } catch (error) {
+        console.error("Failed to refresh pending AI evaluations", error);
+      }
+    }, 5_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [hasPendingEvaluations, jobId, token]);
 
   const handleDelete = async () => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa bài đăng nháp này?")) return;
@@ -406,6 +448,10 @@ export function JobDetailView({
                         const score = aiResult ? Math.round(Number(aiResult.overallScore)) : 0;
                         const isSelected = activeApp?.id === app.id;
                         const matchedCount = aiResult?.matchedSkills?.length || 0;
+                        const evaluationPending =
+                          !aiResult && isAiEvaluationPending(app.processingStatus);
+                        const evaluationFailed =
+                          !aiResult && app.processingStatus === "FAILED";
 
                         return (
                           <div
@@ -469,10 +515,18 @@ export function JobDetailView({
 
                             {/* Right Info: Large AI Score */}
                             <div className="flex items-center gap-3 shrink-0">
-                              {app.processingStatus === 'MATCHING' ? (
+                              {evaluationPending ? (
                                 <div className="flex items-center gap-2">
                                   <div className="w-4 h-4 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin"></div>
                                   <span className="text-xs font-bold text-[#2563EB]">Đang phân tích AI...</span>
+                                </div>
+                              ) : evaluationFailed ? (
+                                <div
+                                  className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700"
+                                  title={app.evaluationError || "AI chưa thể hoàn tất đánh giá."}
+                                >
+                                  <AlertTriangle className="h-4 w-4" />
+                                  <span className="text-xs font-bold">Đánh giá AI thất bại</span>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200">
@@ -505,6 +559,8 @@ export function JobDetailView({
                     const educations = cand?.educations || [];
                     const projects = cand?.projects || [];
                     const skills = cand?.candidateSkills || [];
+                    const evaluationPending =
+                      !aiResult && isAiEvaluationPending(activeApp.processingStatus);
 
                     return (
                       <div className="space-y-4 pt-2">
@@ -691,6 +747,34 @@ export function JobDetailView({
                               <h4 className="font-extrabold text-base">II. Đánh giá &amp; Giải thích Chi tiết từ AI Engine</h4>
                             </div>
 
+                            {!aiResult ? (
+                              <div className={`rounded-xl border p-5 ${
+                                evaluationPending
+                                  ? "border-blue-200 bg-blue-50 text-blue-800"
+                                  : "border-rose-200 bg-rose-50 text-rose-800"
+                              }`}>
+                                <div className="flex items-start gap-3">
+                                  {evaluationPending ? (
+                                    <div className="mt-0.5 h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-[#2563EB] border-t-transparent" />
+                                  ) : (
+                                    <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+                                  )}
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-extrabold">
+                                      {evaluationPending
+                                        ? "AI đang phân tích hồ sơ ứng viên"
+                                        : "AI chưa thể hoàn tất đánh giá"}
+                                    </p>
+                                    <p className="text-xs leading-relaxed">
+                                      {evaluationPending
+                                        ? "Kết quả sẽ tự động cập nhật tại đây khi phân tích xong."
+                                        : activeApp.evaluationError || "Vui lòng thử lại sau hoặc kiểm tra trạng thái AI worker."}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
                             {/* 1. Score Header Card */}
                             <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-blue-50 border border-blue-200 rounded-xl flex items-center justify-between">
                               <div>
@@ -833,6 +917,8 @@ export function JobDetailView({
                                 💬 {aiResult?.reasoningSummary || "AI đã đánh giá tổng quan dựa trên các trọng số kỹ năng và tiêu chí công việc."}
                               </p>
                             </div>
+                              </>
+                            )}
 
                           </div>
 

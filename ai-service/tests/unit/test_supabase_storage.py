@@ -48,7 +48,12 @@ def test_download_uses_validated_signed_url_without_service_role(monkeypatch):
 
 @pytest.mark.parametrize(
     ("status_code", "error_type"),
-    [(403, SignedUrlExpiredError), (503, TransientError)],
+    [
+        (400, SignedUrlExpiredError),
+        (401, SignedUrlExpiredError),
+        (403, SignedUrlExpiredError),
+        (503, TransientError),
+    ],
 )
 def test_signed_url_classifies_http_failures(
     monkeypatch,
@@ -64,6 +69,41 @@ def test_signed_url_classifies_http_failures(
 
     with pytest.raises(error_type):
         adapter.download("candidate/resume.pdf", SIGNED_URL)
+
+
+def test_expired_signed_url_falls_back_to_service_role_download(monkeypatch):
+    monkeypatch.setattr(
+        supabase_storage.httpx,
+        "stream",
+        lambda *args, **kwargs: FakeStreamResponse(status_code=400),
+    )
+
+    downloaded_paths: list[str] = []
+
+    class FakeBucket:
+        def download(self, object_path: str) -> bytes:
+            downloaded_paths.append(object_path)
+            return b"fresh resume"
+
+    class FakeStorage:
+        def from_(self, bucket: str) -> FakeBucket:
+            assert bucket == "resumes"
+            return FakeBucket()
+
+    class FakeClient:
+        storage = FakeStorage()
+
+    monkeypatch.setattr(
+        supabase_storage,
+        "create_client",
+        lambda url, key: FakeClient(),
+    )
+    adapter = SupabaseStorageAdapter(SUPABASE_URL, "service-role", "resumes")
+
+    result = adapter.download("candidate/resume.pdf", SIGNED_URL)
+
+    assert result == b"fresh resume"
+    assert downloaded_paths == ["candidate/resume.pdf"]
 
 
 def test_signed_url_treats_transport_failures_as_transient(monkeypatch):

@@ -36,7 +36,16 @@ class SupabaseStorageAdapter:
             raise PermanentError("Resume object path is empty")
 
         if signed_url:
-            return self._download_signed_url(signed_url)
+            try:
+                return self._download_signed_url(signed_url)
+            except SignedUrlExpiredError:
+                if not self._url or not self._service_role_key:
+                    raise
+                logger.warning(
+                    "Signed resume URL expired; downloading %s with "
+                    "service credentials",
+                    object_path,
+                )
 
         if not self._url or not self._service_role_key:
             raise PermanentError(
@@ -66,7 +75,9 @@ class SupabaseStorageAdapter:
                 timeout=30,
                 follow_redirects=False,
             ) as response:
-                if response.status_code in (401, 403):
+                # Supabase Storage returns 400 for an expired/invalid JWT in
+                # addition to the more conventional 401/403 responses.
+                if response.status_code in (400, 401, 403):
                     raise SignedUrlExpiredError(
                         f"Signed resume download returned {response.status_code}"
                     )

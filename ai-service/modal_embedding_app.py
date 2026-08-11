@@ -13,9 +13,9 @@ import modal
 
 
 APP_NAME = "ai-recruitment-embedder"
-MODEL_ID = "XuanTruong03/ai-recruitment-embedder"
-MODEL_REVISION = "89b83a7f3097c9b562920fafb8444e31155423c2"
-MODEL_DIR = "/opt/models/ai-recruitment-embedder"
+MODEL_ID = "XuanTruong03/ai-recruitment-embedder-v2"
+MODEL_REVISION = "62326063403466c374e0a70a438385fa035ef41b"
+MODEL_DIR = "/opt/models/ai-recruitment-embedder-v2"
 MAX_BATCH_SIZE = 128
 
 

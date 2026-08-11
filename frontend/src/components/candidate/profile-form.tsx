@@ -41,6 +41,7 @@ interface ProfileFormProps {
   initialEducations?: EducationData[]
   initialProjects?: ProjectData[]
   initialCertificates?: CertificateData[]
+  onResumeParsed?: () => void
   onCancel: () => void
   onSaved: () => void
 }
@@ -59,6 +60,7 @@ export function ProfileForm({
   initialEducations = [],
   initialProjects = [],
   initialCertificates = [],
+  onResumeParsed,
   onCancel,
   onSaved
 }: ProfileFormProps) {
@@ -861,7 +863,7 @@ export function ProfileForm({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ResumeUpload />
+          <ResumeUpload onParsed={onResumeParsed} />
         </CardContent>
       </Card>
 

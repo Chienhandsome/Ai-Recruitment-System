@@ -22,7 +22,11 @@ const MAX_CONSECUTIVE_POLL_FAILURES = 3
 
 // ─── Component ────────────────────────────────────────────────────────
 
-export function ResumeUpload() {
+interface ResumeUploadProps {
+  onParsed?: () => void
+}
+
+export function ResumeUpload({ onParsed }: ResumeUploadProps) {
   const [state, setState] = React.useState<UploadState>({ step: "idle" })
   const [dragOver, setDragOver] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
@@ -117,8 +121,7 @@ export function ResumeUpload() {
         if (status.parsingStatus === "PARSED") {
           stopPolling()
           setState({ step: "done", fileName })
-          // Auto-reload after short delay to show fresh extracted data
-          setTimeout(() => window.location.reload(), 1500)
+          onParsed?.()
           return
         } else if (status.parsingStatus === "FAILED") {
           stopPolling()
@@ -259,7 +262,7 @@ export function ResumeUpload() {
                 {state.fileName}
               </p>
               <p className="text-xs text-green-600 dark:text-green-400">
-                Phân tích hoàn tất! Đang cập nhật hồ sơ...
+                Phân tích hoàn tất! Vui lòng kiểm tra thông tin bên dưới trước khi lưu.
               </p>
             </div>
           </div>

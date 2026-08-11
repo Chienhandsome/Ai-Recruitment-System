@@ -8,6 +8,7 @@ import { PrismaService } from '../../../database/prisma.service';
 import { RabbitMQService } from '../../../infrastructure/rabbitmq/rabbitmq.service';
 import { RABBITMQ_ROUTING_KEYS } from '../../../infrastructure/rabbitmq/rabbitmq.constants';
 import { SupabaseStorageService } from '../../../infrastructure/supabase/supabase-storage.service';
+import { AiServiceWakeupService } from '../../../infrastructure/ai/ai-service-wakeup.service';
 
 export interface ResumeUploadFile {
   buffer: Buffer;
@@ -24,6 +25,7 @@ export class UploadResumeUseCase {
     private readonly prisma: PrismaService,
     private readonly storageService: SupabaseStorageService,
     private readonly rabbitMQService: RabbitMQService,
+    private readonly aiServiceWakeupService: AiServiceWakeupService,
   ) {}
 
   async execute(userId: string, file: ResumeUploadFile) {
@@ -108,6 +110,9 @@ export class UploadResumeUseCase {
       }
 
       if (published) {
+        // Render Free web services sleep when idle. Wake the co-located AI
+        // consumers without making the upload response wait for a cold start.
+        void this.aiServiceWakeupService.wake();
         try {
           await this.prisma.$transaction([
             this.prisma.resume.update({

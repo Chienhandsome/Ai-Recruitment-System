@@ -18,6 +18,7 @@ import { PrismaModule } from '../../database/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { SupabaseModule } from '../../infrastructure/supabase/supabase.module';
 import { RabbitMQModule } from '../../infrastructure/rabbitmq/rabbitmq.module';
+import { AiServiceWakeupService } from '../../infrastructure/ai/ai-service-wakeup.service';
 
 @Module({
   imports: [PrismaModule, AuthModule, SupabaseModule, RabbitMQModule],
@@ -37,6 +38,7 @@ import { RabbitMQModule } from '../../infrastructure/rabbitmq/rabbitmq.module';
     SkillWriter,
     ProfileWriter,
     ResumeResultListener,
+    AiServiceWakeupService,
   ],
   exports: [ResumesService],
 })

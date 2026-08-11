@@ -19,5 +19,6 @@ FROM base AS worker
 CMD ["python", "worker_main.py"]
 
 FROM base AS web
+ENV AI_WORKER_MODE=co_located
 EXPOSE 8000
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["python", "service_main.py"]

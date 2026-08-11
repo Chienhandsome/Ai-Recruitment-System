@@ -234,13 +234,15 @@ Configured deployments:
 - Frontend: [https://ai-recruitment-system-test-deploy-1.vercel.app](https://ai-recruitment-system-test-deploy-1.vercel.app)
 - Backend: [https://ai-recruitment-system-test-deploy.onrender.com/api](https://ai-recruitment-system-test-deploy.onrender.com/api)
 
-Resume parsing also requires a separate long-running background worker. Deploy
-`ai-service` with the start command `python worker_main.py`; running only the
-FastAPI web process does not consume queued CVs. Configure the worker with the
-same `RABBITMQ_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and
-`SUPABASE_STORAGE_BUCKET` as the backend storage pipeline, plus
-`GEMINI_API_KEY` and `LLM_MODEL`. The worker now exits immediately with a clear
-configuration error when a required variable is missing.
+The test deployment uses Render's Free web-service plan. Its `web` Docker target
+runs FastAPI and both RabbitMQ consumers through `python service_main.py`. The
+backend wakes this service whenever it queues a resume because Free instances
+sleep when idle. Set the backend `AI_SERVICE_URL` to the deployed AI service URL.
+
+For production, deploy `ai-service` as a dedicated background worker with the
+start command `python worker_main.py`. Configure it with the same `RABBITMQ_URL`,
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_STORAGE_BUCKET` as the
+backend storage pipeline, plus `GEMINI_API_KEY` and `LLM_MODEL`.
 
 ## First administrator
 

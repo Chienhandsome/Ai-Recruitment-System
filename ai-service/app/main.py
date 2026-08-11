@@ -1,4 +1,4 @@
-"""AI Recruitment HTTP service (the RabbitMQ worker is a separate process)."""
+"""AI Recruitment HTTP service."""
 
 import logging
 import os
@@ -47,20 +47,22 @@ class HealthResponse(BaseModel):
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
+    worker_mode = os.getenv("AI_WORKER_MODE", "separate_process")
     return HealthResponse(
         service="ai-service",
         status="UP",
         version="0.2.0",
-        worker="separate_process",
+        worker=worker_mode,
     )
 
 
 @app.get("/")
 async def root():
+    worker_mode = os.getenv("AI_WORKER_MODE", "separate_process")
     return {
         "message": "AI Recruitment Service is running",
         "docs_url": "/docs",
-        "worker_status": "separate_process",
+        "worker_status": worker_mode,
     }
 
 

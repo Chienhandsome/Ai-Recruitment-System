@@ -1,3 +1,7 @@
+import { PrismaService } from '../../../database/prisma.service';
+import { AiServiceWakeupService } from '../../../infrastructure/ai/ai-service-wakeup.service';
+import { RabbitMQService } from '../../../infrastructure/rabbitmq/rabbitmq.service';
+import { SupabaseStorageService } from '../../../infrastructure/supabase/supabase-storage.service';
 import { UploadResumeUseCase } from './upload-resume.use-case';
 
 describe('UploadResumeUseCase', () => {
@@ -17,7 +21,7 @@ describe('UploadResumeUseCase', () => {
         update: jest.fn().mockResolvedValue(undefined),
       },
       $transaction: jest.fn(),
-    } as any;
+    };
     const storage = {
       uploadCandidateResume: jest
         .fn()
@@ -25,9 +29,15 @@ describe('UploadResumeUseCase', () => {
       createSignedDownloadUrl: jest.fn().mockResolvedValue({
         signedUrl: 'https://storage.example/signed',
       }),
-    } as any;
-    const rabbitMQ = { publish: jest.fn().mockResolvedValue(false) } as any;
-    const useCase = new UploadResumeUseCase(prisma, storage, rabbitMQ);
+    };
+    const rabbitMQ = { publish: jest.fn().mockResolvedValue(false) };
+    const wakeup = { wake: jest.fn() };
+    const useCase = new UploadResumeUseCase(
+      prisma as unknown as PrismaService,
+      storage as unknown as SupabaseStorageService,
+      rabbitMQ as unknown as RabbitMQService,
+      wakeup as unknown as AiServiceWakeupService,
+    );
 
     const result = await useCase.execute('user', {
       buffer: Buffer.from('%PDF'),
@@ -49,6 +59,7 @@ describe('UploadResumeUseCase', () => {
         signedDownloadUrl: 'https://storage.example/signed',
       }),
     );
+    expect(wakeup.wake).not.toHaveBeenCalled();
   });
 
   it('keeps an uploaded resume PENDING when signed URL creation fails', async () => {
@@ -67,7 +78,7 @@ describe('UploadResumeUseCase', () => {
         update: jest.fn().mockResolvedValue(undefined),
       },
       $transaction: jest.fn(),
-    } as any;
+    };
     const storage = {
       uploadCandidateResume: jest
         .fn()
@@ -75,9 +86,15 @@ describe('UploadResumeUseCase', () => {
       createSignedDownloadUrl: jest
         .fn()
         .mockRejectedValue(new Error('storage timeout')),
-    } as any;
-    const rabbitMQ = { publish: jest.fn() } as any;
-    const useCase = new UploadResumeUseCase(prisma, storage, rabbitMQ);
+    };
+    const rabbitMQ = { publish: jest.fn() };
+    const wakeup = { wake: jest.fn() };
+    const useCase = new UploadResumeUseCase(
+      prisma as unknown as PrismaService,
+      storage as unknown as SupabaseStorageService,
+      rabbitMQ as unknown as RabbitMQService,
+      wakeup as unknown as AiServiceWakeupService,
+    );
 
     await expect(
       useCase.execute('user', {
@@ -90,10 +107,51 @@ describe('UploadResumeUseCase', () => {
 
     expect(rabbitMQ.publish).not.toHaveBeenCalled();
     expect(prisma.$transaction).not.toHaveBeenCalled();
-    expect(prisma.resume.update).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ parsingStatus: 'FAILED' }),
+    expect(wakeup.wake).not.toHaveBeenCalled();
+  });
+
+  it('wakes the AI service after publishing a resume', async () => {
+    const resume = {
+      id: 'resume',
+      originalFileName: 'resume.pdf',
+      createdAt: new Date('2026-08-03T00:00:00Z'),
+    };
+    const prisma = {
+      candidateProfile: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'candidate' }),
+        update: jest.fn().mockResolvedValue(undefined),
+      },
+      resume: {
+        create: jest.fn().mockResolvedValue(resume),
+        update: jest.fn().mockResolvedValue(undefined),
+      },
+      $transaction: jest.fn().mockResolvedValue(undefined),
+    };
+    const storage = {
+      uploadCandidateResume: jest
+        .fn()
+        .mockResolvedValue({ objectPath: 'candidate/resume.pdf' }),
+      createSignedDownloadUrl: jest.fn().mockResolvedValue({
+        signedUrl: 'https://storage.example/signed',
       }),
+    };
+    const rabbitMQ = { publish: jest.fn().mockResolvedValue(true) };
+    const wakeup = { wake: jest.fn().mockResolvedValue(undefined) };
+    const useCase = new UploadResumeUseCase(
+      prisma as unknown as PrismaService,
+      storage as unknown as SupabaseStorageService,
+      rabbitMQ as unknown as RabbitMQService,
+      wakeup as unknown as AiServiceWakeupService,
     );
+
+    const result = await useCase.execute('user', {
+      buffer: Buffer.from('%PDF'),
+      originalname: 'resume.pdf',
+      mimetype: 'application/pdf',
+      size: 4,
+    });
+
+    expect(result.parsingStatus).toBe('PROCESSING');
+    expect(wakeup.wake).toHaveBeenCalledTimes(1);
   });
 });

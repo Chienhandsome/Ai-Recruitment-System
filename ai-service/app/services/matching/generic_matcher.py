@@ -41,35 +41,30 @@ class GenericMatchingEngine:
         job_education_text = f"{job.title} {job.description or ''}"
         add(job.title, job_full_text, job_education_text)
 
+        # Format theo chuẩn Context-Aware V2
+        job_context = f"[CONTEXT] Domain: Technology | Environment: {job.work_mode or 'Professional'}"
         for skill in job.required_skills:
-            add(skill.skill_name)
+            add(f"{job_context} [CONTENT] {skill.skill_name}")
+            
+        cand_context_pro = f"[CONTEXT] Type: professional_employment | Domain: Technology | Seniority: experienced"
         for skill in cand_profile.skills:
-            add(normalize_skill_name(skill.skill_name))
+            add(f"{cand_context_pro} [CONTENT] {normalize_skill_name(skill.skill_name)}")
 
         for experience in cand_profile.work_experiences:
-            context_text = (
-                f"{experience.position_title} {experience.description} "
-                f"{experience.achievements}"
-            )
-            description_text = (
-                f"{experience.position_title}: {experience.description or ''} "
-                f"{experience.achievements or ''}"
-            )
-            add(experience.position_title, context_text, description_text)
+            seniority = "senior" if ("senior" in (experience.position_title or "").lower() or "trưởng" in (experience.position_title or "").lower()) else "experienced"
+            context_str = f"[CONTEXT] Type: professional_employment | Domain: Technology | Seniority: {seniority}"
+            context_text = f"{context_str} [CONTENT] {experience.position_title} {experience.description} {experience.achievements}"
+            add(context_text)
 
         for education in cand_profile.educations:
-            add(education.major)
+            context_str = f"[CONTEXT] Type: academic | Domain: Education | Seniority: intern"
+            add(f"{context_str} [CONTENT] {education.major}")
 
         for project in cand_profile.projects:
             technologies = " ".join(project.technologies)
-            context_text = (
-                f"{project.project_name} {project.description} {technologies}"
-            )
-            description_text = (
-                f"{project.project_name} ({project.project_role}): "
-                f"{project.description}"
-            )
-            add(project.project_role, context_text, description_text)
+            context_str = f"[CONTEXT] Type: project | Domain: Technology | Seniority: experienced"
+            context_text = f"{context_str} [CONTENT] {project.project_name} {project.description} {technologies}"
+            add(context_text)
 
         for certificate in job.required_certificates:
             add(certificate.certificate_name)
@@ -104,14 +99,14 @@ class GenericMatchingEngine:
                 if is_man: mandatory_scores.append(score)
                 else: optional_scores.append(score)
             else:
-                ctx_score, ctx_text, ctx_source = self._search_in_context(norm_req_name, req.skill_name, cand_profile)
-                if ctx_score > 0:
+                ctx_score, ctx_text, ctx_source = self._search_in_context(norm_req_name, req.skill_name, cand_profile, job)
+                if ctx_score >= 0.82: # Mandatory Threshold
                     matched.append({"name": req.skill_name, "isMandatory": is_man, "source": ctx_source})
                     evidence_list.append({"skillName": req.skill_name, "evidenceText": ctx_text, "source": ctx_source})
                     if is_man: mandatory_scores.append(ctx_score)
                     else: optional_scores.append(ctx_score)
                 else:
-                    domain_credit = self._calc_domain_transferability(req.skill_name, cand_norm_names, is_man)
+                    domain_credit = self._calc_domain_transferability(req.skill_name, cand_norm_names, is_man, job)
                     if is_man:
                         mandatory_scores.append(domain_credit)
                         missing_mandatory.append(req.skill_name)
@@ -144,29 +139,52 @@ class GenericMatchingEngine:
     def _get_level_val(self, lvl: str) -> int:
         return {"BEGINNER": 1, "INTERMEDIATE": 2, "ADVANCED": 3, "EXPERT": 4}.get((lvl or "BEGINNER").upper(), 1)
 
-    def _calc_domain_transferability(self, target_skill: str, cand_skills: set, is_man: bool) -> float:
+    def _calc_domain_transferability(self, target_skill: str, cand_skills: set, is_man: bool, job: JobPayload = None) -> float:
         if not is_man or not cand_skills: return 0.0
-        best_sim = max([semantic_matcher.compute_similarity(target_skill, cs) for cs in cand_skills] + [0.0])
-        return 0.35 if best_sim >= 0.70 else 0.0
+        job_context = f"[CONTEXT] Domain: Technology | Environment: {job.work_mode or 'Professional'}"
+        target_skill_v2 = f"{job_context} [CONTENT] {target_skill}"
+        cand_context_pro = f"[CONTEXT] Type: professional_employment | Domain: Technology | Seniority: experienced"
+        
+        best_sim = max([semantic_matcher.compute_similarity(target_skill_v2, f"{cand_context_pro} [CONTENT] {cs}") for cs in cand_skills] + [0.0])
+        # Áp dụng Rule Engine: Mandatory Threshold 0.82
+        if is_man and best_sim < 0.82:
+            return 0.0
+        return best_sim
 
-    def _search_in_context(self, norm_req, req_name, profile):
+    def _search_in_context(self, norm_req, req_name, profile, job: JobPayload = None):
         best_score, best_text, best_source = 0.0, "", ""
+        job_context = f"[CONTEXT] Domain: Technology | Environment: {job.work_mode or 'Professional'}"
+        req_name_v2 = f"{job_context} [CONTENT] {req_name}"
+        
         for exp in profile.work_experiences:
+            seniority = "senior" if ("senior" in (exp.position_title or "").lower() or "trưởng" in (exp.position_title or "").lower()) else "experienced"
+            cand_context_pro = f"[CONTEXT] Type: professional_employment | Domain: Technology | Seniority: {seniority}"
             text = f"{exp.position_title} {exp.description} {exp.achievements}"
+            text_v2 = f"{cand_context_pro} [CONTENT] {text}"
+            
             if norm_req.lower() in text.lower() or req_name.lower() in text.lower():
-                if 0.8 > best_score: best_score, best_text, best_source = 0.8, text, f"Kinh nghiệm: {exp.position_title}"
+                if 0.85 > best_score: best_score, best_text, best_source = 0.85, text, f"Kinh nghiệm: {exp.position_title}"
             else:
-                sim = semantic_matcher.compute_similarity(req_name, text)
-                if sim > 0.70 and sim * 0.7 > best_score:
-                    best_score, best_text, best_source = sim * 0.7, text, f"Kinh nghiệm: {exp.position_title}"
+                sim = semantic_matcher.compute_similarity(req_name_v2, text_v2)
+                if sim > best_score:
+                    best_score, best_text, best_source = sim, text, f"Kinh nghiệm: {exp.position_title}"
+                    
         for proj in profile.projects:
+            cand_context_proj = f"[CONTEXT] Type: project | Domain: Technology | Seniority: experienced"
             text = f"{proj.project_name} {proj.description} {' '.join(proj.technologies)}"
+            text_v2 = f"{cand_context_proj} [CONTENT] {text}"
+            
             if norm_req.lower() in text.lower() or req_name.lower() in text.lower():
-                if 0.8 > best_score: best_score, best_text, best_source = 0.8, text, f"Dự án: {proj.project_name}"
+                if 0.85 > best_score: best_score, best_text, best_source = 0.85, text, f"Dự án: {proj.project_name}"
             else:
-                sim = semantic_matcher.compute_similarity(req_name, text)
-                if sim > 0.70 and sim * 0.7 > best_score:
-                    best_score, best_text, best_source = sim * 0.7, text, f"Dự án: {proj.project_name}"
+                sim = semantic_matcher.compute_similarity(req_name_v2, text_v2)
+                if sim > best_score:
+                    best_score, best_text, best_source = sim, text, f"Dự án: {proj.project_name}"
+                    
+        # Phạt nhẹ nếu nguồn không phải kinh nghiệm chuyên nghiệp
+        if "Dự án" in best_source:
+            best_score *= 0.85
+            
         return best_score, best_text, best_source
 
     def _match_experience(self, cand_profile: CandidateProfilePayload, job: JobPayload) -> Dict[str, Any]:

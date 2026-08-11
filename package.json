@@ -1,0 +1,12 @@
+{
+  "name": "ai-recruitment-system-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:all": "concurrently -n \"RABBITMQ,BACKEND,FRONTEND,AI-API,AI-EVAL,AI-RESUME\" -c \"red,blue,green,magenta,yellow,cyan\" \"powershell -ExecutionPolicy Bypass -File ./scripts/start-rabbitmq.ps1\" \"npm --prefix backend run start:dev\" \"npm --prefix frontend run dev\" \"cd ai-service && .\\venv\\Scripts\\uvicorn app.main:app --host 0.0.0.0 --port 8000\" \"cd ai-service && .\\venv\\Scripts\\python -m app.workers.evaluation_worker\" \"cd ai-service && .\\venv\\Scripts\\python -m app.workers.resume_worker\"",
+    "start:dev": "npm run dev:all"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

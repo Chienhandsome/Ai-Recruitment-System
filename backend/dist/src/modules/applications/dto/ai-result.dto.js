@@ -13,7 +13,9 @@ exports.EvidenceSchema = zod_1.z.object({
 });
 exports.AiResultSchema = zod_1.z.object({
     overall_score: zod_1.z.number().default(0),
-    match_level: zod_1.z.enum(['LOW', 'MEDIUM', 'HIGH', 'EXCELLENT', 'GOOD', 'FAIR', 'POOR']).default('LOW'),
+    match_level: zod_1.z
+        .enum(['LOW', 'MEDIUM', 'HIGH', 'EXCELLENT', 'GOOD', 'FAIR', 'POOR'])
+        .default('LOW'),
     skills_score: zod_1.z.number().default(0),
     experience_score: zod_1.z.number().default(0),
     education_score: zod_1.z.number().default(0),

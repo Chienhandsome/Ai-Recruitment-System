@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { SkillsService } from './skills.service';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
@@ -10,6 +11,7 @@ export class SkillsController {
   constructor(private readonly skillsService: SkillsService) {}
 
   @Public()
+  @UseInterceptors(CacheInterceptor)
   @Get('categories')
 @ApiOperation({ summary: 'Get all skill categories' })
 @ApiResponse({ status: 200, description: 'Return list of skill categories' })
@@ -18,6 +20,7 @@ export class SkillsController {
   }
 
   @Public()
+  @UseInterceptors(CacheInterceptor)
   @Get('skills')
 @ApiOperation({ summary: 'Get active skills by category or search term (searches name & aliases)' })
   @ApiQuery({ name: 'categoryId', required: false, type: String })

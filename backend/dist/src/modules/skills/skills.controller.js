@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SkillsController = void 0;
 const common_1 = require("@nestjs/common");
+const cache_manager_1 = require("@nestjs/cache-manager");
 const swagger_1 = require("@nestjs/swagger");
 const skills_service_1 = require("./skills.service");
 const supabase_auth_guard_1 = require("../auth/guards/supabase-auth.guard");
@@ -57,6 +58,7 @@ let SkillsController = class SkillsController {
 exports.SkillsController = SkillsController;
 __decorate([
     (0, public_decorator_1.Public)(),
+    (0, common_1.UseInterceptors)(cache_manager_1.CacheInterceptor),
     (0, common_1.Get)('categories'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all skill categories' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Return list of skill categories' }),
@@ -66,6 +68,7 @@ __decorate([
 ], SkillsController.prototype, "getCategories", null);
 __decorate([
     (0, public_decorator_1.Public)(),
+    (0, common_1.UseInterceptors)(cache_manager_1.CacheInterceptor),
     (0, common_1.Get)('skills'),
     (0, swagger_1.ApiOperation)({ summary: 'Get active skills by category or search term (searches name & aliases)' }),
     (0, swagger_1.ApiQuery)({ name: 'categoryId', required: false, type: String }),

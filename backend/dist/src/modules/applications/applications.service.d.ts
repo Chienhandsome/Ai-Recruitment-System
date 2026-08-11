@@ -1,14 +1,17 @@
 import { PrismaService } from '../../database/prisma.service';
-import { RabbitMQService } from '../../infrastructure/rabbitmq/rabbitmq.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
+import { ApplicationEvaluationService } from './application-evaluation.service';
 export declare class ApplicationsService {
     private readonly prisma;
-    private readonly rabbitMQService;
+    private readonly evaluationService;
     private readonly logger;
-    constructor(prisma: PrismaService, rabbitMQService: RabbitMQService);
-    applyForJob(userId: string, createApplicationDto: CreateApplicationDto): Promise<{
+    constructor(prisma: PrismaService, evaluationService: ApplicationEvaluationService);
+    applyForJob(userId: string, createApplicationDto: CreateApplicationDto, now?: Date): Promise<{
         message: string;
         applicationId: string;
+        evaluationStatus: string;
     }>;
-    private buildEvaluationRequest;
+    private buildProfileSnapshot;
+    private toStringArray;
+    private errorMessage;
 }

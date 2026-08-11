@@ -37,8 +37,8 @@ class SemanticMatcher:
                 )
                 model_name = (
                     fine_tuned_path
-                    if os.path.exists(fine_tuned_path)
-                    else "XuanTruong03/ai-recruitment-embedder"
+                    if os.path.exists(fine_tuned_path) and os.listdir(fine_tuned_path)
+                    else "XuanTruong03/ai-recruitment-embedder-v2"
                 )
             cls._instance._model_name = model_name
             cls._instance._initialized = False

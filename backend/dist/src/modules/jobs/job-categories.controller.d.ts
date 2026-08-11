@@ -4,9 +4,9 @@ export declare class JobCategoriesController {
     constructor(jobsService: JobsService);
     getJobCategories(): Promise<{
         id: string;
+        createdAt: Date;
         updatedAt: Date;
         name: string;
         slug: string;
-        createdAt: Date;
     }[]>;
 }

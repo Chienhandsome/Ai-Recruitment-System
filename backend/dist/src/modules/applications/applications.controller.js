@@ -36,8 +36,22 @@ __decorate([
     (0, roles_decorator_1.Roles)('CANDIDATE'),
     (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
     (0, swagger_1.ApiOperation)({ summary: 'Apply for a job as a candidate' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Application submitted successfully.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad Request (e.g. already applied, missing resume).' }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Application submitted successfully.',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Missing, unprocessed, or unauthorized resume.',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Candidate profile or active job not found.',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 409,
+        description: 'Candidate already applied for this job.',
+    }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),

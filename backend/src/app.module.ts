@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './database/prisma.module';
 import { SupabaseModule } from './infrastructure/supabase/supabase.module';
 import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 import { CompaniesModule } from './modules/companies/companies.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
@@ -29,6 +30,10 @@ import { AdminModule } from './modules/admin/admin.module';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 60 * 60 * 1000, // 1 hour
+    }),
     PrismaModule,
     SupabaseModule,
     RabbitMQModule,

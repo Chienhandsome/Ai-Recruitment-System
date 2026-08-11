@@ -15,6 +15,7 @@ const app_service_1 = require("./app.service");
 const prisma_module_1 = require("./database/prisma.module");
 const supabase_module_1 = require("./infrastructure/supabase/supabase.module");
 const rabbitmq_module_1 = require("./infrastructure/rabbitmq/rabbitmq.module");
+const cache_manager_1 = require("@nestjs/cache-manager");
 const companies_module_1 = require("./modules/companies/companies.module");
 const departments_module_1 = require("./modules/departments/departments.module");
 const users_module_1 = require("./modules/users/users.module");
@@ -40,6 +41,10 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
             }),
             schedule_1.ScheduleModule.forRoot(),
+            cache_manager_1.CacheModule.register({
+                isGlobal: true,
+                ttl: 60 * 60 * 1000,
+            }),
             prisma_module_1.PrismaModule,
             supabase_module_1.SupabaseModule,
             rabbitmq_module_1.RabbitMQModule,

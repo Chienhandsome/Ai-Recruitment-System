@@ -22,11 +22,14 @@ def main():
     
     try:
         api = HfApi()
+        print(f"\nĐang khởi tạo Repository {repo_id} (nếu chưa có)...")
+        api.create_repo(repo_id=repo_id, repo_type="model", exist_ok=True, private=False)
+
         api.upload_folder(
             folder_path=model_dir,
             repo_id=repo_id,
             repo_type="model",
-            commit_message="Upload fine-tuned embedding model"
+            commit_message="Upload fine-tuned Context-Aware embedding model V2"
         )
         print("\n✅ UPLOAD THÀNH CÔNG TỐT ĐẸP!")
         print(f"Bạn có thể xem model của mình tại: https://huggingface.co/{repo_id}")

@@ -47,6 +47,7 @@ The Python service has two separate processes:
 | Frontend | Next.js 16, React 19, TypeScript, Tailwind CSS 4, Supabase SSR, React Hook Form, Zod |
 | Backend | NestJS 11, TypeScript, Prisma 6, Supabase, RabbitMQ, Swagger |
 | AI service | FastAPI, Pydantic, Google GenAI, pypdf, python-docx, Tesseract OCR, RapidFuzz |
+| AI Matching V2 | **Context-Aware Embedding (CoSENTLoss)**, SentenceTransformers, **Rule Engine V2** |
 | Infrastructure | Supabase PostgreSQL/Auth/Storage, RabbitMQ, Docker Compose |
 
 ## Repository structure
@@ -277,13 +278,15 @@ py -m venv venv
 # Cài đặt thư viện
 pip install -r requirements.txt
 
-# [QUAN TRỌNG] Đăng nhập Hugging Face (Chỉ cần thiết nếu Model của bạn để Private)
-# Chạy lệnh dưới đây và nhập Access Token (Write/Read) của bạn:
-huggingface-cli login
-
-# Khởi chạy AI Service (Sẽ mất vài phút ở lần đầu tiên để tải mô hình Embedding ~500MB từ HF Hub)
+# Khởi chạy AI Service
 python app/main.py
 ```
+
+> [!TIP]
+> **Tự động tải mô hình V2 (Auto-Download):**
+> Lần đầu tiên bạn khởi chạy AI Service (`uvicorn app.main:app`), hệ thống `SentenceTransformer` sẽ tự động phát hiện nếu thư mục `models/fine_tuned_embedder` bị trống. Nó sẽ tự động kết nối đến HuggingFace và tải bộ trọng số **`XuanTruong03/ai-recruitment-embedder-v2`** (nặng ~540MB) về máy của bạn! Quá trình này diễn ra hoàn toàn tự động, bạn không cần phải làm gì thêm.
+>
+> *(Chỉ yêu cầu đăng nhập bằng `huggingface-cli login` nếu bạn set Repo trên HuggingFace về chế độ Private).*
 
 ## Resume processing flow
 

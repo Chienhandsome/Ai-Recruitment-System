@@ -234,6 +234,14 @@ Configured deployments:
 - Frontend: [https://ai-recruitment-system-test-deploy-1.vercel.app](https://ai-recruitment-system-test-deploy-1.vercel.app)
 - Backend: [https://ai-recruitment-system-test-deploy.onrender.com/api](https://ai-recruitment-system-test-deploy.onrender.com/api)
 
+Resume parsing also requires a separate long-running background worker. Deploy
+`ai-service` with the start command `python worker_main.py`; running only the
+FastAPI web process does not consume queued CVs. Configure the worker with the
+same `RABBITMQ_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and
+`SUPABASE_STORAGE_BUCKET` as the backend storage pipeline, plus
+`GEMINI_API_KEY` and `LLM_MODEL`. The worker now exits immediately with a clear
+configuration error when a required variable is missing.
+
 ## First administrator
 
 After migrations and seeding, create a user in Supabase Authentication, copy its UUID, and run this from `backend`:

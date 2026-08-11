@@ -16,18 +16,24 @@ type UploadState =
   | { step: "done"; fileName: string }
   | { step: "error"; message: string; fileName?: string }
 
+const POLLING_INTERVAL_MS = 3000
+const PARSING_TIMEOUT_MS = 10 * 60 * 1000
+const MAX_CONSECUTIVE_POLL_FAILURES = 3
+
 // ─── Component ────────────────────────────────────────────────────────
 
 export function ResumeUpload() {
   const [state, setState] = React.useState<UploadState>({ step: "idle" })
   const [dragOver, setDragOver] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
-  const pollingRef = React.useRef<ReturnType<typeof setInterval> | null>(null)
+  const pollingRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pollingGenerationRef = React.useRef(0)
 
   // Cleanup polling on unmount
   React.useEffect(() => {
     return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current)
+      pollingGenerationRef.current += 1
+      if (pollingRef.current) clearTimeout(pollingRef.current)
     }
   }, [])
 
@@ -77,37 +83,82 @@ export function ResumeUpload() {
   }
 
   const startPolling = (token: string, resumeId: string, fileName: string) => {
-    if (pollingRef.current) clearInterval(pollingRef.current)
+    if (pollingRef.current) clearTimeout(pollingRef.current)
 
-    pollingRef.current = setInterval(async () => {
+    pollingGenerationRef.current += 1
+    const generation = pollingGenerationRef.current
+    const startedAt = Date.now()
+    let consecutiveFailures = 0
+
+    const stopPolling = () => {
+      if (generation !== pollingGenerationRef.current) return
+      pollingGenerationRef.current += 1
+      if (pollingRef.current) clearTimeout(pollingRef.current)
+      pollingRef.current = null
+    }
+
+    const poll = async () => {
+      if (generation !== pollingGenerationRef.current) return
+
+      if (Date.now() - startedAt >= PARSING_TIMEOUT_MS) {
+        stopPolling()
+        setState({
+          step: "error",
+          message: "AI chưa phản hồi sau 10 phút. Dịch vụ xử lý CV có thể đang tạm ngừng, vui lòng thử lại sau.",
+          fileName
+        })
+        return
+      }
+
       try {
         const status: ResumeStatusResponse = await getResumeStatus(token, resumeId)
+        consecutiveFailures = 0
 
         if (status.parsingStatus === "PARSED") {
-          if (pollingRef.current) clearInterval(pollingRef.current)
+          stopPolling()
           setState({ step: "done", fileName })
           // Auto-reload after short delay to show fresh extracted data
           setTimeout(() => window.location.reload(), 1500)
+          return
         } else if (status.parsingStatus === "FAILED") {
-          if (pollingRef.current) clearInterval(pollingRef.current)
+          stopPolling()
           setState({
             step: "error",
             message: status.parsingErrorMessage || "Phân tích CV thất bại.",
             fileName
           })
+          return
         } else if (status.parsingStatus === "SUPERSEDED") {
-          if (pollingRef.current) clearInterval(pollingRef.current)
+          stopPolling()
           setState({
             step: "error",
             message: "CV này đã được thay thế bởi một CV mới hơn.",
             fileName
           })
+          return
         }
-        // PENDING / PROCESSING → keep polling
-      } catch {
-        // Ignore transient fetch errors, keep polling
+      } catch (error) {
+        consecutiveFailures += 1
+        if (consecutiveFailures >= MAX_CONSECUTIVE_POLL_FAILURES) {
+          stopPolling()
+          setState({
+            step: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Không thể nhận trạng thái phân tích CV. Vui lòng thử lại.",
+            fileName
+          })
+          return
+        }
       }
-    }, 3000)
+
+      if (generation === pollingGenerationRef.current) {
+        pollingRef.current = setTimeout(poll, POLLING_INTERVAL_MS)
+      }
+    }
+
+    pollingRef.current = setTimeout(poll, 0)
   }
 
   const handleDrop = (e: React.DragEvent) => {
@@ -125,7 +176,9 @@ export function ResumeUpload() {
   }
 
   const reset = () => {
-    if (pollingRef.current) clearInterval(pollingRef.current)
+    pollingGenerationRef.current += 1
+    if (pollingRef.current) clearTimeout(pollingRef.current)
+    pollingRef.current = null
     setState({ step: "idle" })
   }
 

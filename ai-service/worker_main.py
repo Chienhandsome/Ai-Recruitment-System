@@ -9,7 +9,12 @@ from collections.abc import Callable
 from dotenv import load_dotenv
 
 from app.workers.evaluation_worker import start_evaluation_worker
-from app.workers.resume_worker import start_worker as start_resume_worker
+from app.workers.resume_worker import (
+    start_worker as start_resume_worker,
+)
+from app.workers.resume_worker import (
+    validate_worker_settings as validate_resume_worker_settings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +70,7 @@ def _create_process(
 def main() -> None:
     load_dotenv()
     _configure_logging()
+    validate_resume_worker_settings()
 
     shutdown_requested = False
 

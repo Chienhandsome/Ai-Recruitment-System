@@ -15,6 +15,19 @@ from app.transport.rabbitmq.consumer import ResumeMessageConsumer
 logger = logging.getLogger(__name__)
 
 
+def validate_worker_settings() -> None:
+    required_settings = {
+        "GEMINI_API_KEY": settings.gemini_api_key,
+        "SUPABASE_URL": settings.supabase_url,
+    }
+    missing = [name for name, value in required_settings.items() if not value]
+    if missing:
+        raise RuntimeError(
+            "Resume analysis worker cannot start. Missing required environment "
+            f"variables: {', '.join(missing)}"
+        )
+
+
 def _get_connection() -> pika.BlockingConnection:
     max_retries = 5
     retry_delay = 5
@@ -89,6 +102,7 @@ def _declare_topology(channel) -> None:
 
 
 def build_consumer() -> ResumeMessageConsumer:
+    validate_worker_settings()
     pipeline = ResumeParsingPipeline(
         storage=SupabaseStorageAdapter.from_settings(),
         llm=GeminiLLMAdapter.from_settings(),
@@ -98,13 +112,13 @@ def build_consumer() -> ResumeMessageConsumer:
 
 def start_worker() -> None:
     logger.info("Starting resume analysis worker")
+    consumer = build_consumer()
     connection = _get_connection()
     channel = connection.channel()
     channel.confirm_delivery()
     _declare_topology(channel)
     channel.basic_qos(prefetch_count=1)
 
-    consumer = build_consumer()
     channel.basic_consume(
         queue=settings.rabbitmq_queue,
         on_message_callback=consumer.process_message,

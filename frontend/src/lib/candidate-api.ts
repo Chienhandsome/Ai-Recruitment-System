@@ -21,6 +21,25 @@ async function readApiError(response: Response, fallback: string) {
   }
 }
 
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  timeoutMs: number,
+  timeoutMessage: string,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error(timeoutMessage);
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export type CandidateEmploymentType =
   'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP' | 'REMOTE' | 'HYBRID';
 
@@ -349,11 +368,16 @@ export async function uploadResume(token: string, file: File): Promise<ResumeUpl
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await fetch(`${API_URL}/resumes/upload`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
-  });
+  const res = await fetchWithTimeout(
+    `${API_URL}/resumes/upload`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    },
+    60_000,
+    'Upload CV quá thời gian chờ. Vui lòng thử lại.',
+  );
 
   if (!res.ok) {
     const text = await res.text();
@@ -367,10 +391,15 @@ export async function getResumeStatus(
   token: string,
   resumeId: string,
 ): Promise<ResumeStatusResponse> {
-  const res = await fetch(`${API_URL}/resumes/${resumeId}/status`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
+  const res = await fetchWithTimeout(
+    `${API_URL}/resumes/${resumeId}/status`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    },
+    10_000,
+    'Không thể nhận trạng thái phân tích CV. Vui lòng thử lại.',
+  );
 
   if (!res.ok) {
     throw new Error('Không thể lấy trạng thái CV');

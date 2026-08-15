@@ -60,6 +60,7 @@ class CandidateCertificate(BaseModel):
 class CandidateSkill(BaseModel):
     candidate_profile_id: Optional[str] = None
     skill_id: Optional[str] = None
+    normalized_name: Optional[str] = None
     proficiency_level: Optional[str] = None  # BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
     is_primary: bool = False
     skill_name: str
@@ -79,6 +80,7 @@ class CandidateProfilePayload(BaseModel):
 class JobRequiredSkill(BaseModel):
     job_id: Optional[str] = None
     skill_id: Optional[str] = None
+    normalized_name: Optional[str] = None
     is_mandatory: bool = True
     minimum_level: Optional[str] = "BEGINNER"  # BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
     minimum_years: float = 0.0

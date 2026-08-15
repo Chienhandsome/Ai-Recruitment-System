@@ -29,6 +29,10 @@ from app.utils.normalizer import clean_text, normalize_skill_name
         ("tailwindcss", "Tailwind CSS"),
         ("powerbi", "Power BI"),
         ("github actions", "GitHub Actions"),
+        ("MS Excel", "Microsoft Excel"),
+        ("Golang", "Go"),
+        ("CSKH", "Customer Service"),
+        ("Tuyển dụng", "Recruitment"),
     ],
 )
 def test_skill_alias_normalization(raw_input: str, expected_canonical: str):

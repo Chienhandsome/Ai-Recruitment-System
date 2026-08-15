@@ -48,7 +48,7 @@ class GenericMatchingEngine:
             
         cand_context_pro = f"[CONTEXT] Type: professional_employment | Domain: Technology | Seniority: experienced"
         for skill in cand_profile.skills:
-            add(f"{cand_context_pro} [CONTENT] {normalize_skill_name(skill.skill_name)}")
+            add(f"{cand_context_pro} [CONTENT] {self._skill_match_key(skill)}")
 
         for experience in cand_profile.work_experiences:
             seniority = "senior" if ("senior" in (experience.position_title or "").lower() or "trưởng" in (experience.position_title or "").lower()) else "experienced"
@@ -78,7 +78,12 @@ class GenericMatchingEngine:
         if not job_req_skills:
             return {"score": 1.0, "matched": [], "missing": [], "missing_mandatory": [], "evidence": []}
 
-        cand_skill_map = {normalize_skill_name(cs.skill_name): cs for cs in cand_profile.skills}
+        cand_skill_id_map = {
+            str(cs.skill_id): cs for cs in cand_profile.skills if cs.skill_id
+        }
+        cand_skill_map = {
+            self._skill_match_key(cs): cs for cs in cand_profile.skills
+        }
         cand_norm_names = set(cand_skill_map.keys())
 
         mandatory_scores = []
@@ -89,11 +94,21 @@ class GenericMatchingEngine:
         evidence_list = []
 
         for req in job_req_skills:
-            norm_req_name = normalize_skill_name(req.skill_name)
+            norm_req_name = self._skill_match_key(req)
             is_man = req.is_mandatory
-            
-            if norm_req_name in cand_skill_map:
-                cand_s = cand_skill_map[norm_req_name]
+
+            # Internal evaluation payloads carry the canonical database ID.
+            # Prefer it over text so aliases and renamed display labels cannot
+            # turn the same official skill into a semantic/partial match.
+            cand_s = (
+                cand_skill_id_map.get(str(req.skill_id))
+                if req.skill_id
+                else None
+            )
+            if cand_s is None:
+                cand_s = cand_skill_map.get(norm_req_name)
+
+            if cand_s is not None:
                 score = min(1.0, self._get_level_val(cand_s.proficiency_level) / float(self._get_level_val(req.minimum_level)))
                 matched.append({"name": req.skill_name, "isMandatory": is_man, "source": "skills_list"})
                 if is_man: mandatory_scores.append(score)
@@ -138,6 +153,13 @@ class GenericMatchingEngine:
 
     def _get_level_val(self, lvl: str) -> int:
         return {"BEGINNER": 1, "INTERMEDIATE": 2, "ADVANCED": 3, "EXPERT": 4}.get((lvl or "BEGINNER").upper(), 1)
+
+    def _skill_match_key(self, skill) -> str:
+        """Return a stable, case-insensitive key for name-based fallback."""
+        canonical_name = getattr(skill, "normalized_name", None)
+        if canonical_name and canonical_name.strip():
+            return canonical_name.strip().casefold()
+        return normalize_skill_name(skill.skill_name).strip().casefold()
 
     def _calc_domain_transferability(self, target_skill: str, cand_skills: set, is_man: bool, job: JobPayload = None) -> float:
         if not is_man or not cand_skills: return 0.0

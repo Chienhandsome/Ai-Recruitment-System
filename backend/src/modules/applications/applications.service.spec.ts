@@ -207,6 +207,21 @@ describe('ApplicationsService', () => {
         }),
       }),
     );
+    const evaluationInput = (createData.profileSnapshot as any).evaluationInput;
+    expect(evaluationInput.candidate_profile.skills[0]).toEqual(
+      expect.objectContaining({
+        skill_id: 'skill-1',
+        skill_name: 'NestJS',
+        normalized_name: 'nestjs',
+      }),
+    );
+    expect(evaluationInput.job.required_skills[0]).toEqual(
+      expect.objectContaining({
+        skill_id: 'skill-1',
+        skill_name: 'NestJS',
+        normalized_name: 'nestjs',
+      }),
+    );
     expect(evaluationService.dispatchNewApplication).toHaveBeenCalledWith(
       'application-1',
       now,

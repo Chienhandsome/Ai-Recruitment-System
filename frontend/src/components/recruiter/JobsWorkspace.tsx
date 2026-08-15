@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { Plus, Search, Filter, MoreHorizontal, Eye, Copy, Pencil, Play, Pause, XCircle } from "lucide-react";
-import type { JobsResponse, JobPostingData } from "@/lib/recruiter-api";
-import { updateRecruiterJob, getRecruiterJobs } from "@/lib/recruiter-api";
-import { CreateJobWizard } from "./CreateJobWizard";
-import { JobDetailView } from "./JobDetailView";
-import { format } from "date-fns";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Plus, Search, Filter, Eye, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+import type { JobsResponse, JobPostingData } from '@/lib/recruiter-api';
+import { updateRecruiterJob, getRecruiterJobs } from '@/lib/recruiter-api';
+import { CreateJobWizard } from './CreateJobWizard';
+import { JobDetailView } from './JobDetailView';
+import { format } from 'date-fns';
 
 interface JobsWorkspaceProps {
   initialData: JobsResponse | null;
@@ -16,37 +16,41 @@ interface JobsWorkspaceProps {
 export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
   const [data, setData] = useState<JobsResponse | null>(initialData);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("ALL");
+  const [activeTab, setActiveTab] = useState('ALL');
+  const [page, setPage] = useState(initialData?.meta.page ?? 1);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [editingJob, setEditingJob] = useState<JobPostingData | null>(null);
   const isFirstMount = useRef(true);
 
   const tabs = [
-    { id: "ALL", label: "Tất cả" },
-    { id: "DRAFT", label: "Bản nháp" },
-    { id: "PUBLISHED", label: "Đang mở" },
-    { id: "PAUSED", label: "Tạm dừng" },
-    { id: "CLOSED", label: "Đã đóng" },
+    { id: 'ALL', label: 'Tất cả' },
+    { id: 'DRAFT', label: 'Bản nháp' },
+    { id: 'PUBLISHED', label: 'Đang mở' },
+    { id: 'PAUSED', label: 'Tạm dừng' },
+    { id: 'CLOSED', label: 'Đã đóng' },
   ];
 
-  const loadJobs = async (status: string, searchQuery: string) => {
-    setLoading(true);
-    try {
-      const result = await getRecruiterJobs(token, {
-        page: 1,
-        limit: 10,
-        status: status === "ALL" ? undefined : status,
-        search: searchQuery || undefined,
-      });
-      setData(result);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const loadJobs = useCallback(
+    async (status: string, searchQuery: string, targetPage: number) => {
+      setLoading(true);
+      try {
+        const result = await getRecruiterJobs(token, {
+          page: targetPage,
+          limit: 10,
+          status: status === 'ALL' ? undefined : status,
+          search: searchQuery || undefined,
+        });
+        setData(result);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token],
+  );
 
   useEffect(() => {
     // Skip initial fetch since initialData is loaded from SSR
@@ -55,21 +59,21 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
       return;
     }
 
-    // Only fetch if tab or search changes (debounce could be added for search)
+    // Fetch the requested page; debounce also keeps search input responsive.
     const timeoutId = setTimeout(() => {
-      loadJobs(activeTab, search);
+      loadJobs(activeTab, search, page);
     }, 300);
     return () => clearTimeout(timeoutId);
-  }, [activeTab, search, token]);
+  }, [activeTab, search, page, loadJobs]);
 
   const handleStatusChange = async (jobId: string, newStatus: string) => {
     try {
       await updateRecruiterJob(token, jobId, { status: newStatus });
       // Reload jobs
-      loadJobs(activeTab, search);
+      loadJobs(activeTab, search, page);
     } catch (err) {
-      console.error("Failed to change status", err);
-      alert("Cập nhật trạng thái thất bại");
+      console.error('Failed to change status', err);
+      alert('Cập nhật trạng thái thất bại');
     }
   };
 
@@ -87,23 +91,23 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
           }}
           onJobDeleted={() => {
             setSelectedJobId(null);
-            loadJobs(activeTab, search);
+            loadJobs(activeTab, search, page);
           }}
         />
 
         {isWizardOpen && (
-          <CreateJobWizard 
-            isOpen={isWizardOpen} 
+          <CreateJobWizard
+            isOpen={isWizardOpen}
             onClose={() => {
               setIsWizardOpen(false);
               setEditingJob(null);
-            }} 
+            }}
             token={token}
             initialJobData={editingJob}
             onSuccess={() => {
               setIsWizardOpen(false);
               setEditingJob(null);
-              loadJobs(activeTab, search);
+              loadJobs(activeTab, search, page);
             }}
           />
         )}
@@ -136,11 +140,14 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setPage(1);
+              }}
               className={`px-4 py-2 text-xs font-bold rounded-lg whitespace-nowrap transition-all ${
                 activeTab === tab.id
-                  ? "bg-[#2563EB] text-white shadow-md"
-                  : "text-[#1F2937] hover:text-[#2563EB] hover:bg-white/60"
+                  ? 'bg-[#2563EB] text-white shadow-md'
+                  : 'text-[#1F2937] hover:text-[#2563EB] hover:bg-white/60'
               }`}
             >
               {tab.label}
@@ -156,7 +163,10 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               placeholder="Tìm kiếm JD, mã Job..."
               className="block w-full pl-9 pr-3 py-2 border border-blue-200 rounded-xl text-xs bg-[#EFF6FF] text-[#1F2937] placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] transition-all"
             />
@@ -178,30 +188,48 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-[#EFF6FF] border-b border-blue-100">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                  >
                     Vị trí / Mã Job
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                  >
                     Phòng ban
                   </th>
-                  <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-[#1F2937] uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-center text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                  >
                     Ứng viên
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                  >
                     Ngày tạo
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                  >
                     Trạng thái
                   </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-bold text-[#1F2937] uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                  >
                     Thao tác
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-100">
                 {data.data.map((job) => (
-                  <tr 
-                    key={job.id} 
+                  <tr
+                    key={job.id}
                     onClick={() => setSelectedJobId(job.id)}
                     className="hover:bg-slate-50 transition-colors group cursor-pointer"
                   >
@@ -216,7 +244,13 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
                           </span>
                           {job.workingModel && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                              {job.workingModel === "ON_SITE" ? "On-site" : job.workingModel === "HYBRID" ? "Hybrid" : job.workingModel === "REMOTE" ? "Remote" : "Shift"}
+                              {job.workingModel === 'ON_SITE'
+                                ? 'On-site'
+                                : job.workingModel === 'HYBRID'
+                                  ? 'Hybrid'
+                                  : job.workingModel === 'REMOTE'
+                                    ? 'Remote'
+                                    : 'Shift'}
                             </span>
                           )}
                           {job.requiresProofOfWork && (
@@ -229,7 +263,7 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-medium text-slate-600">
-                        {job.department?.name || "Chưa xếp"}
+                        {job.department?.name || 'Chưa xếp'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -239,18 +273,24 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-slate-500 font-medium">
-                        {format(new Date(job.createdAt), "dd/MM/yyyy")}
+                        {format(new Date(job.createdAt), 'dd/MM/yyyy')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                    <td
+                      className="px-6 py-4 whitespace-nowrap"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <select
                         value={job.status}
                         onChange={(e) => handleStatusChange(job.id, e.target.value)}
                         className={`text-xs font-bold rounded-full px-3 py-1 outline-none cursor-pointer border ${
-                          job.status === "PUBLISHED" ? "bg-emerald-50 text-emerald-700 border-emerald-300" :
-                          job.status === "DRAFT" ? "bg-amber-50 text-amber-700 border-amber-300" :
-                          job.status === "PAUSED" ? "bg-slate-100 text-slate-700 border-slate-300" :
-                          "bg-red-50 text-red-700 border-red-300"
+                          job.status === 'PUBLISHED'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                            : job.status === 'DRAFT'
+                              ? 'bg-amber-50 text-amber-700 border-amber-300'
+                              : job.status === 'PAUSED'
+                                ? 'bg-slate-100 text-slate-700 border-slate-300'
+                                : 'bg-red-50 text-red-700 border-red-300'
                         }`}
                       >
                         <option value="DRAFT">Nháp</option>
@@ -259,21 +299,24 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
                         <option value="CLOSED">Đóng</option>
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={() => setSelectedJobId(job.id)} 
-                          title="Xem Chi tiết JD & AI Candidates" 
+                        <button
+                          onClick={() => setSelectedJobId(job.id)}
+                          title="Xem Chi tiết JD & AI Candidates"
                           className="p-1.5 text-slate-400 hover:text-[#2563EB] rounded-md hover:bg-blue-50"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             setEditingJob(job);
                             setIsWizardOpen(true);
-                          }} 
-                          title="Sửa JD" 
+                          }}
+                          title="Sửa JD"
                           className="p-1.5 text-slate-400 hover:text-[#2563EB] rounded-md hover:bg-blue-50"
                         >
                           <Pencil className="w-4 h-4" />
@@ -284,6 +327,40 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
                 ))}
               </tbody>
             </table>
+            {data.meta.totalPages > 1 && (
+              <div className="flex flex-col gap-3 border-t border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs font-medium text-slate-500">
+                  Hiển thị {(data.meta.page - 1) * data.meta.limit + 1}–
+                  {Math.min(data.meta.page * data.meta.limit, data.meta.total)} trong tổng số{' '}
+                  {data.meta.total} tin tuyển dụng
+                </p>
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                    disabled={loading || data.meta.page <= 1}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Trước
+                  </button>
+                  <span className="min-w-20 text-center text-xs font-bold text-slate-600">
+                    Trang {data.meta.page}/{data.meta.totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPage((current) => Math.min(data.meta.totalPages, current + 1))
+                    }
+                    disabled={loading || data.meta.page >= data.meta.totalPages}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Sau
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -292,9 +369,13 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
             </div>
             <h3 className="text-lg font-bold text-[#1F2937]">Không tìm thấy bài đăng nào</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm">
-              Bạn chưa có bài đăng nào {activeTab !== "ALL" ? `ở trạng thái ${tabs.find(t => t.id === activeTab)?.label}` : ""}. Bắt đầu bằng cách tạo một JD mới nhé!
+              Bạn chưa có bài đăng nào{' '}
+              {activeTab !== 'ALL'
+                ? `ở trạng thái ${tabs.find((t) => t.id === activeTab)?.label}`
+                : ''}
+              . Bắt đầu bằng cách tạo một JD mới nhé!
             </p>
-            <button 
+            <button
               onClick={() => setIsWizardOpen(true)}
               className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-[#2563EB] hover:underline"
             >
@@ -305,18 +386,19 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
       </div>
 
       {isWizardOpen && (
-        <CreateJobWizard 
-          isOpen={isWizardOpen} 
+        <CreateJobWizard
+          isOpen={isWizardOpen}
           onClose={() => {
             setIsWizardOpen(false);
             setEditingJob(null);
-          }} 
+          }}
           token={token}
           initialJobData={editingJob}
           onSuccess={() => {
             setIsWizardOpen(false);
             setEditingJob(null);
-            loadJobs(activeTab, search);
+            setPage(1);
+            loadJobs(activeTab, search, 1);
           }}
         />
       )}

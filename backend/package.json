@@ -19,7 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "auth:bootstrap-admin": "ts-node scripts/bootstrap-admin.ts",
-    "skills:seed": "ts-node scripts/seed-skills-broad.ts"
+    "skills:seed": "ts-node scripts/seed-skills-broad.ts",
+    "jobs:seed-recruiter": "ts-node scripts/seed-recruiter-jobs.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.1.3",

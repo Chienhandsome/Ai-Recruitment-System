@@ -1,19 +1,26 @@
-import { 
-  IsString, 
-  IsNotEmpty, 
-  IsOptional, 
-  IsEnum, 
-  IsNumber, 
-  IsUUID, 
-  IsArray, 
-  ValidateNested, 
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  IsUUID,
+  IsArray,
+  ValidateNested,
   IsObject,
   IsBoolean,
   Min,
-  Max
+  Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { EmploymentType, ExperienceLevel, SkillRequirementType, WorkingModel, ProofType } from '@prisma/client';
+import {
+  EmploymentType,
+  ExperienceLevel,
+  LevelRequirementMode,
+  SkillRequirementType,
+  WorkingModel,
+  ProofType,
+} from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class JobSkillDto {
@@ -21,7 +28,10 @@ export class JobSkillDto {
   @IsUUID()
   skillId!: string;
 
-  @ApiProperty({ enum: SkillRequirementType, default: SkillRequirementType.MANDATORY })
+  @ApiProperty({
+    enum: SkillRequirementType,
+    default: SkillRequirementType.MANDATORY,
+  })
   @IsEnum(SkillRequirementType)
   requirementType!: SkillRequirementType;
 }
@@ -32,7 +42,10 @@ export class JobCertificateDto {
   @IsNotEmpty()
   certificateName!: string;
 
-  @ApiProperty({ enum: SkillRequirementType, default: SkillRequirementType.MANDATORY })
+  @ApiProperty({
+    enum: SkillRequirementType,
+    default: SkillRequirementType.MANDATORY,
+  })
   @IsEnum(SkillRequirementType)
   requirementType!: SkillRequirementType;
 }
@@ -63,12 +76,18 @@ export class CreateJobDto {
   @IsString()
   benefits?: string;
 
-  @ApiPropertyOptional({ enum: EmploymentType, default: EmploymentType.FULL_TIME })
+  @ApiPropertyOptional({
+    enum: EmploymentType,
+    default: EmploymentType.FULL_TIME,
+  })
   @IsOptional()
   @IsEnum(EmploymentType)
   employmentType?: EmploymentType;
 
-  @ApiPropertyOptional({ enum: ExperienceLevel, default: ExperienceLevel.JUNIOR })
+  @ApiPropertyOptional({
+    enum: ExperienceLevel,
+    default: ExperienceLevel.JUNIOR,
+  })
   @IsOptional()
   @IsEnum(ExperienceLevel)
   experienceLevel?: ExperienceLevel;
@@ -121,7 +140,17 @@ export class CreateJobDto {
   @ApiPropertyOptional({ description: 'Required experience in years' })
   @IsOptional()
   @IsNumber()
+  @Min(0)
   requiredExperienceYears?: number;
+
+  @ApiPropertyOptional({
+    enum: LevelRequirementMode,
+    default: LevelRequirementMode.ADVISORY,
+    description: 'Whether an experience-level gap is advisory or required',
+  })
+  @IsOptional()
+  @IsEnum(LevelRequirementMode)
+  levelRequirementMode?: LevelRequirementMode;
 
   @ApiPropertyOptional({ description: 'AI Shortlist Threshold' })
   @IsOptional()
@@ -137,7 +166,9 @@ export class CreateJobDto {
   @Max(100)
   autoRejectThreshold?: number;
 
-  @ApiPropertyOptional({ description: 'Reject on missing mandatory requirement' })
+  @ApiPropertyOptional({
+    description: 'Reject on missing mandatory requirement',
+  })
   @IsOptional()
   @IsBoolean()
   rejectOnMissingMandatory?: boolean;

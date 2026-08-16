@@ -11,6 +11,38 @@ export const EvidenceSchema = z.object({
   source: z.string().default('Context'),
 });
 
+const ExperienceLevelSchema = z.enum([
+  'INTERN',
+  'FRESHER',
+  'JUNIOR',
+  'MIDDLE',
+  'SENIOR',
+  'LEAD',
+  'MANAGER',
+  'DIRECTOR',
+]);
+
+export const ExperienceAssessmentSchema = z.object({
+  candidate_level: ExperienceLevelSchema.nullable().default(null),
+  required_level: ExperienceLevelSchema,
+  total_experience_years: z.number().min(0),
+  duration_score: z.number().min(0).max(100),
+  relevance_score: z.number().min(0).max(100),
+  level_fit_score: z.number().min(0).max(100).nullable().default(null),
+  level_gap: z.number().int().nullable().default(null),
+  level_eligible: z.boolean().nullable().default(null),
+  level_confidence: z.number().min(0).max(1),
+  level_requirement_mode: z.enum(['ADVISORY', 'REQUIRED']),
+  recommendation: z.enum([
+    'ELIGIBLE',
+    'ADVISORY_LEVEL_GAP',
+    'NOT_ELIGIBLE_LEVEL',
+    'NEEDS_REVIEW',
+  ]),
+  evidence: z.array(z.string()).default([]),
+  reason_codes: z.array(z.string()).default([]),
+});
+
 export const AiResultSchema = z.object({
   overall_score: z.number().default(0),
   match_level: z
@@ -28,6 +60,7 @@ export const AiResultSchema = z.object({
   evidence: z.array(EvidenceSchema).default([]),
   confidence_score: z.number().default(1.0),
   summary: z.string().default(''),
+  experience_assessment: ExperienceAssessmentSchema.nullable().optional(),
 });
 
 export type AiResultDto = z.infer<typeof AiResultSchema>;

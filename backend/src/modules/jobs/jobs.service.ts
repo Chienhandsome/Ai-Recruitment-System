@@ -140,6 +140,7 @@ export class JobsService {
           categoryId: dto.categoryId,
           expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
           requiredExperienceYears: dto.requiredExperienceYears,
+          levelRequirementMode: dto.levelRequirementMode,
           autoShortlistThreshold: dto.autoShortlistThreshold,
           autoRejectThreshold: dto.autoRejectThreshold,
           rejectOnMissingMandatory: dto.rejectOnMissingMandatory,
@@ -174,14 +175,14 @@ export class JobsService {
                       fullName: true,
                       avatarUrl: true,
                       phone: true,
-                    }
-                  }
-                }
-              }
+                    },
+                  },
+                },
+              },
             },
             orderBy: {
-              appliedAt: 'desc'
-            }
+              appliedAt: 'desc',
+            },
           },
         },
       });
@@ -377,6 +378,7 @@ export class JobsService {
       requirements: job.requirements,
       benefits: job.benefits,
       requiredExperienceYears: job.requiredExperienceYears,
+      levelRequirementMode: job.levelRequirementMode,
       requiresProofOfWork: job.requiresProofOfWork,
       proofOfWorkType: job.proofOfWorkType,
       certificates: job.jobCertificates.map((certificate) => ({
@@ -439,18 +441,18 @@ export class JobsService {
                     fullName: true,
                     avatarUrl: true,
                     phone: true,
-                  }
+                  },
                 },
                 workExperiences: { orderBy: { startDate: 'desc' } },
                 educations: { orderBy: { startDate: 'desc' } },
                 projects: true,
-                candidateSkills: { include: { skill: true } }
-              }
-            }
+                candidateSkills: { include: { skill: true } },
+              },
+            },
           },
           orderBy: {
-            appliedAt: 'desc'
-          }
+            appliedAt: 'desc',
+          },
         },
       },
     });
@@ -500,6 +502,7 @@ export class JobsService {
       categoryId: dto.categoryId,
       expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
       requiredExperienceYears: dto.requiredExperienceYears,
+      levelRequirementMode: dto.levelRequirementMode,
       autoShortlistThreshold: dto.autoShortlistThreshold,
       autoRejectThreshold: dto.autoRejectThreshold,
       rejectOnMissingMandatory: dto.rejectOnMissingMandatory,

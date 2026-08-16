@@ -347,6 +347,13 @@ export function JobDetailView({
                 </div>
 
                 <div className="flex justify-between items-center bg-[#EFF6FF] p-2.5 rounded-lg border border-blue-100">
+                  <span className="text-slate-600 font-medium">Yêu cầu level:</span>
+                  <span className="font-extrabold text-[#2563EB]">
+                    {job.experienceLevel || "JUNIOR"} · {job.levelRequirementMode === "REQUIRED" ? "Bắt buộc" : "Cảnh báo"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center bg-[#EFF6FF] p-2.5 rounded-lg border border-blue-100">
                   <span className="text-slate-600 font-medium">Ngưỡng Tự động Loại:</span>
                   <span className="font-extrabold text-rose-600">{job.autoRejectThreshold || 40} Điểm</span>
                 </div>
@@ -561,6 +568,19 @@ export function JobDetailView({
                     const skills = cand?.candidateSkills || [];
                     const evaluationPending =
                       !aiResult && isAiEvaluationPending(activeApp.processingStatus);
+                    const levelEvidencePayload = aiResult?.levelEvidence;
+                    const levelEvidenceItems = Array.isArray(levelEvidencePayload)
+                      ? levelEvidencePayload
+                      : Array.isArray(levelEvidencePayload?.evidence)
+                        ? levelEvidencePayload.evidence
+                        : [];
+                    const evaluatedLevelMode =
+                      levelEvidencePayload?.requirementMode ||
+                      job.levelRequirementMode ||
+                      "ADVISORY";
+                    const isRequiredLevelFailure =
+                      aiResult?.levelEligible === false &&
+                      evaluatedLevelMode === "REQUIRED";
 
                     return (
                       <div className="space-y-4 pt-2">
@@ -830,6 +850,77 @@ export function JobDetailView({
                                 </div>
                               </div>
                             </div>
+
+                            {aiResult?.requiredExperienceLevel && (
+                              <div className={`p-4 rounded-xl border space-y-3 ${
+                                aiResult.levelEligible === true
+                                  ? "bg-emerald-50 border-emerald-200"
+                                  : isRequiredLevelFailure
+                                    ? "bg-rose-50 border-rose-200"
+                                    : aiResult.levelEligible === false
+                                    ? "bg-amber-50 border-amber-200"
+                                    : "bg-slate-50 border-slate-200"
+                              }`}>
+                                <div className="flex items-center justify-between gap-3">
+                                  <div>
+                                    <h5 className="text-xs font-extrabold text-[#1F2937] uppercase tracking-wider">Đánh giá level kinh nghiệm</h5>
+                                    <p className="text-xs text-slate-600 mt-1">
+                                      Hệ thống đánh giá dựa trên số năm, chức danh và bằng chứng vai trò trong snapshot ứng tuyển.
+                                    </p>
+                                    <p className="text-[11px] font-bold text-slate-500 mt-1">
+                                      Chế độ lúc chấm: {evaluatedLevelMode === "REQUIRED" ? "Bắt buộc" : "Cảnh báo"}
+                                    </p>
+                                  </div>
+                                  <span className={`text-xs font-extrabold px-3 py-1 rounded-full border ${
+                                    aiResult.levelEligible === true
+                                      ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                      : isRequiredLevelFailure
+                                        ? "bg-rose-100 text-rose-800 border-rose-300"
+                                        : aiResult.levelEligible === false
+                                        ? "bg-amber-100 text-amber-800 border-amber-300"
+                                        : "bg-slate-200 text-slate-700 border-slate-300"
+                                  }`}>
+                                    {aiResult.levelEligible === true
+                                      ? "Đủ level"
+                                      : isRequiredLevelFailure
+                                        ? "Không đủ điều kiện"
+                                        : aiResult.levelEligible === false
+                                        ? "Chưa đủ level"
+                                        : "Cần xem xét"}
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                  <div className="bg-white/80 border border-white rounded-lg p-2">
+                                    <span className="text-slate-500 block">Ứng viên</span>
+                                    <strong className="text-[#1F2937]">{aiResult.candidateExperienceLevel || "Chưa xác định"}</strong>
+                                  </div>
+                                  <div className="bg-white/80 border border-white rounded-lg p-2">
+                                    <span className="text-slate-500 block">Yêu cầu</span>
+                                    <strong className="text-[#1F2937]">{aiResult.requiredExperienceLevel}</strong>
+                                  </div>
+                                  <div className="bg-white/80 border border-white rounded-lg p-2">
+                                    <span className="text-slate-500 block">Mức phù hợp</span>
+                                    <strong className="text-[#1F2937]">{aiResult.levelFitScore == null ? "—" : `${Math.round(Number(aiResult.levelFitScore))}/100`}</strong>
+                                  </div>
+                                  <div className="bg-white/80 border border-white rounded-lg p-2">
+                                    <span className="text-slate-500 block">Kinh nghiệm</span>
+                                    <strong className="text-[#1F2937]">{Number(aiResult.totalExperienceYears || 0).toFixed(1)} năm</strong>
+                                  </div>
+                                </div>
+                                {levelEvidenceItems.length > 0 && (
+                                  <ul className="text-xs text-slate-700 space-y-1 list-disc list-inside">
+                                    {levelEvidenceItems.map((item: string, index: number) => (
+                                      <li key={index}>{item}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                                {aiResult.levelConfidence != null && (
+                                  <p className="text-[11px] text-slate-500 font-medium">
+                                    Độ tin cậy đánh giá level: {Math.round(Number(aiResult.levelConfidence) * 100)}%
+                                  </p>
+                                )}
+                              </div>
+                            )}
 
                             {/* 3. Skill Matching & Evidence Tooltips */}
                             <div className="space-y-3">

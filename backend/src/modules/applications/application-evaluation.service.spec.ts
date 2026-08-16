@@ -54,6 +54,8 @@ describe('ApplicationEvaluationService', () => {
       expect.objectContaining({
         applicationId: 'application-1',
         application_id: 'application-1',
+        schema_version: 1,
+        evaluation_date: now.toISOString(),
         candidate_profile: profileSnapshot.evaluationInput.candidate_profile,
         job: profileSnapshot.evaluationInput.job,
       }),

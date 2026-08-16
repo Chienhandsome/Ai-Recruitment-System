@@ -1,5 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ApplicationProcessingStatus, MatchLevel } from '@prisma/client';
+import {
+  ApplicationProcessingStatus,
+  ExperienceLevel,
+  MatchLevel,
+} from '@prisma/client';
 import { z } from 'zod';
 import { PrismaService } from '../../database/prisma.service';
 import { RabbitMQService } from '../../infrastructure/rabbitmq/rabbitmq.service';
@@ -64,6 +68,7 @@ export class ApplicationsConsumer implements OnModuleInit {
             ? validatedResult.match_level
             : 'LOW'
         ) as MatchLevel;
+        const experienceAssessment = validatedResult.experience_assessment;
 
         await this.prisma.$transaction(async (prisma) => {
           await prisma.aiMatchingResult.deleteMany({
@@ -87,6 +92,32 @@ export class ApplicationsConsumer implements OnModuleInit {
               reasoningSummary: validatedResult.summary,
               evidence: validatedResult.evidence,
               confidenceScore: validatedResult.confidence_score,
+              candidateExperienceLevel:
+                (experienceAssessment?.candidate_level as
+                  ExperienceLevel | null | undefined) ?? null,
+              requiredExperienceLevel:
+                (experienceAssessment?.required_level as
+                  ExperienceLevel | undefined) ?? null,
+              totalExperienceYears:
+                experienceAssessment?.total_experience_years ?? null,
+              levelFitScore: experienceAssessment?.level_fit_score ?? null,
+              levelGap: experienceAssessment?.level_gap ?? null,
+              levelEligible: experienceAssessment?.level_eligible ?? null,
+              levelConfidence: experienceAssessment?.level_confidence ?? null,
+              levelEvidence: experienceAssessment
+                ? {
+                    evidence: experienceAssessment.evidence,
+                    reasonCodes: experienceAssessment.reason_codes,
+                    recommendation: experienceAssessment.recommendation,
+                    requirementMode:
+                      experienceAssessment.level_requirement_mode,
+                    durationScore: experienceAssessment.duration_score,
+                    relevanceScore: experienceAssessment.relevance_score,
+                  }
+                : undefined,
+              modelVersion: experienceAssessment
+                ? 'experience-level-v1'
+                : undefined,
             },
           });
 
@@ -99,6 +130,20 @@ export class ApplicationsConsumer implements OnModuleInit {
             },
           });
         });
+        if (experienceAssessment) {
+          this.logger.log(
+            JSON.stringify({
+              event: 'experience_level_evaluated',
+              application_id: applicationId,
+              candidate_level: experienceAssessment.candidate_level,
+              required_level: experienceAssessment.required_level,
+              level_gap: experienceAssessment.level_gap,
+              eligible: experienceAssessment.level_eligible,
+              confidence: experienceAssessment.level_confidence,
+              algorithm_version: 'experience-level-v1',
+            }),
+          );
+        }
         this.logger.log(
           `Successfully updated AI evaluation for application ${applicationId}`,
         );

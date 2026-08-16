@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 # pyrefly: ignore [missing-import]
 from pydantic import BaseModel, Field
 
@@ -109,6 +109,20 @@ class JobPayload(BaseModel):
     salary_max: Optional[float] = None
     location: Optional[str] = None
     required_experience_years: float = 0.0
+    experience_level: Optional[
+        Literal[
+            "INTERN",
+            "FRESHER",
+            "JUNIOR",
+            "MIDDLE",
+            "SENIOR",
+            "LEAD",
+            "MANAGER",
+            "DIRECTOR",
+        ]
+    ] = None
+    level_requirement_mode: Literal["ADVISORY", "REQUIRED"] = "ADVISORY"
+    evaluation_date: Optional[str] = None
     description: Optional[str] = None
     requirements: Optional[str] = None
     benefits: Optional[str] = None
@@ -126,6 +140,8 @@ class JobPayload(BaseModel):
 
 class EvaluationRequest(BaseModel):
     application_id: str
+    schema_version: int = 1
+    evaluation_date: Optional[str] = None
     candidate_profile: CandidateProfilePayload
     job: JobPayload
     weights: Optional[JobWeightsConfig] = None
@@ -142,6 +158,27 @@ class EvidenceInfo(BaseModel):
     evidenceText: str
     source: Optional[str] = "Context"
 
+
+class ExperienceLevelAssessment(BaseModel):
+    candidate_level: Optional[str] = None
+    required_level: str
+    total_experience_years: float
+    duration_score: float
+    relevance_score: float
+    level_fit_score: Optional[float] = None
+    level_gap: Optional[int] = None
+    level_eligible: Optional[bool] = None
+    level_confidence: float
+    level_requirement_mode: Literal["ADVISORY", "REQUIRED"] = "ADVISORY"
+    recommendation: Literal[
+        "ELIGIBLE",
+        "ADVISORY_LEVEL_GAP",
+        "NOT_ELIGIBLE_LEVEL",
+        "NEEDS_REVIEW",
+    ]
+    evidence: List[str] = Field(default_factory=list)
+    reason_codes: List[str] = Field(default_factory=list)
+
 class EvaluationResponse(BaseModel):
     overall_score: float
     match_level: str  # HIGH, MEDIUM, LOW
@@ -157,3 +194,4 @@ class EvaluationResponse(BaseModel):
     evidence: List[EvidenceInfo] = Field(default_factory=list)
     confidence_score: float = 1.0
     summary: str
+    experience_assessment: Optional[ExperienceLevelAssessment] = None

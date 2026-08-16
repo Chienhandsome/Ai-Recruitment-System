@@ -65,6 +65,7 @@ class MatchingEngine:
             evidence=match_metrics["skills"]["evidence"],
             confidence_score=final_scores["confidence_score"],
             summary=explanations["summary"],
+            experience_assessment=match_metrics["experience"].get("level_assessment"),
         )
 
 # Singleton engine instance

@@ -106,6 +106,7 @@ class JobPayload(BaseModel):
     salary_min: Optional[float] = None
     salary_max: Optional[float] = None
     location: Optional[str] = None
+    experience_level: Optional[str] = None
     required_experience_years: float = 0.0
     description: Optional[str] = None
     requirements: Optional[str] = None

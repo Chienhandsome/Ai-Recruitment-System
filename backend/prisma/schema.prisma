@@ -54,6 +54,11 @@ enum ExperienceLevel {
   DIRECTOR
 }
 
+enum LevelRequirementMode {
+  ADVISORY
+  REQUIRED
+}
+
 enum SkillStatus {
   ACTIVE
   INACTIVE
@@ -311,24 +316,25 @@ model RecruiterProfile {
 }
 
 model JobPosting {
-  id                      String           @id @default(uuid())
-  jobCode                 String           @unique @map("job_code")
+  id                      String               @id @default(uuid())
+  jobCode                 String               @unique @map("job_code")
   title                   String
-  recruiterId             String           @map("recruiter_id")
-  recruiter               RecruiterProfile @relation(fields: [recruiterId], references: [id], onDelete: Restrict)
-  departmentId            String?          @map("department_id")
-  department              Department?      @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  recruiterId             String               @map("recruiter_id")
+  recruiter               RecruiterProfile     @relation(fields: [recruiterId], references: [id], onDelete: Restrict)
+  departmentId            String?              @map("department_id")
+  department              Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   description             String
   requirements            String?
   benefits                String?
-  employmentType          EmploymentType   @default(FULL_TIME) @map("employment_type")
-  experienceLevel         ExperienceLevel  @default(JUNIOR) @map("experience_level")
-  status                  JobStatus        @default(DRAFT)
-  minSalary               Decimal?         @map("min_salary") @db.Decimal(12, 2)
-  maxSalary               Decimal?         @map("max_salary") @db.Decimal(12, 2)
-  currency                String           @default("VND")
+  employmentType          EmploymentType       @default(FULL_TIME) @map("employment_type")
+  experienceLevel         ExperienceLevel      @default(JUNIOR) @map("experience_level")
+  status                  JobStatus            @default(DRAFT)
+  minSalary               Decimal?             @map("min_salary") @db.Decimal(12, 2)
+  maxSalary               Decimal?             @map("max_salary") @db.Decimal(12, 2)
+  currency                String               @default("VND")
   location                String?
-  requiredExperienceYears Int?             @map("required_experience_years")
+  requiredExperienceYears Int?                 @map("required_experience_years")
+  levelRequirementMode    LevelRequirementMode @default(ADVISORY) @map("level_requirement_mode")
 
   // AI Matching Configurations
   autoShortlistThreshold   Decimal? @map("auto_shortlist_threshold") @db.Decimal(5, 2)
@@ -687,29 +693,37 @@ model Application {
 }
 
 model AiMatchingResult {
-  id                    String      @id @default(uuid())
-  applicationId         String      @map("application_id")
-  application           Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  version               Int         @default(1)
-  overallScore          Decimal     @map("overall_score") @db.Decimal(5, 2)
-  matchLevel            MatchLevel  @default(LOW) @map("match_level")
-  skillScore            Decimal?    @map("skill_score") @db.Decimal(5, 2)
-  experienceScore       Decimal?    @map("experience_score") @db.Decimal(5, 2)
-  educationScore        Decimal?    @map("education_score") @db.Decimal(5, 2)
-  projectScore          Decimal?    @map("project_score") @db.Decimal(5, 2)
-  matchedSkills         Json?       @map("matched_skills")
-  missingSkills         Json?       @map("missing_skills")
-  missingRequiredSkills Json?       @map("missing_required_skills")
-  strengths             Json?
-  gaps                  Json?
-  weaknesses            Json?
-  evidence              Json?       @map("evidence")
-  confidenceScore       Decimal?    @map("confidence_score") @db.Decimal(3, 2)
-  reasoningSummary      String?     @map("reasoning_summary") @db.Text
-  inputSnapshot         Json?       @map("input_snapshot")
-  modelVersion          String?     @map("model_version")
-  createdAt             DateTime    @default(now()) @map("created_at")
-  updatedAt             DateTime    @updatedAt @map("updated_at")
+  id                       String           @id @default(uuid())
+  applicationId            String           @map("application_id")
+  application              Application      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  version                  Int              @default(1)
+  overallScore             Decimal          @map("overall_score") @db.Decimal(5, 2)
+  matchLevel               MatchLevel       @default(LOW) @map("match_level")
+  skillScore               Decimal?         @map("skill_score") @db.Decimal(5, 2)
+  experienceScore          Decimal?         @map("experience_score") @db.Decimal(5, 2)
+  educationScore           Decimal?         @map("education_score") @db.Decimal(5, 2)
+  projectScore             Decimal?         @map("project_score") @db.Decimal(5, 2)
+  matchedSkills            Json?            @map("matched_skills")
+  missingSkills            Json?            @map("missing_skills")
+  missingRequiredSkills    Json?            @map("missing_required_skills")
+  strengths                Json?
+  gaps                     Json?
+  weaknesses               Json?
+  evidence                 Json?            @map("evidence")
+  confidenceScore          Decimal?         @map("confidence_score") @db.Decimal(3, 2)
+  reasoningSummary         String?          @map("reasoning_summary") @db.Text
+  inputSnapshot            Json?            @map("input_snapshot")
+  modelVersion             String?          @map("model_version")
+  candidateExperienceLevel ExperienceLevel? @map("candidate_experience_level")
+  requiredExperienceLevel  ExperienceLevel? @map("required_experience_level")
+  totalExperienceYears     Decimal?         @map("total_experience_years") @db.Decimal(5, 2)
+  levelFitScore            Decimal?         @map("level_fit_score") @db.Decimal(5, 2)
+  levelGap                 Int?             @map("level_gap")
+  levelEligible            Boolean?         @map("level_eligible")
+  levelConfidence          Decimal?         @map("level_confidence") @db.Decimal(3, 2)
+  levelEvidence            Json?            @map("level_evidence")
+  createdAt                DateTime         @default(now()) @map("created_at")
+  updatedAt                DateTime         @updatedAt @map("updated_at")
 
   @@unique([applicationId, version])
   @@index([overallScore])

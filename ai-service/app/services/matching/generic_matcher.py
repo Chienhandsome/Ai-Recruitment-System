@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 from app.schemas.matching import CandidateProfilePayload, JobPayload
+from app.services.matching.experience_level_evaluator import experience_level_evaluator
 from app.services.matching.semantic import semantic_matcher
 from app.utils.normalizer import normalize_skill_name
 
@@ -210,7 +211,17 @@ class GenericMatchingEngine:
         return best_score, best_text, best_source
 
     def _match_experience(self, cand_profile: CandidateProfilePayload, job: JobPayload) -> Dict[str, Any]:
-        total_years = self._calculate_total_years(cand_profile.work_experiences)
+        level_assessment = None
+        if job.experience_level:
+            level_assessment = experience_level_evaluator.evaluate(
+                cand_profile.work_experiences,
+                job.experience_level,
+                job.level_requirement_mode,
+                job.evaluation_date,
+            )
+            total_years = float(level_assessment["total_experience_years"])
+        else:
+            total_years = self._calculate_total_years(cand_profile.work_experiences)
         req_years = float(job.required_experience_years or 0.0)
         
         duration_score = 1.0
@@ -232,21 +243,44 @@ class GenericMatchingEngine:
         job_full_desc = f"{job.title}. {job.description or ''}. {job.requirements or ''}"
         desc_sim = semantic_matcher.compute_best_similarity(job_full_desc, exp_descriptions) if exp_descriptions else 0.0
         
-        relevance_score = 0.7 * best_rel + 0.3 * desc_sim
-        exp_score = 0.5 * duration_score + 0.5 * relevance_score if cand_profile.work_experiences else 0.2
+        work_relevance_score = 0.7 * best_rel + 0.3 * desc_sim
+        legacy_exp_score = 0.5 * duration_score + 0.5 * work_relevance_score if cand_profile.work_experiences else 0.2
 
         project_metrics = self._eval_projects(cand_profile, job)
         project_score = project_metrics["score"]
 
-        # Blend work experience and projects
+        # Preserve the v1 formula for legacy snapshots/jobs that do not carry
+        # an explicit experience level.
         if cand_profile.work_experiences and cand_profile.projects:
-            final_score = 0.7 * exp_score + 0.3 * project_score
+            relevance_score = 0.7 * work_relevance_score + 0.3 * project_score
+            legacy_final_score = 0.7 * legacy_exp_score + 0.3 * project_score
         elif cand_profile.work_experiences:
-            final_score = exp_score
+            relevance_score = work_relevance_score
+            legacy_final_score = legacy_exp_score
         elif cand_profile.projects:
-            final_score = project_score
+            relevance_score = project_score
+            legacy_final_score = project_score
         else:
-            final_score = 0.2
+            relevance_score = 0.2
+            legacy_final_score = 0.2
+
+        if level_assessment is None:
+            final_score = legacy_final_score
+        else:
+            fit_score = level_assessment.get("level_fit_score")
+            if fit_score is None or float(level_assessment["level_confidence"]) < 0.5:
+                final_score = 0.5 * duration_score + 0.5 * relevance_score
+            else:
+                final_score = (
+                    0.35 * duration_score
+                    + 0.35 * relevance_score
+                    + 0.30 * (float(fit_score) / 100.0)
+                )
+            level_assessment = {
+                **level_assessment,
+                "duration_score": round(duration_score * 100.0, 2),
+                "relevance_score": round(relevance_score * 100.0, 2),
+            }
 
         return {
             "score": final_score,
@@ -256,7 +290,8 @@ class GenericMatchingEngine:
             "title_sim": best_rel,
             "desc_sim": desc_sim,
             "best_title": candidate_titles[0] if candidate_titles else None,
-            "project_metrics": project_metrics
+            "project_metrics": project_metrics,
+            "level_assessment": level_assessment,
         }
 
     def _calculate_total_years(self, experiences) -> float:

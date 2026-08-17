@@ -19,6 +19,8 @@ export interface JobPostingData {
   };
   description: string;
   employmentType: string;
+  experienceLevel?: string;
+  levelRequirementMode?: "ADVISORY" | "REQUIRED";
   status: string;
   requiredExperienceYears?: number;
   autoShortlistThreshold?: number;

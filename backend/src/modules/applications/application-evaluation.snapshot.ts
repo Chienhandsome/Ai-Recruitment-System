@@ -1,6 +1,10 @@
 import type { Prisma } from '@prisma/client';
 
-export const APPLICATION_SNAPSHOT_VERSION = 1 as const;
+export const LEGACY_APPLICATION_SNAPSHOT_VERSION = 1 as const;
+export const APPLICATION_SNAPSHOT_VERSION = 2 as const;
+export type ApplicationSnapshotVersion =
+  | typeof LEGACY_APPLICATION_SNAPSHOT_VERSION
+  | typeof APPLICATION_SNAPSHOT_VERSION;
 
 export interface ApplicationEvaluationInput {
   candidate_profile: Record<string, unknown>;
@@ -9,7 +13,7 @@ export interface ApplicationEvaluationInput {
 }
 
 export interface ApplicationProfileSnapshot {
-  schemaVersion: typeof APPLICATION_SNAPSHOT_VERSION;
+  schemaVersion: ApplicationSnapshotVersion;
   capturedAt: string;
   candidateIdentity: {
     id: string;
@@ -42,7 +46,8 @@ export function createEvaluationMessage(
 ): Record<string, unknown> | null {
   const snapshot = asRecord(snapshotValue);
   if (
-    snapshot?.schemaVersion !== APPLICATION_SNAPSHOT_VERSION ||
+    (snapshot?.schemaVersion !== LEGACY_APPLICATION_SNAPSHOT_VERSION &&
+      snapshot?.schemaVersion !== APPLICATION_SNAPSHOT_VERSION) ||
     !isRecord(snapshot.evaluationInput)
   ) {
     return null;
@@ -58,6 +63,9 @@ export function createEvaluationMessage(
   return {
     applicationId,
     application_id: applicationId,
+    schema_version: snapshot.schemaVersion,
+    evaluation_date:
+      typeof snapshot.capturedAt === 'string' ? snapshot.capturedAt : undefined,
     candidate_profile: candidateProfile,
     job,
     weights,

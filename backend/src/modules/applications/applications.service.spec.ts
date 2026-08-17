@@ -109,6 +109,7 @@ const job = {
   requiresProofOfWork: false,
   proofOfWorkType: null,
   requiredExperienceYears: 2,
+  levelRequirementMode: 'ADVISORY',
   autoShortlistThreshold: null,
   autoRejectThreshold: null,
   rejectOnMissingMandatory: false,
@@ -195,7 +196,7 @@ describe('ApplicationsService', () => {
     );
     expect(createData.profileSnapshot).toEqual(
       expect.objectContaining({
-        schemaVersion: 1,
+        schemaVersion: 2,
         capturedAt: now.toISOString(),
         candidateIdentity: expect.objectContaining({
           email: candidateProfile.email,
@@ -203,7 +204,11 @@ describe('ApplicationsService', () => {
         resume: expect.objectContaining({ id: resume.id }),
         evaluationInput: expect.objectContaining({
           candidate_profile: expect.any(Object),
-          job: expect.objectContaining({ id: job.id }),
+          job: expect.objectContaining({
+            id: job.id,
+            experience_level: job.experienceLevel,
+            evaluation_date: now.toISOString(),
+          }),
         }),
       }),
     );

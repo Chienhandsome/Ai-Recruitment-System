@@ -89,9 +89,50 @@ export interface CandidateJobDetail extends CandidateJobSummary {
   hasApplied?: boolean;
   application?: {
     id: string;
-    status: string;
-    createdAt: string;
+    processingStatus: CandidateApplicationProcessingStatus;
+    currentStage: CandidateApplicationStage;
+    appliedAt: string;
   } | null;
+}
+
+export type CandidateApplicationStage =
+  | 'RECEIVED'
+  | 'SCREENING'
+  | 'SHORTLISTED'
+  | 'INTERVIEW_SCHEDULED'
+  | 'INTERVIEWED'
+  | 'OFFERED'
+  | 'HIRED'
+  | 'REJECTED'
+  | 'WITHDRAWN';
+
+export type CandidateApplicationProcessingStatus =
+  | 'UPLOADED'
+  | 'QUEUED'
+  | 'PARSING'
+  | 'NORMALIZING'
+  | 'MATCHING'
+  | 'SCORING'
+  | 'COMPLETED'
+  | 'FAILED';
+
+export interface CandidateApplicationItem {
+  id: string;
+  job: {
+    id: string;
+    title: string;
+    location: string | null;
+    company: { id: string; name: string } | null;
+  };
+  currentStage: CandidateApplicationStage;
+  processingStatus: CandidateApplicationProcessingStatus;
+  appliedAt: string;
+  updatedAt: string;
+}
+
+export interface CandidateApplicationsResponse {
+  data: CandidateApplicationItem[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
 export interface CandidateJobsResponse {
@@ -191,6 +232,27 @@ export async function applyForJob(
   }
 
   return res.json();
+}
+
+export async function getMyApplications(
+  token: string,
+  query: { stage?: CandidateApplicationStage; page?: number; limit?: number } = {},
+): Promise<CandidateApplicationsResponse> {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined) params.set(key, String(value));
+  });
+  const response = await fetch(`${API_URL}/applications/me?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+  if (!response.ok) {
+    throw new CandidateApiError(
+      await readApiError(response, 'Không thể tải danh sách đơn ứng tuyển'),
+      response.status,
+    );
+  }
+  return response.json();
 }
 
 // ─── Types ────────────────────────────────────────────────────────────

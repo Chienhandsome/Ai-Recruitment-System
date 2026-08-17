@@ -23,6 +23,7 @@ import {
 } from '@/lib/job-display';
 import { createClient } from '@/lib/supabase/server';
 import { ApplyButton } from '@/components/candidate/apply-button';
+import { applicationStageLabels, applicationStageStyles } from '@/lib/application-stage';
 
 export const dynamic = 'force-dynamic';
 
@@ -179,9 +180,16 @@ export default async function CandidateJobDetailPage({
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {job.hasApplied
-                ? 'Hồ sơ của bạn đã được gửi tới nhà tuyển dụng và AI đã hoàn tất việc đánh giá.'
+                ? job.application?.processingStatus === 'COMPLETED'
+                  ? 'Hồ sơ đã được tiếp nhận và phân tích. Quyết định cuối cùng thuộc nhà tuyển dụng.'
+                  : 'Hồ sơ đã được tiếp nhận và đang được xử lý.'
                 : 'Bạn đã sẵn sàng cho vị trí này? Cập nhật CV mới nhất của bạn và gửi ngay cho chúng tôi.'}
             </p>
+            {job.application && (
+              <span className={`mt-3 inline-flex rounded-full border px-3 py-1 text-xs font-bold ${applicationStageStyles[job.application.currentStage]}`}>
+                {applicationStageLabels[job.application.currentStage]}
+              </span>
+            )}
             <ApplyButton
               jobId={job.id}
               hasApplied={job.hasApplied}

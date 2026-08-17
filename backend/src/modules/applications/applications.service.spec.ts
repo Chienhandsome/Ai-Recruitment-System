@@ -162,6 +162,7 @@ describe('ApplicationsService', () => {
     const service = new ApplicationsService(
       prisma as never,
       evaluationService as never,
+      {} as never,
     );
 
     const result = await service.applyForJob(
@@ -212,7 +213,7 @@ describe('ApplicationsService', () => {
         }),
       }),
     );
-    const evaluationInput = (createData.profileSnapshot as any).evaluationInput;
+    const evaluationInput = createData.profileSnapshot.evaluationInput;
     expect(evaluationInput.candidate_profile.skills[0]).toEqual(
       expect.objectContaining({
         skill_id: 'skill-1',
@@ -245,6 +246,7 @@ describe('ApplicationsService', () => {
     const service = new ApplicationsService(
       prisma as never,
       evaluationService as never,
+      {} as never,
     );
 
     await expect(
@@ -263,6 +265,7 @@ describe('ApplicationsService', () => {
     const service = new ApplicationsService(
       prisma as never,
       evaluationService as never,
+      {} as never,
     );
 
     await expect(
@@ -282,6 +285,7 @@ describe('ApplicationsService', () => {
     const service = new ApplicationsService(
       prisma as never,
       evaluationService as never,
+      {} as never,
     );
 
     await expect(
@@ -296,6 +300,7 @@ describe('ApplicationsService', () => {
     const service = new ApplicationsService(
       prisma as never,
       evaluationService as never,
+      {} as never,
     );
 
     const result = await service.applyForJob(

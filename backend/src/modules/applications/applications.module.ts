@@ -6,6 +6,7 @@ import { AuthModule } from '../auth/auth.module';
 import { RabbitMQModule } from '../../infrastructure/rabbitmq/rabbitmq.module';
 import { ApplicationEvaluationService } from './application-evaluation.service';
 import { RetryApplicationEvaluationsUseCase } from './retry-application-evaluations.use-case';
+import { ApplicationAccessService } from './application-access.service';
 
 @Module({
   imports: [AuthModule, RabbitMQModule],
@@ -15,6 +16,7 @@ import { RetryApplicationEvaluationsUseCase } from './retry-application-evaluati
     ApplicationsConsumer,
     ApplicationEvaluationService,
     RetryApplicationEvaluationsUseCase,
+    ApplicationAccessService,
   ],
   exports: [ApplicationsService, ApplicationsConsumer],
 })

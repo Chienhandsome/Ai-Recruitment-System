@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   ApplicationProcessingStatus,
@@ -15,6 +16,20 @@ import {
 import { PrismaService } from '../../database/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { ApplicationEvaluationService } from './application-evaluation.service';
+import { ApplicationAccessService } from './application-access.service';
+import {
+  allowedApplicationTransitions,
+  applicationTransitionRequiresNote,
+  canTransitionApplication,
+  hrDecisionForStage,
+} from './application-stage-machine';
+import {
+  ApplicationSortBy,
+  QueryRecruiterApplicationsDto,
+  SortOrder,
+} from './dto/query-recruiter-applications.dto';
+import { QueryMyApplicationsDto } from './dto/query-my-applications.dto';
+import { UpdateApplicationStageDto } from './dto/update-application-stage.dto';
 import {
   APPLICATION_SNAPSHOT_VERSION,
   type ApplicationProfileSnapshot,
@@ -45,6 +60,77 @@ const resumeSnapshotSelect = {
   createdAt: true,
 } satisfies Prisma.ResumeSelect;
 
+const latestAiResultSelect = {
+  id: true,
+  version: true,
+  overallScore: true,
+  matchLevel: true,
+  skillScore: true,
+  experienceScore: true,
+  educationScore: true,
+  projectScore: true,
+  matchedSkills: true,
+  missingSkills: true,
+  missingRequiredSkills: true,
+  strengths: true,
+  gaps: true,
+  weaknesses: true,
+  evidence: true,
+  confidenceScore: true,
+  reasoningSummary: true,
+  inputSnapshot: true,
+  modelVersion: true,
+  candidateExperienceLevel: true,
+  requiredExperienceLevel: true,
+  totalExperienceYears: true,
+  levelFitScore: true,
+  levelGap: true,
+  levelEligible: true,
+  levelConfidence: true,
+  levelEvidence: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.AiMatchingResultSelect;
+
+const recruiterApplicationListSelect = {
+  id: true,
+  currentStage: true,
+  hrDecision: true,
+  processingStatus: true,
+  appliedAt: true,
+  updatedAt: true,
+  job: {
+    select: { id: true, jobCode: true, title: true },
+  },
+  candidate: {
+    select: {
+      id: true,
+      desiredTitle: true,
+      user: {
+        select: {
+          fullName: true,
+          email: true,
+          avatarUrl: true,
+        },
+      },
+    },
+  },
+  aiMatchingResults: {
+    orderBy: { version: 'desc' as const },
+    take: 1,
+    select: {
+      overallScore: true,
+      matchLevel: true,
+      confidenceScore: true,
+      version: true,
+    },
+  },
+} satisfies Prisma.ApplicationSelect;
+
+type RecruiterApplicationListRecord = Prisma.ApplicationGetPayload<{
+  select: typeof recruiterApplicationListSelect;
+}>;
+
 type CandidateForApplication = Prisma.CandidateProfileGetPayload<{
   include: typeof candidateProfileInclude;
 }>;
@@ -62,6 +148,7 @@ export class ApplicationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly evaluationService: ApplicationEvaluationService,
+    private readonly accessService: ApplicationAccessService,
   ) {}
 
   async applyForJob(
@@ -187,6 +274,421 @@ export class ApplicationsService {
       applicationId: application.id,
       evaluationStatus: published ? 'QUEUED' : 'RETRY_SCHEDULED',
     };
+  }
+
+  async findAllForRecruiter(
+    userId: string,
+    query: QueryRecruiterApplicationsDto,
+  ) {
+    if (
+      query.minScore !== undefined &&
+      query.maxScore !== undefined &&
+      query.minScore > query.maxScore
+    ) {
+      throw new BadRequestException(
+        'minScore must be less than or equal to maxScore.',
+      );
+    }
+
+    const scope = await this.accessService.recruiterApplicationWhere(userId);
+    const where: Prisma.ApplicationWhereInput = {
+      AND: [
+        scope,
+        query.jobId ? { jobId: query.jobId } : {},
+        query.stage ? { currentStage: query.stage } : {},
+        query.hrDecision ? { hrDecision: query.hrDecision } : {},
+        query.processingStatus
+          ? { processingStatus: query.processingStatus }
+          : {},
+        query.search?.trim()
+          ? {
+              candidate: {
+                user: {
+                  OR: [
+                    {
+                      fullName: {
+                        contains: query.search.trim(),
+                        mode: 'insensitive',
+                      },
+                    },
+                    {
+                      email: {
+                        contains: query.search.trim(),
+                        mode: 'insensitive',
+                      },
+                    },
+                  ],
+                },
+              },
+            }
+          : {},
+      ],
+    };
+
+    const rows = await this.prisma.application.findMany({
+      where,
+      select: recruiterApplicationListSelect,
+    });
+
+    const filtered = rows.filter((row) => {
+      const score = this.latestScore(row);
+      if (query.minScore !== undefined && (score ?? -1) < query.minScore) {
+        return false;
+      }
+      if (query.maxScore !== undefined && (score ?? 101) > query.maxScore) {
+        return false;
+      }
+      return true;
+    });
+
+    filtered.sort((left, right) =>
+      this.compareApplicationRows(left, right, query.sortBy, query.sortOrder),
+    );
+
+    const total = filtered.length;
+    const start = (query.page - 1) * query.limit;
+    const pageRows = filtered.slice(start, start + query.limit);
+
+    return {
+      data: pageRows.map((row) => this.toRecruiterListItem(row)),
+      meta: {
+        total,
+        page: query.page,
+        limit: query.limit,
+        totalPages: Math.ceil(total / query.limit),
+      },
+    };
+  }
+
+  async findOneForRecruiter(userId: string, applicationId: string) {
+    const scope = await this.accessService.recruiterApplicationWhere(userId);
+    const application = await this.prisma.application.findFirst({
+      where: { AND: [scope, { id: applicationId }] },
+      select: {
+        id: true,
+        currentStage: true,
+        hrDecision: true,
+        hrNotes: true,
+        processingStatus: true,
+        evaluationError: true,
+        profileSnapshot: true,
+        appliedAt: true,
+        updatedAt: true,
+        job: {
+          select: {
+            id: true,
+            jobCode: true,
+            title: true,
+            location: true,
+            levelRequirementMode: true,
+            skillWeight: true,
+            experienceWeight: true,
+            educationWeight: true,
+            otherWeight: true,
+          },
+        },
+        candidate: {
+          select: {
+            id: true,
+            desiredTitle: true,
+            user: {
+              select: {
+                fullName: true,
+                email: true,
+                phone: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
+        aiMatchingResults: {
+          orderBy: { version: 'desc' },
+          take: 1,
+          select: latestAiResultSelect,
+        },
+        statusHistories: {
+          orderBy: { createdAt: 'desc' },
+          take: 20,
+          select: {
+            id: true,
+            previousStage: true,
+            newStage: true,
+            changedByUserId: true,
+            note: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Application not found.');
+    }
+
+    const latestAiResult = application.aiMatchingResults[0] ?? null;
+    return {
+      id: application.id,
+      job: this.serializeJob(application.job),
+      candidate: {
+        id: application.candidate.id,
+        desiredTitle: application.candidate.desiredTitle,
+        ...application.candidate.user,
+      },
+      currentStage: application.currentStage,
+      hrDecision: application.hrDecision,
+      hrNotes: application.hrNotes,
+      processingStatus: application.processingStatus,
+      evaluationError: application.evaluationError,
+      profileSnapshot: application.profileSnapshot,
+      latestAiResult: latestAiResult
+        ? this.serializeAiResult(latestAiResult)
+        : null,
+      statusHistories: application.statusHistories,
+      appliedAt: application.appliedAt,
+      updatedAt: application.updatedAt,
+      allowedTransitions: allowedApplicationTransitions(
+        application.currentStage,
+      ),
+    };
+  }
+
+  async updateStage(
+    userId: string,
+    applicationId: string,
+    dto: UpdateApplicationStageDto,
+  ) {
+    const scope = await this.accessService.recruiterApplicationWhere(userId);
+    const application = await this.prisma.application.findFirst({
+      where: { AND: [scope, { id: applicationId }] },
+      select: {
+        id: true,
+        currentStage: true,
+        hrNotes: true,
+      },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Application not found.');
+    }
+    if (application.currentStage !== dto.expectedStage) {
+      throw new ConflictException(
+        `Application stage changed from ${dto.expectedStage} to ${application.currentStage}.`,
+      );
+    }
+    if (dto.targetStage === dto.expectedStage) {
+      throw new ConflictException(
+        'Application is already in the target stage.',
+      );
+    }
+    if (!canTransitionApplication(dto.expectedStage, dto.targetStage)) {
+      throw new UnprocessableEntityException(
+        `Transition from ${dto.expectedStage} to ${dto.targetStage} is not allowed.`,
+      );
+    }
+
+    const note = dto.note?.trim() || null;
+    if (
+      applicationTransitionRequiresNote(dto.expectedStage, dto.targetStage) &&
+      !note
+    ) {
+      throw new BadRequestException('A note is required for this transition.');
+    }
+
+    const hrNotes =
+      dto.hrNotes === undefined
+        ? application.hrNotes
+        : dto.hrNotes.trim() || null;
+    const hrDecision = hrDecisionForStage(dto.targetStage);
+
+    return this.prisma.$transaction(async (prisma) => {
+      const updated = await prisma.application.updateMany({
+        where: {
+          id: applicationId,
+          currentStage: dto.expectedStage,
+        },
+        data: {
+          currentStage: dto.targetStage,
+          hrDecision,
+          hrNotes,
+        },
+      });
+
+      if (updated.count !== 1) {
+        throw new ConflictException(
+          'Application was updated by another recruiter. Refresh and try again.',
+        );
+      }
+
+      const historyEntry = await prisma.applicationStatusHistory.create({
+        data: {
+          applicationId,
+          previousStage: dto.expectedStage,
+          newStage: dto.targetStage,
+          changedByUserId: userId,
+          note,
+        },
+        select: {
+          id: true,
+          note: true,
+          changedByUserId: true,
+          createdAt: true,
+        },
+      });
+
+      const current = await prisma.application.findUniqueOrThrow({
+        where: { id: applicationId },
+        select: {
+          id: true,
+          currentStage: true,
+          hrDecision: true,
+          hrNotes: true,
+          updatedAt: true,
+        },
+      });
+
+      return {
+        ...current,
+        previousStage: dto.expectedStage,
+        allowedTransitions: allowedApplicationTransitions(current.currentStage),
+        historyEntry,
+      };
+    });
+  }
+
+  async findMine(userId: string, query: QueryMyApplicationsDto) {
+    const candidateId = await this.accessService.candidateProfileId(userId);
+    const where: Prisma.ApplicationWhereInput = {
+      candidateId,
+      ...(query.stage ? { currentStage: query.stage } : {}),
+    };
+    const skip = (query.page - 1) * query.limit;
+
+    const [total, applications] = await Promise.all([
+      this.prisma.application.count({ where }),
+      this.prisma.application.findMany({
+        where,
+        skip,
+        take: query.limit,
+        orderBy: { appliedAt: 'desc' },
+        select: {
+          id: true,
+          currentStage: true,
+          processingStatus: true,
+          appliedAt: true,
+          updatedAt: true,
+          job: {
+            select: {
+              id: true,
+              title: true,
+              location: true,
+              recruiter: {
+                select: {
+                  company: { select: { id: true, name: true } },
+                },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      data: applications.map((application) => ({
+        id: application.id,
+        job: {
+          id: application.job.id,
+          title: application.job.title,
+          location: application.job.location,
+          company: application.job.recruiter.company,
+        },
+        currentStage: application.currentStage,
+        processingStatus: application.processingStatus,
+        appliedAt: application.appliedAt,
+        updatedAt: application.updatedAt,
+      })),
+      meta: {
+        total,
+        page: query.page,
+        limit: query.limit,
+        totalPages: Math.ceil(total / query.limit),
+      },
+    };
+  }
+
+  private latestScore(row: RecruiterApplicationListRecord): number | null {
+    const score = row.aiMatchingResults[0]?.overallScore;
+    return score === undefined ? null : Number(score);
+  }
+
+  private compareApplicationRows(
+    left: RecruiterApplicationListRecord,
+    right: RecruiterApplicationListRecord,
+    sortBy: ApplicationSortBy,
+    sortOrder: SortOrder,
+  ): number {
+    let comparison: number;
+    if (sortBy === ApplicationSortBy.APPLIED_AT) {
+      comparison = left.appliedAt.getTime() - right.appliedAt.getTime();
+    } else if (sortBy === ApplicationSortBy.UPDATED_AT) {
+      comparison = left.updatedAt.getTime() - right.updatedAt.getTime();
+    } else {
+      const leftScore = this.latestScore(left);
+      const rightScore = this.latestScore(right);
+      if (leftScore === null && rightScore === null) comparison = 0;
+      else if (leftScore === null) return 1;
+      else if (rightScore === null) return -1;
+      else comparison = leftScore - rightScore;
+    }
+
+    return sortOrder === SortOrder.ASC ? comparison : -comparison;
+  }
+
+  private toRecruiterListItem(row: RecruiterApplicationListRecord) {
+    const latest = row.aiMatchingResults[0];
+    return {
+      id: row.id,
+      job: row.job,
+      candidate: {
+        id: row.candidate.id,
+        desiredTitle: row.candidate.desiredTitle,
+        ...row.candidate.user,
+      },
+      currentStage: row.currentStage,
+      hrDecision: row.hrDecision,
+      processingStatus: row.processingStatus,
+      latestAiResult: latest
+        ? {
+            overallScore: Number(latest.overallScore),
+            matchLevel: latest.matchLevel,
+            confidenceScore:
+              latest.confidenceScore === null
+                ? null
+                : Number(latest.confidenceScore),
+            version: latest.version,
+          }
+        : null,
+      appliedAt: row.appliedAt,
+      updatedAt: row.updatedAt,
+      allowedTransitions: allowedApplicationTransitions(row.currentStage),
+    };
+  }
+
+  private serializeJob<T extends Record<string, unknown>>(job: T): T {
+    return Object.fromEntries(
+      Object.entries(job).map(([key, value]) => [
+        key,
+        value instanceof Prisma.Decimal ? Number(value) : value,
+      ]),
+    ) as T;
+  }
+
+  private serializeAiResult<T extends Record<string, unknown>>(result: T): T {
+    return Object.fromEntries(
+      Object.entries(result).map(([key, value]) => [
+        key,
+        value instanceof Prisma.Decimal ? Number(value) : value,
+      ]),
+    ) as T;
   }
 
   private buildProfileSnapshot(

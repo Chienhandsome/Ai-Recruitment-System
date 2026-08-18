@@ -344,8 +344,6 @@ export class JobsService {
     }
 
     let application = null;
-    let aiScore = null;
-    let matchLevel = null;
 
     const profile = await this.prisma.candidateProfile.findUnique({
       where: { userId },
@@ -360,14 +358,20 @@ export class JobsService {
             candidateId: profile.id,
           },
         },
-        include: { aiMatchingResults: true },
+        select: {
+          id: true,
+          processingStatus: true,
+          currentStage: true,
+          appliedAt: true,
+        },
       });
 
       if (app) {
         application = {
           id: app.id,
-          status: app.processingStatus,
-          createdAt: app.appliedAt,
+          processingStatus: app.processingStatus,
+          currentStage: app.currentStage,
+          appliedAt: app.appliedAt,
         };
       }
     }

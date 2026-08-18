@@ -7,8 +7,19 @@ import {
   GraduationCap, Code, AlertTriangle, ExternalLink, ThumbsUp, ThumbsDown, ChevronRight,
   Phone, Mail, FolderGit2, ShieldCheck
 } from "lucide-react";
-import { JobPostingData, getRecruiterJobDetail, deleteRecruiterJob, updateRecruiterJob } from "@/lib/recruiter-api";
+import {
+  type JobPostingData,
+  type RecruiterApplicationDetail,
+  type RecruiterApplicationListItem,
+  getRecruiterApplicationDetail,
+  getRecruiterApplications,
+  getRecruiterJobDetail,
+  deleteRecruiterJob,
+  updateRecruiterJob,
+} from "@/lib/recruiter-api";
 import { format } from "date-fns";
+import { ApplicationStageActions } from "./applications/ApplicationStageActions";
+import { applicationStageLabels, applicationStageStyles } from "@/lib/application-stage";
 
 interface JobDetailViewProps {
   jobId: string;
@@ -31,6 +42,95 @@ function isAiEvaluationPending(status: unknown): boolean {
   return typeof status === "string" && AI_PENDING_STATUSES.has(status);
 }
 
+function listItemToLegacyApplication(item: RecruiterApplicationListItem) {
+  return {
+    id: item.id,
+    currentStage: item.currentStage,
+    hrDecision: item.hrDecision,
+    processingStatus: item.processingStatus,
+    appliedAt: item.appliedAt,
+    updatedAt: item.updatedAt,
+    allowedTransitions: item.allowedTransitions,
+    candidate: {
+      id: item.candidate.id,
+      desiredTitle: item.candidate.desiredTitle,
+      user: {
+        fullName: item.candidate.fullName,
+        email: item.candidate.email,
+        avatarUrl: item.candidate.avatarUrl,
+      },
+      workExperiences: [],
+      educations: [],
+      projects: [],
+      candidateSkills: [],
+    },
+    aiMatchingResults: item.latestAiResult ? [item.latestAiResult] : [],
+  };
+}
+
+function detailToLegacyApplication(detail: RecruiterApplicationDetail) {
+  const snapshot = detail.profileSnapshot as {
+    evaluationInput?: {
+      candidate_profile?: {
+        work_experiences?: Array<Record<string, unknown>>;
+        educations?: Array<Record<string, unknown>>;
+        projects?: Array<Record<string, unknown>>;
+        skills?: Array<Record<string, unknown>>;
+      };
+    };
+  } | null;
+  const profile = snapshot?.evaluationInput?.candidate_profile;
+
+  return {
+    id: detail.id,
+    currentStage: detail.currentStage,
+    hrDecision: detail.hrDecision,
+    hrNotes: detail.hrNotes,
+    processingStatus: detail.processingStatus,
+    evaluationError: detail.evaluationError,
+    appliedAt: detail.appliedAt,
+    updatedAt: detail.updatedAt,
+    allowedTransitions: detail.allowedTransitions,
+    candidate: {
+      id: detail.candidate.id,
+      desiredTitle: detail.candidate.desiredTitle,
+      user: {
+        fullName: detail.candidate.fullName,
+        email: detail.candidate.email,
+        phone: detail.candidate.phone,
+        avatarUrl: detail.candidate.avatarUrl,
+      },
+      workExperiences: (profile?.work_experiences ?? []).map((item) => ({
+        companyName: item.company_name,
+        positionTitle: item.position_title,
+        startDate: item.start_date,
+        endDate: item.end_date,
+        description: item.description,
+        achievements: item.achievements,
+      })),
+      educations: (profile?.educations ?? []).map((item) => ({
+        schoolName: item.school_name,
+        degree: item.degree,
+        major: item.major,
+        startDate: item.start_date,
+        endDate: item.end_date,
+      })),
+      projects: (profile?.projects ?? []).map((item) => ({
+        projectName: item.project_name,
+        projectRole: item.project_role,
+        description: item.description,
+        technologies: item.technologies,
+        projectUrl: item.project_url,
+      })),
+      candidateSkills: (profile?.skills ?? []).map((item) => ({
+        proficiencyLevel: item.proficiency_level,
+        skill: { name: item.skill_name },
+      })),
+    },
+    aiMatchingResults: detail.latestAiResult ? [detail.latestAiResult] : [],
+  };
+}
+
 export function JobDetailView({
   jobId,
   token,
@@ -43,15 +143,24 @@ export function JobDetailView({
   const [loading, setLoading] = useState(true);
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [searchCandidate, setSearchCandidate] = useState("");
+  const [selectedApplicationDetail, setSelectedApplicationDetail] =
+    useState<RecruiterApplicationDetail | null>(null);
 
   const fetchJobDetail = async () => {
     setLoading(true);
     try {
-      const data = await getRecruiterJobDetail(token, jobId);
-      setJob(data);
+      const [data, applications] = await Promise.all([
+        getRecruiterJobDetail(token, jobId),
+        getRecruiterApplications(token, { jobId, limit: 100 }),
+      ]);
+      const hydratedJob = {
+        ...data,
+        applications: applications.data.map(listItemToLegacyApplication),
+      };
+      setJob(hydratedJob);
 
-      if (data?.applications && data.applications.length > 0) {
-        const sorted = [...data.applications].sort((a: any, b: any) => {
+      if (hydratedJob.applications.length > 0) {
+        const sorted = [...hydratedJob.applications].sort((a: any, b: any) => {
           const scoreA = a.aiMatchingResults?.[0] ? Number(a.aiMatchingResults[0].overallScore) : 0;
           const scoreB = b.aiMatchingResults?.[0] ? Number(b.aiMatchingResults[0].overallScore) : 0;
           return scoreB - scoreA;
@@ -69,6 +178,39 @@ export function JobDetailView({
     fetchJobDetail();
   }, [jobId]);
 
+  useEffect(() => {
+    if (!selectedAppId) {
+      setSelectedApplicationDetail(null);
+      return;
+    }
+    let cancelled = false;
+    getRecruiterApplicationDetail(token, selectedAppId)
+      .then((detail) => {
+        if (!cancelled) setSelectedApplicationDetail(detail);
+      })
+      .catch((error) => console.error("Failed to load application detail", error));
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAppId, token]);
+
+  const refreshApplications = async () => {
+    const applications = await getRecruiterApplications(token, { jobId, limit: 100 });
+    setJob((current) =>
+      current
+        ? {
+            ...current,
+            applications: applications.data.map(listItemToLegacyApplication),
+          }
+        : current,
+    );
+    if (selectedAppId) {
+      setSelectedApplicationDetail(
+        await getRecruiterApplicationDetail(token, selectedAppId),
+      );
+    }
+  };
+
   const hasPendingEvaluations =
     job?.applications?.some(
       (application: {
@@ -85,8 +227,20 @@ export function JobDetailView({
     let cancelled = false;
     const intervalId = window.setInterval(async () => {
       try {
-        const data = await getRecruiterJobDetail(token, jobId);
-        if (!cancelled) setJob(data);
+        const applications = await getRecruiterApplications(token, {
+          jobId,
+          limit: 100,
+        });
+        if (!cancelled) {
+          setJob((current) =>
+            current
+              ? {
+                  ...current,
+                  applications: applications.data.map(listItemToLegacyApplication),
+                }
+              : current,
+          );
+        }
       } catch (error) {
         console.error("Failed to refresh pending AI evaluations", error);
       }
@@ -437,7 +591,14 @@ export function JobDetailView({
                   return scoreB - scoreA;
                 });
 
-              const activeApp = sortedApplications.find((app: any) => app.id === selectedAppId) || sortedApplications[0];
+              const selectedListApplication =
+                sortedApplications.find((app: any) => app.id === selectedAppId) ||
+                sortedApplications[0];
+              const activeApp =
+                selectedApplicationDetail &&
+                selectedApplicationDetail.id === selectedListApplication?.id
+                  ? detailToLegacyApplication(selectedApplicationDetail)
+                  : selectedListApplication;
 
               return (
                 <div className="space-y-6">
@@ -512,11 +673,10 @@ export function JobDetailView({
                                 ✓ {matchedCount} Kỹ năng khớp
                               </span>
                               <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${
-                                app.currentStage === 'SHORTLISTED' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
-                                app.currentStage === 'REJECTED' ? 'bg-rose-100 text-rose-800 border-rose-300' :
+                                applicationStageStyles[app.currentStage as keyof typeof applicationStageStyles] ||
                                 'bg-[#EFF6FF] text-[#2563EB] border-blue-200'
                               }`}>
-                                {app.currentStage || "APPLIED"}
+                                {applicationStageLabels[app.currentStage as keyof typeof applicationStageLabels] || app.currentStage}
                               </span>
                             </div>
 
@@ -599,11 +759,33 @@ export function JobDetailView({
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-slate-300">Trạng thái:</span>
-                            <span className="px-3 py-1 text-xs font-bold bg-[#2563EB] text-white rounded-lg">
-                              {activeApp.currentStage || "APPLIED"}
+                            <span className={`rounded-lg border px-3 py-1 text-xs font-bold ${
+                              applicationStageStyles[activeApp.currentStage as keyof typeof applicationStageStyles]
+                            }`}>
+                              {applicationStageLabels[activeApp.currentStage as keyof typeof applicationStageLabels] || activeApp.currentStage}
                             </span>
                           </div>
                         </div>
+
+                        {selectedApplicationDetail &&
+                          selectedApplicationDetail.id === activeApp.id && (
+                          <div className="flex flex-col gap-3 rounded-2xl border border-blue-200 bg-blue-50/70 p-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div>
+                              <h4 className="text-sm font-extrabold text-slate-900">Quyết định tuyển dụng</h4>
+                              <p className="mt-1 text-xs text-slate-600">
+                                Thao tác được lưu vào lịch sử; điểm AI chỉ là dữ liệu tham khảo.
+                              </p>
+                            </div>
+                            <ApplicationStageActions
+                              token={token}
+                              applicationId={activeApp.id}
+                              currentStage={selectedApplicationDetail.currentStage}
+                              allowedTransitions={selectedApplicationDetail.allowedTransitions}
+                              currentHrNotes={selectedApplicationDetail.hrNotes}
+                              onUpdated={refreshApplications}
+                            />
+                          </div>
+                        )}
 
                         {/* 2 COLUMNS INLINE SPLIT LAYOUT */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

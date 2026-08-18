@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 
 const navigation = [
   { href: '/candidate', label: 'Việc làm' },
+  { href: '/candidate/applications', label: 'Đơn ứng tuyển' },
   { href: '/candidate/profile', label: 'Hồ sơ' },
 ];
 

@@ -1,7 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
+  ApplicationStage,
   ApplicationProcessingStatus,
-  ExperienceLevel,
+  HrDecision,
   MatchLevel,
 } from '@prisma/client';
 import { z } from 'zod';
@@ -93,11 +94,9 @@ export class ApplicationsConsumer implements OnModuleInit {
               evidence: validatedResult.evidence,
               confidenceScore: validatedResult.confidence_score,
               candidateExperienceLevel:
-                (experienceAssessment?.candidate_level as
-                  ExperienceLevel | null | undefined) ?? null,
+                experienceAssessment?.candidate_level ?? null,
               requiredExperienceLevel:
-                (experienceAssessment?.required_level as
-                  ExperienceLevel | undefined) ?? null,
+                experienceAssessment?.required_level ?? null,
               totalExperienceYears:
                 experienceAssessment?.total_experience_years ?? null,
               levelFitScore: experienceAssessment?.level_fit_score ?? null,
@@ -129,6 +128,29 @@ export class ApplicationsConsumer implements OnModuleInit {
               evaluationError: null,
             },
           });
+
+          const promoted = await prisma.application.updateMany({
+            where: {
+              id: applicationId,
+              currentStage: ApplicationStage.RECEIVED,
+            },
+            data: {
+              currentStage: ApplicationStage.SCREENING,
+              hrDecision: HrDecision.CONSIDER,
+            },
+          });
+
+          if (promoted.count === 1) {
+            await prisma.applicationStatusHistory.create({
+              data: {
+                applicationId,
+                previousStage: ApplicationStage.RECEIVED,
+                newStage: ApplicationStage.SCREENING,
+                changedByUserId: null,
+                note: 'AI evaluation completed; application entered screening.',
+              },
+            });
+          }
         });
         if (experienceAssessment) {
           this.logger.log(

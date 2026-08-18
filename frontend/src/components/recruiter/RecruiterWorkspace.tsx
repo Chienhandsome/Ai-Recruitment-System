@@ -25,9 +25,14 @@ import {
 
 import { KanbanBoard, ApplicationStage, KanbanCandidate } from "./KanbanBoard";
 import { Candidate360Modal } from "./Candidate360Modal";
+import { RecruiterApplicationsRanking } from "./applications/RecruiterApplicationsRanking";
 import { RecruiterProfileModal } from "./RecruiterProfileModal";
 import { JobsWorkspace } from "./JobsWorkspace";
-import type { RecruiterProfileData, RecruiterDashboardStats } from "@/lib/recruiter-api";
+import {
+  getRecruiterApplications,
+  type RecruiterProfileData,
+  type RecruiterDashboardStats,
+} from "@/lib/recruiter-api";
 import { createClient } from "@/lib/supabase/client";
 
 // Types
@@ -65,10 +70,6 @@ export interface JobPosting {
   postedDate: string;
 }
 
-// Mock Data Removed - System uses live API data
-const MOCK_CANDIDATES: Candidate[] = [];
-const MOCK_JOBS: JobPosting[] = [];
-
 export function RecruiterWorkspace({
   profile: initialProfile,
   stats,
@@ -84,11 +85,54 @@ export function RecruiterWorkspace({
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedCandidateForReport, setSelectedCandidateForReport] = useState<Candidate | null>(null);
+  const [topCandidates, setTopCandidates] = useState<Candidate[]>([]);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   useEffect(() => {
     setProfile(initialProfile);
   }, [initialProfile]);
+
+  useEffect(() => {
+    if (!token) return;
+    getRecruiterApplications(token, { page: 1, limit: 3 })
+      .then((response) => {
+        setTopCandidates(
+          response.data.map((application) => {
+            const score = Math.round(application.latestAiResult?.overallScore ?? 0);
+            const status: Candidate["status"] =
+              application.currentStage === "SHORTLISTED"
+                ? "SHORTLISTED"
+                : application.currentStage === "REJECTED"
+                  ? "REJECTED"
+                  : application.currentStage === "SCREENING"
+                    ? "SCREENING"
+                    : "NEW";
+            return {
+              id: application.id,
+              name: application.candidate.fullName || "Ứng viên",
+              avatar: application.candidate.avatarUrl || "/file.svg",
+              roleApplied: application.job.title,
+              matchScore: score,
+              skillsFit: [],
+              experienceYears: 0,
+              aiSummary: "Mở bảng xếp hạng để xem báo cáo đánh giá đầy đủ.",
+              status,
+              appliedDate: new Date(application.appliedAt).toLocaleDateString("vi-VN"),
+              pros: [],
+              cons: [],
+              education: "Chưa tổng hợp",
+              radarScores: {
+                skills: score,
+                experience: score,
+                education: score,
+                cultureFit: score,
+              },
+            };
+          }),
+        );
+      })
+      .catch((error) => console.error("Failed to load top applications", error));
+  }, [token]);
 
   const handleProfileUpdated = (updatedProfile: RecruiterProfileData) => {
     setProfile(updatedProfile);
@@ -239,7 +283,7 @@ export function RecruiterWorkspace({
         {/* Tab 1: Dashboard */}
         {activeTab === "dashboard" && (
           <DashboardTab
-            candidates={MOCK_CANDIDATES}
+            candidates={topCandidates}
             stats={stats}
             onOpenReport={(cand) => setSelectedCandidateForReport(cand)}
             onOpenCreateJob={() => setIsCreateJobOpen(true)}
@@ -251,10 +295,7 @@ export function RecruiterWorkspace({
 
         {/* Tab 3: Candidate Ranking */}
         {activeTab === "candidates" && (
-          <CandidatesTab
-            candidates={MOCK_CANDIDATES}
-            onOpenReport={(cand) => setSelectedCandidateForReport(cand)}
-          />
+          <RecruiterApplicationsRanking token={token} />
         )}
       </main>
 

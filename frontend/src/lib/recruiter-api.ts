@@ -78,7 +78,120 @@ export interface JobsResponse {
   };
 }
 
+export type ApplicationStage =
+  | "RECEIVED"
+  | "SCREENING"
+  | "SHORTLISTED"
+  | "INTERVIEW_SCHEDULED"
+  | "INTERVIEWED"
+  | "OFFERED"
+  | "HIRED"
+  | "REJECTED"
+  | "WITHDRAWN";
+
+export type ApplicationProcessingStatus =
+  | "UPLOADED"
+  | "QUEUED"
+  | "PARSING"
+  | "NORMALIZING"
+  | "MATCHING"
+  | "SCORING"
+  | "COMPLETED"
+  | "FAILED";
+
+export type HrDecision = "PENDING" | "ACCEPTED" | "REJECTED" | "CONSIDER";
+
+export interface RecruiterApplicationListItem {
+  id: string;
+  job: { id: string; jobCode: string; title: string };
+  candidate: {
+    id: string;
+    fullName: string | null;
+    email: string;
+    avatarUrl: string | null;
+    desiredTitle: string | null;
+  };
+  currentStage: ApplicationStage;
+  hrDecision: HrDecision;
+  processingStatus: ApplicationProcessingStatus;
+  latestAiResult: {
+    overallScore: number;
+    matchLevel: "LOW" | "MEDIUM" | "HIGH";
+    confidenceScore: number | null;
+    version: number;
+  } | null;
+  appliedAt: string;
+  updatedAt: string;
+  allowedTransitions: ApplicationStage[];
+}
+
+export interface RecruiterApplicationsResponse {
+  data: RecruiterApplicationListItem[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}
+
+export interface RecruiterApplicationDetail {
+  id: string;
+  job: JobPostingData;
+  candidate: {
+    id: string;
+    fullName: string | null;
+    email: string;
+    phone: string | null;
+    avatarUrl: string | null;
+    desiredTitle: string | null;
+  };
+  currentStage: ApplicationStage;
+  hrDecision: HrDecision;
+  hrNotes: string | null;
+  processingStatus: ApplicationProcessingStatus;
+  evaluationError: string | null;
+  profileSnapshot: Record<string, unknown> | null;
+  latestAiResult: Record<string, unknown> | null;
+  statusHistories: Array<{
+    id: string;
+    previousStage: ApplicationStage | null;
+    newStage: ApplicationStage;
+    changedByUserId: string | null;
+    note: string | null;
+    createdAt: string;
+  }>;
+  appliedAt: string;
+  updatedAt: string;
+  allowedTransitions: ApplicationStage[];
+}
+
+export interface UpdateApplicationStageResponse {
+  id: string;
+  previousStage: ApplicationStage;
+  currentStage: ApplicationStage;
+  hrDecision: HrDecision;
+  hrNotes: string | null;
+  updatedAt: string;
+  allowedTransitions: ApplicationStage[];
+}
+
+export class RecruiterApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "RecruiterApiError";
+  }
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+
+async function readRecruiterApiError(response: Response, fallback: string) {
+  try {
+    const payload = (await response.json()) as { message?: string | string[] };
+    if (Array.isArray(payload.message)) return payload.message.join(", ");
+    return payload.message || fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export interface RecruiterProfileData {
   id: string;
@@ -245,6 +358,82 @@ export async function getRecruiterJobDetail(
   }
 
   return res.json();
+}
+
+export async function getRecruiterApplications(
+  token: string,
+  query: {
+    jobId?: string;
+    stage?: ApplicationStage;
+    processingStatus?: ApplicationProcessingStatus;
+    minScore?: number;
+    maxScore?: number;
+    search?: string;
+    sortBy?: "AI_SCORE" | "APPLIED_AT" | "UPDATED_AT";
+    sortOrder?: "ASC" | "DESC";
+    page?: number;
+    limit?: number;
+  } = {},
+): Promise<RecruiterApplicationsResponse> {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  });
+  const response = await fetch(`${API_URL}/applications?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new RecruiterApiError(
+      await readRecruiterApiError(response, "Không thể tải danh sách ứng viên"),
+      response.status,
+    );
+  }
+  return response.json();
+}
+
+export async function getRecruiterApplicationDetail(
+  token: string,
+  applicationId: string,
+): Promise<RecruiterApplicationDetail> {
+  const response = await fetch(`${API_URL}/applications/${applicationId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new RecruiterApiError(
+      await readRecruiterApiError(response, "Không thể tải hồ sơ ứng viên"),
+      response.status,
+    );
+  }
+  return response.json();
+}
+
+export async function updateApplicationStage(
+  token: string,
+  applicationId: string,
+  input: {
+    targetStage: ApplicationStage;
+    expectedStage: ApplicationStage;
+    note?: string;
+    hrNotes?: string;
+  },
+): Promise<UpdateApplicationStageResponse> {
+  const response = await fetch(`${API_URL}/applications/${applicationId}/stage`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) {
+    throw new RecruiterApiError(
+      await readRecruiterApiError(response, "Không thể cập nhật trạng thái hồ sơ"),
+      response.status,
+    );
+  }
+  return response.json();
 }
 
 export async function deleteRecruiterJob(

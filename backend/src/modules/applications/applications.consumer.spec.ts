@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ApplicationsConsumer } from './applications.consumer';
 
 describe('ApplicationsConsumer experience-level persistence', () => {
@@ -9,6 +10,10 @@ describe('ApplicationsConsumer experience-level persistence', () => {
       },
       application: {
         update: jest.fn().mockResolvedValue({ id: 'application-1' }),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+      applicationStatusHistory: {
+        create: jest.fn().mockResolvedValue({ id: 'history-1' }),
       },
     };
     const prisma = {
@@ -79,6 +84,18 @@ describe('ApplicationsConsumer experience-level persistence', () => {
         modelVersion: 'experience-level-v1',
       }),
     });
+    expect(tx.application.updateMany).toHaveBeenCalledWith({
+      where: { id: 'application-1', currentStage: 'RECEIVED' },
+      data: { currentStage: 'SCREENING', hrDecision: 'CONSIDER' },
+    });
+    expect(tx.applicationStatusHistory.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        applicationId: 'application-1',
+        previousStage: 'RECEIVED',
+        newStage: 'SCREENING',
+        changedByUserId: null,
+      }),
+    });
     expect(evaluationService.markForRetry).not.toHaveBeenCalled();
   });
 
@@ -117,5 +134,43 @@ describe('ApplicationsConsumer experience-level persistence', () => {
       'application-1',
       expect.stringContaining('level_confidence'),
     );
+  });
+
+  it('does not overwrite a stage already changed by a recruiter', async () => {
+    const tx = {
+      aiMatchingResult: {
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+        create: jest.fn().mockResolvedValue({ id: 'result-1' }),
+      },
+      application: {
+        update: jest.fn().mockResolvedValue({ id: 'application-1' }),
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
+      applicationStatusHistory: {
+        create: jest.fn(),
+      },
+    };
+    const prisma = {
+      $transaction: jest.fn(
+        async (callback: (client: typeof tx) => Promise<void>) => callback(tx),
+      ),
+    };
+    const consumer = new ApplicationsConsumer(
+      prisma as never,
+      { subscribe: jest.fn() } as never,
+      { markForRetry: jest.fn() } as never,
+    );
+
+    await consumer.handleMessage({
+      applicationId: 'application-1',
+      status: 'COMPLETED',
+      result: { overall_score: 75 },
+    });
+
+    expect(tx.application.updateMany).toHaveBeenCalledWith({
+      where: { id: 'application-1', currentStage: 'RECEIVED' },
+      data: { currentStage: 'SCREENING', hrDecision: 'CONSIDER' },
+    });
+    expect(tx.applicationStatusHistory.create).not.toHaveBeenCalled();
   });
 });

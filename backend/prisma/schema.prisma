@@ -686,6 +686,8 @@ model Application {
   @@unique([jobId, candidateId])
   @@index([jobId])
   @@index([candidateId])
+  @@index([jobId, currentStage, appliedAt])
+  @@index([candidateId, appliedAt])
   @@index([processingStatus])
   @@index([processingStatus, nextEvaluationRetryAt])
   @@index([currentStage])
@@ -789,6 +791,7 @@ model ApplicationStatusHistory {
   note            String?
   createdAt       DateTime          @default(now()) @map("created_at")
 
+  @@index([applicationId, createdAt])
   @@map("application_status_histories")
 }
 

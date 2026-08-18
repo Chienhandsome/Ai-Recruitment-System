@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, BrainCircuit, ExternalLink, MapPin, Briefcase, FileText, CheckCircle2, AlertCircle, TrendingUp } from "lucide-react";
+import { X, BrainCircuit, ExternalLink, FileText, CheckCircle2, AlertCircle } from "lucide-react";
 
 export interface Candidate360 {
   id: string;
@@ -54,11 +54,10 @@ export function Candidate360Modal({ isOpen, onClose, candidate }: Candidate360Mo
             </button>
           </div>
           <div className="flex-1 p-6 flex items-center justify-center">
-            {/* Fake PDF Viewer */}
             <div className="w-full max-w-md bg-white border border-[#E2E8F0] shadow-sm rounded-lg h-[80%] flex flex-col items-center justify-center gap-3">
               <FileText className="w-16 h-16 text-[#CBD5E1]" />
-              <p className="text-[#64748B] font-medium">Bản xem trước PDF sẽ hiển thị ở đây</p>
-              <p className="text-xs text-[#94A3B8]">Dữ liệu đã được trích xuất sang báo cáo AI bên phải</p>
+              <p className="text-[#64748B] font-medium">CV gốc của ứng viên</p>
+              <p className="text-xs text-[#94A3B8]">Dữ liệu đã được AI trích xuất và phân tích trong báo cáo bên phải</p>
             </div>
           </div>
         </div>
@@ -74,10 +73,7 @@ export function Candidate360Modal({ isOpen, onClose, candidate }: Candidate360Mo
               <div>
                 <h2 className="text-xl font-bold text-[#0F172A]">{candidate.name}</h2>
                 <p className="text-[#64748B] text-sm font-medium">{candidate.role}</p>
-                <div className="flex items-center gap-3 mt-2 text-xs text-[#64748B] font-medium">
-                  <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> Hồ Chí Minh</span>
-                  <span className="flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" /> 3 năm kinh nghiệm</span>
-                </div>
+
               </div>
             </div>
             <button onClick={onClose} className="p-2 text-[#64748B] hover:bg-gray-100 rounded-full transition-colors">
@@ -85,22 +81,12 @@ export function Candidate360Modal({ isOpen, onClose, candidate }: Candidate360Mo
             </button>
           </div>
 
-          {/* HR Decision Action Bar */}
-          <div className="px-6 py-3 bg-[#F8FAFC] border-b border-[#E2E8F0] flex items-center justify-between">
-            <span className="text-sm font-semibold text-[#0F172A]">Quyết định Nhân sự:</span>
-            <div className="flex items-center gap-2">
-              <button className="px-4 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors">Từ chối</button>
-              <button className="px-4 py-1.5 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors">Cân nhắc</button>
-              <button className="px-4 py-1.5 text-xs font-bold text-white bg-[#2563EB] shadow-sm rounded-lg hover:bg-[#1D4ED8] transition-colors">Tiến hành phỏng vấn</button>
-            </div>
-          </div>
+
 
           {/* Tabs */}
           <div className="flex border-b border-[#E2E8F0] px-6 mt-2">
             {[
               { id: "ai_report", label: "Báo cáo AI Match" },
-              { id: "parsed_resume", label: "Hồ sơ trích xuất" },
-              { id: "interviews", label: "Lịch phỏng vấn" }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -137,12 +123,12 @@ export function Candidate360Modal({ isOpen, onClose, candidate }: Candidate360Mo
                       <BrainCircuit className="w-5 h-5 text-[#2563EB]" /> AI Match Score
                     </h3>
                     <p className="text-sm text-[#64748B] mt-1 leading-relaxed">
-                      Ứng viên có độ phù hợp rất cao. Kỹ năng chuyên môn khớp 95% với yêu cầu công việc. Tuy nhiên thiếu kinh nghiệm về quản lý nhóm (Team Lead).
+                      Hệ thống AI đã phân tích hồ sơ và tính điểm tương thích dựa trên yêu cầu công việc.
                     </p>
                   </div>
                 </div>
 
-                {/* Sub Scores (Radar Metrics Fake) */}
+                {/* Sub Scores (Radar Metrics) */}
                 <div>
                   <h4 className="text-sm font-bold text-[#0F172A] mb-4">Chi tiết Đánh giá</h4>
                   <div className="space-y-3">
@@ -189,12 +175,7 @@ export function Candidate360Modal({ isOpen, onClose, candidate }: Candidate360Mo
               </div>
             )}
             
-            {activeTab !== "ai_report" && (
-              <div className="flex flex-col items-center justify-center h-48 text-[#64748B]">
-                <TrendingUp className="w-10 h-10 mb-3 text-[#CBD5E1]" />
-                <p className="text-sm font-medium">Chức năng đang được phát triển</p>
-              </div>
-            )}
+
           </div>
         </div>
       </div>

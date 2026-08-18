@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Filter, MoreHorizontal, Calendar, BrainCircuit, GripVertical } from "lucide-react";
+import { Search, Calendar, BrainCircuit, GripVertical } from "lucide-react";
 
 export type ApplicationStage = 
   | "RECEIVED"
@@ -85,12 +85,7 @@ export function KanbanBoard({ candidates, onCandidateClick, onMoveCandidate }: K
             />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-sm font-medium text-[#0F172A] hover:bg-gray-50 transition-colors">
-            <Filter className="w-4 h-4" />
-            Lọc AI Match
-          </button>
-        </div>
+        <div className="flex items-center gap-2" />
       </div>
 
       {/* Kanban Columns */}
@@ -115,9 +110,6 @@ export function KanbanBoard({ candidates, onCandidateClick, onMoveCandidate }: K
                       {colCandidates.length}
                     </span>
                   </div>
-                  <button className="text-[#64748B] hover:text-[#0F172A] transition-colors">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </button>
                 </div>
 
                 {/* Cards Container */}

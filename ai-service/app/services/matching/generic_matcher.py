@@ -258,8 +258,9 @@ class GenericMatchingEngine:
             relevance_score = work_relevance_score
             legacy_final_score = legacy_exp_score
         elif cand_profile.projects:
-            relevance_score = project_score
-            legacy_final_score = project_score
+            # Projects alone cannot fully substitute professional work experience
+            relevance_score = min(project_score, 0.4)
+            legacy_final_score = min(project_score, 0.4)
         else:
             relevance_score = 0.2
             legacy_final_score = 0.2
@@ -384,8 +385,8 @@ class GenericMatchingEngine:
         cand_certs = cand_profile.certificates
         
         if not req_certs:
-            # If no certificates required, but candidate has them, give bonus credit
-            return {"score": 1.0 if cand_certs else 0.8, "matched": [], "missing": []}
+            # No cert requirements configured → neutral score, not a reward
+            return {"score": 0.5, "matched": [], "missing": []}
             
         if not cand_certs:
             # Required but candidate has none

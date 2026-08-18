@@ -169,6 +169,19 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobD
       (suggestedMaxYears !== null && requiredYears > suggestedMaxYears));
 
   const handleSubmit = async () => {
+    // Block publish when skillWeight > 0 and no skills configured
+    if (
+      formData.status === "PUBLISHED" &&
+      Number(formData.skillWeight) > 0 &&
+      formData.selectedSkills.length === 0
+    ) {
+      alert(
+        "Vui lòng chọn ít nhất 1 kỹ năng yêu cầu trước khi đăng tuyển.\n\n" +
+        "AI cần kỹ năng cấu trúc để đánh giá chính xác ứng viên. " +
+        "Nếu không muốn đánh giá kỹ năng, hãy đặt trọng số Kỹ năng về 0% ở bước 3."
+      );
+      return;
+    }
     setLoading(true);
     try {
       const payload = {
@@ -505,6 +518,12 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobD
                       ))}
                     </div>
                   </div>
+                )}
+                {formData.selectedSkills.length === 0 && Number(formData.skillWeight) > 0 && (
+                  <p className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                    <AlertTriangle size={14} className="shrink-0" />
+                    Chưa có kỹ năng nào được chọn. AI sẽ không thể đánh giá chính xác kỹ năng ứng viên nếu bài tuyển dụng được đăng.
+                  </p>
                 )}
               </div>
 

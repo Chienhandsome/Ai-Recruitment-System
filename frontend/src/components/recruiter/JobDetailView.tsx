@@ -1002,9 +1002,14 @@ export function JobDetailView({
                                 </span>
 
                                 {aiResult?.confidenceScore !== undefined && (
-                                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white text-emerald-700 border border-emerald-300 flex items-center gap-1 shadow-2xs">
+                                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white text-emerald-700 border border-emerald-300 flex items-center gap-1 shadow-2xs" title="Được tính từ dữ liệu kỹ năng, kinh nghiệm, dự án, học vấn và chứng chỉ; không phản ánh mức độ chắc chắn của kết quả matching.">
                                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                                    Độ tin cậy AI: {Math.round(Number(aiResult.confidenceScore) * 100)}%
+                                    Độ phủ dữ liệu hồ sơ: {Math.round(Number(aiResult.confidenceScore) * 100)}%
+                                  </span>
+                                )}
+                                {aiResult?.levelEligible === false && (
+                                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-white border border-slate-900 flex items-center gap-1">
+                                    ⚠ Không đạt điều kiện bắt buộc
                                   </span>
                                 )}
                               </div>

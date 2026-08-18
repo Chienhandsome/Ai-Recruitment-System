@@ -119,8 +119,8 @@ export function CandidateDetailModal({
                   {candidate.aiScore} / 100 Điểm AI
                 </span>
                 {candidate.confidenceScore !== undefined && (
-                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${candidate.confidenceScore >= 0.8 ? 'text-emerald-700 bg-emerald-100 border-emerald-300' : candidate.confidenceScore >= 0.5 ? 'text-amber-700 bg-amber-100 border-amber-300' : 'text-rose-700 bg-rose-100 border-rose-300'}`} title="Độ tin cậy của AI dựa trên lượng dữ liệu hồ sơ">
-                    Độ tin cậy: {Math.round(candidate.confidenceScore * 100)}%
+                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${candidate.confidenceScore >= 0.8 ? 'text-emerald-700 bg-emerald-100 border-emerald-300' : candidate.confidenceScore >= 0.5 ? 'text-amber-700 bg-amber-100 border-amber-300' : 'text-rose-700 bg-rose-100 border-rose-300'}`} title="Được tính từ dữ liệu kỹ năng, kinh nghiệm, dự án, học vấn và chứng chỉ; không phản ánh mức độ chắc chắn của kết quả matching.">
+                    Độ phủ dữ liệu: {Math.round(candidate.confidenceScore * 100)}%
                   </span>
                 )}
               </div>

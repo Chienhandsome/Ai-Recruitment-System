@@ -33,12 +33,41 @@ class ScoreEngine:
         
         overall_score = round(overall, 2)
         
-        match_level = "HIGH" if overall_score >= 75.0 else ("MEDIUM" if overall_score >= 50.0 else "LOW")
+        # Base match level from score threshold
+        base_level = "HIGH" if overall_score >= 75.0 else ("MEDIUM" if overall_score >= 50.0 else "LOW")
+        match_level = base_level
+
+        # Enforce level requirement constraints
+        level_assessment = match_metrics.get("experience", {}).get("level_assessment")
+        if level_assessment:
+            req_mode = level_assessment.get("level_requirement_mode", "ADVISORY")
+            recommendation = level_assessment.get("recommendation", "")
+
+            if req_mode == "REQUIRED":
+                if recommendation == "NOT_ELIGIBLE_LEVEL":
+                    # Candidate confirmed below required level → cap to LOW
+                    match_level = "LOW"
+                    overall_score = min(overall_score, 40.0)
+                elif recommendation == "NEEDS_REVIEW":
+                    # Can't determine level with confidence → cap to MEDIUM
+                    if base_level == "HIGH":
+                        match_level = "MEDIUM"
+                    overall_score = min(overall_score, 55.0)
         
-        # Confidence logic based on profile depth
+        # Profile completeness — weighted by importance for matching
         profile = request.candidate_profile
-        data_pts = len(profile.skills) + len(profile.work_experiences) + len(profile.projects) + len(profile.educations) + len(profile.certificates)
-        conf = 0.3 if data_pts < 3 else (0.6 if data_pts < 7 else (0.85 if data_pts < 12 else 1.0))
+        w_pts = 0.0
+        if profile.skills:
+            w_pts += 1.5
+        if profile.work_experiences:
+            w_pts += 3.0  # Most critical for matching
+        elif profile.projects:
+            w_pts += 1.0  # Partial substitute only
+        if profile.educations:
+            w_pts += 1.5
+        if profile.certificates:
+            w_pts += 1.0
+        conf = round(min(1.0, w_pts / 7.0), 2)
         
         return {
             "overall_score": overall_score,
@@ -47,7 +76,8 @@ class ScoreEngine:
             "education_score": edu_score,
             "other_score": other_score,
             "match_level": match_level,
-            "confidence_score": conf
+            "confidence_score": conf,
+            "level_assessment": level_assessment,
         }
 
     def _resolve_weights(self, request: EvaluationRequest) -> Dict[str, float]:

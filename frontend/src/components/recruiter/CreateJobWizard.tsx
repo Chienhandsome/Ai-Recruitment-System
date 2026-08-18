@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, ChevronRight, ChevronLeft, Bot, CheckCircle2, Settings2, Plus, Trash2, Tag, Sparkles } from "lucide-react";
+import { X, ChevronRight, ChevronLeft, Bot, CheckCircle2, Settings2, Plus, Trash2, Tag, Sparkles, AlertTriangle } from "lucide-react";
 import { 
   createRecruiterJob, updateRecruiterJob, JobPostingData, 
   getJobCategories, getSkillsByCategory, createCustomSkill, 

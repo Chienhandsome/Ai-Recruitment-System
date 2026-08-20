@@ -294,8 +294,8 @@ python app/main.py
 ```
 
 > [!TIP]
-> **Tự động tải mô hình V2 (Auto-Download):**
-> Lần đầu tiên bạn khởi chạy AI Service (`uvicorn app.main:app`), hệ thống `SentenceTransformer` sẽ tự động phát hiện nếu thư mục `models/fine_tuned_embedder` bị trống. Nó sẽ tự động kết nối đến HuggingFace và tải bộ trọng số **`XuanTruong03/ai-recruitment-embedder-v2`** (nặng ~540MB) về máy của bạn! Quá trình này diễn ra hoàn toàn tự động, bạn không cần phải làm gì thêm.
+> **Tự động tải mô hình V3 (Auto-Download):**
+> Lần đầu tiên bạn khởi chạy AI Service (`uvicorn app.main:app`), hệ thống `SentenceTransformer` sẽ tự động phát hiện nếu thư mục `models/fine_tuned_embedder` bị trống. Nó sẽ tự động kết nối đến HuggingFace và tải bộ trọng số **`XuanTruong03/ai-recruitment-embedder-v3`** về máy của bạn! Quá trình này diễn ra hoàn toàn tự động, bạn không cần phải làm gì thêm.
 >
 > *(Chỉ yêu cầu đăng nhập bằng `huggingface-cli login` nếu bạn set Repo trên HuggingFace về chế độ Private).*
 

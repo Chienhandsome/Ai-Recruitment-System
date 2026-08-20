@@ -11,11 +11,10 @@ from __future__ import annotations
 
 import modal
 
-
 APP_NAME = "ai-recruitment-embedder"
-MODEL_ID = "XuanTruong03/ai-recruitment-embedder-v2"
-MODEL_REVISION = "62326063403466c374e0a70a438385fa035ef41b"
-MODEL_DIR = "/opt/models/ai-recruitment-embedder-v2"
+MODEL_ID = "XuanTruong03/ai-recruitment-embedder-v3"
+MODEL_REVISION = "aa6c1273cbce705e7a7b583f3bd3d93636da4f97"
+MODEL_DIR = "/opt/models/ai-recruitment-embedder"
 MAX_BATCH_SIZE = 128
 
 

@@ -26,5 +26,7 @@ pytesseract>=0.3.13
 # Matching engine (fuzzy skill name matching)
 rapidfuzz>=3.6.0
 
-# Matching engine (production embeddings are provided by Modal)
+# Matching engine (local SentenceTransformers embeddings)
 numpy>=1.24.0
+torch>=2.0.0
+sentence-transformers>=3.0.0

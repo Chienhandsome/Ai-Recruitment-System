@@ -43,6 +43,35 @@ export const ExperienceAssessmentSchema = z.object({
   reason_codes: z.array(z.string()).default([]),
 });
 
+export const PillarScoreBreakdownItemSchema = z.object({
+  earned_points: z.number().default(0),
+  max_points: z.number().default(0),
+  weight_pct: z.number().default(0),
+  normalized_score: z.number().default(0),
+});
+
+export const ScoreBreakdownSchema = z.object({
+  skills: PillarScoreBreakdownItemSchema,
+  experience: PillarScoreBreakdownItemSchema,
+  education: PillarScoreBreakdownItemSchema,
+  other: PillarScoreBreakdownItemSchema,
+});
+
+export const PillarExplanationItemSchema = z.object({
+  earned_points: z.number().default(0),
+  max_points: z.number().default(0),
+  plus_reasons: z.array(z.string()).default([]),
+  minus_reasons: z.array(z.string()).default([]),
+  summary: z.string().default(''),
+});
+
+export const PillarExplanationsSchema = z.object({
+  skills: PillarExplanationItemSchema,
+  experience: PillarExplanationItemSchema,
+  education: PillarExplanationItemSchema,
+  other: PillarExplanationItemSchema,
+});
+
 export const AiResultSchema = z.object({
   overall_score: z.number().default(0),
   match_level: z
@@ -52,6 +81,8 @@ export const AiResultSchema = z.object({
   experience_score: z.number().default(0),
   education_score: z.number().default(0),
   other_score: z.number().default(0),
+  score_breakdown: ScoreBreakdownSchema.nullable().optional(),
+  pillar_explanations: PillarExplanationsSchema.nullable().optional(),
   strengths: z.array(z.string()).default([]),
   gaps: z.array(z.string()).default([]),
   matched_skills: z.array(SkillInfoSchema).default([]),

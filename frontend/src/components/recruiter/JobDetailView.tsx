@@ -1015,28 +1015,52 @@ export function JobDetailView({
                               </div>
                             </div>
 
-                            {/* 2. Score Breakdown 4 Pillars */}
-                            <div className="space-y-2">
-                              <h5 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Phân rã Trọng số (Score Breakdown)</h5>
-                              <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                                <div className="p-3 bg-white border border-blue-200 rounded-xl shadow-2xs">
-                                  <span className="text-[10px] text-slate-500 block font-bold">Kỹ năng ({job.skillWeight || 40}%)</span>
-                                  <span className="text-base font-black text-[#2563EB]">{aiResult ? Math.round(Number(aiResult.skillScore)) : 0}%</span>
+                            {/* 2. Score Breakdown 4 Pillars (Point-based with Exact Max Contribution) */}
+                            {(() => {
+                              const sWeight = Number(job.skillWeight) || 40;
+                              const eWeight = Number(job.experienceWeight) || 30;
+                              const edWeight = Number(job.educationWeight) || 15;
+                              const oWeight = Number(job.otherWeight) || 15;
+
+                              const sScore = Number(aiResult?.skillScore) || 0;
+                              const eScore = Number(aiResult?.experienceScore) || 0;
+                              const edScore = Number(aiResult?.educationScore) || 0;
+                              const oScore = Number(aiResult?.projectScore) || 0;
+
+                              const sPts = +(sScore * (sWeight / 100)).toFixed(1);
+                              const ePts = +(eScore * (eWeight / 100)).toFixed(1);
+                              const edPts = +(edScore * (edWeight / 100)).toFixed(1);
+                              const oPts = +(oScore * (oWeight / 100)).toFixed(1);
+
+                              return (
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <h5 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Bảng Điểm Thành Phần Tuyệt Đối</h5>
+                                    <span className="text-[11px] font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                      {sPts} + {ePts} + {edPts} + {oPts} = {score} đ
+                                    </span>
+                                  </div>
+                                  <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                                    <div className="p-3 bg-blue-50/60 border border-blue-200 rounded-xl shadow-2xs">
+                                      <span className="text-[10px] text-slate-500 block font-bold">Kỹ năng (Max {sWeight}đ)</span>
+                                      <span className="text-sm sm:text-base font-black text-[#2563EB]">{sPts} <span className="text-[10px] font-normal text-slate-400">/ {sWeight}đ</span></span>
+                                    </div>
+                                    <div className="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl shadow-2xs">
+                                      <span className="text-[10px] text-slate-500 block font-bold">Kinh nghiệm (Max {eWeight}đ)</span>
+                                      <span className="text-sm sm:text-base font-black text-emerald-700">{ePts} <span className="text-[10px] font-normal text-slate-400">/ {eWeight}đ</span></span>
+                                    </div>
+                                    <div className="p-3 bg-purple-50/60 border border-purple-200 rounded-xl shadow-2xs">
+                                      <span className="text-[10px] text-slate-500 block font-bold">Học vấn (Max {edWeight}đ)</span>
+                                      <span className="text-sm sm:text-base font-black text-purple-700">{edPts} <span className="text-[10px] font-normal text-slate-400">/ {edWeight}đ</span></span>
+                                    </div>
+                                    <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl shadow-2xs">
+                                      <span className="text-[10px] text-slate-500 block font-bold">Chứng chỉ (Max {oWeight}đ)</span>
+                                      <span className="text-sm sm:text-base font-black text-amber-700">{oPts} <span className="text-[10px] font-normal text-slate-400">/ {oWeight}đ</span></span>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="p-3 bg-white border border-blue-200 rounded-xl shadow-2xs">
-                                  <span className="text-[10px] text-slate-500 block font-bold">Kinh nghiệm ({job.experienceWeight || 30}%)</span>
-                                  <span className="text-base font-black text-[#2563EB]">{aiResult ? Math.round(Number(aiResult.experienceScore)) : 0}%</span>
-                                </div>
-                                <div className="p-3 bg-white border border-blue-200 rounded-xl shadow-2xs">
-                                  <span className="text-[10px] text-slate-500 block font-bold">Học vấn ({job.educationWeight || 15}%)</span>
-                                  <span className="text-base font-black text-[#2563EB]">{aiResult ? Math.round(Number(aiResult.educationScore)) : 0}%</span>
-                                </div>
-                                <div className="p-3 bg-white border border-blue-200 rounded-xl shadow-2xs">
-                                  <span className="text-[10px] text-slate-500 block font-bold">Ngoại ngữ / Chứng chỉ ({job.otherWeight || 15}%)</span>
-                                  <span className="text-base font-black text-[#2563EB]">{aiResult ? Math.round(Number(aiResult.projectScore)) : 0}%</span>
-                                </div>
-                              </div>
-                            </div>
+                              );
+                            })()}
 
                             {aiResult?.requiredExperienceLevel && (
                               <div className={`p-4 rounded-xl border space-y-3 ${

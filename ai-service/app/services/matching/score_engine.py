@@ -30,15 +30,14 @@ class ScoreEngine:
         total_weight = weights["skills"] + weights["experience"] + weights["education"] + weights["other"]
         if total_weight <= 0: total_weight = 100.0
 
-        weighted_competency = (
-            weights["skills"] * skills_raw +
-            weights["experience"] * exp_raw +
-            weights["education"] * edu_raw +
-            weights["other"] * other_raw
-        ) / float(total_weight)
+        # Calculate max points per pillar based on normalized weights
+        max_skills = round((weights["skills"] / float(total_weight)) * 100.0, 1)
+        max_exp = round((weights["experience"] / float(total_weight)) * 100.0, 1)
+        max_edu = round((weights["education"] / float(total_weight)) * 100.0, 1)
+        max_other = round((weights["other"] / float(total_weight)) * 100.0, 1)
 
         # 1. Macro Compatibility Gating (Domain Compatibility Gate)
-        gated_score = weighted_competency * (0.35 + 0.65 * domain_compat)
+        domain_factor = (0.35 + 0.65 * domain_compat)
 
         # 2. Mandatory Satisfiability Multiplier (Psi_mandatory)
         if mandatory_ratio >= 1.0:
@@ -48,8 +47,16 @@ class ScoreEngine:
         else:
             psi_mandatory = max(0.20, 0.40 + (0.40 * mandatory_ratio))
 
-        final_ratio = gated_score * psi_mandatory
-        final_overall = round(final_ratio * 100.0, 2)
+        effective_multiplier = domain_factor * psi_mandatory
+
+        # Exact earned points per pillar
+        earned_skills = round(skills_raw * max_skills * effective_multiplier, 2)
+        earned_exp = round(exp_raw * max_exp * effective_multiplier, 2)
+        earned_edu = round(edu_raw * max_edu * effective_multiplier, 2)
+        earned_other = round(other_raw * max_other * effective_multiplier, 2)
+
+        final_overall = round(earned_skills + earned_exp + earned_edu + earned_other, 2)
+        final_overall = max(0.0, min(100.0, final_overall))
 
         match_level = "HIGH" if final_overall >= 75.0 else ("MEDIUM" if final_overall >= 50.0 else "LOW")
 
@@ -58,12 +65,40 @@ class ScoreEngine:
         data_pts = len(profile.skills) + len(profile.work_experiences) + len(profile.projects) + len(profile.educations) + len(profile.certificates)
         conf = 0.3 if data_pts < 3 else (0.6 if data_pts < 7 else (0.85 if data_pts < 12 else 1.0))
 
+        score_breakdown = {
+            "skills": {
+                "earned_points": earned_skills,
+                "max_points": max_skills,
+                "weight_pct": max_skills,
+                "normalized_score": skills_score,
+            },
+            "experience": {
+                "earned_points": earned_exp,
+                "max_points": max_exp,
+                "weight_pct": max_exp,
+                "normalized_score": exp_score,
+            },
+            "education": {
+                "earned_points": earned_edu,
+                "max_points": max_edu,
+                "weight_pct": max_edu,
+                "normalized_score": edu_score,
+            },
+            "other": {
+                "earned_points": earned_other,
+                "max_points": max_other,
+                "weight_pct": max_other,
+                "normalized_score": other_score,
+            },
+        }
+
         return {
             "overall_score": final_overall,
             "skills_score": skills_score,
             "experience_score": exp_score,
             "education_score": edu_score,
             "other_score": other_score,
+            "score_breakdown": score_breakdown,
             "match_level": match_level,
             "confidence_score": conf,
             "domain_compatibility": round(domain_compat, 3),

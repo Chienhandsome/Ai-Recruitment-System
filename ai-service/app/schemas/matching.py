@@ -179,6 +179,31 @@ class ExperienceLevelAssessment(BaseModel):
     evidence: List[str] = Field(default_factory=list)
     reason_codes: List[str] = Field(default_factory=list)
 
+class PillarScoreBreakdownItem(BaseModel):
+    earned_points: float
+    max_points: float
+    weight_pct: float
+    normalized_score: float
+
+class ScoreBreakdown(BaseModel):
+    skills: PillarScoreBreakdownItem
+    experience: PillarScoreBreakdownItem
+    education: PillarScoreBreakdownItem
+    other: PillarScoreBreakdownItem
+
+class PillarExplanationItem(BaseModel):
+    earned_points: float
+    max_points: float
+    plus_reasons: List[str] = Field(default_factory=list)
+    minus_reasons: List[str] = Field(default_factory=list)
+    summary: str = ""
+
+class PillarExplanations(BaseModel):
+    skills: PillarExplanationItem
+    experience: PillarExplanationItem
+    education: PillarExplanationItem
+    other: PillarExplanationItem
+
 class EvaluationResponse(BaseModel):
     overall_score: float
     match_level: str  # HIGH, MEDIUM, LOW
@@ -186,6 +211,8 @@ class EvaluationResponse(BaseModel):
     experience_score: float
     education_score: float
     other_score: float
+    score_breakdown: Optional[ScoreBreakdown] = None
+    pillar_explanations: Optional[PillarExplanations] = None
     strengths: List[str] = Field(default_factory=list)
     gaps: List[str] = Field(default_factory=list)
     matched_skills: List[SkillInfo] = Field(default_factory=list)
@@ -195,3 +222,4 @@ class EvaluationResponse(BaseModel):
     confidence_score: float = 1.0
     summary: str
     experience_assessment: Optional[ExperienceLevelAssessment] = None
+

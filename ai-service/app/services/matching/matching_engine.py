@@ -57,6 +57,8 @@ class MatchingEngine:
             experience_score=final_scores["experience_score"],
             education_score=final_scores["education_score"],
             other_score=final_scores["other_score"],
+            score_breakdown=final_scores.get("score_breakdown"),
+            pillar_explanations=explanations.get("pillar_explanations"),
             strengths=explanations["strengths"],
             gaps=explanations["gaps"],
             matched_skills=match_metrics["skills"]["matched"],

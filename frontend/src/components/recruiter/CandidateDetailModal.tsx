@@ -199,25 +199,50 @@ export function CandidateDetailModal({
             </p>
           </div>
 
-          {/* 3. AI Score Breakdown */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-bold text-[#1F2937]">Phân rã Điểm số (Score Breakdown)</h3>
-            <div className="grid grid-cols-4 gap-4">
-              <div className="p-3 bg-[#EFF6FF] border border-blue-200 rounded-xl text-center">
-                <span className="text-xs text-slate-500 block">Kỹ năng (Skill)</span>
-                <span className="text-lg font-extrabold text-[#2563EB]">{candidate.scoreBreakdown.skillScore}%</span>
+          {/* 3. AI Score Breakdown (Point-based with Exact Max Contribution) */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-[#1F2937]">Bảng Điểm Thành Phần Tuyệt Đối (Score Breakdown)</h3>
+              <span className="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                Toán cộng nhẩm: {+(candidate.scoreBreakdown.skillScore * 0.4).toFixed(1)} + {+(candidate.scoreBreakdown.experienceScore * 0.3).toFixed(1)} + {+(candidate.scoreBreakdown.educationScore * 0.15).toFixed(1)} + {+(candidate.scoreBreakdown.projectScore * 0.15).toFixed(1)} = {candidate.aiScore} đ
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-3.5">
+              <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-center">
+                <span className="text-xs text-slate-500 block font-medium">Kỹ năng (Max 40đ)</span>
+                <span className="text-base font-black text-blue-700">
+                  {+(candidate.scoreBreakdown.skillScore * 0.40).toFixed(1)} <span className="text-xs font-normal text-slate-400">/ 40đ</span>
+                </span>
+                <div className="w-full bg-blue-200 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                  <div className="bg-blue-600 h-full rounded-full" style={{ width: `${candidate.scoreBreakdown.skillScore}%` }} />
+                </div>
               </div>
-              <div className="p-3 bg-[#EFF6FF] border border-blue-200 rounded-xl text-center">
-                <span className="text-xs text-slate-500 block">Kinh nghiệm (Exp)</span>
-                <span className="text-lg font-extrabold text-[#2563EB]">{candidate.scoreBreakdown.experienceScore}%</span>
+              <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl text-center">
+                <span className="text-xs text-slate-500 block font-medium">Kinh nghiệm (Max 30đ)</span>
+                <span className="text-base font-black text-emerald-700">
+                  {+(candidate.scoreBreakdown.experienceScore * 0.30).toFixed(1)} <span className="text-xs font-normal text-slate-400">/ 30đ</span>
+                </span>
+                <div className="w-full bg-emerald-200 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                  <div className="bg-emerald-600 h-full rounded-full" style={{ width: `${candidate.scoreBreakdown.experienceScore}%` }} />
+                </div>
               </div>
-              <div className="p-3 bg-[#EFF6FF] border border-blue-200 rounded-xl text-center">
-                <span className="text-xs text-slate-500 block">Học vấn (Education)</span>
-                <span className="text-lg font-extrabold text-[#2563EB]">{candidate.scoreBreakdown.educationScore}%</span>
+              <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-xl text-center">
+                <span className="text-xs text-slate-500 block font-medium">Học vấn (Max 15đ)</span>
+                <span className="text-base font-black text-purple-700">
+                  {+(candidate.scoreBreakdown.educationScore * 0.15).toFixed(1)} <span className="text-xs font-normal text-slate-400">/ 15đ</span>
+                </span>
+                <div className="w-full bg-purple-200 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                  <div className="bg-purple-600 h-full rounded-full" style={{ width: `${candidate.scoreBreakdown.educationScore}%` }} />
+                </div>
               </div>
-              <div className="p-3 bg-[#EFF6FF] border border-blue-200 rounded-xl text-center">
-                <span className="text-xs text-slate-500 block">Dự án (Project)</span>
-                <span className="text-lg font-extrabold text-[#2563EB]">{candidate.scoreBreakdown.projectScore}%</span>
+              <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-center">
+                <span className="text-xs text-slate-500 block font-medium">Dự án & Khác (Max 15đ)</span>
+                <span className="text-base font-black text-amber-700">
+                  {+(candidate.scoreBreakdown.projectScore * 0.15).toFixed(1)} <span className="text-xs font-normal text-slate-400">/ 15đ</span>
+                </span>
+                <div className="w-full bg-amber-200 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                  <div className="bg-amber-600 h-full rounded-full" style={{ width: `${candidate.scoreBreakdown.projectScore}%` }} />
+                </div>
               </div>
             </div>
           </div>

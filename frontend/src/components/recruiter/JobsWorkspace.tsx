@@ -15,7 +15,7 @@ interface JobsWorkspaceProps {
 
 export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
   const [data, setData] = useState<JobsResponse | null>(initialData);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!initialData);
   const [search, setSearch] = useState('');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('ALL');
@@ -34,17 +34,18 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
 
   const loadJobs = useCallback(
     async (status: string, searchQuery: string, targetPage: number) => {
+      if (!token) return;
       setLoading(true);
       try {
         const result = await getRecruiterJobs(token, {
           page: targetPage,
           limit: 10,
           status: status === 'ALL' ? undefined : status,
-          search: searchQuery || undefined,
+          search: searchQuery.trim() || undefined,
         });
         setData(result);
       } catch (err) {
-        console.error(err);
+        console.error('Failed to load recruiter jobs:', err);
       } finally {
         setLoading(false);
       }
@@ -53,18 +54,30 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
   );
 
   useEffect(() => {
-    // Skip initial fetch since initialData is loaded from SSR
+    if (initialData) {
+      setData(initialData);
+      setLoading(false);
+    }
+  }, [initialData]);
+
+  useEffect(() => {
+    // If initialData is available on first mount, skip the initial fetch
     if (isFirstMount.current) {
       isFirstMount.current = false;
+      if (initialData) {
+        return;
+      }
+      // If initialData is null/undefined, load jobs immediately on first mount
+      loadJobs(activeTab, search, page);
       return;
     }
 
-    // Fetch the requested page; debounce also keeps search input responsive.
+    // Fetch the requested page with debounce
     const timeoutId = setTimeout(() => {
       loadJobs(activeTab, search, page);
     }, 300);
     return () => clearTimeout(timeoutId);
-  }, [activeTab, search, page, loadJobs]);
+  }, [activeTab, search, page, loadJobs, initialData]);
 
   const handleStatusChange = async (jobId: string, newStatus: string) => {
     try {

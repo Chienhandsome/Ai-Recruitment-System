@@ -4,22 +4,21 @@ import { createClient } from "@/lib/supabase/server";
 import { getRecruiterJobs } from "@/lib/recruiter-api";
 import { JobsWorkspace } from "@/components/recruiter/JobsWorkspace";
 
+import { requireProfile } from "@/lib/server-profile";
+
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Job Management - SmartRecruit AI",
   description: "Manage your job postings and AI configurations",
 };
 
 export default async function JobsPage() {
+  await requireProfile("RECRUITER");
+
   const supabase = await createClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !authData?.user) {
-    redirect("/login");
-  }
-
-  // Get auth session token
-  const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData.session?.access_token;
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
 
   if (!token) {
     redirect("/login");

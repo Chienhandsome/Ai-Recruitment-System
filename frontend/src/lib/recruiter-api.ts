@@ -493,3 +493,81 @@ export async function createCustomSkill(
 
   return res.json();
 }
+
+export interface FunnelStageData {
+  stage: string;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface ScoreDistributionData {
+  range: string;
+  label: string;
+  count: number;
+  percentage: number;
+  color: string;
+}
+
+export interface UpcomingInterviewItem {
+  id: string;
+  title: string;
+  type: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  locationOrLink?: string | null;
+  candidate: {
+    id: string;
+    fullName: string;
+    avatarUrl?: string | null;
+    email: string;
+    phone?: string | null;
+  };
+  job: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface TopSkillStat {
+  skill: string;
+  demandCount: number;
+  matchRate: number;
+}
+
+export interface RecruiterAnalyticsData {
+  kpis: {
+    totalActiveJobs: number;
+    totalApplications: number;
+    newApplicationsToday: number;
+    newApplicationsThisWeek: number;
+    totalInterviews: number;
+    totalHired: number;
+    avgAiScore: number;
+    hireConversionRate: number;
+  };
+  funnel: FunnelStageData[];
+  scoreDistribution: ScoreDistributionData[];
+  upcomingInterviews: UpcomingInterviewItem[];
+  topSkills: TopSkillStat[];
+}
+
+export async function getRecruiterAnalytics(
+  token: string,
+  jobId?: string
+): Promise<RecruiterAnalyticsData> {
+  const query = new URLSearchParams();
+  if (jobId) query.set("jobId", jobId);
+
+  const res = await fetch(`${API_URL}/recruiters/dashboard/analytics?${query.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to load recruiter analytics");
+  }
+
+  return res.json();
+}
+

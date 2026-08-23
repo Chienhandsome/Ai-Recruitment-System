@@ -1,5 +1,5 @@
-import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Patch, Body, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { RecruitersService } from './recruiters.service';
 import { UpdateRecruiterProfileDto } from './dto/update-recruiter-profile.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -38,5 +38,16 @@ export class RecruitersController {
   @ApiResponse({ status: 200, description: 'Return total active jobs, candidates, and new applications today' })
   async getDashboardStats(@CurrentUser() user: AuthenticatedUser) {
     return this.recruitersService.getDashboardStats(user.id);
+  }
+
+  @Get('dashboard/analytics')
+  @ApiOperation({ summary: 'Get recruitment funnel and analytics for recruiter' })
+  @ApiQuery({ name: 'jobId', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Return comprehensive analytics including funnel, score distribution, upcoming interviews, and top skills' })
+  async getDashboardAnalytics(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('jobId') jobId?: string,
+  ) {
+    return this.recruitersService.getDashboardAnalytics(user.id, jobId);
   }
 }

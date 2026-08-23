@@ -35,6 +35,9 @@ let RecruitersController = class RecruitersController {
     async getDashboardStats(user) {
         return this.recruitersService.getDashboardStats(user.id);
     }
+    async getDashboardAnalytics(user, jobId) {
+        return this.recruitersService.getDashboardAnalytics(user.id, jobId);
+    }
 };
 exports.RecruitersController = RecruitersController;
 __decorate([
@@ -65,6 +68,17 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], RecruitersController.prototype, "getDashboardStats", null);
+__decorate([
+    (0, common_1.Get)('dashboard/analytics'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get recruitment funnel and analytics for recruiter' }),
+    (0, swagger_1.ApiQuery)({ name: 'jobId', required: false, type: String }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Return comprehensive analytics including funnel, score distribution, upcoming interviews, and top skills' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('jobId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], RecruitersController.prototype, "getDashboardAnalytics", null);
 exports.RecruitersController = RecruitersController = __decorate([
     (0, swagger_1.ApiTags)('Recruiters'),
     (0, swagger_1.ApiBearerAuth)(),

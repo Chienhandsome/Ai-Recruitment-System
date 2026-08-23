@@ -15,14 +15,17 @@ const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../../database/prisma.service");
 const application_access_service_1 = require("../applications/application-access.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 const application_stage_machine_1 = require("../applications/application-stage-machine");
 let InterviewsService = InterviewsService_1 = class InterviewsService {
     prisma;
     accessService;
+    notificationsService;
     logger = new common_1.Logger(InterviewsService_1.name);
-    constructor(prisma, accessService) {
+    constructor(prisma, accessService, notificationsService) {
         this.prisma = prisma;
         this.accessService = accessService;
+        this.notificationsService = notificationsService;
     }
     async create(userId, dto) {
         const scope = await this.accessService.recruiterApplicationWhere(userId);
@@ -47,7 +50,7 @@ let InterviewsService = InterviewsService_1 = class InterviewsService {
         if (isNaN(scheduledDate.getTime())) {
             throw new common_1.BadRequestException('Thời gian phỏng vấn không hợp lệ.');
         }
-        return this.prisma.$transaction(async (prisma) => {
+        const result = await this.prisma.$transaction(async (prisma) => {
             const interview = await prisma.interview.create({
                 data: {
                     applicationId: dto.applicationId,
@@ -93,6 +96,23 @@ let InterviewsService = InterviewsService_1 = class InterviewsService {
                 },
             };
         });
+        if (this.notificationsService && application.candidate?.user?.id) {
+            await this.notificationsService.createNotification({
+                recipientUserId: application.candidate.user.id,
+                applicationId: application.id,
+                type: client_1.NotificationType.INTERVIEW_SCHEDULED,
+                title: `Thư mời phỏng vấn: ${application.job?.title || 'Công việc'}`,
+                message: `Bạn có buổi phỏng vấn "${dto.title}" vào lúc ${new Date(dto.scheduledAt).toLocaleString('vi-VN')}.`,
+                payload: {
+                    applicationId: application.id,
+                    interviewId: result.id,
+                    scheduledAt: dto.scheduledAt,
+                    locationOrLink: dto.locationOrLink,
+                    jobTitle: application.job?.title,
+                },
+            });
+        }
+        return result;
     }
     async findAllForRecruiter(userId, query) {
         const scope = await this.accessService.recruiterApplicationWhere(userId);
@@ -302,6 +322,8 @@ let InterviewsService = InterviewsService_1 = class InterviewsService {
                     select: {
                         id: true,
                         currentStage: true,
+                        job: { select: { title: true } },
+                        candidate: { select: { userId: true } },
                     },
                 },
             },
@@ -310,7 +332,7 @@ let InterviewsService = InterviewsService_1 = class InterviewsService {
             throw new common_1.NotFoundException('Không tìm thấy lịch phỏng vấn.');
         }
         const targetStage = dto.nextStage ?? client_1.ApplicationStage.INTERVIEWED;
-        return this.prisma.$transaction(async (prisma) => {
+        const result = await this.prisma.$transaction(async (prisma) => {
             const updatedInterview = await prisma.interview.update({
                 where: { id },
                 data: {
@@ -350,12 +372,29 @@ let InterviewsService = InterviewsService_1 = class InterviewsService {
                 applicationStage: targetStage,
             };
         });
+        if (this.notificationsService && existing.application.candidate?.userId) {
+            await this.notificationsService.createNotification({
+                recipientUserId: existing.application.candidate.userId,
+                applicationId: existing.application.id,
+                type: client_1.NotificationType.APPLICATION_STATUS_CHANGED,
+                title: `Kết quả phỏng vấn: ${existing.application.job?.title || 'Công việc'}`,
+                message: `Buổi phỏng vấn "${existing.title}" đã được ghi nhận kết quả đánh giá (${dto.score}/100 điểm).`,
+                payload: {
+                    applicationId: existing.application.id,
+                    interviewId: existing.id,
+                    score: dto.score,
+                    nextStage: targetStage,
+                },
+            });
+        }
+        return result;
     }
 };
 exports.InterviewsService = InterviewsService;
 exports.InterviewsService = InterviewsService = InterviewsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        application_access_service_1.ApplicationAccessService])
+        application_access_service_1.ApplicationAccessService,
+        notifications_service_1.NotificationsService])
 ], InterviewsService);
 //# sourceMappingURL=interviews.service.js.map

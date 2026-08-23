@@ -14,6 +14,7 @@ exports.ApplicationsService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../../database/prisma.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 const application_evaluation_service_1 = require("./application-evaluation.service");
 const application_access_service_1 = require("./application-access.service");
 const application_stage_machine_1 = require("./application-stage-machine");
@@ -109,11 +110,13 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
     prisma;
     evaluationService;
     accessService;
+    notificationsService;
     logger = new common_1.Logger(ApplicationsService_1.name);
-    constructor(prisma, evaluationService, accessService) {
+    constructor(prisma, evaluationService, accessService, notificationsService) {
         this.prisma = prisma;
         this.evaluationService = evaluationService;
         this.accessService = accessService;
+        this.notificationsService = notificationsService;
     }
     async applyForJob(userId, createApplicationDto, now = new Date()) {
         const candidateProfile = await this.prisma.candidateProfile.findUnique({
@@ -382,6 +385,8 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
                 id: true,
                 currentStage: true,
                 hrNotes: true,
+                candidate: { select: { userId: true } },
+                job: { select: { title: true } },
             },
         });
         if (!application) {
@@ -405,7 +410,7 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
             ? application.hrNotes
             : dto.hrNotes.trim() || null;
         const hrDecision = (0, application_stage_machine_1.hrDecisionForStage)(dto.targetStage);
-        return this.prisma.$transaction(async (prisma) => {
+        const result = await this.prisma.$transaction(async (prisma) => {
             const updated = await prisma.application.updateMany({
                 where: {
                     id: applicationId,
@@ -452,6 +457,35 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
                 historyEntry,
             };
         });
+        if (this.notificationsService && application.candidate?.userId) {
+            const stageLabels = {
+                RECEIVED: 'Đã nhận hồ sơ',
+                SCREENING: 'Sơ loại hồ sơ',
+                SHORTLISTED: 'Đạt yêu cầu hồ sơ',
+                INTERVIEW_SCHEDULED: 'Lên lịch phỏng vấn',
+                INTERVIEWED: 'Đã phỏng vấn',
+                OFFERED: 'Đề nghị nhận việc (Offer)',
+                HIRED: 'Đã tuyển dụng',
+                REJECTED: 'Chưa phù hợp',
+                WITHDRAWN: 'Đã rút hồ sơ',
+            };
+            const targetLabel = stageLabels[dto.targetStage] || dto.targetStage;
+            await this.notificationsService.createNotification({
+                recipientUserId: application.candidate.userId,
+                applicationId: application.id,
+                type: client_1.NotificationType.APPLICATION_STATUS_CHANGED,
+                title: `Cập nhật trạng thái hồ sơ: ${application.job?.title || 'Công việc'}`,
+                message: `Hồ sơ ứng tuyển của bạn đã được chuyển sang giai đoạn "${targetLabel}".`,
+                payload: {
+                    applicationId: application.id,
+                    previousStage: dto.expectedStage,
+                    newStage: dto.targetStage,
+                    jobTitle: application.job?.title,
+                    note: dto.note || undefined,
+                },
+            });
+        }
+        return result;
     }
     async findMine(userId, query) {
         const candidateId = await this.accessService.candidateProfileId(userId);
@@ -473,6 +507,10 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
                     processingStatus: true,
                     appliedAt: true,
                     updatedAt: true,
+                    notifications: {
+                        where: { status: client_1.NotificationStatus.UNREAD },
+                        select: { id: true },
+                    },
                     job: {
                         select: {
                             id: true,
@@ -513,6 +551,7 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
                 },
                 currentStage: application.currentStage,
                 processingStatus: application.processingStatus,
+                hasUnreadUpdate: (application.notifications?.length ?? 0) > 0,
                 interviews: application.interviews,
                 appliedAt: application.appliedAt,
                 updatedAt: application.updatedAt,
@@ -739,6 +778,7 @@ exports.ApplicationsService = ApplicationsService = ApplicationsService_1 = __de
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         application_evaluation_service_1.ApplicationEvaluationService,
-        application_access_service_1.ApplicationAccessService])
+        application_access_service_1.ApplicationAccessService,
+        notifications_service_1.NotificationsService])
 ], ApplicationsService);
 //# sourceMappingURL=applications.service.js.map

@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { ApplicationEvaluationService } from './application-evaluation.service';
 import { ApplicationAccessService } from './application-access.service';
@@ -10,8 +11,9 @@ export declare class ApplicationsService {
     private readonly prisma;
     private readonly evaluationService;
     private readonly accessService;
+    private readonly notificationsService?;
     private readonly logger;
-    constructor(prisma: PrismaService, evaluationService: ApplicationEvaluationService, accessService: ApplicationAccessService);
+    constructor(prisma: PrismaService, evaluationService: ApplicationEvaluationService, accessService: ApplicationAccessService, notificationsService?: NotificationsService | undefined);
     applyForJob(userId: string, createApplicationDto: CreateApplicationDto, now?: Date): Promise<{
         message: string;
         applicationId: string;
@@ -164,6 +166,7 @@ export declare class ApplicationsService {
             };
             currentStage: import(".prisma/client").$Enums.ApplicationStage;
             processingStatus: import(".prisma/client").$Enums.ApplicationProcessingStatus;
+            hasUnreadUpdate: boolean;
             interviews: {
                 id: string;
                 title: string;

@@ -1,5 +1,6 @@
 import { PrismaService } from '../../database/prisma.service';
 import { ApplicationAccessService } from '../applications/application-access.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateInterviewDto } from './dto/create-interview.dto';
 import { UpdateInterviewDto } from './dto/update-interview.dto';
 import { SubmitInterviewFeedbackDto } from './dto/submit-interview-feedback.dto';
@@ -7,8 +8,9 @@ import { QueryInterviewsDto } from './dto/query-interviews.dto';
 export declare class InterviewsService {
     private readonly prisma;
     private readonly accessService;
+    private readonly notificationsService?;
     private readonly logger;
-    constructor(prisma: PrismaService, accessService: ApplicationAccessService);
+    constructor(prisma: PrismaService, accessService: ApplicationAccessService, notificationsService?: NotificationsService | undefined);
     create(userId: string, dto: CreateInterviewDto): Promise<{
         score: number | null;
         application: {

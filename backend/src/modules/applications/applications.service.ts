@@ -10,10 +10,13 @@ import {
   ApplicationProcessingStatus,
   ApplicationStage,
   JobStatus,
+  NotificationStatus,
+  NotificationType,
   Prisma,
   ResumeParsingStatus,
 } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { ApplicationEvaluationService } from './application-evaluation.service';
 import { ApplicationAccessService } from './application-access.service';
@@ -149,6 +152,7 @@ export class ApplicationsService {
     private readonly prisma: PrismaService,
     private readonly evaluationService: ApplicationEvaluationService,
     private readonly accessService: ApplicationAccessService,
+    private readonly notificationsService?: NotificationsService,
   ) {}
 
   async applyForJob(
@@ -484,6 +488,8 @@ export class ApplicationsService {
         id: true,
         currentStage: true,
         hrNotes: true,
+        candidate: { select: { userId: true } },
+        job: { select: { title: true } },
       },
     });
 
@@ -520,7 +526,7 @@ export class ApplicationsService {
         : dto.hrNotes.trim() || null;
     const hrDecision = hrDecisionForStage(dto.targetStage);
 
-    return this.prisma.$transaction(async (prisma) => {
+    const result = await this.prisma.$transaction(async (prisma) => {
       const updated = await prisma.application.updateMany({
         where: {
           id: applicationId,
@@ -573,6 +579,37 @@ export class ApplicationsService {
         historyEntry,
       };
     });
+
+    if (this.notificationsService && application.candidate?.userId) {
+      const stageLabels: Record<ApplicationStage, string> = {
+        RECEIVED: 'Đã nhận hồ sơ',
+        SCREENING: 'Sơ loại hồ sơ',
+        SHORTLISTED: 'Đạt yêu cầu hồ sơ',
+        INTERVIEW_SCHEDULED: 'Lên lịch phỏng vấn',
+        INTERVIEWED: 'Đã phỏng vấn',
+        OFFERED: 'Đề nghị nhận việc (Offer)',
+        HIRED: 'Đã tuyển dụng',
+        REJECTED: 'Chưa phù hợp',
+        WITHDRAWN: 'Đã rút hồ sơ',
+      };
+      const targetLabel = stageLabels[dto.targetStage] || dto.targetStage;
+      await this.notificationsService.createNotification({
+        recipientUserId: application.candidate.userId,
+        applicationId: application.id,
+        type: NotificationType.APPLICATION_STATUS_CHANGED,
+        title: `Cập nhật trạng thái hồ sơ: ${application.job?.title || 'Công việc'}`,
+        message: `Hồ sơ ứng tuyển của bạn đã được chuyển sang giai đoạn "${targetLabel}".`,
+        payload: {
+          applicationId: application.id,
+          previousStage: dto.expectedStage,
+          newStage: dto.targetStage,
+          jobTitle: application.job?.title,
+          note: dto.note || undefined,
+        },
+      });
+    }
+
+    return result;
   }
 
   async findMine(userId: string, query: QueryMyApplicationsDto) {
@@ -596,6 +633,10 @@ export class ApplicationsService {
           processingStatus: true,
           appliedAt: true,
           updatedAt: true,
+          notifications: {
+            where: { status: NotificationStatus.UNREAD },
+            select: { id: true },
+          },
           job: {
             select: {
               id: true,
@@ -637,6 +678,7 @@ export class ApplicationsService {
         },
         currentStage: application.currentStage,
         processingStatus: application.processingStatus,
+        hasUnreadUpdate: (application.notifications?.length ?? 0) > 0,
         interviews: application.interviews,
         appliedAt: application.appliedAt,
         updatedAt: application.updatedAt,

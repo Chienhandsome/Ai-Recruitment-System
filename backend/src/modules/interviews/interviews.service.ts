@@ -9,10 +9,12 @@ import {
 import {
   ApplicationStage,
   InterviewStatus,
+  NotificationType,
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { ApplicationAccessService } from '../applications/application-access.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import {
   canTransitionApplication,
   hrDecisionForStage,
@@ -29,6 +31,7 @@ export class InterviewsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessService: ApplicationAccessService,
+    private readonly notificationsService?: NotificationsService,
   ) {}
 
   async create(userId: string, dto: CreateInterviewDto) {
@@ -57,7 +60,7 @@ export class InterviewsService {
       throw new BadRequestException('Thời gian phỏng vấn không hợp lệ.');
     }
 
-    return this.prisma.$transaction(async (prisma) => {
+    const result = await this.prisma.$transaction(async (prisma) => {
       const interview = await prisma.interview.create({
         data: {
           applicationId: dto.applicationId,
@@ -115,6 +118,25 @@ export class InterviewsService {
         },
       };
     });
+
+    if (this.notificationsService && application.candidate?.user?.id) {
+      await this.notificationsService.createNotification({
+        recipientUserId: application.candidate.user.id,
+        applicationId: application.id,
+        type: NotificationType.INTERVIEW_SCHEDULED,
+        title: `Thư mời phỏng vấn: ${application.job?.title || 'Công việc'}`,
+        message: `Bạn có buổi phỏng vấn "${dto.title}" vào lúc ${new Date(dto.scheduledAt).toLocaleString('vi-VN')}.`,
+        payload: {
+          applicationId: application.id,
+          interviewId: result.id,
+          scheduledAt: dto.scheduledAt,
+          locationOrLink: dto.locationOrLink,
+          jobTitle: application.job?.title,
+        },
+      });
+    }
+
+    return result;
   }
 
   async findAllForRecruiter(userId: string, query: QueryInterviewsDto) {
@@ -345,6 +367,8 @@ export class InterviewsService {
           select: {
             id: true,
             currentStage: true,
+            job: { select: { title: true } },
+            candidate: { select: { userId: true } },
           },
         },
       },
@@ -356,7 +380,7 @@ export class InterviewsService {
 
     const targetStage = dto.nextStage ?? ApplicationStage.INTERVIEWED;
 
-    return this.prisma.$transaction(async (prisma) => {
+    const result = await this.prisma.$transaction(async (prisma) => {
       const updatedInterview = await prisma.interview.update({
         where: { id },
         data: {
@@ -407,5 +431,23 @@ export class InterviewsService {
         applicationStage: targetStage,
       };
     });
+
+    if (this.notificationsService && existing.application.candidate?.userId) {
+      await this.notificationsService.createNotification({
+        recipientUserId: existing.application.candidate.userId,
+        applicationId: existing.application.id,
+        type: NotificationType.APPLICATION_STATUS_CHANGED,
+        title: `Kết quả phỏng vấn: ${existing.application.job?.title || 'Công việc'}`,
+        message: `Buổi phỏng vấn "${existing.title}" đã được ghi nhận kết quả đánh giá (${dto.score}/100 điểm).`,
+        payload: {
+          applicationId: existing.application.id,
+          interviewId: existing.id,
+          score: dto.score,
+          nextStage: targetStage,
+        },
+      });
+    }
+
+    return result;
   }
 }

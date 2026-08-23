@@ -4,6 +4,7 @@ import { ApplicationStage, InterviewStatus, InterviewType } from '@prisma/client
 import { InterviewsService } from './interviews.service';
 import { PrismaService } from '../../database/prisma.service';
 import { ApplicationAccessService } from '../applications/application-access.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('InterviewsService', () => {
   let service: InterviewsService;
@@ -40,6 +41,10 @@ describe('InterviewsService', () => {
         InterviewsService,
         { provide: PrismaService, useValue: prisma },
         { provide: ApplicationAccessService, useValue: accessService },
+        {
+          provide: NotificationsService,
+          useValue: { createNotification: jest.fn().mockResolvedValue({}) },
+        },
       ],
     }).compile();
 

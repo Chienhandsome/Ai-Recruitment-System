@@ -12,12 +12,13 @@ const interviews_controller_1 = require("./interviews.controller");
 const interviews_service_1 = require("./interviews.service");
 const auth_module_1 = require("../auth/auth.module");
 const applications_module_1 = require("../applications/applications.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 let InterviewsModule = class InterviewsModule {
 };
 exports.InterviewsModule = InterviewsModule;
 exports.InterviewsModule = InterviewsModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, applications_module_1.ApplicationsModule],
+        imports: [auth_module_1.AuthModule, applications_module_1.ApplicationsModule, notifications_module_1.NotificationsModule],
         controllers: [interviews_controller_1.InterviewsController],
         providers: [interviews_service_1.InterviewsService],
         exports: [interviews_service_1.InterviewsService],

@@ -2,6 +2,7 @@ import Link from "next/link"
 import { BrainCircuit } from "lucide-react"
 import { CandidateNav } from "@/components/candidate/candidate-nav"
 import { UserMenu } from "@/components/candidate/user-menu"
+import { NotificationBell } from "@/components/candidate/NotificationBell"
 
 interface CandidateHeaderProps {
   fullName: string
@@ -10,7 +11,7 @@ interface CandidateHeaderProps {
 
 export function CandidateHeader({ fullName, avatarUrl }: CandidateHeaderProps) {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60 font-sans">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/candidate" className="flex items-center gap-2">
@@ -22,7 +23,8 @@ export function CandidateHeader({ fullName, avatarUrl }: CandidateHeaderProps) {
 
           <CandidateNav />
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
+            <NotificationBell />
             <UserMenu fullName={fullName} avatarUrl={avatarUrl} />
           </div>
         </div>

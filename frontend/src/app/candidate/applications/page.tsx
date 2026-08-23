@@ -17,6 +17,7 @@ import {
 } from '@/lib/candidate-api';
 import { applicationStageLabels, applicationStageStyles } from '@/lib/application-stage';
 import { interviewTypeLabels } from '@/lib/interview-api';
+import { AutoMarkRead } from '@/components/candidate/AutoMarkRead';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -97,6 +98,8 @@ export default async function CandidateApplicationsPage({
         </form>
       </header>
 
+      <AutoMarkRead />
+
       {applications.data.length === 0 ? (
         <section className="mt-8 rounded-2xl border bg-surface px-6 py-16 text-center">
           <BriefcaseBusiness className="mx-auto size-11 text-primary" strokeWidth={1.5} />
@@ -113,7 +116,11 @@ export default async function CandidateApplicationsPage({
           {applications.data.map((application) => (
             <article
               key={application.id}
-              className="rounded-2xl border bg-surface p-5 shadow-sm transition-shadow hover:shadow-md"
+              className={`rounded-2xl border p-5 shadow-sm transition-shadow hover:shadow-md ${
+                application.hasUnreadUpdate
+                  ? 'border-blue-300 bg-blue-50/30 ring-1 ring-blue-300'
+                  : 'border-slate-200 bg-surface'
+              }`}
             >
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
@@ -124,6 +131,12 @@ export default async function CandidateApplicationsPage({
                     <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${applicationStageStyles[application.currentStage]}`}>
                       {applicationStageLabels[application.currentStage]}
                     </span>
+                    {application.hasUnreadUpdate && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
+                        <span className="size-2 rounded-full bg-rose-500 animate-pulse" />
+                        Cập nhật mới
+                      </span>
+                    )}
                   </div>
                   <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1.5">

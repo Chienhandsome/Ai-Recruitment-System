@@ -26,6 +26,7 @@ export declare class ApplicationsController {
             };
             currentStage: import(".prisma/client").$Enums.ApplicationStage;
             processingStatus: import(".prisma/client").$Enums.ApplicationProcessingStatus;
+            hasUnreadUpdate: boolean;
             interviews: {
                 id: string;
                 title: string;

@@ -25,7 +25,10 @@ __decorate([
     __metadata("design:type", String)
 ], JobSkillDto.prototype, "skillId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: client_1.SkillRequirementType, default: client_1.SkillRequirementType.MANDATORY }),
+    (0, swagger_1.ApiProperty)({
+        enum: client_1.SkillRequirementType,
+        default: client_1.SkillRequirementType.MANDATORY,
+    }),
     (0, class_validator_1.IsEnum)(client_1.SkillRequirementType),
     __metadata("design:type", String)
 ], JobSkillDto.prototype, "requirementType", void 0);
@@ -41,7 +44,10 @@ __decorate([
     __metadata("design:type", String)
 ], JobCertificateDto.prototype, "certificateName", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: client_1.SkillRequirementType, default: client_1.SkillRequirementType.MANDATORY }),
+    (0, swagger_1.ApiProperty)({
+        enum: client_1.SkillRequirementType,
+        default: client_1.SkillRequirementType.MANDATORY,
+    }),
     (0, class_validator_1.IsEnum)(client_1.SkillRequirementType),
     __metadata("design:type", String)
 ], JobCertificateDto.prototype, "requirementType", void 0);
@@ -63,6 +69,7 @@ class CreateJobDto {
     categoryId;
     expiryDate;
     requiredExperienceYears;
+    levelRequirementMode;
     autoShortlistThreshold;
     autoRejectThreshold;
     rejectOnMissingMandatory;
@@ -105,13 +112,19 @@ __decorate([
     __metadata("design:type", String)
 ], CreateJobDto.prototype, "benefits", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.EmploymentType, default: client_1.EmploymentType.FULL_TIME }),
+    (0, swagger_1.ApiPropertyOptional)({
+        enum: client_1.EmploymentType,
+        default: client_1.EmploymentType.FULL_TIME,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.EmploymentType),
     __metadata("design:type", String)
 ], CreateJobDto.prototype, "employmentType", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.ExperienceLevel, default: client_1.ExperienceLevel.JUNIOR }),
+    (0, swagger_1.ApiPropertyOptional)({
+        enum: client_1.ExperienceLevel,
+        default: client_1.ExperienceLevel.JUNIOR,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.ExperienceLevel),
     __metadata("design:type", String)
@@ -174,8 +187,19 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ description: 'Required experience in years' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateJobDto.prototype, "requiredExperienceYears", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        enum: client_1.LevelRequirementMode,
+        default: client_1.LevelRequirementMode.ADVISORY,
+        description: 'Whether an experience-level gap is advisory or required',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.LevelRequirementMode),
+    __metadata("design:type", String)
+], CreateJobDto.prototype, "levelRequirementMode", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ description: 'AI Shortlist Threshold' }),
     (0, class_validator_1.IsOptional)(),
@@ -193,7 +217,9 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateJobDto.prototype, "autoRejectThreshold", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ description: 'Reject on missing mandatory requirement' }),
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Reject on missing mandatory requirement',
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)

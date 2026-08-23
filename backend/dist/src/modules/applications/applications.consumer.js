@@ -59,6 +59,7 @@ let ApplicationsConsumer = ApplicationsConsumer_1 = class ApplicationsConsumer {
                 const matchLevel = (['HIGH', 'MEDIUM', 'LOW'].includes(validatedResult.match_level)
                     ? validatedResult.match_level
                     : 'LOW');
+                const experienceAssessment = validatedResult.experience_assessment;
                 await this.prisma.$transaction(async (prisma) => {
                     await prisma.aiMatchingResult.deleteMany({
                         where: { applicationId },
@@ -80,6 +81,26 @@ let ApplicationsConsumer = ApplicationsConsumer_1 = class ApplicationsConsumer {
                             reasoningSummary: validatedResult.summary,
                             evidence: validatedResult.evidence,
                             confidenceScore: validatedResult.confidence_score,
+                            candidateExperienceLevel: experienceAssessment?.candidate_level ?? null,
+                            requiredExperienceLevel: experienceAssessment?.required_level ?? null,
+                            totalExperienceYears: experienceAssessment?.total_experience_years ?? null,
+                            levelFitScore: experienceAssessment?.level_fit_score ?? null,
+                            levelGap: experienceAssessment?.level_gap ?? null,
+                            levelEligible: experienceAssessment?.level_eligible ?? null,
+                            levelConfidence: experienceAssessment?.level_confidence ?? null,
+                            levelEvidence: experienceAssessment
+                                ? {
+                                    evidence: experienceAssessment.evidence,
+                                    reasonCodes: experienceAssessment.reason_codes,
+                                    recommendation: experienceAssessment.recommendation,
+                                    requirementMode: experienceAssessment.level_requirement_mode,
+                                    durationScore: experienceAssessment.duration_score,
+                                    relevanceScore: experienceAssessment.relevance_score,
+                                }
+                                : undefined,
+                            modelVersion: experienceAssessment
+                                ? 'experience-level-v1'
+                                : undefined,
                         },
                     });
                     await prisma.application.update({
@@ -90,7 +111,40 @@ let ApplicationsConsumer = ApplicationsConsumer_1 = class ApplicationsConsumer {
                             evaluationError: null,
                         },
                     });
+                    const promoted = await prisma.application.updateMany({
+                        where: {
+                            id: applicationId,
+                            currentStage: client_1.ApplicationStage.RECEIVED,
+                        },
+                        data: {
+                            currentStage: client_1.ApplicationStage.SCREENING,
+                            hrDecision: client_1.HrDecision.CONSIDER,
+                        },
+                    });
+                    if (promoted.count === 1) {
+                        await prisma.applicationStatusHistory.create({
+                            data: {
+                                applicationId,
+                                previousStage: client_1.ApplicationStage.RECEIVED,
+                                newStage: client_1.ApplicationStage.SCREENING,
+                                changedByUserId: null,
+                                note: 'AI evaluation completed; application entered screening.',
+                            },
+                        });
+                    }
                 });
+                if (experienceAssessment) {
+                    this.logger.log(JSON.stringify({
+                        event: 'experience_level_evaluated',
+                        application_id: applicationId,
+                        candidate_level: experienceAssessment.candidate_level,
+                        required_level: experienceAssessment.required_level,
+                        level_gap: experienceAssessment.level_gap,
+                        eligible: experienceAssessment.level_eligible,
+                        confidence: experienceAssessment.level_confidence,
+                        algorithm_version: 'experience-level-v1',
+                    }));
+                }
                 this.logger.log(`Successfully updated AI evaluation for application ${applicationId}`);
             }
             catch (caughtError) {

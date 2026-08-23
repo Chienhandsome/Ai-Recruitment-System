@@ -50,6 +50,7 @@ export declare class CandidateJobsController {
         requirements: string | null;
         benefits: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
         certificates: {
@@ -60,8 +61,9 @@ export declare class CandidateJobsController {
         hasApplied: boolean;
         application: {
             id: string;
-            status: import(".prisma/client").$Enums.ApplicationProcessingStatus;
-            createdAt: Date;
+            processingStatus: import(".prisma/client").$Enums.ApplicationProcessingStatus;
+            currentStage: import(".prisma/client").$Enums.ApplicationStage;
+            appliedAt: Date;
         } | null;
         id: string;
         jobCode: string;

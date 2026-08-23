@@ -95,9 +95,6 @@ export declare class JobsService {
                 updatedAt: Date;
                 applicationId: string;
                 version: number;
-                strengths: Prisma.JsonValue | null;
-                gaps: Prisma.JsonValue | null;
-                evidence: Prisma.JsonValue | null;
                 overallScore: Prisma.Decimal;
                 matchLevel: import(".prisma/client").$Enums.MatchLevel;
                 skillScore: Prisma.Decimal | null;
@@ -107,11 +104,22 @@ export declare class JobsService {
                 matchedSkills: Prisma.JsonValue | null;
                 missingSkills: Prisma.JsonValue | null;
                 missingRequiredSkills: Prisma.JsonValue | null;
+                strengths: Prisma.JsonValue | null;
+                gaps: Prisma.JsonValue | null;
                 weaknesses: Prisma.JsonValue | null;
+                evidence: Prisma.JsonValue | null;
                 confidenceScore: Prisma.Decimal | null;
                 reasoningSummary: string | null;
                 inputSnapshot: Prisma.JsonValue | null;
                 modelVersion: string | null;
+                candidateExperienceLevel: import(".prisma/client").$Enums.ExperienceLevel | null;
+                requiredExperienceLevel: import(".prisma/client").$Enums.ExperienceLevel | null;
+                totalExperienceYears: Prisma.Decimal | null;
+                levelFitScore: Prisma.Decimal | null;
+                levelGap: number | null;
+                levelEligible: boolean | null;
+                levelConfidence: Prisma.Decimal | null;
+                levelEvidence: Prisma.JsonValue | null;
             }[];
         } & {
             id: string;
@@ -147,6 +155,7 @@ export declare class JobsService {
         currency: string;
         location: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         autoShortlistThreshold: Prisma.Decimal | null;
         autoRejectThreshold: Prisma.Decimal | null;
         rejectOnMissingMandatory: boolean;
@@ -202,6 +211,7 @@ export declare class JobsService {
             currency: string;
             location: string | null;
             requiredExperienceYears: number | null;
+            levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
             autoShortlistThreshold: Prisma.Decimal | null;
             autoRejectThreshold: Prisma.Decimal | null;
             rejectOnMissingMandatory: boolean;
@@ -272,6 +282,7 @@ export declare class JobsService {
         requirements: string | null;
         benefits: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         requiresProofOfWork: boolean;
         proofOfWorkType: import(".prisma/client").$Enums.ProofType | null;
         certificates: {
@@ -282,8 +293,9 @@ export declare class JobsService {
         hasApplied: boolean;
         application: {
             id: string;
-            status: import(".prisma/client").$Enums.ApplicationProcessingStatus;
-            createdAt: Date;
+            processingStatus: import(".prisma/client").$Enums.ApplicationProcessingStatus;
+            currentStage: import(".prisma/client").$Enums.ApplicationStage;
+            appliedAt: Date;
         } | null;
         id: string;
         jobCode: string;
@@ -470,9 +482,6 @@ export declare class JobsService {
                 updatedAt: Date;
                 applicationId: string;
                 version: number;
-                strengths: Prisma.JsonValue | null;
-                gaps: Prisma.JsonValue | null;
-                evidence: Prisma.JsonValue | null;
                 overallScore: Prisma.Decimal;
                 matchLevel: import(".prisma/client").$Enums.MatchLevel;
                 skillScore: Prisma.Decimal | null;
@@ -482,11 +491,22 @@ export declare class JobsService {
                 matchedSkills: Prisma.JsonValue | null;
                 missingSkills: Prisma.JsonValue | null;
                 missingRequiredSkills: Prisma.JsonValue | null;
+                strengths: Prisma.JsonValue | null;
+                gaps: Prisma.JsonValue | null;
                 weaknesses: Prisma.JsonValue | null;
+                evidence: Prisma.JsonValue | null;
                 confidenceScore: Prisma.Decimal | null;
                 reasoningSummary: string | null;
                 inputSnapshot: Prisma.JsonValue | null;
                 modelVersion: string | null;
+                candidateExperienceLevel: import(".prisma/client").$Enums.ExperienceLevel | null;
+                requiredExperienceLevel: import(".prisma/client").$Enums.ExperienceLevel | null;
+                totalExperienceYears: Prisma.Decimal | null;
+                levelFitScore: Prisma.Decimal | null;
+                levelGap: number | null;
+                levelEligible: boolean | null;
+                levelConfidence: Prisma.Decimal | null;
+                levelEvidence: Prisma.JsonValue | null;
             }[];
         } & {
             id: string;
@@ -522,6 +542,7 @@ export declare class JobsService {
         currency: string;
         location: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         autoShortlistThreshold: Prisma.Decimal | null;
         autoRejectThreshold: Prisma.Decimal | null;
         rejectOnMissingMandatory: boolean;
@@ -600,6 +621,7 @@ export declare class JobsService {
         currency: string;
         location: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         autoShortlistThreshold: Prisma.Decimal | null;
         autoRejectThreshold: Prisma.Decimal | null;
         rejectOnMissingMandatory: boolean;

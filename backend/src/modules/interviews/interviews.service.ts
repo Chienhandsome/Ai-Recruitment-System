@@ -1,0 +1,411 @@
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import {
+  ApplicationStage,
+  InterviewStatus,
+  Prisma,
+} from '@prisma/client';
+import { PrismaService } from '../../database/prisma.service';
+import { ApplicationAccessService } from '../applications/application-access.service';
+import {
+  canTransitionApplication,
+  hrDecisionForStage,
+} from '../applications/application-stage-machine';
+import { CreateInterviewDto } from './dto/create-interview.dto';
+import { UpdateInterviewDto } from './dto/update-interview.dto';
+import { SubmitInterviewFeedbackDto } from './dto/submit-interview-feedback.dto';
+import { QueryInterviewsDto } from './dto/query-interviews.dto';
+
+@Injectable()
+export class InterviewsService {
+  private readonly logger = new Logger(InterviewsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly accessService: ApplicationAccessService,
+  ) {}
+
+  async create(userId: string, dto: CreateInterviewDto) {
+    const scope = await this.accessService.recruiterApplicationWhere(userId);
+    const application = await this.prisma.application.findFirst({
+      where: { AND: [scope, { id: dto.applicationId }] },
+      select: {
+        id: true,
+        currentStage: true,
+        job: { select: { id: true, title: true, jobCode: true } },
+        candidate: {
+          select: {
+            id: true,
+            user: { select: { id: true, fullName: true, email: true, phone: true } },
+          },
+        },
+      },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Đơn ứng tuyển không tồn tại hoặc bạn không có quyền truy cập.');
+    }
+
+    const scheduledDate = new Date(dto.scheduledAt);
+    if (isNaN(scheduledDate.getTime())) {
+      throw new BadRequestException('Thời gian phỏng vấn không hợp lệ.');
+    }
+
+    return this.prisma.$transaction(async (prisma) => {
+      const interview = await prisma.interview.create({
+        data: {
+          applicationId: dto.applicationId,
+          title: dto.title,
+          type: dto.type,
+          scheduledAt: scheduledDate,
+          durationMinutes: dto.durationMinutes ?? 60,
+          locationOrLink: dto.locationOrLink,
+          interviewerNotes: dto.interviewerNotes,
+          status: InterviewStatus.SCHEDULED,
+        },
+      });
+
+      // Automatically advance stage to INTERVIEW_SCHEDULED if transition is allowed
+      if (
+        application.currentStage !== ApplicationStage.INTERVIEW_SCHEDULED &&
+        canTransitionApplication(
+          application.currentStage,
+          ApplicationStage.INTERVIEW_SCHEDULED,
+        )
+      ) {
+        await prisma.application.update({
+          where: { id: application.id },
+          data: {
+            currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
+            hrDecision: hrDecisionForStage(ApplicationStage.INTERVIEW_SCHEDULED),
+          },
+        });
+
+        await prisma.applicationStatusHistory.create({
+          data: {
+            applicationId: application.id,
+            previousStage: application.currentStage,
+            newStage: ApplicationStage.INTERVIEW_SCHEDULED,
+            changedByUserId: userId,
+            note: `Lên lịch phỏng vấn: ${dto.title} (${scheduledDate.toLocaleString('vi-VN')})`,
+          },
+        });
+      }
+
+      this.logger.log(
+        `Interview ${interview.id} scheduled for application ${application.id} by user ${userId}`,
+      );
+
+      return {
+        ...interview,
+        score: interview.score !== null ? Number(interview.score) : null,
+        application: {
+          id: application.id,
+          job: application.job,
+          candidate: {
+            id: application.candidate.id,
+            ...application.candidate.user,
+          },
+        },
+      };
+    });
+  }
+
+  async findAllForRecruiter(userId: string, query: QueryInterviewsDto) {
+    const scope = await this.accessService.recruiterApplicationWhere(userId);
+    const where: Prisma.InterviewWhereInput = {
+      application: {
+        AND: [
+          scope,
+          query.jobId ? { jobId: query.jobId } : {},
+          query.applicationId ? { id: query.applicationId } : {},
+        ],
+      },
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.type ? { type: query.type } : {}),
+    };
+
+    const skip = (query.page - 1) * query.limit;
+
+    const [total, items] = await Promise.all([
+      this.prisma.interview.count({ where }),
+      this.prisma.interview.findMany({
+        where,
+        skip,
+        take: query.limit,
+        orderBy: { scheduledAt: 'desc' },
+        include: {
+          application: {
+            select: {
+              id: true,
+              currentStage: true,
+              job: { select: { id: true, title: true, jobCode: true } },
+              candidate: {
+                select: {
+                  id: true,
+                  desiredTitle: true,
+                  user: {
+                    select: {
+                      fullName: true,
+                      email: true,
+                      phone: true,
+                      avatarUrl: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      data: items.map((item) => ({
+        ...item,
+        score: item.score !== null ? Number(item.score) : null,
+      })),
+      meta: {
+        total,
+        page: query.page,
+        limit: query.limit,
+        totalPages: Math.ceil(total / query.limit),
+      },
+    };
+  }
+
+  async findMineForCandidate(userId: string) {
+    const candidateId = await this.accessService.candidateProfileId(userId);
+
+    const interviews = await this.prisma.interview.findMany({
+      where: {
+        application: {
+          candidateId,
+        },
+      },
+      orderBy: { scheduledAt: 'desc' },
+      include: {
+        application: {
+          select: {
+            id: true,
+            currentStage: true,
+            job: {
+              select: {
+                id: true,
+                title: true,
+                location: true,
+                recruiter: {
+                  select: {
+                    company: { select: { id: true, name: true, logoUrl: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return interviews.map((item) => ({
+      id: item.id,
+      title: item.title,
+      type: item.type,
+      status: item.status,
+      scheduledAt: item.scheduledAt,
+      durationMinutes: item.durationMinutes,
+      locationOrLink: item.locationOrLink,
+      interviewerNotes: item.interviewerNotes,
+      application: {
+        id: item.application.id,
+        currentStage: item.application.currentStage,
+        job: {
+          id: item.application.job.id,
+          title: item.application.job.title,
+          location: item.application.job.location,
+          company: item.application.job.recruiter?.company,
+        },
+      },
+    }));
+  }
+
+  async findOne(userId: string, id: string) {
+    const interview = await this.prisma.interview.findUnique({
+      where: { id },
+      include: {
+        application: {
+          select: {
+            id: true,
+            currentStage: true,
+            candidateId: true,
+            job: {
+              select: {
+                id: true,
+                title: true,
+                recruiter: { select: { id: true, userId: true, companyId: true } },
+              },
+            },
+            candidate: {
+              select: {
+                id: true,
+                userId: true,
+                user: { select: { fullName: true, email: true, phone: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!interview) {
+      throw new NotFoundException('Không tìm thấy lịch phỏng vấn.');
+    }
+
+    const isCandidateOwner = interview.application.candidate.userId === userId;
+    if (!isCandidateOwner) {
+      const scope = await this.accessService
+        .recruiterApplicationWhere(userId)
+        .catch(() => null);
+      if (!scope) {
+        throw new NotFoundException('Không tìm thấy lịch phỏng vấn.');
+      }
+      const app = await this.prisma.application.findFirst({
+        where: { AND: [scope, { id: interview.applicationId }] },
+        select: { id: true },
+      });
+      if (!app) {
+        throw new NotFoundException('Không tìm thấy lịch phỏng vấn.');
+      }
+    }
+
+    return {
+      ...interview,
+      score: interview.score !== null ? Number(interview.score) : null,
+    };
+  }
+
+  async update(userId: string, id: string, dto: UpdateInterviewDto) {
+    const scope = await this.accessService.recruiterApplicationWhere(userId);
+    const existing = await this.prisma.interview.findFirst({
+      where: {
+        id,
+        application: scope,
+      },
+      include: {
+        application: { select: { id: true, currentStage: true } },
+      },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy lịch phỏng vấn để cập nhật.');
+    }
+
+    const scheduledDate = dto.scheduledAt ? new Date(dto.scheduledAt) : undefined;
+    if (scheduledDate && isNaN(scheduledDate.getTime())) {
+      throw new BadRequestException('Thời gian phỏng vấn không hợp lệ.');
+    }
+
+    const updated = await this.prisma.interview.update({
+      where: { id },
+      data: {
+        title: dto.title,
+        type: dto.type,
+        status: dto.status,
+        scheduledAt: scheduledDate,
+        durationMinutes: dto.durationMinutes,
+        locationOrLink: dto.locationOrLink,
+        interviewerNotes: dto.interviewerNotes,
+      },
+    });
+
+    return {
+      ...updated,
+      score: updated.score !== null ? Number(updated.score) : null,
+    };
+  }
+
+  async submitFeedback(
+    userId: string,
+    id: string,
+    dto: SubmitInterviewFeedbackDto,
+  ) {
+    const scope = await this.accessService.recruiterApplicationWhere(userId);
+    const existing = await this.prisma.interview.findFirst({
+      where: {
+        id,
+        application: scope,
+      },
+      include: {
+        application: {
+          select: {
+            id: true,
+            currentStage: true,
+          },
+        },
+      },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy lịch phỏng vấn.');
+    }
+
+    const targetStage = dto.nextStage ?? ApplicationStage.INTERVIEWED;
+
+    return this.prisma.$transaction(async (prisma) => {
+      const updatedInterview = await prisma.interview.update({
+        where: { id },
+        data: {
+          score: dto.score,
+          interviewerNotes: dto.interviewerNotes,
+          status: InterviewStatus.COMPLETED,
+        },
+      });
+
+      const currentStage = existing.application.currentStage;
+      if (
+        currentStage !== targetStage &&
+        canTransitionApplication(currentStage, targetStage)
+      ) {
+        await prisma.application.update({
+          where: { id: existing.application.id },
+          data: {
+            currentStage: targetStage,
+            hrDecision: hrDecisionForStage(targetStage),
+          },
+        });
+
+        await prisma.applicationStatusHistory.create({
+          data: {
+            applicationId: existing.application.id,
+            previousStage: currentStage,
+            newStage: targetStage,
+            changedByUserId: userId,
+            note: `Đánh giá phỏng vấn: ${dto.score}/100 điểm. Nhận xét: ${dto.interviewerNotes.slice(0, 300)}`,
+          },
+        });
+      } else if (
+        currentStage !== targetStage &&
+        !canTransitionApplication(currentStage, targetStage)
+      ) {
+        throw new UnprocessableEntityException(
+          `Không thể chuyển trạng thái từ ${currentStage} sang ${targetStage}.`,
+        );
+      }
+
+      this.logger.log(
+        `Feedback submitted for interview ${id}. Score: ${dto.score}, target stage: ${targetStage}`,
+      );
+
+      return {
+        ...updatedInterview,
+        score: Number(updatedInterview.score),
+        applicationStage: targetStage,
+      };
+    });
+  }
+}

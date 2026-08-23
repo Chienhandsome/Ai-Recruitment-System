@@ -117,6 +117,7 @@ let JobsService = class JobsService {
                     categoryId: dto.categoryId,
                     expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
                     requiredExperienceYears: dto.requiredExperienceYears,
+                    levelRequirementMode: dto.levelRequirementMode,
                     autoShortlistThreshold: dto.autoShortlistThreshold,
                     autoRejectThreshold: dto.autoRejectThreshold,
                     rejectOnMissingMandatory: dto.rejectOnMissingMandatory,
@@ -151,14 +152,14 @@ let JobsService = class JobsService {
                                             fullName: true,
                                             avatarUrl: true,
                                             phone: true,
-                                        }
-                                    }
-                                }
-                            }
+                                        },
+                                    },
+                                },
+                            },
                         },
                         orderBy: {
-                            appliedAt: 'desc'
-                        }
+                            appliedAt: 'desc',
+                        },
                     },
                 },
             });
@@ -293,8 +294,6 @@ let JobsService = class JobsService {
             throw new common_1.NotFoundException('Job posting is unavailable');
         }
         let application = null;
-        let aiScore = null;
-        let matchLevel = null;
         const profile = await this.prisma.candidateProfile.findUnique({
             where: { userId },
             select: { id: true },
@@ -307,13 +306,19 @@ let JobsService = class JobsService {
                         candidateId: profile.id,
                     },
                 },
-                include: { aiMatchingResults: true },
+                select: {
+                    id: true,
+                    processingStatus: true,
+                    currentStage: true,
+                    appliedAt: true,
+                },
             });
             if (app) {
                 application = {
                     id: app.id,
-                    status: app.processingStatus,
-                    createdAt: app.appliedAt,
+                    processingStatus: app.processingStatus,
+                    currentStage: app.currentStage,
+                    appliedAt: app.appliedAt,
                 };
             }
         }
@@ -323,6 +328,7 @@ let JobsService = class JobsService {
             requirements: job.requirements,
             benefits: job.benefits,
             requiredExperienceYears: job.requiredExperienceYears,
+            levelRequirementMode: job.levelRequirementMode,
             requiresProofOfWork: job.requiresProofOfWork,
             proofOfWorkType: job.proofOfWorkType,
             certificates: job.jobCertificates.map((certificate) => ({
@@ -381,18 +387,18 @@ let JobsService = class JobsService {
                                         fullName: true,
                                         avatarUrl: true,
                                         phone: true,
-                                    }
+                                    },
                                 },
                                 workExperiences: { orderBy: { startDate: 'desc' } },
                                 educations: { orderBy: { startDate: 'desc' } },
                                 projects: true,
-                                candidateSkills: { include: { skill: true } }
-                            }
-                        }
+                                candidateSkills: { include: { skill: true } },
+                            },
+                        },
                     },
                     orderBy: {
-                        appliedAt: 'desc'
-                    }
+                        appliedAt: 'desc',
+                    },
                 },
             },
         });
@@ -433,6 +439,7 @@ let JobsService = class JobsService {
             categoryId: dto.categoryId,
             expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
             requiredExperienceYears: dto.requiredExperienceYears,
+            levelRequirementMode: dto.levelRequirementMode,
             autoShortlistThreshold: dto.autoShortlistThreshold,
             autoRejectThreshold: dto.autoRejectThreshold,
             rejectOnMissingMandatory: dto.rejectOnMissingMandatory,

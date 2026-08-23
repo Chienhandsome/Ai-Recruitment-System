@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
+const seed_skill_catalog_1 = require("./seed-skill-catalog");
 const prisma = new client_1.PrismaClient();
 async function main() {
     console.log('Start seeding...');
@@ -43,83 +44,17 @@ async function main() {
         });
     }
     console.log(`Seeded ${departments.length} departments.`);
-    const categoryNames = [
-        'Frontend',
-        'Backend',
-        'AI & Data',
-        'Database',
-        'Programming Language',
-        'Cloud',
-        'DevOps',
-        'Soft Skill',
-    ];
-    const categories = new Map();
-    for (const name of categoryNames) {
-        const category = await prisma.skillCategory.upsert({
-            where: { name },
-            update: {},
-            create: { name },
-        });
-        categories.set(name, category.id);
+    const skillSeedResult = await (0, seed_skill_catalog_1.seedSkillCatalog)(prisma);
+    console.log(`Seeded ${skillSeedResult.categories} skill categories, ` +
+        `${skillSeedResult.skills} skills and ${skillSeedResult.aliases} aliases.`);
+    if (skillSeedResult.removedAmbiguousAliases > 0) {
+        console.log(`Removed ${skillSeedResult.removedAmbiguousAliases} aliases that conflicted with canonical skill names.`);
     }
-    console.log(`Seeded ${categories.size} skill categories.`);
-    const skillsData = [
-        { name: 'React', normalizedName: 'react', category: 'Frontend', type: client_1.SkillType.HARD },
-        { name: 'Node.js', normalizedName: 'node.js', category: 'Backend', type: client_1.SkillType.HARD },
-        { name: 'Python', normalizedName: 'python', category: 'AI & Data', type: client_1.SkillType.HARD },
-        { name: 'Java', normalizedName: 'java', category: 'Backend', type: client_1.SkillType.HARD },
-        { name: 'SQL', normalizedName: 'sql', category: 'Database', type: client_1.SkillType.HARD },
-        { name: 'TypeScript', normalizedName: 'typescript', category: 'Programming Language', type: client_1.SkillType.HARD },
-        { name: 'AWS', normalizedName: 'aws', category: 'Cloud', type: client_1.SkillType.HARD },
-        { name: 'Docker', normalizedName: 'docker', category: 'DevOps', type: client_1.SkillType.HARD },
-        { name: 'Kubernetes', normalizedName: 'kubernetes', category: 'DevOps', type: client_1.SkillType.HARD },
-        { name: 'Communication', normalizedName: 'communication', category: 'Soft Skill', type: client_1.SkillType.SOFT },
-        { name: 'Leadership', normalizedName: 'leadership', category: 'Soft Skill', type: client_1.SkillType.SOFT },
-    ];
-    const skillRecords = [];
-    for (const skill of skillsData) {
-        const record = await prisma.skill.upsert({
-            where: { normalizedName: skill.normalizedName },
-            update: {
-                name: skill.name,
-                categoryId: categories.get(skill.category),
-                type: skill.type,
-                status: client_1.SkillStatus.ACTIVE,
-            },
-            create: {
-                name: skill.name,
-                normalizedName: skill.normalizedName,
-                categoryId: categories.get(skill.category),
-                type: skill.type,
-                status: client_1.SkillStatus.ACTIVE,
-            },
-        });
-        skillRecords.push(record);
+    if (skillSeedResult.deprecatedLegacySkills > 0) {
+        console.log(`Migrated ${skillSeedResult.migratedCandidateSkillLinks} candidate links and ` +
+            `${skillSeedResult.migratedJobSkillLinks} job links from ` +
+            `${skillSeedResult.deprecatedLegacySkills} legacy composite skills.`);
     }
-    console.log(`Seeded ${skillRecords.length} skills.`);
-    const skillAliasesData = [
-        { skillNormalized: 'react', alias: 'reactjs' },
-        { skillNormalized: 'react', alias: 'react.js' },
-        { skillNormalized: 'node.js', alias: 'nodejs' },
-        { skillNormalized: 'node.js', alias: 'node' },
-        { skillNormalized: 'typescript', alias: 'ts' },
-    ];
-    let aliasCount = 0;
-    for (const item of skillAliasesData) {
-        const skill = skillRecords.find(s => s.normalizedName === item.skillNormalized);
-        if (skill) {
-            await prisma.skillAlias.upsert({
-                where: { aliasName: item.alias },
-                update: {},
-                create: {
-                    aliasName: item.alias,
-                    skillId: skill.id,
-                },
-            });
-            aliasCount++;
-        }
-    }
-    console.log(`Seeded ${aliasCount} skill aliases.`);
     console.log('Seeding finished.');
 }
 main()

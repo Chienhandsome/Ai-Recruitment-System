@@ -18,6 +18,10 @@ import { ApplicationAccessService } from './application-access.service';
     RetryApplicationEvaluationsUseCase,
     ApplicationAccessService,
   ],
-  exports: [ApplicationsService, ApplicationsConsumer],
+  exports: [
+    ApplicationsService,
+    ApplicationsConsumer,
+    ApplicationAccessService,
+  ],
 })
 export class ApplicationsModule {}

@@ -27,6 +27,7 @@ const prisma_module_1 = require("../../database/prisma.module");
 const auth_module_1 = require("../auth/auth.module");
 const supabase_module_1 = require("../../infrastructure/supabase/supabase.module");
 const rabbitmq_module_1 = require("../../infrastructure/rabbitmq/rabbitmq.module");
+const ai_service_wakeup_service_1 = require("../../infrastructure/ai/ai-service-wakeup.service");
 let ResumesModule = class ResumesModule {
 };
 exports.ResumesModule = ResumesModule;
@@ -49,6 +50,7 @@ exports.ResumesModule = ResumesModule = __decorate([
             skill_writer_1.SkillWriter,
             profile_writer_1.ProfileWriter,
             resume_result_listener_1.ResumeResultListener,
+            ai_service_wakeup_service_1.AiServiceWakeupService,
         ],
         exports: [resumes_service_1.ResumesService],
     })

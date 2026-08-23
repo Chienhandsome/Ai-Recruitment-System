@@ -21,6 +21,9 @@ const current_user_decorator_1 = require("../auth/decorators/current-user.decora
 const supabase_auth_guard_1 = require("../auth/guards/supabase-auth.guard");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
+const query_recruiter_applications_dto_1 = require("./dto/query-recruiter-applications.dto");
+const query_my_applications_dto_1 = require("./dto/query-my-applications.dto");
+const update_application_stage_dto_1 = require("./dto/update-application-stage.dto");
 let ApplicationsController = class ApplicationsController {
     applicationsService;
     constructor(applicationsService) {
@@ -28,6 +31,18 @@ let ApplicationsController = class ApplicationsController {
     }
     async apply(user, dto) {
         return this.applicationsService.applyForJob(user.id, dto);
+    }
+    findMine(user, query) {
+        return this.applicationsService.findMine(user.id, query);
+    }
+    findAllForRecruiter(user, query) {
+        return this.applicationsService.findAllForRecruiter(user.id, query);
+    }
+    findOneForRecruiter(user, id) {
+        return this.applicationsService.findOneForRecruiter(user.id, id);
+    }
+    updateStage(user, id, dto) {
+        return this.applicationsService.updateStage(user.id, id, dto);
     }
 };
 exports.ApplicationsController = ApplicationsController;
@@ -58,6 +73,53 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_application_dto_1.CreateApplicationDto]),
     __metadata("design:returntype", Promise)
 ], ApplicationsController.prototype, "apply", null);
+__decorate([
+    (0, common_1.Get)('me'),
+    (0, roles_decorator_1.Roles)('CANDIDATE'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'List applications submitted by the current candidate',
+    }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, query_my_applications_dto_1.QueryMyApplicationsDto]),
+    __metadata("design:returntype", void 0)
+], ApplicationsController.prototype, "findMine", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, roles_decorator_1.Roles)('RECRUITER'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'List applications available to the current recruiter',
+    }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, query_recruiter_applications_dto_1.QueryRecruiterApplicationsDto]),
+    __metadata("design:returntype", void 0)
+], ApplicationsController.prototype, "findAllForRecruiter", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, roles_decorator_1.Roles)('RECRUITER'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get a scoped application with AI evaluation details',
+    }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], ApplicationsController.prototype, "findOneForRecruiter", null);
+__decorate([
+    (0, common_1.Patch)(':id/stage'),
+    (0, roles_decorator_1.Roles)('RECRUITER'),
+    (0, swagger_1.ApiOperation)({ summary: 'Move an application to another recruitment stage' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, update_application_stage_dto_1.UpdateApplicationStageDto]),
+    __metadata("design:returntype", void 0)
+], ApplicationsController.prototype, "updateStage", null);
 exports.ApplicationsController = ApplicationsController = __decorate([
     (0, swagger_1.ApiTags)('Applications'),
     (0, swagger_1.ApiBearerAuth)(),

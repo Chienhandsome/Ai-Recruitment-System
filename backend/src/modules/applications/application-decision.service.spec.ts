@@ -92,6 +92,7 @@ describe('ApplicationsService decision workflow', () => {
       select: expect.any(Object),
     });
     expect(result.allowedTransitions).toEqual([
+      ApplicationStage.INTERVIEW_SCHEDULED,
       ApplicationStage.SCREENING,
       ApplicationStage.OFFERED,
       ApplicationStage.REJECTED,

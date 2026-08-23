@@ -1,13 +1,22 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { BriefcaseBusiness, Building2, CalendarDays, MapPin } from 'lucide-react';
+import {
+  BriefcaseBusiness,
+  Building2,
+  Calendar,
+  CalendarDays,
+  Clock,
+  MapPin,
+  Video,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   type CandidateApplicationStage,
   getMyApplications,
 } from '@/lib/candidate-api';
 import { applicationStageLabels, applicationStageStyles } from '@/lib/application-stage';
+import { interviewTypeLabels } from '@/lib/interview-api';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -139,6 +148,64 @@ export default async function CandidateApplicationsPage({
                         ? 'Hồ sơ đã được tiếp nhận; nhà tuyển dụng sẽ xem xét thủ công.'
                         : 'Hồ sơ đã được tiếp nhận và đang được xử lý.'}
                   </p>
+
+                  {/* Thư mời phỏng vấn nếu có */}
+                  {application.interviews && application.interviews.length > 0 && (
+                    <div className="mt-4 rounded-xl border border-blue-200 bg-[#EFF6FF] p-4 space-y-2.5">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#2563EB]">
+                          <Calendar className="size-4" /> Thư mời phỏng vấn: {application.interviews[0].title}
+                        </span>
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-[#2563EB] border border-blue-200">
+                          {interviewTypeLabels[application.interviews[0].type] || application.interviews[0].type}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="size-3.5 text-slate-400 shrink-0" />
+                          <span>
+                            {new Date(application.interviews[0].scheduledAt).toLocaleString('vi-VN', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                            })}{' '}
+                            ({application.interviews[0].durationMinutes} phút)
+                          </span>
+                        </div>
+
+                        {application.interviews[0].locationOrLink && (
+                          <div className="flex items-center gap-1.5">
+                            {application.interviews[0].type === 'ONLINE' ? (
+                              <Video className="size-3.5 text-[#2563EB] shrink-0" />
+                            ) : (
+                              <MapPin className="size-3.5 text-[#2563EB] shrink-0" />
+                            )}
+                            {application.interviews[0].locationOrLink.startsWith('http') ? (
+                              <a
+                                href={application.interviews[0].locationOrLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-bold text-[#2563EB] hover:underline truncate"
+                              >
+                                Tham gia phỏng vấn (Link) ↗
+                              </a>
+                            ) : (
+                              <span className="truncate">{application.interviews[0].locationOrLink}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {application.interviews[0].interviewerNotes && (
+                        <p className="text-xs text-slate-600 bg-white/80 p-2.5 rounded-lg border border-blue-100 italic">
+                          📌 Dặn dò: {application.interviews[0].interviewerNotes}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <Button asChild variant="outline" size="sm">
                   <Link href={`/candidate/jobs/${application.job.id}`}>Xem công việc</Link>

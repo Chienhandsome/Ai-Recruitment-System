@@ -126,6 +126,7 @@ export interface CandidateApplicationItem {
   };
   currentStage: CandidateApplicationStage;
   processingStatus: CandidateApplicationProcessingStatus;
+  interviews?: import('./interview-api').InterviewData[];
   appliedAt: string;
   updatedAt: string;
 }

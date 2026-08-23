@@ -406,6 +406,22 @@ export class ApplicationsService {
           take: 1,
           select: latestAiResultSelect,
         },
+        interviews: {
+          orderBy: { scheduledAt: 'desc' },
+          select: {
+            id: true,
+            title: true,
+            type: true,
+            status: true,
+            scheduledAt: true,
+            durationMinutes: true,
+            locationOrLink: true,
+            interviewerNotes: true,
+            score: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
         statusHistories: {
           orderBy: { createdAt: 'desc' },
           take: 20,
@@ -443,6 +459,10 @@ export class ApplicationsService {
       latestAiResult: latestAiResult
         ? this.serializeAiResult(latestAiResult)
         : null,
+      interviews: application.interviews.map((i) => ({
+        ...i,
+        score: i.score !== null ? Number(i.score) : null,
+      })),
       statusHistories: application.statusHistories,
       appliedAt: application.appliedAt,
       updatedAt: application.updatedAt,
@@ -588,6 +608,20 @@ export class ApplicationsService {
               },
             },
           },
+          interviews: {
+            orderBy: { scheduledAt: 'desc' },
+            select: {
+              id: true,
+              title: true,
+              type: true,
+              status: true,
+              scheduledAt: true,
+              durationMinutes: true,
+              locationOrLink: true,
+              interviewerNotes: true,
+              createdAt: true,
+            },
+          },
         },
       }),
     ]);
@@ -603,6 +637,7 @@ export class ApplicationsService {
         },
         currentStage: application.currentStage,
         processingStatus: application.processingStatus,
+        interviews: application.interviews,
         appliedAt: application.appliedAt,
         updatedAt: application.updatedAt,
       })),

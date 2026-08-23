@@ -1,15 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.APPLICATION_SNAPSHOT_VERSION = void 0;
+exports.APPLICATION_SNAPSHOT_VERSION = exports.LEGACY_APPLICATION_SNAPSHOT_VERSION = void 0;
 exports.toPrismaJson = toPrismaJson;
 exports.createEvaluationMessage = createEvaluationMessage;
-exports.APPLICATION_SNAPSHOT_VERSION = 1;
+exports.LEGACY_APPLICATION_SNAPSHOT_VERSION = 1;
+exports.APPLICATION_SNAPSHOT_VERSION = 2;
 function toPrismaJson(snapshot) {
     return snapshot;
 }
 function createEvaluationMessage(applicationId, snapshotValue) {
     const snapshot = asRecord(snapshotValue);
-    if (snapshot?.schemaVersion !== exports.APPLICATION_SNAPSHOT_VERSION ||
+    if ((snapshot?.schemaVersion !== exports.LEGACY_APPLICATION_SNAPSHOT_VERSION &&
+        snapshot?.schemaVersion !== exports.APPLICATION_SNAPSHOT_VERSION) ||
         !isRecord(snapshot.evaluationInput)) {
         return null;
     }
@@ -22,6 +24,8 @@ function createEvaluationMessage(applicationId, snapshotValue) {
     return {
         applicationId,
         application_id: applicationId,
+        schema_version: snapshot.schemaVersion,
+        evaluation_date: typeof snapshot.capturedAt === 'string' ? snapshot.capturedAt : undefined,
         candidate_profile: candidateProfile,
         job,
         weights,

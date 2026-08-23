@@ -64,6 +64,7 @@ export declare class AdminController {
         currency: string;
         location: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
         autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
         rejectOnMissingMandatory: boolean;
@@ -98,6 +99,7 @@ export declare class AdminController {
         currency: string;
         location: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
         autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
         rejectOnMissingMandatory: boolean;

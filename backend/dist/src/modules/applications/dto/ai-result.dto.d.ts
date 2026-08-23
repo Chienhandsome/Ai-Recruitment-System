@@ -8,6 +8,116 @@ export declare const EvidenceSchema: z.ZodObject<{
     evidenceText: z.ZodString;
     source: z.ZodDefault<z.ZodString>;
 }, z.core.$strip>;
+export declare const ExperienceAssessmentSchema: z.ZodObject<{
+    candidate_level: z.ZodDefault<z.ZodNullable<z.ZodEnum<{
+        INTERN: "INTERN";
+        FRESHER: "FRESHER";
+        JUNIOR: "JUNIOR";
+        MIDDLE: "MIDDLE";
+        SENIOR: "SENIOR";
+        LEAD: "LEAD";
+        MANAGER: "MANAGER";
+        DIRECTOR: "DIRECTOR";
+    }>>>;
+    required_level: z.ZodEnum<{
+        INTERN: "INTERN";
+        FRESHER: "FRESHER";
+        JUNIOR: "JUNIOR";
+        MIDDLE: "MIDDLE";
+        SENIOR: "SENIOR";
+        LEAD: "LEAD";
+        MANAGER: "MANAGER";
+        DIRECTOR: "DIRECTOR";
+    }>;
+    total_experience_years: z.ZodNumber;
+    duration_score: z.ZodNumber;
+    relevance_score: z.ZodNumber;
+    level_fit_score: z.ZodDefault<z.ZodNullable<z.ZodNumber>>;
+    level_gap: z.ZodDefault<z.ZodNullable<z.ZodNumber>>;
+    level_eligible: z.ZodDefault<z.ZodNullable<z.ZodBoolean>>;
+    level_confidence: z.ZodNumber;
+    level_requirement_mode: z.ZodEnum<{
+        ADVISORY: "ADVISORY";
+        REQUIRED: "REQUIRED";
+    }>;
+    recommendation: z.ZodEnum<{
+        NEEDS_REVIEW: "NEEDS_REVIEW";
+        ELIGIBLE: "ELIGIBLE";
+        ADVISORY_LEVEL_GAP: "ADVISORY_LEVEL_GAP";
+        NOT_ELIGIBLE_LEVEL: "NOT_ELIGIBLE_LEVEL";
+    }>;
+    evidence: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    reason_codes: z.ZodDefault<z.ZodArray<z.ZodString>>;
+}, z.core.$strip>;
+export declare const PillarScoreBreakdownItemSchema: z.ZodObject<{
+    earned_points: z.ZodDefault<z.ZodNumber>;
+    max_points: z.ZodDefault<z.ZodNumber>;
+    weight_pct: z.ZodDefault<z.ZodNumber>;
+    normalized_score: z.ZodDefault<z.ZodNumber>;
+}, z.core.$strip>;
+export declare const ScoreBreakdownSchema: z.ZodObject<{
+    skills: z.ZodObject<{
+        earned_points: z.ZodDefault<z.ZodNumber>;
+        max_points: z.ZodDefault<z.ZodNumber>;
+        weight_pct: z.ZodDefault<z.ZodNumber>;
+        normalized_score: z.ZodDefault<z.ZodNumber>;
+    }, z.core.$strip>;
+    experience: z.ZodObject<{
+        earned_points: z.ZodDefault<z.ZodNumber>;
+        max_points: z.ZodDefault<z.ZodNumber>;
+        weight_pct: z.ZodDefault<z.ZodNumber>;
+        normalized_score: z.ZodDefault<z.ZodNumber>;
+    }, z.core.$strip>;
+    education: z.ZodObject<{
+        earned_points: z.ZodDefault<z.ZodNumber>;
+        max_points: z.ZodDefault<z.ZodNumber>;
+        weight_pct: z.ZodDefault<z.ZodNumber>;
+        normalized_score: z.ZodDefault<z.ZodNumber>;
+    }, z.core.$strip>;
+    other: z.ZodObject<{
+        earned_points: z.ZodDefault<z.ZodNumber>;
+        max_points: z.ZodDefault<z.ZodNumber>;
+        weight_pct: z.ZodDefault<z.ZodNumber>;
+        normalized_score: z.ZodDefault<z.ZodNumber>;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+export declare const PillarExplanationItemSchema: z.ZodObject<{
+    earned_points: z.ZodDefault<z.ZodNumber>;
+    max_points: z.ZodDefault<z.ZodNumber>;
+    plus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    minus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    summary: z.ZodDefault<z.ZodString>;
+}, z.core.$strip>;
+export declare const PillarExplanationsSchema: z.ZodObject<{
+    skills: z.ZodObject<{
+        earned_points: z.ZodDefault<z.ZodNumber>;
+        max_points: z.ZodDefault<z.ZodNumber>;
+        plus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        minus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        summary: z.ZodDefault<z.ZodString>;
+    }, z.core.$strip>;
+    experience: z.ZodObject<{
+        earned_points: z.ZodDefault<z.ZodNumber>;
+        max_points: z.ZodDefault<z.ZodNumber>;
+        plus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        minus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        summary: z.ZodDefault<z.ZodString>;
+    }, z.core.$strip>;
+    education: z.ZodObject<{
+        earned_points: z.ZodDefault<z.ZodNumber>;
+        max_points: z.ZodDefault<z.ZodNumber>;
+        plus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        minus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        summary: z.ZodDefault<z.ZodString>;
+    }, z.core.$strip>;
+    other: z.ZodObject<{
+        earned_points: z.ZodDefault<z.ZodNumber>;
+        max_points: z.ZodDefault<z.ZodNumber>;
+        plus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        minus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        summary: z.ZodDefault<z.ZodString>;
+    }, z.core.$strip>;
+}, z.core.$strip>;
 export declare const AiResultSchema: z.ZodObject<{
     overall_score: z.ZodDefault<z.ZodNumber>;
     match_level: z.ZodDefault<z.ZodEnum<{
@@ -23,6 +133,62 @@ export declare const AiResultSchema: z.ZodObject<{
     experience_score: z.ZodDefault<z.ZodNumber>;
     education_score: z.ZodDefault<z.ZodNumber>;
     other_score: z.ZodDefault<z.ZodNumber>;
+    score_breakdown: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        skills: z.ZodObject<{
+            earned_points: z.ZodDefault<z.ZodNumber>;
+            max_points: z.ZodDefault<z.ZodNumber>;
+            weight_pct: z.ZodDefault<z.ZodNumber>;
+            normalized_score: z.ZodDefault<z.ZodNumber>;
+        }, z.core.$strip>;
+        experience: z.ZodObject<{
+            earned_points: z.ZodDefault<z.ZodNumber>;
+            max_points: z.ZodDefault<z.ZodNumber>;
+            weight_pct: z.ZodDefault<z.ZodNumber>;
+            normalized_score: z.ZodDefault<z.ZodNumber>;
+        }, z.core.$strip>;
+        education: z.ZodObject<{
+            earned_points: z.ZodDefault<z.ZodNumber>;
+            max_points: z.ZodDefault<z.ZodNumber>;
+            weight_pct: z.ZodDefault<z.ZodNumber>;
+            normalized_score: z.ZodDefault<z.ZodNumber>;
+        }, z.core.$strip>;
+        other: z.ZodObject<{
+            earned_points: z.ZodDefault<z.ZodNumber>;
+            max_points: z.ZodDefault<z.ZodNumber>;
+            weight_pct: z.ZodDefault<z.ZodNumber>;
+            normalized_score: z.ZodDefault<z.ZodNumber>;
+        }, z.core.$strip>;
+    }, z.core.$strip>>>;
+    pillar_explanations: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        skills: z.ZodObject<{
+            earned_points: z.ZodDefault<z.ZodNumber>;
+            max_points: z.ZodDefault<z.ZodNumber>;
+            plus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+            minus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+            summary: z.ZodDefault<z.ZodString>;
+        }, z.core.$strip>;
+        experience: z.ZodObject<{
+            earned_points: z.ZodDefault<z.ZodNumber>;
+            max_points: z.ZodDefault<z.ZodNumber>;
+            plus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+            minus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+            summary: z.ZodDefault<z.ZodString>;
+        }, z.core.$strip>;
+        education: z.ZodObject<{
+            earned_points: z.ZodDefault<z.ZodNumber>;
+            max_points: z.ZodDefault<z.ZodNumber>;
+            plus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+            minus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+            summary: z.ZodDefault<z.ZodString>;
+        }, z.core.$strip>;
+        other: z.ZodObject<{
+            earned_points: z.ZodDefault<z.ZodNumber>;
+            max_points: z.ZodDefault<z.ZodNumber>;
+            plus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+            minus_reasons: z.ZodDefault<z.ZodArray<z.ZodString>>;
+            summary: z.ZodDefault<z.ZodString>;
+        }, z.core.$strip>;
+    }, z.core.$strip>>>;
     strengths: z.ZodDefault<z.ZodArray<z.ZodString>>;
     gaps: z.ZodDefault<z.ZodArray<z.ZodString>>;
     matched_skills: z.ZodDefault<z.ZodArray<z.ZodObject<{
@@ -41,5 +207,46 @@ export declare const AiResultSchema: z.ZodObject<{
     }, z.core.$strip>>>;
     confidence_score: z.ZodDefault<z.ZodNumber>;
     summary: z.ZodDefault<z.ZodString>;
+    experience_assessment: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        candidate_level: z.ZodDefault<z.ZodNullable<z.ZodEnum<{
+            INTERN: "INTERN";
+            FRESHER: "FRESHER";
+            JUNIOR: "JUNIOR";
+            MIDDLE: "MIDDLE";
+            SENIOR: "SENIOR";
+            LEAD: "LEAD";
+            MANAGER: "MANAGER";
+            DIRECTOR: "DIRECTOR";
+        }>>>;
+        required_level: z.ZodEnum<{
+            INTERN: "INTERN";
+            FRESHER: "FRESHER";
+            JUNIOR: "JUNIOR";
+            MIDDLE: "MIDDLE";
+            SENIOR: "SENIOR";
+            LEAD: "LEAD";
+            MANAGER: "MANAGER";
+            DIRECTOR: "DIRECTOR";
+        }>;
+        total_experience_years: z.ZodNumber;
+        duration_score: z.ZodNumber;
+        relevance_score: z.ZodNumber;
+        level_fit_score: z.ZodDefault<z.ZodNullable<z.ZodNumber>>;
+        level_gap: z.ZodDefault<z.ZodNullable<z.ZodNumber>>;
+        level_eligible: z.ZodDefault<z.ZodNullable<z.ZodBoolean>>;
+        level_confidence: z.ZodNumber;
+        level_requirement_mode: z.ZodEnum<{
+            ADVISORY: "ADVISORY";
+            REQUIRED: "REQUIRED";
+        }>;
+        recommendation: z.ZodEnum<{
+            NEEDS_REVIEW: "NEEDS_REVIEW";
+            ELIGIBLE: "ELIGIBLE";
+            ADVISORY_LEVEL_GAP: "ADVISORY_LEVEL_GAP";
+            NOT_ELIGIBLE_LEVEL: "NOT_ELIGIBLE_LEVEL";
+        }>;
+        evidence: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        reason_codes: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    }, z.core.$strip>>>;
 }, z.core.$strip>;
 export type AiResultDto = z.infer<typeof AiResultSchema>;

@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
+import { InterviewsController } from './interviews.controller';
+import { InterviewsService } from './interviews.service';
+import { AuthModule } from '../auth/auth.module';
+import { ApplicationsModule } from '../applications/applications.module';
 
 @Module({
-  imports: [],
-  controllers: [],
-  providers: [],
-  exports: [],
+  imports: [AuthModule, ApplicationsModule],
+  controllers: [InterviewsController],
+  providers: [InterviewsService],
+  exports: [InterviewsService],
 })
 export class InterviewsModule {}

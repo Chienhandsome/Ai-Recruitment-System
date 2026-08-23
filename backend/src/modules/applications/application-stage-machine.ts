@@ -8,23 +8,29 @@ const TRANSITIONS: Record<ApplicationStage, readonly ApplicationStage[]> = {
   ],
   [ApplicationStage.SCREENING]: [
     ApplicationStage.SHORTLISTED,
+    ApplicationStage.INTERVIEW_SCHEDULED,
     ApplicationStage.REJECTED,
   ],
   [ApplicationStage.SHORTLISTED]: [
+    ApplicationStage.INTERVIEW_SCHEDULED,
     ApplicationStage.SCREENING,
     ApplicationStage.OFFERED,
     ApplicationStage.REJECTED,
   ],
   [ApplicationStage.INTERVIEW_SCHEDULED]: [
     ApplicationStage.INTERVIEWED,
+    ApplicationStage.SHORTLISTED,
     ApplicationStage.REJECTED,
   ],
   [ApplicationStage.INTERVIEWED]: [
     ApplicationStage.OFFERED,
+    ApplicationStage.INTERVIEW_SCHEDULED,
+    ApplicationStage.SHORTLISTED,
     ApplicationStage.REJECTED,
   ],
   [ApplicationStage.OFFERED]: [
     ApplicationStage.HIRED,
+    ApplicationStage.INTERVIEWED,
     ApplicationStage.SHORTLISTED,
     ApplicationStage.REJECTED,
   ],

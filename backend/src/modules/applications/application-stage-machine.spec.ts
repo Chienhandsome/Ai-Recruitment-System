@@ -57,8 +57,41 @@ describe('application stage machine', () => {
     expect(hrDecisionForStage(ApplicationStage.SHORTLISTED)).toBe(
       HrDecision.ACCEPTED,
     );
+    expect(hrDecisionForStage(ApplicationStage.INTERVIEW_SCHEDULED)).toBe(
+      HrDecision.ACCEPTED,
+    );
+    expect(hrDecisionForStage(ApplicationStage.INTERVIEWED)).toBe(
+      HrDecision.ACCEPTED,
+    );
     expect(hrDecisionForStage(ApplicationStage.REJECTED)).toBe(
       HrDecision.REJECTED,
     );
+  });
+
+  it('allows scheduling interviews from shortlisted and screening stages', () => {
+    expect(
+      canTransitionApplication(
+        ApplicationStage.SHORTLISTED,
+        ApplicationStage.INTERVIEW_SCHEDULED,
+      ),
+    ).toBe(true);
+    expect(
+      canTransitionApplication(
+        ApplicationStage.SCREENING,
+        ApplicationStage.INTERVIEW_SCHEDULED,
+      ),
+    ).toBe(true);
+    expect(
+      canTransitionApplication(
+        ApplicationStage.INTERVIEW_SCHEDULED,
+        ApplicationStage.INTERVIEWED,
+      ),
+    ).toBe(true);
+    expect(
+      canTransitionApplication(
+        ApplicationStage.INTERVIEWED,
+        ApplicationStage.OFFERED,
+      ),
+    ).toBe(true);
   });
 });

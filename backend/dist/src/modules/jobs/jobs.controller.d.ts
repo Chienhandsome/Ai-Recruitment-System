@@ -85,9 +85,6 @@ export declare class JobsController {
                 updatedAt: Date;
                 applicationId: string;
                 version: number;
-                strengths: import("@prisma/client/runtime/library").JsonValue | null;
-                gaps: import("@prisma/client/runtime/library").JsonValue | null;
-                evidence: import("@prisma/client/runtime/library").JsonValue | null;
                 overallScore: import("@prisma/client/runtime/library").Decimal;
                 matchLevel: import(".prisma/client").$Enums.MatchLevel;
                 skillScore: import("@prisma/client/runtime/library").Decimal | null;
@@ -97,11 +94,22 @@ export declare class JobsController {
                 matchedSkills: import("@prisma/client/runtime/library").JsonValue | null;
                 missingSkills: import("@prisma/client/runtime/library").JsonValue | null;
                 missingRequiredSkills: import("@prisma/client/runtime/library").JsonValue | null;
+                strengths: import("@prisma/client/runtime/library").JsonValue | null;
+                gaps: import("@prisma/client/runtime/library").JsonValue | null;
                 weaknesses: import("@prisma/client/runtime/library").JsonValue | null;
+                evidence: import("@prisma/client/runtime/library").JsonValue | null;
                 confidenceScore: import("@prisma/client/runtime/library").Decimal | null;
                 reasoningSummary: string | null;
                 inputSnapshot: import("@prisma/client/runtime/library").JsonValue | null;
                 modelVersion: string | null;
+                candidateExperienceLevel: import(".prisma/client").$Enums.ExperienceLevel | null;
+                requiredExperienceLevel: import(".prisma/client").$Enums.ExperienceLevel | null;
+                totalExperienceYears: import("@prisma/client/runtime/library").Decimal | null;
+                levelFitScore: import("@prisma/client/runtime/library").Decimal | null;
+                levelGap: number | null;
+                levelEligible: boolean | null;
+                levelConfidence: import("@prisma/client/runtime/library").Decimal | null;
+                levelEvidence: import("@prisma/client/runtime/library").JsonValue | null;
             }[];
         } & {
             id: string;
@@ -137,6 +145,7 @@ export declare class JobsController {
         currency: string;
         location: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
         autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
         rejectOnMissingMandatory: boolean;
@@ -192,6 +201,7 @@ export declare class JobsController {
             currency: string;
             location: string | null;
             requiredExperienceYears: number | null;
+            levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
             autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
             autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
             rejectOnMissingMandatory: boolean;
@@ -368,9 +378,6 @@ export declare class JobsController {
                 updatedAt: Date;
                 applicationId: string;
                 version: number;
-                strengths: import("@prisma/client/runtime/library").JsonValue | null;
-                gaps: import("@prisma/client/runtime/library").JsonValue | null;
-                evidence: import("@prisma/client/runtime/library").JsonValue | null;
                 overallScore: import("@prisma/client/runtime/library").Decimal;
                 matchLevel: import(".prisma/client").$Enums.MatchLevel;
                 skillScore: import("@prisma/client/runtime/library").Decimal | null;
@@ -380,11 +387,22 @@ export declare class JobsController {
                 matchedSkills: import("@prisma/client/runtime/library").JsonValue | null;
                 missingSkills: import("@prisma/client/runtime/library").JsonValue | null;
                 missingRequiredSkills: import("@prisma/client/runtime/library").JsonValue | null;
+                strengths: import("@prisma/client/runtime/library").JsonValue | null;
+                gaps: import("@prisma/client/runtime/library").JsonValue | null;
                 weaknesses: import("@prisma/client/runtime/library").JsonValue | null;
+                evidence: import("@prisma/client/runtime/library").JsonValue | null;
                 confidenceScore: import("@prisma/client/runtime/library").Decimal | null;
                 reasoningSummary: string | null;
                 inputSnapshot: import("@prisma/client/runtime/library").JsonValue | null;
                 modelVersion: string | null;
+                candidateExperienceLevel: import(".prisma/client").$Enums.ExperienceLevel | null;
+                requiredExperienceLevel: import(".prisma/client").$Enums.ExperienceLevel | null;
+                totalExperienceYears: import("@prisma/client/runtime/library").Decimal | null;
+                levelFitScore: import("@prisma/client/runtime/library").Decimal | null;
+                levelGap: number | null;
+                levelEligible: boolean | null;
+                levelConfidence: import("@prisma/client/runtime/library").Decimal | null;
+                levelEvidence: import("@prisma/client/runtime/library").JsonValue | null;
             }[];
         } & {
             id: string;
@@ -420,6 +438,7 @@ export declare class JobsController {
         currency: string;
         location: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
         autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
         rejectOnMissingMandatory: boolean;
@@ -498,6 +517,7 @@ export declare class JobsController {
         currency: string;
         location: string | null;
         requiredExperienceYears: number | null;
+        levelRequirementMode: import(".prisma/client").$Enums.LevelRequirementMode;
         autoShortlistThreshold: import("@prisma/client/runtime/library").Decimal | null;
         autoRejectThreshold: import("@prisma/client/runtime/library").Decimal | null;
         rejectOnMissingMandatory: boolean;

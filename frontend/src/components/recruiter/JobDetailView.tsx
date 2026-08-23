@@ -5,7 +5,7 @@ import {
   ArrowLeft, Edit, Trash2, CheckCircle2, Bot, MapPin, Briefcase, 
   DollarSign, Clock, FileText, Award, HelpCircle, User, Sparkles, Filter, Search,
   GraduationCap, Code, AlertTriangle, ExternalLink, ThumbsUp, ThumbsDown, ChevronRight,
-  Phone, Mail, FolderGit2, ShieldCheck
+  Phone, Mail, FolderGit2, ShieldCheck, Calendar, Video, Plus
 } from "lucide-react";
 import {
   type JobPostingData,
@@ -17,6 +17,13 @@ import {
   deleteRecruiterJob,
   updateRecruiterJob,
 } from "@/lib/recruiter-api";
+import {
+  type InterviewData,
+  interviewTypeLabels,
+  interviewStatusLabels,
+} from "@/lib/interview-api";
+import { ScheduleInterviewModal } from "./interviews/ScheduleInterviewModal";
+import { InterviewFeedbackModal } from "./interviews/InterviewFeedbackModal";
 import { format } from "date-fns";
 import { ApplicationStageActions } from "./applications/ApplicationStageActions";
 import { applicationStageLabels, applicationStageStyles } from "@/lib/application-stage";
@@ -65,6 +72,7 @@ function listItemToLegacyApplication(item: RecruiterApplicationListItem) {
       candidateSkills: [],
     },
     aiMatchingResults: item.latestAiResult ? [item.latestAiResult] : [],
+    interviews: [],
   };
 }
 
@@ -128,6 +136,7 @@ function detailToLegacyApplication(detail: RecruiterApplicationDetail) {
       })),
     },
     aiMatchingResults: detail.latestAiResult ? [detail.latestAiResult] : [],
+    interviews: detail.interviews || [],
   };
 }
 
@@ -143,6 +152,8 @@ export function JobDetailView({
   const [loading, setLoading] = useState(true);
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [searchCandidate, setSearchCandidate] = useState("");
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [feedbackInterview, setFeedbackInterview] = useState<InterviewData | null>(null);
   const [selectedApplicationDetail, setSelectedApplicationDetail] =
     useState<RecruiterApplicationDetail | null>(null);
 
@@ -783,9 +794,127 @@ export function JobDetailView({
                               allowedTransitions={selectedApplicationDetail.allowedTransitions}
                               currentHrNotes={selectedApplicationDetail.hrNotes}
                               onUpdated={refreshApplications}
+                              onScheduleInterview={() => setIsScheduleModalOpen(true)}
                             />
                           </div>
                         )}
+
+                        {/* ==================== KHỐI LỊCH PHỎNG VẤN & ĐÁNH GIÁ (INTERVIEWS & EVALUATION) ==================== */}
+                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                            <div className="flex items-center gap-2">
+                              <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB] border border-blue-200">
+                                <Calendar className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h4 className="font-extrabold text-sm text-[#1F2937]">Lịch Phỏng Vấn &amp; Đánh Giá</h4>
+                                <p className="text-xs text-slate-500">Quản lý các vòng phỏng vấn và nhập kết quả đánh giá</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setIsScheduleModalOpen(true)}
+                              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-sm transition-all"
+                            >
+                              <Plus className="w-3.5 h-3.5" /> Lên lịch phỏng vấn
+                            </button>
+                          </div>
+
+                          {activeApp.interviews && activeApp.interviews.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                              {activeApp.interviews.map((item: InterviewData) => (
+                                <div
+                                  key={item.id}
+                                  className="p-4 rounded-xl border border-slate-200 bg-[#F8FAFC] hover:border-blue-300 transition-all space-y-3"
+                                >
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div>
+                                      <h5 className="font-bold text-xs text-[#1F2937]">{item.title}</h5>
+                                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] border border-blue-200">
+                                          {interviewTypeLabels[item.type] || item.type}
+                                        </span>
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                                          item.status === 'COMPLETED'
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                            : item.status === 'CANCELLED'
+                                              ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                              : 'bg-amber-50 text-amber-700 border-amber-200'
+                                        }`}>
+                                          {interviewStatusLabels[item.status] || item.status}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {item.score !== undefined && item.score !== null ? (
+                                      <div className="text-right shrink-0 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Điểm</span>
+                                        <span className="text-sm font-black text-[#2563EB]">{Number(item.score)}/100</span>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => setFeedbackInterview(item)}
+                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition-colors shrink-0"
+                                      >
+                                        <Award className="w-3 h-3" /> Chấm điểm
+                                      </button>
+                                    )}
+                                  </div>
+
+                                  <div className="text-xs text-slate-600 space-y-1 pt-1 border-t border-slate-200/60">
+                                    <div className="flex items-center gap-1.5 font-medium">
+                                      <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                      <span>{format(new Date(item.scheduledAt), 'HH:mm - dd/MM/yyyy')} ({item.durationMinutes} phút)</span>
+                                    </div>
+                                    {item.locationOrLink && (
+                                      <div className="flex items-center gap-1.5">
+                                        {item.type === 'ONLINE' ? (
+                                          <Video className="w-3.5 h-3.5 text-[#2563EB] shrink-0" />
+                                        ) : (
+                                          <MapPin className="w-3.5 h-3.5 text-[#2563EB] shrink-0" />
+                                        )}
+                                        {item.locationOrLink.startsWith('http') ? (
+                                          <a
+                                            href={item.locationOrLink}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-[#2563EB] font-semibold hover:underline truncate max-w-[280px]"
+                                          >
+                                            {item.locationOrLink}
+                                          </a>
+                                        ) : (
+                                          <span className="truncate max-w-[280px]">{item.locationOrLink}</span>
+                                        )}
+                                      </div>
+                                    )}
+                                    {item.interviewerNotes && (
+                                      <p className="text-[11px] text-slate-600 bg-white p-2 rounded-lg border border-slate-200 italic mt-1">
+                                        💬 {item.interviewerNotes}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-[#EFF6FF]/40 rounded-xl border border-dashed border-blue-200 gap-3">
+                              <div className="flex items-center gap-3">
+                                <Video className="w-5 h-5 text-[#2563EB]" />
+                                <span className="text-xs text-slate-600 font-medium">
+                                  Chưa có buổi phỏng vấn nào được lên lịch cho ứng viên này.
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setIsScheduleModalOpen(true)}
+                                className="text-xs font-bold text-[#2563EB] hover:underline"
+                              >
+                                + Lên lịch phỏng vấn ngay
+                              </button>
+                            </div>
+                          )}
+                        </div>
 
                         {/* 2 COLUMNS INLINE SPLIT LAYOUT */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1241,6 +1370,30 @@ export function JobDetailView({
             </div>
           )}
         </div>
+      )}
+
+      {/* MODALS */}
+      {isScheduleModalOpen && selectedApplicationDetail && (
+        <ScheduleInterviewModal
+          isOpen={isScheduleModalOpen}
+          onClose={() => setIsScheduleModalOpen(false)}
+          token={token}
+          applicationId={selectedApplicationDetail.id}
+          candidateName={selectedApplicationDetail.candidate?.fullName || "Ứng viên"}
+          jobTitle={job.title}
+          onSuccess={refreshApplications}
+        />
+      )}
+
+      {feedbackInterview && selectedApplicationDetail && (
+        <InterviewFeedbackModal
+          isOpen={!!feedbackInterview}
+          onClose={() => setFeedbackInterview(null)}
+          token={token}
+          interview={feedbackInterview}
+          candidateName={selectedApplicationDetail.candidate?.fullName || "Ứng viên"}
+          onSuccess={refreshApplications}
+        />
       )}
     </div>
   );

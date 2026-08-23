@@ -17,6 +17,7 @@ interface ApplicationStageActionsProps {
   allowedTransitions: ApplicationStage[];
   currentHrNotes?: string | null;
   onUpdated: () => void | Promise<void>;
+  onScheduleInterview?: () => void;
 }
 
 function noteRequired(current: ApplicationStage, target: ApplicationStage) {
@@ -36,6 +37,7 @@ export function ApplicationStageActions({
   allowedTransitions,
   currentHrNotes,
   onUpdated,
+  onScheduleInterview,
 }: ApplicationStageActionsProps) {
   const [target, setTarget] = useState<ApplicationStage | null>(null);
   const [note, setNote] = useState("");
@@ -99,16 +101,24 @@ export function ApplicationStageActions({
           <button
             key={stage}
             type="button"
-            onClick={() => setTarget(stage)}
+            onClick={() => {
+              if (stage === "INTERVIEW_SCHEDULED" && onScheduleInterview) {
+                onScheduleInterview();
+              } else {
+                setTarget(stage);
+              }
+            }}
             className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
               stage === "REJECTED"
                 ? "border-rose-200 text-rose-700 hover:bg-rose-50"
                 : stage === "HIRED"
                   ? "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
-                  : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                  : stage === "INTERVIEW_SCHEDULED"
+                    ? "border-blue-300 bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-sm"
+                    : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
             }`}
           >
-            {applicationStageLabels[stage]}
+            {stage === "INTERVIEW_SCHEDULED" ? "📅 Lên lịch phỏng vấn" : applicationStageLabels[stage]}
           </button>
         ))}
       </div>

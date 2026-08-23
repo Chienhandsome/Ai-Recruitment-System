@@ -1,4 +1,4 @@
-import { EmploymentType, ExperienceLevel, SkillRequirementType, WorkingModel, ProofType } from '@prisma/client';
+import { EmploymentType, ExperienceLevel, LevelRequirementMode, SkillRequirementType, WorkingModel, ProofType } from '@prisma/client';
 export declare class JobSkillDto {
     skillId: string;
     requirementType: SkillRequirementType;
@@ -25,6 +25,7 @@ export declare class CreateJobDto {
     categoryId?: string;
     expiryDate?: string;
     requiredExperienceYears?: number;
+    levelRequirementMode?: LevelRequirementMode;
     autoShortlistThreshold?: number;
     autoRejectThreshold?: number;
     rejectOnMissingMandatory?: boolean;

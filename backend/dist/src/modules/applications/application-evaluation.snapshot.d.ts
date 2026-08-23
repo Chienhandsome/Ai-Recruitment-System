@@ -1,12 +1,14 @@
 import type { Prisma } from '@prisma/client';
-export declare const APPLICATION_SNAPSHOT_VERSION: 1;
+export declare const LEGACY_APPLICATION_SNAPSHOT_VERSION: 1;
+export declare const APPLICATION_SNAPSHOT_VERSION: 2;
+export type ApplicationSnapshotVersion = typeof LEGACY_APPLICATION_SNAPSHOT_VERSION | typeof APPLICATION_SNAPSHOT_VERSION;
 export interface ApplicationEvaluationInput {
     candidate_profile: Record<string, unknown>;
     job: Record<string, unknown>;
     weights: Record<string, number>;
 }
 export interface ApplicationProfileSnapshot {
-    schemaVersion: typeof APPLICATION_SNAPSHOT_VERSION;
+    schemaVersion: ApplicationSnapshotVersion;
     capturedAt: string;
     candidateIdentity: {
         id: string;

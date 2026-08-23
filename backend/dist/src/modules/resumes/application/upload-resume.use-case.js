@@ -16,15 +16,18 @@ const prisma_service_1 = require("../../../database/prisma.service");
 const rabbitmq_service_1 = require("../../../infrastructure/rabbitmq/rabbitmq.service");
 const rabbitmq_constants_1 = require("../../../infrastructure/rabbitmq/rabbitmq.constants");
 const supabase_storage_service_1 = require("../../../infrastructure/supabase/supabase-storage.service");
+const ai_service_wakeup_service_1 = require("../../../infrastructure/ai/ai-service-wakeup.service");
 let UploadResumeUseCase = UploadResumeUseCase_1 = class UploadResumeUseCase {
     prisma;
     storageService;
     rabbitMQService;
+    aiServiceWakeupService;
     logger = new common_1.Logger(UploadResumeUseCase_1.name);
-    constructor(prisma, storageService, rabbitMQService) {
+    constructor(prisma, storageService, rabbitMQService, aiServiceWakeupService) {
         this.prisma = prisma;
         this.storageService = storageService;
         this.rabbitMQService = rabbitMQService;
+        this.aiServiceWakeupService = aiServiceWakeupService;
     }
     async execute(userId, file) {
         const profile = await this.prisma.candidateProfile.findUnique({
@@ -79,6 +82,7 @@ let UploadResumeUseCase = UploadResumeUseCase_1 = class UploadResumeUseCase {
                     : 'Unknown error'}`);
             }
             if (published) {
+                void this.aiServiceWakeupService.wake();
                 try {
                     await this.prisma.$transaction([
                         this.prisma.resume.update({
@@ -147,6 +151,7 @@ exports.UploadResumeUseCase = UploadResumeUseCase = UploadResumeUseCase_1 = __de
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         supabase_storage_service_1.SupabaseStorageService,
-        rabbitmq_service_1.RabbitMQService])
+        rabbitmq_service_1.RabbitMQService,
+        ai_service_wakeup_service_1.AiServiceWakeupService])
 ], UploadResumeUseCase);
 //# sourceMappingURL=upload-resume.use-case.js.map

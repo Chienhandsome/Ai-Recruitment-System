@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { InterviewStatus, InterviewType } from '@prisma/client';
+import { CandidateResponseStatus, InterviewStatus, InterviewType } from '@prisma/client';
 import {
   IsEnum,
   IsInt,
@@ -36,6 +36,14 @@ export class UpdateInterviewDto {
   @IsOptional()
   @IsEnum(InterviewStatus)
   status?: InterviewStatus;
+
+  @ApiPropertyOptional({
+    enum: CandidateResponseStatus,
+    description: 'Trạng thái phản hồi của ứng viên (PENDING, ACCEPTED, RESCHEDULE_REQUESTED, DECLINED)',
+  })
+  @IsOptional()
+  @IsEnum(CandidateResponseStatus)
+  candidateResponse?: CandidateResponseStatus;
 
   @ApiPropertyOptional({
     description: 'Thời gian mới của buổi phỏng vấn (ISO 8601 string)',

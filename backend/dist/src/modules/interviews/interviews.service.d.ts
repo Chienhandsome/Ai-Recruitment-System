@@ -18,68 +18,68 @@ export declare class InterviewsService {
         application: {
             id: string;
             job: {
+                title: string;
                 id: string;
                 jobCode: string;
-                title: string;
             };
             candidate: {
                 id: string;
-                phone?: string | null | undefined;
-                email?: string | undefined;
                 fullName?: string | undefined;
+                email?: string | undefined;
+                phone?: string | null | undefined;
             };
         };
-        id: string;
+        type: import(".prisma/client").$Enums.InterviewType;
         title: string;
         status: import(".prisma/client").$Enums.InterviewStatus;
-        createdAt: Date;
-        updatedAt: Date;
-        type: import(".prisma/client").$Enums.InterviewType;
-        applicationId: string;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
         scheduledAt: Date;
         durationMinutes: number;
         locationOrLink: string | null;
         interviewerNotes: string | null;
-        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        id: string;
         candidateNotes: string | null;
         proposedSlots: Prisma.JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        applicationId: string;
     }>;
     findAllForRecruiter(userId: string, query: QueryInterviewsDto): Promise<{
         data: {
             score: number | null;
             application: {
                 id: string;
+                currentStage: import(".prisma/client").$Enums.ApplicationStage;
                 job: {
+                    title: string;
                     id: string;
                     jobCode: string;
-                    title: string;
                 };
                 candidate: {
-                    id: string;
                     user: {
-                        phone: string | null;
-                        email: string;
                         fullName: string;
+                        email: string;
+                        phone: string | null;
                         avatarUrl: string | null;
                     } | null;
+                    id: string;
                     desiredTitle: string | null;
                 };
-                currentStage: import(".prisma/client").$Enums.ApplicationStage;
             };
-            id: string;
+            type: import(".prisma/client").$Enums.InterviewType;
             title: string;
             status: import(".prisma/client").$Enums.InterviewStatus;
-            createdAt: Date;
-            updatedAt: Date;
-            type: import(".prisma/client").$Enums.InterviewType;
-            applicationId: string;
+            candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
             scheduledAt: Date;
             durationMinutes: number;
             locationOrLink: string | null;
             interviewerNotes: string | null;
-            candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+            id: string;
             candidateNotes: string | null;
             proposedSlots: Prisma.JsonValue | null;
+            createdAt: Date;
+            updatedAt: Date;
+            applicationId: string;
         }[];
         meta: {
             total: number;
@@ -125,92 +125,92 @@ export declare class InterviewsService {
         score: number | null;
         application: {
             id: string;
+            candidateId: string;
+            currentStage: import(".prisma/client").$Enums.ApplicationStage;
             job: {
-                id: string;
                 title: string;
+                id: string;
                 recruiter: {
                     id: string;
                     userId: string;
                     companyId: string | null;
                 };
             };
-            candidateId: string;
             candidate: {
-                id: string;
                 user: {
-                    phone: string | null;
-                    email: string;
                     fullName: string;
+                    email: string;
+                    phone: string | null;
                 } | null;
+                id: string;
                 userId: string | null;
             };
-            currentStage: import(".prisma/client").$Enums.ApplicationStage;
         };
-        id: string;
+        type: import(".prisma/client").$Enums.InterviewType;
         title: string;
         status: import(".prisma/client").$Enums.InterviewStatus;
-        createdAt: Date;
-        updatedAt: Date;
-        type: import(".prisma/client").$Enums.InterviewType;
-        applicationId: string;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
         scheduledAt: Date;
         durationMinutes: number;
         locationOrLink: string | null;
         interviewerNotes: string | null;
-        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        id: string;
         candidateNotes: string | null;
         proposedSlots: Prisma.JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        applicationId: string;
     }>;
     update(userId: string, id: string, dto: UpdateInterviewDto): Promise<{
         score: number | null;
-        id: string;
+        type: import(".prisma/client").$Enums.InterviewType;
         title: string;
         status: import(".prisma/client").$Enums.InterviewStatus;
-        createdAt: Date;
-        updatedAt: Date;
-        type: import(".prisma/client").$Enums.InterviewType;
-        applicationId: string;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
         scheduledAt: Date;
         durationMinutes: number;
         locationOrLink: string | null;
         interviewerNotes: string | null;
-        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        id: string;
         candidateNotes: string | null;
         proposedSlots: Prisma.JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        applicationId: string;
     }>;
     submitFeedback(userId: string, id: string, dto: SubmitInterviewFeedbackDto): Promise<{
         score: number;
         applicationStage: import(".prisma/client").$Enums.ApplicationStage;
-        id: string;
+        type: import(".prisma/client").$Enums.InterviewType;
         title: string;
         status: import(".prisma/client").$Enums.InterviewStatus;
-        createdAt: Date;
-        updatedAt: Date;
-        type: import(".prisma/client").$Enums.InterviewType;
-        applicationId: string;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
         scheduledAt: Date;
         durationMinutes: number;
         locationOrLink: string | null;
         interviewerNotes: string | null;
-        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        id: string;
         candidateNotes: string | null;
         proposedSlots: Prisma.JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        applicationId: string;
     }>;
     respondToInterview(userId: string, id: string, dto: CandidateResponseInterviewDto): Promise<{
         score: number | null;
-        id: string;
+        type: import(".prisma/client").$Enums.InterviewType;
         title: string;
         status: import(".prisma/client").$Enums.InterviewStatus;
-        createdAt: Date;
-        updatedAt: Date;
-        type: import(".prisma/client").$Enums.InterviewType;
-        applicationId: string;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
         scheduledAt: Date;
         durationMinutes: number;
         locationOrLink: string | null;
         interviewerNotes: string | null;
-        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        id: string;
         candidateNotes: string | null;
         proposedSlots: Prisma.JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        applicationId: string;
     }>;
 }

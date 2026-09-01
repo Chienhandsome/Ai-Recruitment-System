@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Calendar,
@@ -15,8 +15,10 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
+  type InterviewData,
   type InterviewType,
   createInterview,
+  updateInterview,
   interviewTypeLabels,
 } from '@/lib/interview-api';
 
@@ -28,6 +30,8 @@ interface ScheduleInterviewModalProps {
   candidateName: string;
   jobTitle: string;
   onSuccess: () => void | Promise<void>;
+  interviewToEdit?: InterviewData | null;
+  existingInterviewsCount?: number;
 }
 
 export function ScheduleInterviewModal({
@@ -38,24 +42,62 @@ export function ScheduleInterviewModal({
   candidateName,
   jobTitle,
   onSuccess,
+  interviewToEdit,
+  existingInterviewsCount = 0,
 }: ScheduleInterviewModalProps) {
-  // Default to tomorrow 09:00
+  const formatDatetimeLocal = (d: Date) => {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const getDefaultDateTime = () => {
+    if (interviewToEdit?.scheduledAt) {
+      return formatDatetimeLocal(new Date(interviewToEdit.scheduledAt));
+    }
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(9, 0, 0, 0);
-    // Format to YYYY-MM-DDTHH:mm for datetime-local input
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth() + 1)}-${pad(tomorrow.getDate())}T${pad(tomorrow.getHours())}:${pad(tomorrow.getMinutes())}`;
+    return formatDatetimeLocal(tomorrow);
   };
 
-  const [title, setTitle] = useState(`Phỏng vấn - ${jobTitle}`);
-  const [type, setType] = useState<InterviewType>('ONLINE');
+  const [title, setTitle] = useState(
+    interviewToEdit?.title ||
+      (existingInterviewsCount > 0
+        ? `Phỏng vấn Vòng ${existingInterviewsCount + 1} - ${jobTitle}`
+        : `Phỏng vấn - ${jobTitle}`),
+  );
+  const [type, setType] = useState<InterviewType>(interviewToEdit?.type || 'ONLINE');
   const [scheduledAt, setScheduledAt] = useState(getDefaultDateTime());
-  const [durationMinutes, setDurationMinutes] = useState(60);
-  const [locationOrLink, setLocationOrLink] = useState('');
-  const [interviewerNotes, setInterviewerNotes] = useState('');
+  const [durationMinutes, setDurationMinutes] = useState(interviewToEdit?.durationMinutes || 60);
+  const [locationOrLink, setLocationOrLink] = useState(interviewToEdit?.locationOrLink || '');
+  const [interviewerNotes, setInterviewerNotes] = useState(interviewToEdit?.interviewerNotes || '');
   const [submitting, setSubmitting] = useState(false);
+
+  // Sync state whenever modal is opened or interviewToEdit / existingInterviewsCount changes
+  useEffect(() => {
+    if (isOpen) {
+      if (interviewToEdit) {
+        setTitle(interviewToEdit.title);
+        setType(interviewToEdit.type || 'ONLINE');
+        setScheduledAt(formatDatetimeLocal(new Date(interviewToEdit.scheduledAt)));
+        setDurationMinutes(interviewToEdit.durationMinutes || 60);
+        setLocationOrLink(interviewToEdit.locationOrLink || '');
+        setInterviewerNotes(interviewToEdit.interviewerNotes || '');
+      } else {
+        const nextRound = existingInterviewsCount + 1;
+        const defaultTitle =
+          existingInterviewsCount > 0
+            ? `Phỏng vấn Vòng ${nextRound} - ${jobTitle}`
+            : `Phỏng vấn - ${jobTitle}`;
+        setTitle(defaultTitle);
+        setType('ONLINE');
+        setScheduledAt(getDefaultDateTime());
+        setDurationMinutes(60);
+        setLocationOrLink('');
+        setInterviewerNotes('');
+      }
+    }
+  }, [isOpen, interviewToEdit, existingInterviewsCount, jobTitle]);
 
   if (!isOpen) return null;
 
@@ -72,22 +114,39 @@ export function ScheduleInterviewModal({
 
     setSubmitting(true);
     try {
-      await createInterview(token, {
-        applicationId,
-        title: title.trim(),
-        type,
-        scheduledAt: new Date(scheduledAt).toISOString(),
-        durationMinutes,
-        locationOrLink: locationOrLink.trim() || undefined,
-        interviewerNotes: interviewerNotes.trim() || undefined,
-      });
-
-      toast.success('Đã lên lịch phỏng vấn và cập nhật trạng thái hồ sơ!');
+      if (interviewToEdit) {
+        await updateInterview(token, interviewToEdit.id, {
+          title: title.trim(),
+          type,
+          scheduledAt: new Date(scheduledAt).toISOString(),
+          durationMinutes,
+          locationOrLink: locationOrLink.trim() || undefined,
+          interviewerNotes: interviewerNotes.trim() || undefined,
+          status: 'SCHEDULED',
+          candidateResponse: 'PENDING',
+        });
+        toast.success('Đã cập nhật lịch phỏng vấn và gửi thông báo tới ứng viên!');
+      } else {
+        await createInterview(token, {
+          applicationId,
+          title: title.trim(),
+          type,
+          scheduledAt: new Date(scheduledAt).toISOString(),
+          durationMinutes,
+          locationOrLink: locationOrLink.trim() || undefined,
+          interviewerNotes: interviewerNotes.trim() || undefined,
+        });
+        toast.success(
+          existingInterviewsCount > 0
+            ? `Đã lên lịch phỏng vấn Vòng ${existingInterviewsCount + 1} thành công!`
+            : 'Đã lên lịch phỏng vấn và cập nhật trạng thái hồ sơ!',
+        );
+      }
       await onSuccess();
       onClose();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Không thể lên lịch phỏng vấn',
+        error instanceof Error ? error.message : 'Không thể lưu lịch phỏng vấn',
       );
     } finally {
       setSubmitting(false);
@@ -107,7 +166,11 @@ export function ScheduleInterviewModal({
             </div>
             <div>
               <h2 className="text-base font-extrabold text-[#1F2937]">
-                Lên Lịch Phỏng Vấn
+                {interviewToEdit
+                  ? 'Đổi Ngày Giờ / Chỉnh Sửa Phỏng Vấn'
+                  : existingInterviewsCount > 0
+                    ? `Lên Lịch Phỏng Vấn Vòng ${existingInterviewsCount + 1}`
+                    : 'Lên Lịch Phỏng Vấn'}
               </h2>
               <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
                 <span className="flex items-center gap-1 font-semibold text-[#2563EB]">
@@ -132,6 +195,29 @@ export function ScheduleInterviewModal({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+          {/* Informational Context Banner */}
+          {interviewToEdit ? (
+            <div className="rounded-xl bg-amber-50 p-3 border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
+              <Clock className="size-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">Đang đổi thời gian cho buổi phỏng vấn hiện tại</p>
+                <p className="text-[11px] text-amber-700 mt-0.5">
+                  Thời gian mới sẽ cập nhật cho buổi này và gửi thông báo mời ứng viên xác nhận lại.
+                </p>
+              </div>
+            </div>
+          ) : existingInterviewsCount > 0 ? (
+            <div className="rounded-xl bg-blue-50 p-3 border border-blue-200 text-xs text-blue-900 flex items-start gap-2.5">
+              <Sparkles className="size-4 text-[#2563EB] shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">Tạo thêm vòng phỏng vấn mới (Vòng {existingInterviewsCount + 1})</p>
+                <p className="text-[11px] text-blue-700 mt-0.5">
+                  Buổi phỏng vấn trước đó và kết quả đánh giá vẫn được giữ nguyên vẹn trong hồ sơ ứng viên.
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           {/* Tiêu đề */}
           <div>
             <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-1.5">
@@ -266,7 +352,7 @@ export function ScheduleInterviewModal({
               ) : (
                 <>
                   <Calendar className="size-4" />
-                  Xác nhận Lên Lịch
+                  {interviewToEdit ? 'Lưu Lịch Phỏng Vấn Mới' : 'Xác nhận Lên Lịch'}
                 </>
               )}
             </button>

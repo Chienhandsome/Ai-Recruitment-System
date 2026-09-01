@@ -21,12 +21,12 @@ LEVELS = (
 LEVEL_RANK = {level: rank for rank, level in enumerate(LEVELS)}
 
 TITLE_PATTERNS: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("DIRECTOR", (r"\bdirector\b", r"\bhead of\b", r"giám đốc", r"trưởng phòng")),
-    ("MANAGER", (r"\bmanager\b", r"engineering manager", r"quản lý")),
-    ("LEAD", (r"\bteam lead\b", r"\btech lead\b", r"technical lead", r"trưởng nhóm")),
-    ("SENIOR", (r"\bsenior\b", r"\bsr\.?\b", r"\bstaff\b", r"\bprincipal\b")),
-    ("MIDDLE", (r"\bmiddle\b", r"\bmid[- ]level\b", r"\bintermediate\b")),
-    ("JUNIOR", (r"\bjunior\b", r"\bjr\.?\b", r"\bentry[- ]level\b")),
+    ("DIRECTOR", (r"\bdirector\b", r"\bhead of\b", r"giám đốc", r"trưởng phòng", r"\brsm\b", r"regional sales director", r"national sales manager", r"\bnsm\b")),
+    ("MANAGER", (r"\bmanager\b", r"engineering manager", r"quản lý", r"\basm\b", r"area sales manager", r"territory manager", r"quản lý kinh doanh", r"quản lý khu vực", r"trưởng phòng kinh doanh", r"commercial manager")),
+    ("LEAD", (r"\bteam lead\b", r"\btech lead\b", r"technical lead", r"trưởng nhóm", r"giám sát bán hàng", r"sales supervisor", r"\bsupervisor\b")),
+    ("SENIOR", (r"\bsenior\b", r"\bsr\.?\b", r"\bstaff\b", r"\bprincipal\b", r"chuyên viên cao cấp")),
+    ("MIDDLE", (r"\bmiddle\b", r"\bmid[- ]level\b", r"\bintermediate\b", r"chuyên viên", r"nhân viên kinh doanh")),
+    ("JUNIOR", (r"\bjunior\b", r"\bjr\.?\b", r"\bentry[- ]level\b", r"nhân viên")),
     ("FRESHER", (r"\bfresher\b", r"\bnew graduate\b", r"mới tốt nghiệp")),
     ("INTERN", (r"\bintern\b", r"\binternship\b", r"thực tập", r"thực tập sinh")),
 )
@@ -44,6 +44,13 @@ LEADERSHIP_PATTERNS = (
 MANAGEMENT_PATTERNS = (
     r"quản lý đội",
     r"quản lý nhân sự",
+    r"quản lý toàn diện",
+    r"lãnh đạo trực tiếp",
+    r"lãnh đạo đội ngũ",
+    r"chỉ đạo",
+    r"điều hành mạng lưới",
+    r"quản trị mạng lưới",
+    r"giám sát trực tiếp",
     r"đánh giá hiệu suất",
     r"\bmanag(?:e|ed|ing)\b.{0,30}\bteam",
     r"\bpeople management\b",
@@ -299,6 +306,50 @@ class ExperienceLevelEvaluator:
 
         days = sum((end - start).days for start, end in merged)
         return max(0.0, days / 365.25), len(intervals)
+
+    def calculate_management_years(
+        self, experiences: Iterable[WorkExperience], reference_date: Optional[str] = None
+    ) -> float:
+        reference = self._parse_reference_date(reference_date)
+        intervals: list[tuple[date, date]] = []
+        for exp in experiences:
+            title = (exp.position_title or "").strip()
+            desc = f"{exp.description or ''} {exp.achievements or ''}".strip()
+            t_level = self._title_level(title)
+            has_mgmt = (
+                t_level in {"LEAD", "MANAGER", "DIRECTOR"}
+                or self._contains_any(desc.casefold(), MANAGEMENT_PATTERNS)
+                or self._contains_any(title.casefold(), [r"\basm\b", r"\brsm\b", r"quản lý", r"giám sát", r"trưởng", r"manager", r"supervisor", r"lead", r"director"])
+            )
+            if not has_mgmt:
+                continue
+
+            start = self._parse_date(exp.start_date)
+            if start is None:
+                continue
+            end = (
+                reference
+                if exp.is_current or not exp.end_date
+                else self._parse_date(exp.end_date)
+            )
+            if end is None or start > end:
+                continue
+            intervals.append((start, min(end, reference)))
+
+        if not intervals:
+            return 0.0
+
+        intervals.sort(key=lambda item: item[0])
+        merged: list[tuple[date, date]] = []
+        for start, end in intervals:
+            if not merged or start > merged[-1][1]:
+                merged.append((start, end))
+                continue
+            previous_start, previous_end = merged[-1]
+            merged[-1] = (previous_start, max(previous_end, end))
+
+        days = sum((end - start).days for start, end in merged)
+        return max(0.0, days / 365.25)
 
     def _most_recent_experience(
         self, experiences: list[WorkExperience], reference: date

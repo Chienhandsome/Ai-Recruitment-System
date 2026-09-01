@@ -72,6 +72,26 @@ class GenericMatchingEngine:
         """
         t = (text or "").lower()
 
+        # REAL ESTATE & BROKERAGE (REAL_) - Bất động sản & Địa ốc
+        if any(k in t for k in ["bất động sản", "địa ốc", "nhà đất", "sàn giao dịch", "môi giới bất động sản", "condotel", "đất nền", "novaland", "vinhomes", "căn hộ", "biệt thự"]):
+            return "REAL_ESTATE_BROKERAGE"
+
+        # 0. SALES & COMMERCIAL DISTRIBUTION (SALES_) - Ưu tiên nhận diện vai trò bán hàng & quản lý kênh phân phối
+        if any(k in t for k in ["area sales manager", " asm ", "asm,", "asm.", "(asm)", "rsm", "nsm", "quản lý bán hàng", "giám sát bán hàng", "sales supervisor", "quản lý kinh doanh", "kênh phân phối", "nhà phân phối", "npp", "horeca", "foodservice", "sell-in", "sell-out", "điểm bán lẻ", "tổng thầu phân phối", "commercial negotiation", "key accounts", "sales team management", "territory leadership"]):
+            if any(k in t for k in ["pharma", "dược", "thuốc", "trình dược", "bệnh viện", "etc", "otc", "nhà thuốc"]):
+                return "SALES_PHARMA_HEALTHCARE"
+            if any(k in t for k in ["fmcg", "thực phẩm", "đồ uống", "f&b", "bánh kẹo", "gia vị", "hóa mỹ phẩm", "tiêu dùng nhanh", "sauce", "nước mắm", "mì ăn liền", "nước ngọt"]):
+                return "SALES_FMCG_CONSUMER"
+            if any(k in t for k in ["b2b", "doanh nghiệp", "khách hàng doanh nghiệp", "giải pháp b2b", "thiết bị"]):
+                return "SALES_B2B_ENTERPRISE"
+            return "SALES_DISTRIBUTION_CHANNELS"
+
+        if any(k in t for k in ["fmcg", "tiêu dùng nhanh"]) and any(k in t for k in ["sales", "bán hàng", "kinh doanh", "thị trường", "phân phối"]):
+            return "SALES_FMCG_CONSUMER"
+
+        if any(k in t for k in ["trình dược viên", "trình dược y tế", "sales pharma", "quản lý trình dược"]):
+            return "SALES_PHARMA_HEALTHCARE"
+
         # 1. IT & SOFTWARE ENGINEERING (IT_) - Ưu tiên nhận diện vai trò kỹ thuật phần mềm
         if any(k in t for k in ["fullstack", "full stack", "web developer", "lập trình web", "kỹ sư phần mềm"]):
             return "IT_FULLSTACK_DEV"
@@ -99,9 +119,9 @@ class GenericMatchingEngine:
             return "FIN_INVESTMENT_BANKING"
         if any(k in t for k in ["kiểm toán", "auditing", "big 4", "soát xét", "internal audit", "kiểm soát nội bộ"]):
             return "FIN_AUDIT_INTERNAL_CONTROL"
-        if any(k in t for k in ["kế toán", "quyết toán thuế", "báo cáo thuế", "hạch toán", "misa", "sổ sách", "thuế tndn", "tax accountant", "kế toán trưởng", "cpa việt nam", "chứng chỉ cpa"]):
+        if any(k in t for k in ["kế toán", "quyết toán thuế", "báo cáo thuế", "hạch toán", "misa", "sổ sách kế toán", "thuế tndn", "tax accountant", "kế toán trưởng", "cpa việt nam", "chứng chỉ cpa"]):
             return "FIN_TAX_ACCOUNTING"
-        if any(k in t for k in ["tín dụng", "ngân hàng bán lẻ", "thẩm định tín dụng", "credit risk", "teller", "giao dịch viên"]):
+        if any(k in t for k in ["ngân hàng bán lẻ", "thẩm định tín dụng", "credit risk", "teller", "giao dịch viên", "tín dụng ngân hàng", "hồ sơ vay tín chấp", "tín dụng thế chấp"]):
             return "FIN_RETAIL_BANKING"
 
         # 4. MARKETING & GROWTH (MKT_)
@@ -111,7 +131,7 @@ class GenericMatchingEngine:
             return "MKT_B2B_SAAS"
         if any(k in t for k in ["agency", "media planner", "tài khoản khách hàng", "nhãn hàng", "media executive"]):
             return "MKT_AGENCY_SERVICES"
-        if any(k in t for k in ["e-commerce", "ecommerce", "d2c", "shopee", "tiktok shop", "shopify", "lazada", "bán lẻ", "giỏ hàng", "fmcg"]):
+        if any(k in t for k in ["e-commerce", "ecommerce", "d2c", "shopee", "tiktok shop", "shopify", "lazada", "bán lẻ trực tuyến", "giỏ hàng"]):
             return "MKT_ECOMMERCE_D2C"
         if any(k in t for k in ["content", "fanpage", "social media", "post engagement", "livestream", "canva", "copywriter"]):
             return "MKT_SOCIAL_CONTENT"
@@ -127,7 +147,7 @@ class GenericMatchingEngine:
         # 6. HEALTHCARE & MEDICINE (MED_)
         if any(k in t for k in ["bác sĩ", "chẩn đoán lâm sàng", "khám chữa bệnh", "doctor", "medical practitioner"]):
             return "MED_CLINICAL_DOCTOR"
-        if any(k in t for k in ["dược sĩ", "dược lâm sàng", "pharma", "trình dược viên", "thuốc", "pharmacist"]):
+        if any(k in t for k in ["dược sĩ", "dược lâm sàng", "pharmacist"]):
             return "MED_PHARMACEUTICAL"
         if any(k in t for k in ["điều dưỡng", "y tá", "chăm sóc bệnh nhân", "nursing"]):
             return "MED_NURSING_CARE"
@@ -167,7 +187,7 @@ class GenericMatchingEngine:
         # 11. HOSPITALITY & F&B (HOSP_)
         if any(k in t for k in ["khách sạn", "hotel manager", "resort", "tiền sảnh", "front office", "buồng phòng"]):
             return "HOSP_HOTEL_RESORT"
-        if any(k in t for k in ["nhà hàng", "bếp trưởng", "f&b", "barista", "phục vụ bàn", "quản lý nhà hàng"]):
+        if any(k in t for k in ["nhà hàng", "bếp trưởng", "barista", "phục vụ bàn", "quản lý nhà hàng"]):
             return "HOSP_FB_RESTAURANT"
 
         # 12. REAL ESTATE & CONSTRUCTION (REAL_)
@@ -193,7 +213,7 @@ class GenericMatchingEngine:
     def _calc_domain_compatibility(self, job_dom: str, cand_dom: str) -> float:
         """
         Tính toán Hệ số Tương thích Mô hình Doanh nghiệp (Domain Compatibility Gating)
-        trên Ma trận Taxonomy 14 Ngành Lớn.
+        trên Ma trận Taxonomy 15 Ngành Lớn.
         """
         if job_dom == cand_dom:
             return 1.0
@@ -203,13 +223,22 @@ class GenericMatchingEngine:
         job_family = job_dom.split("_")[0]
         cand_family = cand_dom.split("_")[0]
 
-        # Khác khối ngành hoàn toàn (ví dụ: Y tế vs IT, Logistics vs Pháp lý, Marketing vs Nông nghiệp)
+        # Khác khối ngành hoàn toàn
         if job_family != cand_family:
             # Ngoại lệ chuyển giao kỹ thuật công nghệ
             if ("MFG_AUTOMATION" in job_dom and "IT_EMBEDDED" in cand_dom) or ("IT_EMBEDDED" in job_dom and "MFG_AUTOMATION" in cand_dom):
                 return 0.65
             if ("IT_BACKEND" in job_dom and "DESIGN_UI_UX" in cand_dom) or ("DESIGN_UI_UX" in job_dom and "IT_BACKEND" in cand_dom):
                 return 0.40
+            # Ngoại lệ chuyển giao Bán hàng FMCG vs Dược phẩm/Y tế
+            if ("SALES_FMCG" in job_dom and "MED_PHARMACEUTICAL" in cand_dom) or ("MED_PHARMACEUTICAL" in job_dom and "SALES_FMCG" in cand_dom):
+                return 0.75
+            if ("SALES_" in job_dom and "MKT_ECOMMERCE" in cand_dom) or ("MKT_ECOMMERCE" in job_dom and "SALES_" in cand_dom):
+                return 0.75
+            if ("SALES_" in job_dom and "HOSP_FB" in cand_dom) or ("HOSP_FB" in job_dom and "SALES_" in cand_dom):
+                return 0.65
+            if ("SALES_" in job_dom and "REAL_" in cand_dom) or ("REAL_" in job_dom and "SALES_" in cand_dom):
+                return 0.20
             return 0.15
 
         # CÙNG KHỐI NGÀNH (Intra-Family Distance)
@@ -292,6 +321,18 @@ class GenericMatchingEngine:
         if ("CUSTOMER" in job_dom and "TECH" in cand_dom) or ("TECH" in job_dom and "CUSTOMER" in cand_dom):
             return 0.65
 
+        # 13. Sales & Commercial Distribution
+        if "SALES_" in job_dom and "SALES_" in cand_dom:
+            if ("FMCG" in job_dom and "DISTRIBUTION" in cand_dom) or ("DISTRIBUTION" in job_dom and "FMCG" in cand_dom):
+                return 0.95
+            if ("FMCG" in job_dom and "PHARMA" in cand_dom) or ("PHARMA" in job_dom and "FMCG" in cand_dom):
+                return 0.75
+            if ("DISTRIBUTION" in job_dom and "PHARMA" in cand_dom) or ("PHARMA" in job_dom and "DISTRIBUTION" in cand_dom):
+                return 0.80
+            if ("B2B" in job_dom and "FMCG" in cand_dom) or ("FMCG" in job_dom and "B2B" in cand_dom):
+                return 0.70
+            return 0.85
+
         # Mặc định các phân ngành cùng họ
         return 0.65
 
@@ -368,8 +409,8 @@ class GenericMatchingEngine:
         cand_norm_names = set(cand_skill_map.keys())
 
         # Ngưỡng động (Đồng nghĩa thực sự vs Chuyển giao)
-        mandatory_threshold = 0.88
-        transferable_threshold = 0.68
+        mandatory_threshold = 0.78
+        transferable_threshold = 0.60
 
         mandatory_scores = []
         optional_scores = []
@@ -403,7 +444,10 @@ class GenericMatchingEngine:
                 if req_min_years > 0:
                     if cand_skill_years < req_min_years:
                         ratio = cand_skill_years / req_min_years
-                        penalty_mult = 0.65 + 0.35 * max(0.2, min(1.0, ratio))
+                        if ratio < 0.25:
+                            penalty_mult = 0.35 + 0.35 * max(0.0, ratio * 2.0)
+                        else:
+                            penalty_mult = 0.65 + 0.35 * max(0.2, min(1.0, ratio))
                         score *= penalty_mult
                         years_gap_info = {
                             "req_years": req_min_years,
@@ -428,7 +472,12 @@ class GenericMatchingEngine:
                 })
                 if is_man:
                     mandatory_scores.append(score)
-                    mandatory_credits.append(1.0)
+                    if req_min_years > 0 and cand_skill_years < req_min_years * 0.3:
+                        mand_credit = max(0.2, (cand_skill_years / req_min_years))
+                        mandatory_credits.append(mand_credit)
+                        missing_mandatory.append(req.skill_name)
+                    else:
+                        mandatory_credits.append(1.0)
                 else:
                     optional_scores.append(score)
                 continue
@@ -440,7 +489,9 @@ class GenericMatchingEngine:
             for cs in cand_profile.skills:
                 # Kiểm tra tương đương trực tiếp qua semantic embedding
                 raw_sem = semantic_matcher.compute_similarity(req.skill_name.strip(), cs.skill_name.strip())
-                gated_sem = raw_sem * (0.2 + 0.8 * domain_compat)
+                gated_sem = raw_sem * (0.35 + 0.65 * domain_compat)
+                if raw_sem >= 0.80 and domain_compat >= 0.5:
+                    gated_sem = max(gated_sem, raw_sem * 0.95)
                 if gated_sem >= mandatory_threshold and gated_sem > best_sem_score:
                     best_sem_score = gated_sem
                     best_cs_match = cs
@@ -617,7 +668,15 @@ class GenericMatchingEngine:
             # Digital Marketing Ad Platforms
             {"facebook ads", "fb ads", "meta ads", "google ads", "tiktok ads", "zalo ads", "performance marketing"},
             # Design & UI/UX Tools
-            {"figma", "sketch", "adobe xd", "photoshop", "illustrator"}
+            {"figma", "sketch", "adobe xd", "photoshop", "illustrator"},
+            # Embedded Systems, Firmware & Microcontrollers
+            {"stm32", "arm cortex", "arm", "freertos", "rtos", "embedded", "c/c++", "firmware", "microcontroller", "esp32", "nordic", "ble", "iot"},
+            # Digital Marketing Analytics & Tracking
+            {"ga4", "google analytics", "gtm", "google tag manager", "server-side tracking", "meta capi", "conversions api", "tracking", "adjust", "appsflyer", "mixpanel", "amplitude", "hạ tầng tracking", "e-commerce tracking"},
+            # E-commerce Unit Economics, CRO & Funnel Optimization
+            {"tối ưu phễu", "funnel", "roas", "cac", "mer", "cro", "conversion rate", "a/b testing", "a/b test", "kinh tế e-com", "đơn vị kinh tế", "phễu chuyển đổi"},
+            # Sales Management & FMCG Distribution Channels
+            {"quản lý đội ngũ sales", "sales management", "quản lý bán hàng", "giám sát bán hàng", "sales supervisor", "territory management", "giám sát địa bàn", "phát triển mạng lưới", "kênh phân phối", "nhà phân phối", "distributor management", "channel management", "đại lý", "horeca", "foodservice", "dự báo doanh số", "sales target", "revenue forecasting", "đàm phán", "commercial negotiation", "key accounts", "kam", "huấn luyện bán hàng", "sales coaching", "field training", "nghiên cứu đối thủ", "competitor intelligence", "chiến lược kinh doanh", "business planning", "sell-in", "sell-out", "mạng lưới cung ứng", "điểm bán lẻ"}
         ]
 
         for cluster in clusters:
@@ -627,11 +686,11 @@ class GenericMatchingEngine:
         return False, 0.0
 
     def _calculate_skill_years(self, skill_name: str, cand_profile: CandidateProfilePayload) -> float:
-        """Calculates cumulative years candidate has explicitly worked with this specific technology."""
+        """Calculates cumulative years candidate has explicitly worked with this specific technology or skill."""
         s_clean = skill_name.lower().strip()
         total_months = 0.0
 
-        # Strict explicit technology aliases mapping (no broad role spillover like 'frontend' or 'backend')
+        # Strict explicit technology aliases mapping
         strict_tech_aliases: Dict[str, List[str]] = {
             "react": ["react", "reactjs", "react.js", "react-native"],
             "next.js": ["next.js", "nextjs", "next js"],
@@ -641,7 +700,23 @@ class GenericMatchingEngine:
             "tailwind css": ["tailwind", "tailwindcss", "tailwind css"],
             "docker": ["docker", "dockerfile", "docker-compose", "containerization"]
         }
-        target_aliases = strict_tech_aliases.get(s_clean, [s_clean])
+        target_aliases = list(strict_tech_aliases.get(s_clean, [s_clean]))
+
+        # Expand target aliases if skill contains composite parts (e.g. Vietnamese (English) or A & B)
+        if "(" in s_clean:
+            parts = [p.strip().rstrip(")") for p in s_clean.split("(") if p.strip()]
+            for p in parts:
+                if p not in target_aliases:
+                    target_aliases.append(p)
+                for sub in re.split(r"&|/|,", p):
+                    sub_strip = sub.strip()
+                    if len(sub_strip) > 3 and sub_strip not in target_aliases:
+                        target_aliases.append(sub_strip)
+        elif "&" in s_clean or "/" in s_clean:
+            for sub in re.split(r"&|/|,", s_clean):
+                sub_strip = sub.strip()
+                if len(sub_strip) > 3 and sub_strip not in target_aliases:
+                    target_aliases.append(sub_strip)
 
         def contains_alias(text: str) -> bool:
             if not text:
@@ -687,11 +762,16 @@ class GenericMatchingEngine:
             for cs in getattr(cand_profile, "skills", []) or []:
                 cs_name = cs.skill_name.lower().strip()
                 if any(alias == cs_name or alias in cs_name for alias in target_aliases):
-                    lvl = (getattr(cs, "proficiency_level", None) or "BEGINNER").upper()
-                    if lvl == "EXPERT": total_months = 48.0
-                    elif lvl == "ADVANCED": total_months = 24.0
-                    elif lvl == "INTERMEDIATE": total_months = 12.0
-                    else: total_months = 6.0
+                    has_work_exp = bool(getattr(cand_profile, "work_experiences", None))
+                    if has_work_exp:
+                        # Conservative fallback when candidate has work history but no verified mention for this skill
+                        total_months = 6.0
+                    else:
+                        lvl = (getattr(cs, "proficiency_level", None) or "BEGINNER").upper()
+                        if lvl == "EXPERT": total_months = 24.0
+                        elif lvl == "ADVANCED": total_months = 18.0
+                        elif lvl == "INTERMEDIATE": total_months = 12.0
+                        else: total_months = 6.0
                     break
 
         return round(total_months / 12.0, 1)
@@ -751,8 +831,8 @@ class GenericMatchingEngine:
                     is_explicit = True
             elif not is_explicit:
                 sim = semantic_matcher.compute_similarity(req_name_v2, text_v2) * multiplier
-                # Gián tiếp qua văn cảnh chỉ đạt tối đa mức chuyển giao (capped at 0.70)
-                sim = min(0.70, sim * 0.80)
+                # Rich context evidence with semantic similarity
+                sim = min(0.90, sim * 0.92)
                 if sim > best_score:
                     best_score, best_text, best_source = sim, exp_text, f"Kinh nghiệm: {exp.position_title}"
 
@@ -771,7 +851,7 @@ class GenericMatchingEngine:
                     is_explicit = True
             elif not is_explicit:
                 sim = semantic_matcher.compute_similarity(req_name_v2, text_v2) * multiplier
-                sim = min(0.70, sim * 0.80)
+                sim = min(0.85, sim * 0.88)
                 if sim > best_score:
                     best_score, best_text, best_source = sim, proj_text, f"Dự án: {proj.project_name}"
 
@@ -794,11 +874,30 @@ class GenericMatchingEngine:
         total_years = self._calculate_total_years(cand_profile.work_experiences)
         req_years = float(job.required_experience_years or 0.0)
 
-        duration_ratio = (total_years / req_years) if req_years > 0.0 else 1.0
-        if duration_ratio < 0.6:
-            duration_score = max(0.1, (duration_ratio ** 1.3))
+        # Check management/leadership requirements if job level is MANAGER/LEAD/DIRECTOR
+        req_level = (job.experience_level or "").upper()
+        if req_level in {"MANAGER", "LEAD", "DIRECTOR"} and req_years > 0.0:
+            mgmt_years = experience_level_evaluator.calculate_management_years(
+                cand_profile.work_experiences, job.evaluation_date
+            )
+            total_duration_ratio = (total_years / req_years) if req_years > 0.0 else 1.0
+            mgmt_duration_ratio = (mgmt_years / req_years) if req_years > 0.0 else 1.0
+
+            if mgmt_duration_ratio < 0.2:
+                # Almost zero management tenure for a Management role
+                duration_score = 0.15
+            elif mgmt_duration_ratio < 0.5:
+                # Partial management tenure (e.g. 2 years vs 5 years required)
+                duration_score = 0.45 * mgmt_duration_ratio + 0.25 * min(1.0, total_duration_ratio)
+            else:
+                duration_score = 0.6 * min(1.0, mgmt_duration_ratio) + 0.4 * min(1.0, total_duration_ratio)
+            duration_score = max(0.1, min(1.0, duration_score))
         else:
-            duration_score = min(1.0, duration_ratio)
+            duration_ratio = (total_years / req_years) if req_years > 0.0 else 1.0
+            if duration_ratio < 0.6:
+                duration_score = max(0.1, (duration_ratio ** 1.3))
+            else:
+                duration_score = min(1.0, duration_ratio)
 
         candidate_titles = [exp.position_title for exp in cand_profile.work_experiences if exp.position_title]
         j_title_lower = job.title.lower()

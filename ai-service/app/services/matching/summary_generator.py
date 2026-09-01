@@ -102,6 +102,12 @@ class SummaryGenerator:
             "CS_CUSTOMER_CARE": "Dịch vụ Chăm sóc Khách hàng & Call Center",
             "CS_TECH_HELPDESK": "Hỗ trợ Kỹ thuật & Helpdesk IT",
 
+            # 15. Sales & Commercial Distribution
+            "SALES_FMCG_CONSUMER": "Bán hàng Tiêu dùng nhanh FMCG & F&B",
+            "SALES_DISTRIBUTION_CHANNELS": "Quản trị Kênh Phân phối & Bán lẻ (GT/MT/Horeca)",
+            "SALES_B2B_ENTERPRISE": "Bán hàng Doanh nghiệp B2B & Giải pháp Thương mại",
+            "SALES_PHARMA_HEALTHCARE": "Quản lý Bán hàng Dược phẩm & Kênh Y tế",
+
             "GENERAL_PROFESSIONAL": "Nghiệp vụ Chuyên môn Chung"
         }
 

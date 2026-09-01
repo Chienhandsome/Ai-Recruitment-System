@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev:all": "concurrently -n \"RABBITMQ,BACKEND,FRONTEND,AI-API,AI-EVAL,AI-RESUME\" -c \"red,blue,green,magenta,yellow,cyan\" \"powershell -ExecutionPolicy Bypass -File ./scripts/start-rabbitmq.ps1\" \"npm --prefix backend run start:dev\" \"npm --prefix frontend run dev\" \"cd ai-service && .\\venv\\Scripts\\uvicorn app.main:app --host 0.0.0.0 --port 8000\" \"cd ai-service && .\\venv\\Scripts\\python -m app.workers.evaluation_worker\" \"cd ai-service && .\\venv\\Scripts\\python -m app.workers.resume_worker\"",
+    "dev:all": "concurrently -n \"BACKEND,FRONTEND,AI-API,AI-WORKERS\" -c \"blue,green,magenta,yellow\" \"npm --prefix backend run start:dev\" \"npm --prefix frontend run dev\" \"cd ai-service && .\\venv\\Scripts\\uvicorn app.main:app --host 127.0.0.1 --port 8000\" \"cd ai-service && .\\venv\\Scripts\\python worker_main.py\"",
+    "dev:with-docker": "concurrently -n \"RABBITMQ,BACKEND,FRONTEND,AI-API,AI-WORKERS\" -c \"red,blue,green,magenta,yellow\" \"powershell -ExecutionPolicy Bypass -File ./scripts/start-rabbitmq.ps1\" \"npm --prefix backend run start:dev\" \"npm --prefix frontend run dev\" \"cd ai-service && .\\venv\\Scripts\\uvicorn app.main:app --host 127.0.0.1 --port 8000\" \"cd ai-service && .\\venv\\Scripts\\python worker_main.py\"",
     "start:dev": "npm run dev:all"
   },
   "devDependencies": {

@@ -1,0 +1,1815 @@
+[
+  {
+    "code": "CANDIDATE-01",
+    "name": "Vũ Minh Đức",
+    "archetype": "True Excellent Match",
+    "expected": "HIGH",
+    "overall": 84.09,
+    "level": "HIGH",
+    "skills": 70.68,
+    "exp": 97.72,
+    "edu": 96.74,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [],
+    "evidence": [
+      {
+        "skillName": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn' tương đương 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (Độ khớp: 94.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "evidenceText": "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý' tương đương 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (Độ khớp: 92.5%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo' tương đương 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (Độ khớp: 89.8%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khai thác Thị trường Horeca & Foodservice' tương đương 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (Độ khớp: 95.3%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "evidenceText": "AI nhận diện kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account' tương đương 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (Độ khớp: 94.4%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "evidenceText": "AI nhận diện kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng' tương đương 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (Độ khớp: 91.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "evidenceText": "AI nhận diện kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ' tương đương 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (Độ khớp: 88.8%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "evidenceText": "AI nhận diện kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực' tương đương 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (Độ khớp: 90.5%)",
+        "source": "semantic_embedding"
+      }
+    ],
+    "cand_level": "MANAGER",
+    "req_level": "MANAGER",
+    "level_fit": 100.0,
+    "level_eligible": true,
+    "level_evidence": [
+      "11.25 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Area Sales Manager (Quản lý Kinh doanh Khu vực Đông Nam Bộ)",
+      "Có bằng chứng quản lý hoặc chịu trách nhiệm đội ngũ"
+    ],
+    "total_experience_years": 11.25,
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (84.1/100 - CẤP ĐỘ HIGH) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Bán hàng Tiêu dùng nhanh FMCG & F&B khớp với Bán hàng Tiêu dùng nhanh FMCG & F&B) với điểm kỹ năng chuyên môn đạt 70.7/100 và kinh nghiệm đạt 97.7/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).; Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+      "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+      "AI nhận diện kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' qua Kỹ năng tương đương: Khai thác Thị trường Horeca & Foodservice (Đạt chuẩn chuyên môn).",
+      "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.5 năm kinh nghiệm thực chiến).",
+      "Tổng thâm niên tích lũy (11.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Area Sales Manager (Quản lý Kinh doanh Khu vực Đông Nam Bộ)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh Thương mại (Business Administration)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 28.27,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+          "AI nhận diện kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' qua Kỹ năng tương đương: Khai thác Thị trường Horeca & Foodservice (Đạt chuẩn chuyên môn).",
+          "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.5 năm kinh nghiệm thực chiến)."
+        ],
+        "minus_reasons": [
+          "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+        ],
+        "summary": "Đạt 28.3 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn (có 7 kỹ năng bị trừ điểm do chưa đủ số năm kinh nghiệm theo JD)."
+      },
+      "experience": {
+        "earned_points": 29.31,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+          "Tổng thâm niên tích lũy (11.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Area Sales Manager (Quản lý Kinh doanh Khu vực Đông Nam Bộ)) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.3 / 30.0 điểm: Đánh giá dựa trên 11.2 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 14.51,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh Thương mại (Business Administration)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 14.5 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quản trị Kinh doanh Thương mại (Business Administration))."
+      },
+      "other": {
+        "earned_points": 12.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 12.0 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  },
+  {
+    "code": "CANDIDATE-02",
+    "name": "Lê Hoàng Long",
+    "archetype": "Strong Semantic Match",
+    "expected": "HIGH",
+    "overall": 80.71,
+    "level": "HIGH",
+    "skills": 62.86,
+    "exp": 96.79,
+    "edu": 96.82,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [],
+    "evidence": [
+      {
+        "skillName": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khảo sát Động thái Đối thủ & Xu hướng Tiêu dùng Thực phẩm' tương đương 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (Độ khớp: 83.1%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khảo sát Động thái Đối thủ & Xu hướng Tiêu dùng Thực phẩm' tương đương 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (Độ khớp: 82.3%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khảo sát Động thái Đối thủ & Xu hướng Tiêu dùng Thực phẩm' tương đương 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (Độ khớp: 81.9%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "evidenceText": "AI nhận diện kỹ năng 'Tối ưu hóa Chuỗi Điểm Bán lẻ & Giải phóng Tồn kho' tương đương 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (Độ khớp: 79.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "evidenceText": "AI nhận diện kỹ năng 'Thương thảo Điều khoản Mua bán Buôn & Hợp đồng Phân phối' tương đương 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (Độ khớp: 81.6%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khảo sát Động thái Đối thủ & Xu hướng Tiêu dùng Thực phẩm' tương đương 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (Độ khớp: 85.9%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khảo sát Động thái Đối thủ & Xu hướng Tiêu dùng Thực phẩm' tương đương 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (Độ khớp: 85.7%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khảo sát Động thái Đối thủ & Xu hướng Tiêu dùng Thực phẩm' tương đương 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (Độ khớp: 84.3%)",
+        "source": "semantic_embedding"
+      }
+    ],
+    "cand_level": "SENIOR",
+    "req_level": "MANAGER",
+    "level_fit": 35.0,
+    "level_eligible": false,
+    "level_evidence": [
+      "11.66 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Trưởng Đại diện Kinh doanh Khu vực Trọng điểm (Area Commercial Lead)",
+      "Có bằng chứng quản lý hoặc chịu trách nhiệm đội ngũ"
+    ],
+    "total_experience_years": 11.66,
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (80.7/100 - CẤP ĐỘ HIGH) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Bán hàng Tiêu dùng nhanh FMCG & F&B khớp với Bán hàng Tiêu dùng nhanh FMCG & F&B) với điểm kỹ năng chuyên môn đạt 62.9/100 và kinh nghiệm đạt 96.8/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).; Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+      "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+      "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' qua Kỹ năng tương đương: Khảo sát Động thái Đối thủ & Xu hướng Tiêu dùng Thực phẩm (Đạt chuẩn chuyên môn).",
+      "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến).",
+      "Tổng thâm niên tích lũy (11.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Trưởng Đại diện Kinh doanh Khu vực Trọng điểm (Area Commercial Lead)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Kinh tế Quốc tế & Quản trị Kinh doanh Thương mại) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 25.15,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+          "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' qua Kỹ năng tương đương: Khảo sát Động thái Đối thủ & Xu hướng Tiêu dùng Thực phẩm (Đạt chuẩn chuyên môn).",
+          "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến)."
+        ],
+        "minus_reasons": [
+          "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+        ],
+        "summary": "Đạt 25.1 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn (có 7 kỹ năng bị trừ điểm do chưa đủ số năm kinh nghiệm theo JD)."
+      },
+      "experience": {
+        "earned_points": 29.04,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+          "Tổng thâm niên tích lũy (11.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Trưởng Đại diện Kinh doanh Khu vực Trọng điểm (Area Commercial Lead)) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.0 / 30.0 điểm: Đánh giá dựa trên 11.7 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 14.52,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Kinh tế Quốc tế & Quản trị Kinh doanh Thương mại) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 14.5 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Kinh tế Quốc tế & Quản trị Kinh doanh Thương mại)."
+      },
+      "other": {
+        "earned_points": 12.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 12.0 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  },
+  {
+    "code": "CANDIDATE-03",
+    "name": "Nguyễn Thùy Linh",
+    "archetype": "Keyword Stuffing Trap",
+    "expected": "LOW",
+    "overall": 9.76,
+    "level": "LOW",
+    "skills": 55.35,
+    "exp": 53.41,
+    "edu": 96.7,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [
+      "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+      "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+      "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+      "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)"
+    ],
+    "evidence": [],
+    "cand_level": "SENIOR",
+    "req_level": "MANAGER",
+    "level_fit": 35.0,
+    "level_eligible": false,
+    "level_evidence": [
+      "9.57 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Sales Admin & Trợ lý Kinh doanh Kênh GT (Sales Administrator)"
+    ],
+    "total_experience_years": 9.57,
+    "summary": "ỨNG VIÊN CHƯA PHÙ HỢP (9.8/100 - CẤP ĐỘ LOW) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Lý do cốt lõi: Hồ sơ thiếu hụt hầu hết các kỹ năng bắt buộc tiên quyết: Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership), Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting), Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration), Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts). Điểm thiếu sót chính: Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.. Khuyến nghị: Từ chối hồ sơ hoặc lưu trữ cho các vị trí khác đúng phân khúc.",
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+      "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).",
+      "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (6.5 năm) đáp ứng đủ yêu cầu (4.0 năm).",
+      "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.5 năm kinh nghiệm thực chiến).",
+      "Tổng thâm niên tích lũy (9.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Sales Admin & Trợ lý Kinh doanh Kênh GT (Sales Administrator)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh Tổng hợp) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 3.34,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).",
+          "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (6.5 năm) đáp ứng đủ yêu cầu (4.0 năm).",
+          "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.5 năm kinh nghiệm thực chiến)."
+        ],
+        "minus_reasons": [
+          "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+        ],
+        "summary": "Đạt 3.3 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn (có 7 kỹ năng bị trừ điểm do chưa đủ số năm kinh nghiệm theo JD)."
+      },
+      "experience": {
+        "earned_points": 2.42,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+          "Tổng thâm niên tích lũy (9.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Sales Admin & Trợ lý Kinh doanh Kênh GT (Sales Administrator)) -> Cộng điểm tương quan cấp bậc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 2.4 / 30.0 điểm: Đánh giá dựa trên 9.6 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 2.19,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh Tổng hợp) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 2.2 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quản trị Kinh doanh Tổng hợp)."
+      },
+      "other": {
+        "earned_points": 1.81,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 1.8 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  },
+  {
+    "code": "CANDIDATE-04",
+    "name": "Phạm Quốc Anh",
+    "archetype": "Partial Match (Missing Management Years)",
+    "expected": "MEDIUM",
+    "overall": 77.13,
+    "level": "HIGH",
+    "skills": 58.25,
+    "exp": 91.17,
+    "edu": 96.52,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [],
+    "evidence": [
+      {
+        "skillName": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn' tương đương 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (Độ khớp: 94.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "evidenceText": "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý' tương đương 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (Độ khớp: 92.5%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo' tương đương 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (Độ khớp: 89.8%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khai thác Thị trường Horeca & Foodservice' tương đương 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (Độ khớp: 95.3%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "evidenceText": "AI nhận diện kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account' tương đương 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (Độ khớp: 94.4%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "evidenceText": "AI nhận diện kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng' tương đương 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (Độ khớp: 91.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "evidenceText": "AI nhận diện kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ' tương đương 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (Độ khớp: 88.8%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "evidenceText": "AI nhận diện kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực' tương đương 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (Độ khớp: 90.5%)",
+        "source": "semantic_embedding"
+      }
+    ],
+    "cand_level": "SENIOR",
+    "req_level": "MANAGER",
+    "level_fit": 35.0,
+    "level_eligible": false,
+    "level_evidence": [
+      "10.25 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Sales Supervisor (Giám sát Mại vụ Khu vực Nam Sài Gòn)",
+      "Chưa đủ bằng chứng trách nhiệm quản lý trong mô tả"
+    ],
+    "total_experience_years": 10.25,
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (77.1/100 - CẤP ĐỘ HIGH) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Bán hàng Tiêu dùng nhanh FMCG & F&B khớp với Bán hàng Tiêu dùng nhanh FMCG & F&B) với điểm kỹ năng chuyên môn đạt 58.2/100 và kinh nghiệm đạt 91.2/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).; Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+      "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.5 năm kinh nghiệm thực chiến).",
+      "Tổng thâm niên tích lũy (10.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Sales Supervisor (Giám sát Mại vụ Khu vực Nam Sài Gòn)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Thương mại & Quản trị Bán hàng) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 23.3,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.5 năm kinh nghiệm thực chiến)."
+        ],
+        "minus_reasons": [
+          "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+        ],
+        "summary": "Đạt 23.3 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn (có 8 kỹ năng bị trừ điểm do chưa đủ số năm kinh nghiệm theo JD)."
+      },
+      "experience": {
+        "earned_points": 27.35,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+          "Tổng thâm niên tích lũy (10.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Sales Supervisor (Giám sát Mại vụ Khu vực Nam Sài Gòn)) -> Cộng điểm tương quan cấp bậc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 27.4 / 30.0 điểm: Đánh giá dựa trên 10.2 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 14.48,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Thương mại & Quản trị Bán hàng) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 14.5 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Thương mại & Quản trị Bán hàng)."
+      },
+      "other": {
+        "earned_points": 12.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 12.0 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  },
+  {
+    "code": "CANDIDATE-05",
+    "name": "Trịnh Công Danh",
+    "archetype": "Wrong Domain (Real Estate Brokerage)",
+    "expected": "LOW",
+    "overall": 30.42,
+    "level": "LOW",
+    "skills": 85.0,
+    "exp": 83.75,
+    "edu": 96.56,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [
+      "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+      "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+      "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+      "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+      "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)"
+    ],
+    "evidence": [
+      {
+        "skillName": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "evidenceText": "Kỹ năng 'Quản lý Đội ngũ Sales Bất động sản' có thể chuyển giao sang 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill"
+      },
+      {
+        "skillName": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "evidenceText": "Kỹ năng 'Quản lý Đội ngũ Sales Bất động sản' có thể chuyển giao sang 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill"
+      },
+      {
+        "skillName": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "evidenceText": "Kỹ năng 'Quản lý Đội ngũ Sales Bất động sản' có thể chuyển giao sang 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill"
+      },
+      {
+        "skillName": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "evidenceText": "Kỹ năng 'Quản lý Đội ngũ Sales Bất động sản' có thể chuyển giao sang 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill"
+      },
+      {
+        "skillName": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "evidenceText": "Kỹ năng 'Quản lý Đội ngũ Sales Bất động sản' có thể chuyển giao sang 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill"
+      },
+      {
+        "skillName": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "evidenceText": "Kỹ năng 'Quản lý Đội ngũ Sales Bất động sản' có thể chuyển giao sang 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill"
+      },
+      {
+        "skillName": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "evidenceText": "Kỹ năng 'Quản lý Đội ngũ Sales Bất động sản' có thể chuyển giao sang 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill"
+      },
+      {
+        "skillName": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "evidenceText": "Kỹ năng 'Quản lý Đội ngũ Sales Bất động sản' có thể chuyển giao sang 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill"
+      }
+    ],
+    "cand_level": "SENIOR",
+    "req_level": "MANAGER",
+    "level_fit": 35.0,
+    "level_eligible": false,
+    "level_evidence": [
+      "8.25 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Trưởng phòng Kinh doanh Bất động sản (Real Estate Sales Manager)",
+      "Chưa đủ bằng chứng trách nhiệm quản lý trong mô tả"
+    ],
+    "total_experience_years": 8.25,
+    "summary": "ỨNG VIÊN CHƯA PHÙ HỢP (30.4/100 - CẤP ĐỘ LOW) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Lý do cốt lõi: Sai lệch bản chất mô hình hoạt động. Ứng viên thuộc mảng 'REAL_ESTATE_BROKERAGE' (vận hành khác biệt hoàn toàn với mô hình 'Bán hàng Tiêu dùng nhanh FMCG & F&B' của vị trí tuyển dụng). Các từ khóa kỹ thuật tương đồng (nếu có) chỉ mang tính chất trùng lặp công cụ bề mặt. Điểm thiếu sót chính: Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.. Khuyến nghị: Từ chối hồ sơ hoặc lưu trữ cho các vị trí khác đúng phân khúc.",
+    "strengths": [
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)'.",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)'.",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)'.",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)'.",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)'.",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)'.",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)'.",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)'.",
+      "Tổng thâm niên tích lũy (8.3 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Trưởng phòng Kinh doanh Bất động sản (Real Estate Sales Manager)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh Bất động sản & Địa ốc) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 12.08,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)'.",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)'.",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)'.",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)'.",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)'.",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)'.",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)'.",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)'."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 12.1 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 8.93,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Tổng thâm niên tích lũy (8.3 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Trưởng phòng Kinh doanh Bất động sản (Real Estate Sales Manager)) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+        ],
+        "summary": "Đạt 8.9 / 30.0 điểm: Đánh giá dựa trên 8.3 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 5.15,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh Bất động sản & Địa ốc) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 5.2 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quản trị Kinh doanh Bất động sản & Địa ốc)."
+      },
+      "other": {
+        "earned_points": 4.26,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 4.3 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  },
+  {
+    "code": "CANDIDATE-06",
+    "name": "Đặng Tiến Dũng",
+    "archetype": "Transferable Domain (Pharma Territory Manager)",
+    "expected": "MEDIUM",
+    "overall": 64.17,
+    "level": "MEDIUM",
+    "skills": 66.45,
+    "exp": 93.89,
+    "edu": 95.41,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [
+      "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)"
+    ],
+    "evidence": [
+      {
+        "skillName": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản lý Địa bàn & Đội ngũ Trình dược viên' tương đương 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (Độ khớp: 81.8%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "evidenceText": "AI nhận diện kỹ năng 'Phát triển Kênh Phân phối Nhà thuốc & Đại lý Dược phẩm' tương đương 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (Độ khớp: 83.7%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Doanh số & Dự báo Nhu cầu Thuốc' tương đương 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (Độ khớp: 82.2%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "evidenceText": "Kỹ năng 'Phát triển Kênh Phân phối Nhà thuốc & Đại lý Dược phẩm' có thể chuyển giao sang 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill"
+      },
+      {
+        "skillName": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "evidenceText": "AI nhận diện kỹ năng 'Đàm phán Hợp đồng Thầu & Điều khoản Thương mại' tương đương 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (Độ khớp: 82.2%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "evidenceText": "AI nhận diện kỹ năng 'Huấn luyện Kỹ năng Tư vấn & Bán hàng Y Dược' tương đương 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (Độ khớp: 79.5%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "evidenceText": "AI nhận diện kỹ năng 'Phát triển Kênh Phân phối Nhà thuốc & Đại lý Dược phẩm' tương đương 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (Độ khớp: 80.7%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "evidenceText": "AI nhận diện kỹ năng 'Phát triển Kênh Phân phối Nhà thuốc & Đại lý Dược phẩm' tương đương 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (Độ khớp: 80.2%)",
+        "source": "semantic_embedding"
+      }
+    ],
+    "cand_level": "MANAGER",
+    "req_level": "MANAGER",
+    "level_fit": 100.0,
+    "level_eligible": true,
+    "level_evidence": [
+      "7.50 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Area Sales Manager - Southern Region (Quản lý Bán hàng Khu vực Miền Nam)",
+      "Có bằng chứng quản lý hoặc chịu trách nhiệm đội ngũ"
+    ],
+    "total_experience_years": 7.5,
+    "summary": "ỨNG VIÊN TIỀM NĂNG CHUYỂN GIAO (64.2/100 - CẤP ĐỘ MEDIUM) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Cần lưu ý ứng viên chưa đáp ứng kỹ năng bắt buộc: Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration). Hạn chế cần đào tạo thêm: Có sự khác biệt nhất định về phân khúc mô hình kinh doanh so với vị trí tuyển dụng.; Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.. Khuyến nghị: Phỏng vấn đánh giá khả năng thích ứng và tư duy nghiệp vụ.",
+    "strengths": [
+      "Có tư duy và kỹ năng chuyển giao tốt (Transferable Skills) giữa các phân khúc nghiệp vụ liên quan.",
+      "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+      "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' qua Kỹ năng tương đương: Phát triển Kênh Phân phối Nhà thuốc & Đại lý Dược phẩm (Đạt chuẩn chuyên môn).",
+      "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)'.",
+      "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến).",
+      "Tổng thâm niên tích lũy (7.5 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Area Sales Manager - Southern Region (Quản lý Bán hàng Khu vực Miền Nam)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Dược học & Quản trị Kinh doanh Dược (Pharmacy)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Có sự khác biệt nhất định về phân khúc mô hình kinh doanh so với vị trí tuyển dụng.",
+      "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 21.04,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Có tư duy và kỹ năng chuyển giao tốt (Transferable Skills) giữa các phân khúc nghiệp vụ liên quan.",
+          "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+          "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' qua Kỹ năng tương đương: Phát triển Kênh Phân phối Nhà thuốc & Đại lý Dược phẩm (Đạt chuẩn chuyên môn).",
+          "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)'.",
+          "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến)."
+        ],
+        "minus_reasons": [
+          "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+        ],
+        "summary": "Đạt 21.0 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn (có 6 kỹ năng bị trừ điểm do chưa đủ số năm kinh nghiệm theo JD)."
+      },
+      "experience": {
+        "earned_points": 22.3,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Tổng thâm niên tích lũy (7.5 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Area Sales Manager - Southern Region (Quản lý Bán hàng Khu vực Miền Nam)) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Có sự khác biệt nhất định về phân khúc mô hình kinh doanh so với vị trí tuyển dụng."
+        ],
+        "summary": "Đạt 22.3 / 30.0 điểm: Đánh giá dựa trên 7.5 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 11.33,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Dược học & Quản trị Kinh doanh Dược (Pharmacy)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 11.3 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Dược học & Quản trị Kinh doanh Dược (Pharmacy))."
+      },
+      "other": {
+        "earned_points": 9.5,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 9.5 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  },
+  {
+    "code": "CANDIDATE-07",
+    "name": "Phan Trọng Hiếu",
+    "archetype": "Senior Individual Contributor (Zero Mgmt)",
+    "expected": "MEDIUM",
+    "overall": 81.45,
+    "level": "HIGH",
+    "skills": 65.1,
+    "exp": 96.24,
+    "edu": 96.92,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [],
+    "evidence": [
+      {
+        "skillName": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Khách hàng Trọng điểm Kênh MT (Key Account Management)' tương đương 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (Độ khớp: 86.2%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Khách hàng Trọng điểm Kênh MT (Key Account Management)' tương đương 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (Độ khớp: 88.5%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Khách hàng Trọng điểm Kênh MT (Key Account Management)' tương đương 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (Độ khớp: 85.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Khách hàng Trọng điểm Kênh MT (Key Account Management)' tương đương 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (Độ khớp: 81.4%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Khách hàng Trọng điểm Kênh MT (Key Account Management)' tương đương 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (Độ khớp: 86.7%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Khách hàng Trọng điểm Kênh MT (Key Account Management)' tương đương 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (Độ khớp: 85.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản lý Ngân sách Khuyến mãi & Trade Promotion' tương đương 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (Độ khớp: 82.8%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Khách hàng Trọng điểm Kênh MT (Key Account Management)' tương đương 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (Độ khớp: 86.6%)",
+        "source": "semantic_embedding"
+      }
+    ],
+    "cand_level": "SENIOR",
+    "req_level": "MANAGER",
+    "level_fit": 35.0,
+    "level_eligible": false,
+    "level_evidence": [
+      "8.34 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Senior National Key Account Manager (Chuyên viên Quản lý Khách hàng Cấp cao)",
+      "Chưa đủ bằng chứng trách nhiệm quản lý trong mô tả"
+    ],
+    "total_experience_years": 8.34,
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (81.5/100 - CẤP ĐỘ HIGH) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Bán hàng Tiêu dùng nhanh FMCG & F&B khớp với Bán hàng Tiêu dùng nhanh FMCG & F&B) với điểm kỹ năng chuyên môn đạt 65.1/100 và kinh nghiệm đạt 96.2/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).; Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+      "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.0 năm kinh nghiệm thực chiến).",
+      "AI nhận diện kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' qua Kỹ năng tương đương: Quản trị Khách hàng Trọng điểm Kênh MT (Key Account Management) (Đạt chuẩn chuyên môn).",
+      "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến).",
+      "Tổng thâm niên tích lũy (8.3 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior National Key Account Manager (Chuyên viên Quản lý Khách hàng Cấp cao)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Quản lý Công nghiệp & Chuỗi cung ứng) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 26.04,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.0 năm kinh nghiệm thực chiến).",
+          "AI nhận diện kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' qua Kỹ năng tương đương: Quản trị Khách hàng Trọng điểm Kênh MT (Key Account Management) (Đạt chuẩn chuyên môn).",
+          "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến)."
+        ],
+        "minus_reasons": [
+          "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+        ],
+        "summary": "Đạt 26.0 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn (có 7 kỹ năng bị trừ điểm do chưa đủ số năm kinh nghiệm theo JD)."
+      },
+      "experience": {
+        "earned_points": 28.87,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+          "Tổng thâm niên tích lũy (8.3 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior National Key Account Manager (Chuyên viên Quản lý Khách hàng Cấp cao)) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 28.9 / 30.0 điểm: Đánh giá dựa trên 8.3 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 14.54,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Quản lý Công nghiệp & Chuỗi cung ứng) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 14.5 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quản lý Công nghiệp & Chuỗi cung ứng)."
+      },
+      "other": {
+        "earned_points": 12.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 12.0 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  },
+  {
+    "code": "CANDIDATE-08",
+    "name": "Đỗ Minh Khang",
+    "archetype": "Title Inflation Trap",
+    "expected": "LOW",
+    "overall": 55.01,
+    "level": "MEDIUM",
+    "skills": 59.34,
+    "exp": 93.29,
+    "edu": 96.6,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [
+      "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)"
+    ],
+    "evidence": [
+      {
+        "skillName": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "evidenceText": "AI nhận diện kỹ năng 'Regional Sales Leadership & Strategic Management' tương đương 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (Độ khớp: 85.8%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "evidenceText": "AI nhận diện kỹ năng 'Regional Sales Leadership & Strategic Management' tương đương 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (Độ khớp: 81.9%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "evidenceText": "AI nhận diện kỹ năng 'Enterprise Revenue & Corporate Forecasting' tương đương 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (Độ khớp: 80.8%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "evidenceText": "AI nhận diện kỹ năng 'Regional Sales Leadership & Strategic Management' tương đương 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (Độ khớp: 78.3%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "evidenceText": "Regional Sales Director (Giám đốc Kinh doanh Vùng) Quản lý và trực tiếp chỉ đạo toàn bộ hoạt động giao hàng của 2 nhân viên giao hàng bằng xe máy tại 1 cửa hàng bán lẻ duy nhất ở Quận Bình Thạnh. Tự tay ghi chép sổ sách thu chi, đóng gói sản phẩm rau củ và giao hàng cho các hộ gia đình lân cận. Duy trì doanh số bán lẻ của cửa hàng đạt 350 triệu VND/tháng.",
+        "source": "Kinh nghiệm: Regional Sales Director (Giám đốc Kinh doanh Vùng)"
+      },
+      {
+        "skillName": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "evidenceText": "AI nhận diện kỹ năng 'Regional Sales Leadership & Strategic Management' tương đương 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (Độ khớp: 82.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "evidenceText": "AI nhận diện kỹ năng 'Regional Sales Leadership & Strategic Management' tương đương 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (Độ khớp: 79.9%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "evidenceText": "AI nhận diện kỹ năng 'Regional Sales Leadership & Strategic Management' tương đương 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (Độ khớp: 81.6%)",
+        "source": "semantic_embedding"
+      }
+    ],
+    "cand_level": "DIRECTOR",
+    "req_level": "MANAGER",
+    "level_fit": 100.0,
+    "level_eligible": true,
+    "level_evidence": [
+      "8.58 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Regional Sales Director (Giám đốc Kinh doanh Vùng)",
+      "Có bằng chứng quản lý hoặc chịu trách nhiệm đội ngũ"
+    ],
+    "total_experience_years": 8.58,
+    "summary": "ỨNG VIÊN TIỀM NĂNG CHUYỂN GIAO (55.0/100 - CẤP ĐỘ MEDIUM) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Cần lưu ý ứng viên chưa đáp ứng kỹ năng bắt buộc: Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts). Hạn chế cần đào tạo thêm: Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.; Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.. Khuyến nghị: Phỏng vấn đánh giá khả năng thích ứng và tư duy nghiệp vụ.",
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+      "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.0 năm kinh nghiệm thực chiến).",
+      "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' được chứng minh qua Kinh nghiệm: Regional Sales Director (Giám đốc Kinh doanh Vùng) (Chuyển giao).",
+      "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến).",
+      "Tổng thâm niên tích lũy (8.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Regional Sales Director (Giám đốc Kinh doanh Vùng)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 16.69,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.0 năm kinh nghiệm thực chiến).",
+          "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' được chứng minh qua Kinh nghiệm: Regional Sales Director (Giám đốc Kinh doanh Vùng) (Chuyển giao).",
+          "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến)."
+        ],
+        "minus_reasons": [
+          "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+        ],
+        "summary": "Đạt 16.7 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn (có 7 kỹ năng bị trừ điểm do chưa đủ số năm kinh nghiệm theo JD)."
+      },
+      "experience": {
+        "earned_points": 19.69,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+          "Tổng thâm niên tích lũy (8.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Regional Sales Director (Giám đốc Kinh doanh Vùng)) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 19.7 / 30.0 điểm: Đánh giá dựa trên 8.6 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 10.19,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 10.2 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quản trị Kinh doanh)."
+      },
+      "other": {
+        "earned_points": 8.44,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 8.4 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  },
+  {
+    "code": "CANDIDATE-09",
+    "name": "Trần Mai Phương",
+    "archetype": "Realistic Complex Career Path",
+    "expected": "HIGH",
+    "overall": 85.51,
+    "level": "HIGH",
+    "skills": 74.06,
+    "exp": 97.76,
+    "edu": 97.06,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [],
+    "evidence": [
+      {
+        "skillName": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn' tương đương 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (Độ khớp: 94.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "evidenceText": "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý' tương đương 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (Độ khớp: 92.5%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "evidenceText": "AI nhận diện kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo' tương đương 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (Độ khớp: 89.8%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khai thác Thị trường Horeca & Foodservice' tương đương 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (Độ khớp: 95.3%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "evidenceText": "AI nhận diện kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account' tương đương 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (Độ khớp: 94.4%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "evidenceText": "AI nhận diện kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng' tương đương 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (Độ khớp: 91.0%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "evidenceText": "AI nhận diện kỹ năng 'Khai thác Thị trường Horeca & Foodservice' tương đương 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (Độ khớp: 82.6%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "evidenceText": "AI nhận diện kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực' tương đương 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (Độ khớp: 90.5%)",
+        "source": "semantic_embedding"
+      }
+    ],
+    "cand_level": "SENIOR",
+    "req_level": "MANAGER",
+    "level_fit": 35.0,
+    "level_eligible": false,
+    "level_evidence": [
+      "9.17 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Senior Commercial Consultant (Chuyên gia Tư vấn Kênh Phân phối)",
+      "Có bằng chứng quản lý hoặc chịu trách nhiệm đội ngũ"
+    ],
+    "total_experience_years": 9.17,
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (85.5/100 - CẤP ĐỘ HIGH) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Bán hàng Tiêu dùng nhanh FMCG & F&B khớp với Bán hàng Tiêu dùng nhanh FMCG & F&B) với điểm kỹ năng chuyên môn đạt 74.1/100 và kinh nghiệm đạt 97.8/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).; Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+      "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).",
+      "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' qua Kỹ năng tương đương: Phát triển Mạng lưới Nhà phân phối & Đại lý (Đạt chuẩn chuyên môn).",
+      "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+      "AI nhận diện kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' qua Kỹ năng tương đương: Khai thác Thị trường Horeca & Foodservice (Đạt chuẩn chuyên môn).",
+      "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.5 năm kinh nghiệm thực chiến).",
+      "Tổng thâm niên tích lũy (9.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Commercial Consultant (Chuyên gia Tư vấn Kênh Phân phối)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Thạc sĩ Quản trị Kinh doanh (MBA)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 29.62,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.5 năm kinh nghiệm thực chiến).",
+          "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' qua Kỹ năng tương đương: Phát triển Mạng lưới Nhà phân phối & Đại lý (Đạt chuẩn chuyên môn).",
+          "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.5 năm kinh nghiệm thực chiến).",
+          "AI nhận diện kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' qua Kỹ năng tương đương: Khai thác Thị trường Horeca & Foodservice (Đạt chuẩn chuyên môn).",
+          "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.5 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.5 năm kinh nghiệm thực chiến)."
+        ],
+        "minus_reasons": [
+          "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.5 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+        ],
+        "summary": "Đạt 29.6 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn (có 6 kỹ năng bị trừ điểm do chưa đủ số năm kinh nghiệm theo JD)."
+      },
+      "experience": {
+        "earned_points": 29.33,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+          "Tổng thâm niên tích lũy (9.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Commercial Consultant (Chuyên gia Tư vấn Kênh Phân phối)) -> Cộng điểm tương quan cấp bậc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.3 / 30.0 điểm: Đánh giá dựa trên 9.2 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 14.56,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Thạc sĩ Quản trị Kinh doanh (MBA)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 14.6 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Thạc sĩ Quản trị Kinh doanh (MBA))."
+      },
+      "other": {
+        "earned_points": 12.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 12.0 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  },
+  {
+    "code": "CANDIDATE-10",
+    "name": "Nguyễn Văn Thành",
+    "archetype": "Highly Qualified Low-Keyword Hero",
+    "expected": "HIGH",
+    "overall": 80.86,
+    "level": "HIGH",
+    "skills": 63.07,
+    "exp": 97.13,
+    "edu": 96.59,
+    "other": 80.0,
+    "matched_skills": [
+      {
+        "name": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "isMandatory": true
+      },
+      {
+        "name": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "isMandatory": true
+      },
+      {
+        "name": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "isMandatory": true
+      },
+      {
+        "name": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "isMandatory": true
+      },
+      {
+        "name": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "isMandatory": true
+      },
+      {
+        "name": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "isMandatory": false
+      },
+      {
+        "name": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "isMandatory": false
+      },
+      {
+        "name": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "isMandatory": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_mandatory": [],
+    "evidence": [
+      {
+        "skillName": "Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)",
+        "evidenceText": "AI nhận diện kỹ năng 'Điều phối Nhân sự Thương mại & Giám sát Tuyến Thực địa' tương đương 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (Độ khớp: 84.6%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)",
+        "evidenceText": "AI nhận diện kỹ năng 'Điều phối Nhân sự Thương mại & Giám sát Tuyến Thực địa' tương đương 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' (Độ khớp: 83.6%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)",
+        "evidenceText": "AI nhận diện kỹ năng 'Điều phối Nhân sự Thương mại & Giám sát Tuyến Thực địa' tương đương 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (Độ khớp: 82.1%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)",
+        "evidenceText": "AI nhận diện kỹ năng 'Điều phối Nhân sự Thương mại & Giám sát Tuyến Thực địa' tương đương 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (Độ khớp: 78.4%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)",
+        "evidenceText": "AI nhận diện kỹ năng 'Điều phối Nhân sự Thương mại & Giám sát Tuyến Thực địa' tương đương 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (Độ khớp: 81.9%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)",
+        "evidenceText": "AI nhận diện kỹ năng 'Kèm cặp Kỹ năng Thực tế & Đánh giá Năng lực Nhân viên' tương đương 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (Độ khớp: 83.4%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)",
+        "evidenceText": "AI nhận diện kỹ năng 'Điều phối Nhân sự Thương mại & Giám sát Tuyến Thực địa' tương đương 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (Độ khớp: 82.3%)",
+        "source": "semantic_embedding"
+      },
+      {
+        "skillName": "Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)",
+        "evidenceText": "AI nhận diện kỹ năng 'Lập Phương án Kinh doanh & Phát triển Địa bàn' tương đương 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (Độ khớp: 88.0%)",
+        "source": "semantic_embedding"
+      }
+    ],
+    "cand_level": "SENIOR",
+    "req_level": "MANAGER",
+    "level_fit": 35.0,
+    "level_eligible": false,
+    "level_evidence": [
+      "13.50 năm kinh nghiệm không trùng thời gian",
+      "Chức danh gần nhất: Trưởng Khu vực Kinh doanh (Area Commercial In-Charge)"
+    ],
+    "total_experience_years": 13.5,
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (80.9/100 - CẤP ĐỘ HIGH) cho vị trí 'Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Bán hàng Tiêu dùng nhanh FMCG & F&B khớp với Bán hàng Tiêu dùng nhanh FMCG & F&B) với điểm kỹ năng chuyên môn đạt 63.1/100 và kinh nghiệm đạt 97.1/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).; Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+      "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+      "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' qua Kỹ năng tương đương: Điều phối Nhân sự Thương mại & Giám sát Tuyến Thực địa (Đạt chuẩn chuyên môn).",
+      "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+      "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến).",
+      "Tổng thâm niên tích lũy (13.5 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Trưởng Khu vực Kinh doanh (Area Commercial In-Charge)) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Kinh tế Nông nghiệp & Thương mại Thực phẩm) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+      "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+    ],
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 25.23,
+        "max_points": 40.0,
+        "plus_reasons": [
+          "Sở hữu kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)' (0.0 năm kinh nghiệm thực chiến).",
+          "AI nhận diện kỹ năng 'Phát triển Mạng lưới Nhà phân phối & Đại lý (Distributor & Channel Management)' qua Kỹ năng tương đương: Điều phối Nhân sự Thương mại & Giám sát Tuyến Thực địa (Đạt chuẩn chuyên môn).",
+          "Sở hữu kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)' (0.0 năm kinh nghiệm thực chiến).",
+          "Sở hữu kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)' (0.0 năm kinh nghiệm thực chiến)."
+        ],
+        "minus_reasons": [
+          "Kỹ năng 'Quản lý Đội ngũ Sales & Giám sát Địa bàn (Sales Team Management & Territory Leadership)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (5.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Quản trị Doanh số & Hoạch định Dự báo (Sales Target & Revenue Forecasting)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Khai thác Thị trường Horeca & Foodservice (Horeca & Foodservice Market Penetration)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Đàm phán Điều khoản Thương mại & Key Account (Commercial Negotiation & Key Accounts)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (4.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Huấn luyện & Phát triển Năng lực Bán hàng (Sales Coaching & Field Training)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Phân tích Thị trường & Nghiên cứu Đối thủ (Market Analysis & Competitor Intelligence)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (2.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+          "Kỹ năng 'Hoạch định Chiến lược Kinh doanh Khu vực (Area Business Planning & Execution)': Thâm niên thực tế (0.0 năm) chưa đủ số năm yêu cầu của JD (3.0 năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+        ],
+        "summary": "Đạt 25.2 / 40.0 điểm: Đã đáp ứng 8/8 kỹ năng chuyên môn (có 7 kỹ năng bị trừ điểm do chưa đủ số năm kinh nghiệm theo JD)."
+      },
+      "experience": {
+        "earned_points": 29.14,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Quản Lý Kinh Doanh Khu Vực (Area Sales Manager - ASM)).",
+          "Tổng thâm niên tích lũy (13.5 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (5.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Trưởng Khu vực Kinh doanh (Area Commercial In-Charge)) -> Cộng điểm tương quan cấp bậc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.1 / 30.0 điểm: Đánh giá dựa trên 13.5 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 14.49,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Kinh tế Nông nghiệp & Thương mại Thực phẩm) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 14.5 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Kinh tế Nông nghiệp & Thương mại Thực phẩm)."
+      },
+      "other": {
+        "earned_points": 12.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 12.0 / 15.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    }
+  }
+]

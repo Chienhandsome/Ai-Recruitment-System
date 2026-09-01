@@ -15,8 +15,10 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
+  type InterviewData,
   type InterviewType,
   createInterview,
+  updateInterview,
   interviewTypeLabels,
 } from '@/lib/interview-api';
 
@@ -28,6 +30,7 @@ interface ScheduleInterviewModalProps {
   candidateName: string;
   jobTitle: string;
   onSuccess: () => void | Promise<void>;
+  interviewToEdit?: InterviewData | null;
 }
 
 export function ScheduleInterviewModal({
@@ -38,23 +41,29 @@ export function ScheduleInterviewModal({
   candidateName,
   jobTitle,
   onSuccess,
+  interviewToEdit,
 }: ScheduleInterviewModalProps) {
-  // Default to tomorrow 09:00
+  const formatDatetimeLocal = (d: Date) => {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const getDefaultDateTime = () => {
+    if (interviewToEdit?.scheduledAt) {
+      return formatDatetimeLocal(new Date(interviewToEdit.scheduledAt));
+    }
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(9, 0, 0, 0);
-    // Format to YYYY-MM-DDTHH:mm for datetime-local input
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth() + 1)}-${pad(tomorrow.getDate())}T${pad(tomorrow.getHours())}:${pad(tomorrow.getMinutes())}`;
+    return formatDatetimeLocal(tomorrow);
   };
 
-  const [title, setTitle] = useState(`Phỏng vấn - ${jobTitle}`);
-  const [type, setType] = useState<InterviewType>('ONLINE');
+  const [title, setTitle] = useState(interviewToEdit?.title || `Phỏng vấn - ${jobTitle}`);
+  const [type, setType] = useState<InterviewType>(interviewToEdit?.type || 'ONLINE');
   const [scheduledAt, setScheduledAt] = useState(getDefaultDateTime());
-  const [durationMinutes, setDurationMinutes] = useState(60);
-  const [locationOrLink, setLocationOrLink] = useState('');
-  const [interviewerNotes, setInterviewerNotes] = useState('');
+  const [durationMinutes, setDurationMinutes] = useState(interviewToEdit?.durationMinutes || 60);
+  const [locationOrLink, setLocationOrLink] = useState(interviewToEdit?.locationOrLink || '');
+  const [interviewerNotes, setInterviewerNotes] = useState(interviewToEdit?.interviewerNotes || '');
   const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -72,22 +81,35 @@ export function ScheduleInterviewModal({
 
     setSubmitting(true);
     try {
-      await createInterview(token, {
-        applicationId,
-        title: title.trim(),
-        type,
-        scheduledAt: new Date(scheduledAt).toISOString(),
-        durationMinutes,
-        locationOrLink: locationOrLink.trim() || undefined,
-        interviewerNotes: interviewerNotes.trim() || undefined,
-      });
-
-      toast.success('Đã lên lịch phỏng vấn và cập nhật trạng thái hồ sơ!');
+      if (interviewToEdit) {
+        await updateInterview(token, interviewToEdit.id, {
+          title: title.trim(),
+          type,
+          scheduledAt: new Date(scheduledAt).toISOString(),
+          durationMinutes,
+          locationOrLink: locationOrLink.trim() || undefined,
+          interviewerNotes: interviewerNotes.trim() || undefined,
+          status: 'SCHEDULED',
+          candidateResponse: 'PENDING',
+        });
+        toast.success('Đã cập nhật lịch phỏng vấn và gửi thông báo tới ứng viên!');
+      } else {
+        await createInterview(token, {
+          applicationId,
+          title: title.trim(),
+          type,
+          scheduledAt: new Date(scheduledAt).toISOString(),
+          durationMinutes,
+          locationOrLink: locationOrLink.trim() || undefined,
+          interviewerNotes: interviewerNotes.trim() || undefined,
+        });
+        toast.success('Đã lên lịch phỏng vấn và cập nhật trạng thái hồ sơ!');
+      }
       await onSuccess();
       onClose();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Không thể lên lịch phỏng vấn',
+        error instanceof Error ? error.message : 'Không thể lưu lịch phỏng vấn',
       );
     } finally {
       setSubmitting(false);
@@ -107,7 +129,7 @@ export function ScheduleInterviewModal({
             </div>
             <div>
               <h2 className="text-base font-extrabold text-[#1F2937]">
-                Lên Lịch Phỏng Vấn
+                {interviewToEdit ? 'Đổi Lịch / Chỉnh Sửa Phỏng Vấn' : 'Lên Lịch Phỏng Vấn'}
               </h2>
               <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
                 <span className="flex items-center gap-1 font-semibold text-[#2563EB]">
@@ -266,7 +288,7 @@ export function ScheduleInterviewModal({
               ) : (
                 <>
                   <Calendar className="size-4" />
-                  Xác nhận Lên Lịch
+                  {interviewToEdit ? 'Lưu Lịch Phỏng Vấn Mới' : 'Xác nhận Lên Lịch'}
                 </>
               )}
             </button>

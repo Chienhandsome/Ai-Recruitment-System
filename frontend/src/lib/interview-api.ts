@@ -73,6 +73,7 @@ export interface UpdateInterviewInput {
   title?: string;
   type?: InterviewType;
   status?: InterviewStatus;
+  candidateResponse?: CandidateResponseStatus;
   scheduledAt?: string;
   durationMinutes?: number;
   locationOrLink?: string;

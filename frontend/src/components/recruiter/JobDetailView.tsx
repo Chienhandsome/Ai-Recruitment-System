@@ -5,7 +5,7 @@ import {
   ArrowLeft, Edit, Trash2, CheckCircle2, Bot, MapPin, Briefcase, 
   DollarSign, Clock, FileText, Award, HelpCircle, User, Sparkles, Filter, Search,
   GraduationCap, Code, AlertTriangle, ExternalLink, ThumbsUp, ThumbsDown, ChevronRight,
-  Phone, Mail, FolderGit2, ShieldCheck, Calendar, Video, Plus
+  Phone, Mail, FolderGit2, ShieldCheck, Calendar, Video, Plus, Loader2
 } from "lucide-react";
 import {
   type JobPostingData,
@@ -22,12 +22,14 @@ import {
   interviewTypeLabels,
   interviewStatusLabels,
   candidateResponseLabels,
+  updateInterview,
 } from "@/lib/interview-api";
 import { ScheduleInterviewModal } from "./interviews/ScheduleInterviewModal";
 import { InterviewFeedbackModal } from "./interviews/InterviewFeedbackModal";
 import { format } from "date-fns";
 import { ApplicationStageActions } from "./applications/ApplicationStageActions";
 import { applicationStageLabels, applicationStageStyles } from "@/lib/application-stage";
+import { toast } from "sonner";
 
 interface JobDetailViewProps {
   jobId: string;
@@ -157,6 +159,30 @@ export function JobDetailView({
   const [feedbackInterview, setFeedbackInterview] = useState<InterviewData | null>(null);
   const [selectedApplicationDetail, setSelectedApplicationDetail] =
     useState<RecruiterApplicationDetail | null>(null);
+  const [interviewToEdit, setInterviewToEdit] = useState<InterviewData | null>(null);
+  const [acceptingSlotId, setAcceptingSlotId] = useState<string | null>(null);
+
+  const handleAcceptProposedSlot = async (interview: InterviewData, slotIso: string) => {
+    const slotKey = `${interview.id}-${slotIso}`;
+    setAcceptingSlotId(slotKey);
+    try {
+      await updateInterview(token, interview.id, {
+        scheduledAt: slotIso,
+        status: 'SCHEDULED',
+        candidateResponse: 'ACCEPTED',
+      });
+      toast.success(
+        `Đã chấp nhận khung giờ ${format(new Date(slotIso), 'HH:mm dd/MM/yyyy')} và chốt lịch phỏng vấn!`,
+      );
+      await refreshApplications();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Không thể cập nhật lịch phỏng vấn',
+      );
+    } finally {
+      setAcceptingSlotId(null);
+    }
+  };
 
   const fetchJobDetail = async () => {
     setLoading(true);
@@ -795,7 +821,10 @@ export function JobDetailView({
                               allowedTransitions={selectedApplicationDetail.allowedTransitions}
                               currentHrNotes={selectedApplicationDetail.hrNotes}
                               onUpdated={refreshApplications}
-                              onScheduleInterview={() => setIsScheduleModalOpen(true)}
+                              onScheduleInterview={() => {
+                                setInterviewToEdit(null);
+                                setIsScheduleModalOpen(true);
+                              }}
                             />
                           </div>
                         )}
@@ -814,7 +843,10 @@ export function JobDetailView({
                             </div>
                             <button
                               type="button"
-                              onClick={() => setIsScheduleModalOpen(true)}
+                              onClick={() => {
+                                setInterviewToEdit(null);
+                                setIsScheduleModalOpen(true);
+                              }}
                               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-sm transition-all"
                             >
                               <Plus className="w-3.5 h-3.5" /> Lên lịch phỏng vấn
@@ -860,48 +892,97 @@ export function JobDetailView({
                                       </div>
                                     </div>
 
-                                    {item.score !== undefined && item.score !== null ? (
-                                      <div className="text-right shrink-0 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
-                                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Điểm</span>
-                                        <span className="text-sm font-black text-[#2563EB]">{Number(item.score)}/100</span>
-                                      </div>
-                                    ) : (
+                                    <div className="flex items-center gap-1 shrink-0">
                                       <button
                                         type="button"
-                                        onClick={() => setFeedbackInterview(item)}
-                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition-colors shrink-0"
+                                        onClick={() => {
+                                          setInterviewToEdit(item);
+                                          setIsScheduleModalOpen(true);
+                                        }}
+                                        className="p-1.5 rounded-lg text-slate-400 hover:text-[#2563EB] hover:bg-blue-50 transition-colors"
+                                        title="Chỉnh sửa hoặc đổi lịch"
                                       >
-                                        <Award className="w-3 h-3" /> Chấm điểm
+                                        <Calendar className="w-3.5 h-3.5" />
                                       </button>
-                                    )}
+
+                                      {item.score !== undefined && item.score !== null ? (
+                                        <div className="text-right shrink-0 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Điểm</span>
+                                          <span className="text-sm font-black text-[#2563EB]">{Number(item.score)}/100</span>
+                                        </div>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          onClick={() => setFeedbackInterview(item)}
+                                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition-colors shrink-0"
+                                        >
+                                          <Award className="w-3 h-3" /> Chấm điểm
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
 
                                   {/* Reschedule Requested Alert for Recruiter */}
                                   {item.candidateResponse === 'RESCHEDULE_REQUESTED' && (
-                                    <div className="rounded-lg bg-orange-50 p-2.5 border border-orange-200 text-xs text-orange-900 space-y-1">
-                                      <div className="font-bold flex items-center justify-between text-orange-800">
-                                        <span>⚠️ Ứng viên xin dời lịch phỏng vấn</span>
+                                    <div className="rounded-xl bg-orange-50/95 p-3 border border-orange-200 text-xs text-orange-950 space-y-2">
+                                      <div className="font-bold flex items-center justify-between text-orange-900">
+                                        <span className="flex items-center gap-1.5">
+                                          ⚠️ Ứng viên xin dời lịch phỏng vấn
+                                        </span>
                                         <button
                                           type="button"
-                                          onClick={() => setIsScheduleModalOpen(true)}
-                                          className="text-[10px] font-bold bg-[#2563EB] text-white px-2 py-0.5 rounded hover:bg-blue-700 transition"
+                                          onClick={() => {
+                                            setInterviewToEdit(item);
+                                            setIsScheduleModalOpen(true);
+                                          }}
+                                          className="text-[11px] font-bold text-[#2563EB] hover:underline"
                                         >
-                                          Lên lịch mới
+                                          Chọn khung giờ khác ↗
                                         </button>
                                       </div>
+
                                       {item.candidateNotes && (
-                                        <p className="text-[11px] text-orange-800">
-                                          <span className="font-semibold">Lý do:</span> {item.candidateNotes}
+                                        <p className="text-[11px] text-orange-800 bg-white/70 p-2 rounded-lg border border-orange-100 italic">
+                                          <span className="font-semibold not-italic">Lý do:</span> {item.candidateNotes}
                                         </p>
                                       )}
-                                      {item.proposedSlots && Array.isArray(item.proposedSlots) && (
-                                        <div className="text-[11px] text-orange-700">
-                                          <span className="font-semibold">Khung giờ đề xuất:</span>{' '}
-                                          {item.proposedSlots
-                                            .map((s: string) => format(new Date(s), 'HH:mm dd/MM/yyyy'))
-                                            .join(' | ')}
+
+                                      {item.proposedSlots && Array.isArray(item.proposedSlots) && item.proposedSlots.length > 0 ? (
+                                        <div className="space-y-1.5 pt-1">
+                                          <span className="text-[11px] font-bold text-orange-900 block">
+                                            Duyệt nhanh 1 khung giờ ứng viên đề xuất:
+                                          </span>
+                                          <div className="space-y-1.5">
+                                            {item.proposedSlots.map((slotIso: string) => {
+                                              const isAccepting = acceptingSlotId === `${item.id}-${slotIso}`;
+                                              return (
+                                                <div
+                                                  key={slotIso}
+                                                  className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-lg bg-white border border-orange-200 shadow-2xs"
+                                                >
+                                                  <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                                                    <Clock className="size-3.5 text-[#2563EB]" />
+                                                    {format(new Date(slotIso), 'HH:mm - EEEE, dd/MM/yyyy')}
+                                                  </span>
+                                                  <button
+                                                    type="button"
+                                                    disabled={acceptingSlotId !== null}
+                                                    onClick={() => handleAcceptProposedSlot(item, slotIso)}
+                                                    className="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[11px] font-bold shadow-2xs active:scale-95 transition disabled:opacity-50"
+                                                  >
+                                                    {isAccepting ? (
+                                                      <Loader2 className="size-3 animate-spin" />
+                                                    ) : (
+                                                      <CheckCircle2 className="size-3" />
+                                                    )}
+                                                    Chấp nhận slot này
+                                                  </button>
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
                                         </div>
-                                      )}
+                                      ) : null}
                                     </div>
                                   )}
 
@@ -1425,11 +1506,15 @@ export function JobDetailView({
       {isScheduleModalOpen && selectedApplicationDetail && (
         <ScheduleInterviewModal
           isOpen={isScheduleModalOpen}
-          onClose={() => setIsScheduleModalOpen(false)}
+          onClose={() => {
+            setIsScheduleModalOpen(false);
+            setInterviewToEdit(null);
+          }}
           token={token}
           applicationId={selectedApplicationDetail.id}
           candidateName={selectedApplicationDetail.candidate?.fullName || "Ứng viên"}
           jobTitle={job.title}
+          interviewToEdit={interviewToEdit}
           onSuccess={refreshApplications}
         />
       )}

@@ -340,7 +340,19 @@ export class InterviewsService {
         application: scope,
       },
       include: {
-        application: { select: { id: true, currentStage: true } },
+        application: {
+          select: {
+            id: true,
+            currentStage: true,
+            job: { select: { title: true } },
+            candidate: {
+              select: {
+                userId: true,
+                user: { select: { fullName: true } },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -353,18 +365,82 @@ export class InterviewsService {
       throw new BadRequestException('Thời gian phỏng vấn không hợp lệ.');
     }
 
-    const updated = await this.prisma.interview.update({
-      where: { id },
-      data: {
-        title: dto.title,
-        type: dto.type,
-        status: dto.status,
-        scheduledAt: scheduledDate,
-        durationMinutes: dto.durationMinutes,
-        locationOrLink: dto.locationOrLink,
-        interviewerNotes: dto.interviewerNotes,
-      },
+    // Determine candidate response & status transitions
+    let targetCandidateResponse = dto.candidateResponse;
+    if (targetCandidateResponse === undefined && scheduledDate) {
+      if (existing.candidateResponse === CandidateResponseStatus.RESCHEDULE_REQUESTED) {
+        targetCandidateResponse = CandidateResponseStatus.PENDING;
+      }
+    }
+
+    let targetStatus = dto.status;
+    if (!targetStatus && scheduledDate && existing.status === InterviewStatus.RESCHEDULED) {
+      targetStatus = InterviewStatus.SCHEDULED;
+    }
+
+    const updated = await this.prisma.$transaction(async (prisma) => {
+      const result = await prisma.interview.update({
+        where: { id },
+        data: {
+          title: dto.title,
+          type: dto.type,
+          status: targetStatus,
+          candidateResponse: targetCandidateResponse,
+          scheduledAt: scheduledDate,
+          durationMinutes: dto.durationMinutes,
+          locationOrLink: dto.locationOrLink,
+          interviewerNotes: dto.interviewerNotes,
+        },
+      });
+
+      const dateStr = scheduledDate
+        ? scheduledDate.toLocaleString('vi-VN')
+        : existing.scheduledAt.toLocaleString('vi-VN');
+
+      let historyNote = `Nhà tuyển dụng đã cập nhật lịch phỏng vấn: "${result.title}" (${dateStr}).`;
+      if (targetCandidateResponse === CandidateResponseStatus.ACCEPTED) {
+        historyNote = `Nhà tuyển dụng đã chấp nhận khung giờ mới và chốt lịch phỏng vấn: "${result.title}" (${dateStr}).`;
+      }
+
+      await prisma.applicationStatusHistory.create({
+        data: {
+          applicationId: existing.application.id,
+          previousStage: existing.application.currentStage,
+          newStage: existing.application.currentStage,
+          changedByUserId: userId,
+          note: historyNote,
+        },
+      });
+
+      return result;
     });
+
+    if (this.notificationsService && existing.application.candidate?.userId) {
+      const jobTitle = existing.application.job?.title || 'Công việc';
+      const dateStr = (scheduledDate || existing.scheduledAt).toLocaleString('vi-VN');
+
+      let notifTitle = `Cập nhật lịch phỏng vấn: ${jobTitle}`;
+      let notifMsg = `Lịch phỏng vấn "${updated.title}" cho vị trí ${jobTitle} đã được cập nhật lại vào lúc ${dateStr}. Vui lòng kiểm tra và xác nhận trên hệ thống.`;
+
+      if (targetCandidateResponse === CandidateResponseStatus.ACCEPTED) {
+        notifTitle = `Xác nhận đổi lịch phỏng vấn: ${jobTitle}`;
+        notifMsg = `Nhà tuyển dụng đã đồng ý dời lịch phỏng vấn "${updated.title}" sang lúc ${dateStr}. Buổi phỏng vấn đã được chốt thành công.`;
+      }
+
+      await this.notificationsService.createNotification({
+        recipientUserId: existing.application.candidate.userId,
+        applicationId: existing.application.id,
+        type: NotificationType.APPLICATION_STATUS_CHANGED,
+        title: notifTitle,
+        message: notifMsg,
+        payload: {
+          applicationId: existing.application.id,
+          interviewId: updated.id,
+          scheduledAt: updated.scheduledAt,
+          candidateResponse: updated.candidateResponse,
+        },
+      });
+    }
 
     return {
       ...updated,

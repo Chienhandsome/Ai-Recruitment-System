@@ -17,6 +17,7 @@ class UpdateInterviewDto {
     title;
     type;
     status;
+    candidateResponse;
     scheduledAt;
     durationMinutes;
     locationOrLink;
@@ -51,6 +52,15 @@ __decorate([
     (0, class_validator_1.IsEnum)(client_1.InterviewStatus),
     __metadata("design:type", String)
 ], UpdateInterviewDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        enum: client_1.CandidateResponseStatus,
+        description: 'Trạng thái phản hồi của ứng viên (PENDING, ACCEPTED, RESCHEDULE_REQUESTED, DECLINED)',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.CandidateResponseStatus),
+    __metadata("design:type", String)
+], UpdateInterviewDto.prototype, "candidateResponse", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Thời gian mới của buổi phỏng vấn (ISO 8601 string)',

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import {
   ApplicationStage,
+  CandidateResponseStatus,
   InterviewStatus,
   NotificationType,
   Prisma,
@@ -23,6 +24,7 @@ import { CreateInterviewDto } from './dto/create-interview.dto';
 import { UpdateInterviewDto } from './dto/update-interview.dto';
 import { SubmitInterviewFeedbackDto } from './dto/submit-interview-feedback.dto';
 import { QueryInterviewsDto } from './dto/query-interviews.dto';
+import { CandidateResponseInterviewDto } from './dto/candidate-response-interview.dto';
 
 @Injectable()
 export class InterviewsService {
@@ -224,6 +226,14 @@ export class InterviewsService {
                 location: true,
                 recruiter: {
                   select: {
+                    title: true,
+                    user: {
+                      select: {
+                        fullName: true,
+                        email: true,
+                        phone: true,
+                      },
+                    },
                     company: { select: { id: true, name: true, logoUrl: true } },
                   },
                 },
@@ -239,6 +249,9 @@ export class InterviewsService {
       title: item.title,
       type: item.type,
       status: item.status,
+      candidateResponse: item.candidateResponse,
+      candidateNotes: item.candidateNotes,
+      proposedSlots: item.proposedSlots,
       scheduledAt: item.scheduledAt,
       durationMinutes: item.durationMinutes,
       locationOrLink: item.locationOrLink,
@@ -251,6 +264,14 @@ export class InterviewsService {
           title: item.application.job.title,
           location: item.application.job.location,
           company: item.application.job.recruiter?.company,
+          recruiter: item.application.job.recruiter
+            ? {
+                title: item.application.job.recruiter.title,
+                fullName: item.application.job.recruiter.user?.fullName,
+                email: item.application.job.recruiter.user?.email,
+                phone: item.application.job.recruiter.user?.phone,
+              }
+            : null,
         },
       },
     }));
@@ -449,5 +470,130 @@ export class InterviewsService {
     }
 
     return result;
+  }
+
+  async respondToInterview(
+    userId: string,
+    id: string,
+    dto: CandidateResponseInterviewDto,
+  ) {
+    const interview = await this.prisma.interview.findUnique({
+      where: { id },
+      include: {
+        application: {
+          select: {
+            id: true,
+            currentStage: true,
+            candidate: {
+              select: {
+                id: true,
+                userId: true,
+                user: { select: { fullName: true, email: true, phone: true } },
+              },
+            },
+            job: {
+              select: {
+                id: true,
+                title: true,
+                recruiter: {
+                  select: {
+                    id: true,
+                    userId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!interview) {
+      throw new NotFoundException('Không tìm thấy lịch phỏng vấn.');
+    }
+
+    if (interview.application.candidate.userId !== userId) {
+      throw new NotFoundException('Bạn không có quyền phản hồi lịch phỏng vấn này.');
+    }
+
+    if (
+      interview.status === InterviewStatus.COMPLETED ||
+      interview.status === InterviewStatus.CANCELLED
+    ) {
+      throw new BadRequestException(
+        'Buổi phỏng vấn này đã hoàn thành hoặc đã bị hủy.',
+      );
+    }
+
+    let newStatus: InterviewStatus = interview.status;
+    if (dto.response === CandidateResponseStatus.DECLINED) {
+      newStatus = InterviewStatus.CANCELLED;
+    } else if (dto.response === CandidateResponseStatus.RESCHEDULE_REQUESTED) {
+      newStatus = InterviewStatus.RESCHEDULED;
+    }
+
+    const updated = await this.prisma.$transaction(async (prisma) => {
+      const result = await prisma.interview.update({
+        where: { id },
+        data: {
+          candidateResponse: dto.response,
+          candidateNotes: dto.candidateNotes,
+          proposedSlots: dto.proposedSlots ? (dto.proposedSlots as Prisma.InputJsonValue) : Prisma.JsonNull,
+          status: newStatus,
+        },
+      });
+
+      const candidateName =
+        interview.application.candidate.user?.fullName || 'Ứng viên';
+      let statusText = 'đã xác nhận tham gia';
+      if (dto.response === CandidateResponseStatus.RESCHEDULE_REQUESTED) {
+        statusText = 'đã đề xuất dời lịch';
+      } else if (dto.response === CandidateResponseStatus.DECLINED) {
+        statusText = 'đã từ chối tham gia';
+      }
+
+      await prisma.applicationStatusHistory.create({
+        data: {
+          applicationId: interview.application.id,
+          previousStage: interview.application.currentStage,
+          newStage: interview.application.currentStage,
+          changedByUserId: userId,
+          note: `Ứng viên ${candidateName} ${statusText} phỏng vấn: "${interview.title}".${dto.candidateNotes ? ` Ghi chú: ${dto.candidateNotes}` : ''}`,
+        },
+      });
+
+      return result;
+    });
+
+    if (this.notificationsService && interview.application.job.recruiter?.userId) {
+      const candidateName =
+        interview.application.candidate.user?.fullName || 'Ứng viên';
+      let statusText = 'đã xác nhận tham gia';
+      if (dto.response === CandidateResponseStatus.RESCHEDULE_REQUESTED) {
+        statusText = 'đã đề xuất dời lịch';
+      } else if (dto.response === CandidateResponseStatus.DECLINED) {
+        statusText = 'đã từ chối tham gia';
+      }
+
+      await this.notificationsService.createNotification({
+        recipientUserId: interview.application.job.recruiter.userId,
+        applicationId: interview.application.id,
+        type: NotificationType.APPLICATION_STATUS_CHANGED,
+        title: `Phản hồi phỏng vấn: ${candidateName}`,
+        message: `${candidateName} ${statusText} buổi phỏng vấn "${interview.title}" cho vị trí ${interview.application.job.title}.${dto.candidateNotes ? ` Ghi chú: ${dto.candidateNotes}` : ''}`,
+        payload: {
+          applicationId: interview.application.id,
+          interviewId: interview.id,
+          candidateResponse: dto.response,
+          candidateNotes: dto.candidateNotes,
+          proposedSlots: dto.proposedSlots,
+        },
+      });
+    }
+
+    return {
+      ...updated,
+      score: updated.score !== null ? Number(updated.score) : null,
+    };
   }
 }

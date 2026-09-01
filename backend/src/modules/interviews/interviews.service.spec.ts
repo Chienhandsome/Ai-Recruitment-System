@@ -157,4 +157,66 @@ describe('InterviewsService', () => {
         });
     });
   });
+
+  describe('respondToInterview', () => {
+    it('updates candidate response to ACCEPTED', async () => {
+      const mockInterview = {
+        id: 'int-1',
+        title: 'Phỏng vấn kỹ thuật',
+        status: InterviewStatus.SCHEDULED,
+        application: {
+          id: 'app-1',
+          currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
+          candidate: {
+            id: 'cand-1',
+            userId: 'cand-user-1',
+            user: { fullName: 'Ứng viên A', email: 'a@example.com' },
+          },
+          job: {
+            id: 'job-1',
+            title: 'Backend Engineer',
+            recruiter: { id: 'rec-1', userId: 'recruiter-user-1' },
+          },
+        },
+      };
+
+      prisma.interview.findUnique.mockResolvedValue(mockInterview);
+      prisma.interview.update.mockResolvedValue({
+        ...mockInterview,
+        candidateResponse: 'ACCEPTED',
+        candidateNotes: null,
+        proposedSlots: null,
+        score: null,
+      });
+
+      const result = await service.respondToInterview('cand-user-1', 'int-1', {
+        response: 'ACCEPTED' as any,
+      });
+
+      expect(result.candidateResponse).toBe('ACCEPTED');
+      expect(prisma.applicationStatusHistory.create).toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when candidate does not own the interview', async () => {
+      const mockInterview = {
+        id: 'int-1',
+        title: 'Phỏng vấn kỹ thuật',
+        status: InterviewStatus.SCHEDULED,
+        application: {
+          id: 'app-1',
+          candidate: {
+            userId: 'other-user',
+          },
+        },
+      };
+
+      prisma.interview.findUnique.mockResolvedValue(mockInterview);
+
+      await expect(
+        service.respondToInterview('cand-user-1', 'int-1', {
+          response: 'ACCEPTED' as any,
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
 });

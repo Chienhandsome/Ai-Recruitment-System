@@ -123,6 +123,12 @@ export interface CandidateApplicationItem {
     title: string;
     location: string | null;
     company: { id: string; name: string } | null;
+    recruiter?: {
+      title?: string | null;
+      fullName?: string | null;
+      email?: string | null;
+      phone?: string | null;
+    } | null;
   };
   currentStage: CandidateApplicationStage;
   processingStatus: CandidateApplicationProcessingStatus;

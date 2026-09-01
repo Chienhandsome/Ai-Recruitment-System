@@ -172,6 +172,13 @@ enum InterviewStatus {
   RESCHEDULED
 }
 
+enum CandidateResponseStatus {
+  PENDING
+  ACCEPTED
+  RESCHEDULE_REQUESTED
+  DECLINED
+}
+
 enum NotificationType {
   APPLICATION_STATUS_CHANGED
   INTERVIEW_SCHEDULED
@@ -741,9 +748,12 @@ model Interview {
   status           InterviewStatus @default(SCHEDULED)
   scheduledAt      DateTime        @map("scheduled_at")
   durationMinutes  Int             @default(60) @map("duration_minutes")
-  locationOrLink   String?         @map("location_or_link")
-  interviewerNotes String?         @map("interviewer_notes")
-  score            Decimal?        @db.Decimal(5, 2)
+  locationOrLink    String?                 @map("location_or_link")
+  interviewerNotes  String?                 @map("interviewer_notes")
+  candidateResponse CandidateResponseStatus @default(PENDING) @map("candidate_response")
+  candidateNotes    String?                 @map("candidate_notes")
+  proposedSlots     Json?                   @map("proposed_slots")
+  score             Decimal?                @db.Decimal(5, 2)
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")
 

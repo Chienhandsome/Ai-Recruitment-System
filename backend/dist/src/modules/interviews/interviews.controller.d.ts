@@ -3,6 +3,7 @@ import { CreateInterviewDto } from './dto/create-interview.dto';
 import { UpdateInterviewDto } from './dto/update-interview.dto';
 import { SubmitInterviewFeedbackDto } from './dto/submit-interview-feedback.dto';
 import { QueryInterviewsDto } from './dto/query-interviews.dto';
+import { CandidateResponseInterviewDto } from './dto/candidate-response-interview.dto';
 import type { AuthenticatedUser } from '../auth/auth.types';
 export declare class InterviewsController {
     private readonly interviewsService;
@@ -34,6 +35,9 @@ export declare class InterviewsController {
         durationMinutes: number;
         locationOrLink: string | null;
         interviewerNotes: string | null;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        candidateNotes: string | null;
+        proposedSlots: import("@prisma/client/runtime/library").JsonValue | null;
     }>;
     findAllForRecruiter(user: AuthenticatedUser, query: QueryInterviewsDto): Promise<{
         data: {
@@ -68,6 +72,9 @@ export declare class InterviewsController {
             durationMinutes: number;
             locationOrLink: string | null;
             interviewerNotes: string | null;
+            candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+            candidateNotes: string | null;
+            proposedSlots: import("@prisma/client/runtime/library").JsonValue | null;
         }[];
         meta: {
             total: number;
@@ -81,6 +88,9 @@ export declare class InterviewsController {
         title: string;
         type: import(".prisma/client").$Enums.InterviewType;
         status: import(".prisma/client").$Enums.InterviewStatus;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        candidateNotes: string | null;
+        proposedSlots: import("@prisma/client/runtime/library").JsonValue;
         scheduledAt: Date;
         durationMinutes: number;
         locationOrLink: string | null;
@@ -96,6 +106,12 @@ export declare class InterviewsController {
                     id: string;
                     name: string;
                     logoUrl: string | null;
+                } | null;
+                recruiter: {
+                    title: string | null;
+                    fullName: string;
+                    email: string;
+                    phone: string | null;
                 } | null;
             };
         };
@@ -136,6 +152,9 @@ export declare class InterviewsController {
         durationMinutes: number;
         locationOrLink: string | null;
         interviewerNotes: string | null;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        candidateNotes: string | null;
+        proposedSlots: import("@prisma/client/runtime/library").JsonValue | null;
     }>;
     update(user: AuthenticatedUser, id: string, dto: UpdateInterviewDto): Promise<{
         score: number | null;
@@ -150,6 +169,9 @@ export declare class InterviewsController {
         durationMinutes: number;
         locationOrLink: string | null;
         interviewerNotes: string | null;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        candidateNotes: string | null;
+        proposedSlots: import("@prisma/client/runtime/library").JsonValue | null;
     }>;
     submitFeedback(user: AuthenticatedUser, id: string, dto: SubmitInterviewFeedbackDto): Promise<{
         score: number;
@@ -165,5 +187,25 @@ export declare class InterviewsController {
         durationMinutes: number;
         locationOrLink: string | null;
         interviewerNotes: string | null;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        candidateNotes: string | null;
+        proposedSlots: import("@prisma/client/runtime/library").JsonValue | null;
+    }>;
+    respondToInterview(user: AuthenticatedUser, id: string, dto: CandidateResponseInterviewDto): Promise<{
+        score: number | null;
+        id: string;
+        title: string;
+        status: import(".prisma/client").$Enums.InterviewStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        type: import(".prisma/client").$Enums.InterviewType;
+        applicationId: string;
+        scheduledAt: Date;
+        durationMinutes: number;
+        locationOrLink: string | null;
+        interviewerNotes: string | null;
+        candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+        candidateNotes: string | null;
+        proposedSlots: import("@prisma/client/runtime/library").JsonValue | null;
     }>;
 }

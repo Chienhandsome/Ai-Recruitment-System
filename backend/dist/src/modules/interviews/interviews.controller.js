@@ -20,6 +20,7 @@ const create_interview_dto_1 = require("./dto/create-interview.dto");
 const update_interview_dto_1 = require("./dto/update-interview.dto");
 const submit_interview_feedback_dto_1 = require("./dto/submit-interview-feedback.dto");
 const query_interviews_dto_1 = require("./dto/query-interviews.dto");
+const candidate_response_interview_dto_1 = require("./dto/candidate-response-interview.dto");
 const current_user_decorator_1 = require("../auth/decorators/current-user.decorator");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const roles_guard_1 = require("../auth/guards/roles.guard");
@@ -46,6 +47,9 @@ let InterviewsController = class InterviewsController {
     }
     async submitFeedback(user, id, dto) {
         return this.interviewsService.submitFeedback(user.id, id, dto);
+    }
+    async respondToInterview(user, id, dto) {
+        return this.interviewsService.respondToInterview(user.id, id, dto);
     }
 };
 exports.InterviewsController = InterviewsController;
@@ -116,6 +120,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, submit_interview_feedback_dto_1.SubmitInterviewFeedbackDto]),
     __metadata("design:returntype", Promise)
 ], InterviewsController.prototype, "submitFeedback", null);
+__decorate([
+    (0, common_1.Patch)(':id/candidate-response'),
+    (0, roles_decorator_1.Roles)('CANDIDATE'),
+    (0, swagger_1.ApiOperation)({ summary: 'Ứng viên xác nhận, xin dời lịch hoặc từ chối phỏng vấn' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, candidate_response_interview_dto_1.CandidateResponseInterviewDto]),
+    __metadata("design:returntype", Promise)
+], InterviewsController.prototype, "respondToInterview", null);
 exports.InterviewsController = InterviewsController = __decorate([
     (0, swagger_1.ApiTags)('Interviews'),
     (0, swagger_1.ApiBearerAuth)(),

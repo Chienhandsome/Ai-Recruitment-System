@@ -23,6 +23,12 @@ export declare class ApplicationsController {
                     id: string;
                     name: string;
                 } | null;
+                recruiter: {
+                    title: string | null;
+                    fullName: string;
+                    email: string;
+                    phone: string | null;
+                } | null;
             };
             currentStage: import(".prisma/client").$Enums.ApplicationStage;
             processingStatus: import(".prisma/client").$Enums.ApplicationProcessingStatus;
@@ -37,6 +43,9 @@ export declare class ApplicationsController {
                 durationMinutes: number;
                 locationOrLink: string | null;
                 interviewerNotes: string | null;
+                candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+                candidateNotes: string | null;
+                proposedSlots: import("@prisma/client/runtime/library").JsonValue;
             }[];
             appliedAt: Date;
             updatedAt: Date;

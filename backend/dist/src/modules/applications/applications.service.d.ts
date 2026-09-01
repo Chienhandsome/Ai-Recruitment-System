@@ -255,6 +255,12 @@ export declare class ApplicationsService {
                     id: string;
                     name: string;
                 } | null;
+                recruiter: {
+                    title: string | null;
+                    fullName: string;
+                    email: string;
+                    phone: string | null;
+                } | null;
             };
             currentStage: import(".prisma/client").$Enums.ApplicationStage;
             processingStatus: import(".prisma/client").$Enums.ApplicationProcessingStatus;
@@ -269,6 +275,9 @@ export declare class ApplicationsService {
                 durationMinutes: number;
                 locationOrLink: string | null;
                 interviewerNotes: string | null;
+                candidateResponse: import(".prisma/client").$Enums.CandidateResponseStatus;
+                candidateNotes: string | null;
+                proposedSlots: Prisma.JsonValue;
             }[];
             appliedAt: Date;
             updatedAt: Date;

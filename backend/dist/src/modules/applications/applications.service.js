@@ -550,6 +550,14 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
                             location: true,
                             recruiter: {
                                 select: {
+                                    title: true,
+                                    user: {
+                                        select: {
+                                            fullName: true,
+                                            email: true,
+                                            phone: true,
+                                        },
+                                    },
                                     company: { select: { id: true, name: true } },
                                 },
                             },
@@ -562,6 +570,9 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
                             title: true,
                             type: true,
                             status: true,
+                            candidateResponse: true,
+                            candidateNotes: true,
+                            proposedSlots: true,
                             scheduledAt: true,
                             durationMinutes: true,
                             locationOrLink: true,
@@ -580,6 +591,14 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
                     title: application.job.title,
                     location: application.job.location,
                     company: application.job.recruiter.company,
+                    recruiter: application.job.recruiter
+                        ? {
+                            title: application.job.recruiter.title,
+                            fullName: application.job.recruiter.user?.fullName,
+                            email: application.job.recruiter.user?.email,
+                            phone: application.job.recruiter.user?.phone,
+                        }
+                        : null,
                 },
                 currentStage: application.currentStage,
                 processingStatus: application.processingStatus,

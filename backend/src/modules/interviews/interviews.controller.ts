@@ -22,6 +22,7 @@ import { CreateInterviewDto } from './dto/create-interview.dto';
 import { UpdateInterviewDto } from './dto/update-interview.dto';
 import { SubmitInterviewFeedbackDto } from './dto/submit-interview-feedback.dto';
 import { QueryInterviewsDto } from './dto/query-interviews.dto';
+import { CandidateResponseInterviewDto } from './dto/candidate-response-interview.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -98,5 +99,16 @@ export class InterviewsController {
     @Body() dto: SubmitInterviewFeedbackDto,
   ) {
     return this.interviewsService.submitFeedback(user.id, id, dto);
+  }
+
+  @Patch(':id/candidate-response')
+  @Roles('CANDIDATE')
+  @ApiOperation({ summary: 'Ứng viên xác nhận, xin dời lịch hoặc từ chối phỏng vấn' })
+  async respondToInterview(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CandidateResponseInterviewDto,
+  ) {
+    return this.interviewsService.respondToInterview(user.id, id, dto);
   }
 }

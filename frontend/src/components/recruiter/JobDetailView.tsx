@@ -21,6 +21,7 @@ import {
   type InterviewData,
   interviewTypeLabels,
   interviewStatusLabels,
+  candidateResponseLabels,
 } from "@/lib/interview-api";
 import { ScheduleInterviewModal } from "./interviews/ScheduleInterviewModal";
 import { InterviewFeedbackModal } from "./interviews/InterviewFeedbackModal";
@@ -843,6 +844,19 @@ export function JobDetailView({
                                         }`}>
                                           {interviewStatusLabels[item.status] || item.status}
                                         </span>
+                                        {item.candidateResponse && (
+                                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                                            item.candidateResponse === 'ACCEPTED'
+                                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                              : item.candidateResponse === 'RESCHEDULE_REQUESTED'
+                                                ? 'bg-orange-50 text-orange-700 border-orange-200 animate-pulse'
+                                                : item.candidateResponse === 'DECLINED'
+                                                  ? 'bg-slate-100 text-slate-600 border-slate-300'
+                                                  : 'bg-amber-50 text-amber-700 border-amber-200'
+                                          }`}>
+                                            {candidateResponseLabels[item.candidateResponse] || item.candidateResponse}
+                                          </span>
+                                        )}
                                       </div>
                                     </div>
 
@@ -861,6 +875,41 @@ export function JobDetailView({
                                       </button>
                                     )}
                                   </div>
+
+                                  {/* Reschedule Requested Alert for Recruiter */}
+                                  {item.candidateResponse === 'RESCHEDULE_REQUESTED' && (
+                                    <div className="rounded-lg bg-orange-50 p-2.5 border border-orange-200 text-xs text-orange-900 space-y-1">
+                                      <div className="font-bold flex items-center justify-between text-orange-800">
+                                        <span>⚠️ Ứng viên xin dời lịch phỏng vấn</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => setIsScheduleModalOpen(true)}
+                                          className="text-[10px] font-bold bg-[#2563EB] text-white px-2 py-0.5 rounded hover:bg-blue-700 transition"
+                                        >
+                                          Lên lịch mới
+                                        </button>
+                                      </div>
+                                      {item.candidateNotes && (
+                                        <p className="text-[11px] text-orange-800">
+                                          <span className="font-semibold">Lý do:</span> {item.candidateNotes}
+                                        </p>
+                                      )}
+                                      {item.proposedSlots && Array.isArray(item.proposedSlots) && (
+                                        <div className="text-[11px] text-orange-700">
+                                          <span className="font-semibold">Khung giờ đề xuất:</span>{' '}
+                                          {item.proposedSlots
+                                            .map((s: string) => format(new Date(s), 'HH:mm dd/MM/yyyy'))
+                                            .join(' | ')}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {item.candidateResponse === 'DECLINED' && item.candidateNotes && (
+                                    <div className="rounded-lg bg-slate-100 p-2 border border-slate-200 text-[11px] text-slate-600 italic">
+                                      Ứng viên từ chối: {item.candidateNotes}
+                                    </div>
+                                  )}
 
                                   <div className="text-xs text-slate-600 space-y-1 pt-1 border-t border-slate-200/60">
                                     <div className="flex items-center gap-1.5 font-medium">

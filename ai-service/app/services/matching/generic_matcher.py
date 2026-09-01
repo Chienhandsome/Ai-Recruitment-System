@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from app.schemas.matching import CandidateProfilePayload, JobPayload
 from app.services.matching.experience_level_evaluator import experience_level_evaluator

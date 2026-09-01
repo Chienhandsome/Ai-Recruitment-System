@@ -35,6 +35,9 @@ let RecruitersController = class RecruitersController {
     async getDashboardStats(user) {
         return this.recruitersService.getDashboardStats(user.id);
     }
+    async getDashboardActionHub(user, jobId) {
+        return this.recruitersService.getDashboardActionHub(user.id, jobId);
+    }
     async getDashboardAnalytics(user, jobId) {
         return this.recruitersService.getDashboardAnalytics(user.id, jobId);
     }
@@ -68,6 +71,17 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], RecruitersController.prototype, "getDashboardStats", null);
+__decorate([
+    (0, common_1.Get)('dashboard/action-hub'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get action-first dashboard data (work queue, pending actions, today & upcoming interviews)' }),
+    (0, swagger_1.ApiQuery)({ name: 'jobId', required: false, type: String }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Return action-first dashboard data' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('jobId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], RecruitersController.prototype, "getDashboardActionHub", null);
 __decorate([
     (0, common_1.Get)('dashboard/analytics'),
     (0, swagger_1.ApiOperation)({ summary: 'Get recruitment funnel and analytics for recruiter' }),

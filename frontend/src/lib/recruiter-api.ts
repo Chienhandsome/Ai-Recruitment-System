@@ -552,6 +552,50 @@ export interface RecruiterAnalyticsData {
   topSkills: TopSkillStat[];
 }
 
+export interface ActionQueueItem {
+  jobId: string;
+  jobCode: string;
+  title: string;
+  departmentName: string;
+  totalApplications: number;
+  newCount: number;
+  highMatchCount: number;
+  pendingReviewCount: number;
+  rescheduleCount: number;
+  autoShortlistThreshold: number;
+}
+
+export interface RecruiterActionHubData {
+  kpis: {
+    openJobs: number;
+    totalApplications: number;
+    pendingActions: number;
+    upcomingInterviews: number;
+  };
+  todayInterviews: UpcomingInterviewItem[];
+  upcomingInterviews: UpcomingInterviewItem[];
+  actionQueue: ActionQueueItem[];
+}
+
+export async function getRecruiterActionHub(
+  token: string,
+  jobId?: string
+): Promise<RecruiterActionHubData> {
+  const query = new URLSearchParams();
+  if (jobId) query.set("jobId", jobId);
+
+  const res = await fetch(`${API_URL}/recruiters/dashboard/action-hub?${query.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to load recruiter action hub data");
+  }
+
+  return res.json();
+}
+
 export async function getRecruiterAnalytics(
   token: string,
   jobId?: string

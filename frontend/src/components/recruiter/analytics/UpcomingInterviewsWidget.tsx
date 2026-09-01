@@ -7,9 +7,10 @@ import type { UpcomingInterviewItem } from '@/lib/recruiter-api';
 
 interface UpcomingInterviewsWidgetProps {
   interviews: UpcomingInterviewItem[];
+  onViewAll?: () => void;
 }
 
-export function UpcomingInterviewsWidget({ interviews }: UpcomingInterviewsWidgetProps) {
+export function UpcomingInterviewsWidget({ interviews, onViewAll }: UpcomingInterviewsWidgetProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 font-sans flex flex-col justify-between">
       <div>
@@ -23,9 +24,19 @@ export function UpcomingInterviewsWidget({ interviews }: UpcomingInterviewsWidge
               <p className="text-[11px] text-slate-500">Các buổi phỏng vấn đã được lên lịch</p>
             </div>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-[#2563EB] border border-blue-200">
-            {interviews.length} buổi
-          </span>
+          {onViewAll ? (
+            <button
+              type="button"
+              onClick={onViewAll}
+              className="text-xs font-bold text-[#2563EB] hover:underline"
+            >
+              Xem tất cả ({interviews.length}) →
+            </button>
+          ) : (
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-[#2563EB] border border-blue-200">
+              {interviews.length} buổi
+            </span>
+          )}
         </div>
 
         {interviews.length > 0 ? (

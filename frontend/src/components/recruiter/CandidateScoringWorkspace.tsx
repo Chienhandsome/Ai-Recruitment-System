@@ -6,7 +6,7 @@ import {
   ShieldCheck, AlertTriangle, ThumbsUp, ThumbsDown, Mail, Phone,
   DollarSign, FolderGit2, Calendar, CheckCircle2, XCircle, ArrowRight,
   Search, Filter, Clock, ChevronRight, Video, Plus, ExternalLink,
-  HelpCircle, Eye, Info, Check, X, AlertCircle
+  HelpCircle, Eye, Info, Check, X, AlertCircle, Globe
 } from "lucide-react";
 import {
   type JobPostingData,
@@ -156,6 +156,24 @@ export function CandidateScoringWorkspace({
       }))) || []
   ) as Array<Record<string, any>>;
 
+  const certifications = (((detail?.candidate as any)?.certifications?.length
+    ? (detail?.candidate as any).certifications
+    : ((snapshotProfile as any)?.certifications ?? []).map((item: any) => ({
+        name: item.certification_name || item.name,
+        issuingOrg: item.issuing_organization || item.issuingOrg,
+        issuedDate: item.issued_date || item.issuedDate,
+        credentialUrl: item.credential_url || item.credentialUrl,
+      }))) || []
+  ) as Array<Record<string, any>>;
+
+  const languages = (((detail?.candidate as any)?.languages?.length
+    ? (detail?.candidate as any).languages
+    : ((snapshotProfile as any)?.languages ?? []).map((item: any) => ({
+        language: item.language,
+        proficiency: item.proficiency,
+      }))) || []
+  ) as Array<Record<string, any>>;
+
   const candidateSkills = (((detail?.candidate as any)?.candidateSkills?.length
     ? (detail?.candidate as any).candidateSkills
     : (snapshotProfile?.skills ?? []).map((item) => ({
@@ -251,8 +269,8 @@ export function CandidateScoringWorkspace({
     },
     {
       id: "other" as PillarDimension,
-      label: "DỰ ÁN & KHÁC",
-      subLabel: "Chứng chỉ & Ngoại ngữ",
+      label: "NGOẠI NGỮ & CHỨNG CHỈ",
+      subLabel: "Ngoại ngữ, Chứng chỉ & Dự án",
       icon: Award,
       score: oPts,
       maxScore: oWeight,
@@ -986,7 +1004,7 @@ export function CandidateScoringWorkspace({
                     </div>
                   </div>
                 ) : (
-                  /* ======================= EXPLANATION: OTHER / PROJECTS ======================= */
+                  /* ======================= EXPLANATION: OTHER / LANGUAGES & CERTIFICATIONS ======================= */
                   <div className="space-y-5">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
@@ -995,8 +1013,8 @@ export function CandidateScoringWorkspace({
                           <Award className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="font-black text-sm text-[#1F2937]">GIẢI THÍCH CHI TIẾT: DỰ ÁN & CHỨNG CHỈ NỔI BẬT</h4>
-                          <p className="text-xs text-slate-500">Đánh giá các dự án thực chiến, chứng chỉ chuyên môn và năng lực mở rộng</p>
+                          <h4 className="font-black text-sm text-[#1F2937]">GIẢI THÍCH CHI TIẾT: TIÊU CHÍ NGOẠI NGỮ & CHỨNG CHỈ</h4>
+                          <p className="text-xs text-slate-500">Đánh giá trình độ ngoại ngữ, chứng chỉ chuyên môn và các dự án bổ trợ</p>
                         </div>
                       </div>
                       <div className="text-right bg-amber-50 px-3.5 py-1.5 rounded-xl border border-amber-200 shrink-0">
@@ -1005,13 +1023,64 @@ export function CandidateScoringWorkspace({
                       </div>
                     </div>
 
-                    <div className="p-4 bg-amber-50/50 border border-amber-200 rounded-xl space-y-3 text-xs">
+                    <div className="p-4 bg-amber-50/50 border border-amber-200 rounded-xl space-y-4 text-xs">
                       <p className="text-slate-700 leading-relaxed">
-                        Điểm số thành phần này phản ánh việc ứng viên sở hữu các dự án thực tế đã hoàn thành, chứng chỉ quốc tế hoặc các năng lực bổ trợ liên quan trực tiếp đến mô hình công việc.
+                        Điểm số thành phần này phản ánh việc ứng viên sở hữu chứng chỉ chuyên môn, trình độ ngoại ngữ (Tiếng Anh, v.v.) và các dự án thực tế bổ trợ liên quan trực tiếp đến vị trí tuyển dụng.
                       </p>
+
+                      {/* 1. Ngoại ngữ (Languages) */}
+                      <div className="space-y-2 pt-2 border-t border-amber-200">
+                        <span className="font-bold text-amber-950 block text-xs flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-amber-700" /> Trình độ Ngoại ngữ ({languages.length}):
+                        </span>
+                        {languages.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {languages.map((lang: any, idx: number) => (
+                              <div key={idx} className="px-3 py-1.5 bg-white rounded-xl border border-amber-300 shadow-2xs flex items-center gap-2">
+                                <span className="font-bold text-[#1F2937]">{lang.language || "Ngoại ngữ"}</span>
+                                <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-extrabold font-mono">
+                                  {lang.proficiency || "Thành thạo"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 italic text-[11px]">Đã ghi nhận năng lực ngoại ngữ qua thông tin tổng hợp trong CV.</p>
+                        )}
+                      </div>
+
+                      {/* 2. Chứng chỉ chuyên môn (Certifications) */}
+                      <div className="space-y-2 pt-2 border-t border-amber-200">
+                        <span className="font-bold text-amber-950 block text-xs flex items-center gap-1.5">
+                          <Award className="w-3.5 h-3.5 text-amber-700" /> Chứng chỉ nghề nghiệp ({certifications.length}):
+                        </span>
+                        {certifications.length > 0 ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {certifications.map((cert: any, idx: number) => (
+                              <div key={idx} className="p-2.5 bg-white rounded-xl border border-amber-300 shadow-2xs space-y-1">
+                                <div className="font-bold text-amber-950 text-xs flex items-center justify-between">
+                                  <span>📜 {cert.name}</span>
+                                  {cert.issuedDate && (
+                                    <span className="text-[10px] text-slate-400 font-normal">{cert.issuedDate}</span>
+                                  )}
+                                </div>
+                                {cert.issuingOrg && (
+                                  <p className="text-[11px] text-slate-500">Tổ chức cấp: {cert.issuingOrg}</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 italic text-[11px]">Chưa khai báo chứng chỉ bổ sung.</p>
+                        )}
+                      </div>
+
+                      {/* 3. Dự án bổ trợ (Projects) */}
                       {projects && projects.length > 0 && (
-                        <div className="pt-2 border-t border-amber-200 space-y-1">
-                          <span className="font-bold text-amber-950 block text-xs">Các dự án đã ghi nhận:</span>
+                        <div className="space-y-2 pt-2 border-t border-amber-200">
+                          <span className="font-bold text-amber-950 block text-xs flex items-center gap-1.5">
+                            <FolderGit2 className="w-3.5 h-3.5 text-amber-700" /> Dự án thực tế đã ghi nhận ({projects.length}):
+                          </span>
                           <div className="flex flex-wrap gap-1.5">
                             {projects.map((p: any, idx: number) => (
                               <span key={idx} className="px-2.5 py-1 bg-white rounded-lg border border-amber-300 text-amber-900 font-semibold text-[11px]">

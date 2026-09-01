@@ -5,83 +5,143 @@ export declare class RecruitersController {
     private readonly recruitersService;
     constructor(recruitersService: RecruitersService);
     getProfile(user: AuthenticatedUser): Promise<{
-        department: {
-            id: string;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            code: string;
-            companyId: string;
-        } | null;
         user: {
-            phone: string | null;
             email: string;
             fullName: string;
             birthDay: Date | null;
+            phone: string | null;
             avatarUrl: string | null;
         };
         company: {
             id: string;
-            description: string | null;
             createdAt: Date;
             updatedAt: Date;
             name: string;
             code: string | null;
-            address: string | null;
             logoUrl: string | null;
             website: string | null;
+            address: string | null;
+            description: string | null;
+        } | null;
+        department: {
+            id: string;
+            companyId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
+            name: string;
+            code: string;
         } | null;
     } & {
         id: string;
-        title: string | null;
-        departmentId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         userId: string;
         companyId: string | null;
+        departmentId: string | null;
+        title: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     updateProfile(user: AuthenticatedUser, dto: UpdateRecruiterProfileDto): Promise<{
-        department: {
-            id: string;
-            status: import(".prisma/client").$Enums.DepartmentStatus;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            code: string;
-            companyId: string;
-        } | null;
         user: {
-            phone: string | null;
             email: string;
             fullName: string;
             birthDay: Date | null;
+            phone: string | null;
             avatarUrl: string | null;
         };
         company: {
             id: string;
-            description: string | null;
             createdAt: Date;
             updatedAt: Date;
             name: string;
             code: string | null;
-            address: string | null;
             logoUrl: string | null;
             website: string | null;
+            address: string | null;
+            description: string | null;
+        } | null;
+        department: {
+            id: string;
+            companyId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            status: import(".prisma/client").$Enums.DepartmentStatus;
+            name: string;
+            code: string;
         } | null;
     } & {
         id: string;
-        title: string | null;
-        departmentId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         userId: string;
         companyId: string | null;
+        departmentId: string | null;
+        title: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     getDashboardStats(user: AuthenticatedUser): Promise<{
         totalActiveJobs: number;
         totalCandidates: number;
         newApplicationsToday: number;
+    }>;
+    getDashboardActionHub(user: AuthenticatedUser, jobId?: string): Promise<{
+        kpis: {
+            openJobs: number;
+            totalApplications: number;
+            pendingActions: number;
+            upcomingInterviews: number;
+        };
+        todayInterviews: {
+            id: any;
+            title: any;
+            type: any;
+            scheduledAt: any;
+            durationMinutes: any;
+            locationOrLink: any;
+            candidateResponse: any;
+            candidate: {
+                id: any;
+                fullName: any;
+                avatarUrl: any;
+                email: any;
+            };
+            job: {
+                id: any;
+                title: any;
+                jobCode: any;
+            };
+        }[];
+        upcomingInterviews: {
+            id: any;
+            title: any;
+            type: any;
+            scheduledAt: any;
+            durationMinutes: any;
+            locationOrLink: any;
+            candidateResponse: any;
+            candidate: {
+                id: any;
+                fullName: any;
+                avatarUrl: any;
+                email: any;
+            };
+            job: {
+                id: any;
+                title: any;
+                jobCode: any;
+            };
+        }[];
+        actionQueue: {
+            jobId: string;
+            jobCode: string;
+            title: string;
+            departmentName: string;
+            totalApplications: number;
+            newCount: number;
+            highMatchCount: number;
+            pendingReviewCount: number;
+            rescheduleCount: number;
+            autoShortlistThreshold: number;
+        }[];
     }>;
     getDashboardAnalytics(user: AuthenticatedUser, jobId?: string): Promise<{
         kpis: {

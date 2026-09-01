@@ -66,10 +66,34 @@ export function NotificationBell() {
 
   useEffect(() => {
     fetchUnreadCount();
-    // Poll unread count every 30s
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    // Poll unread count every 5s for fast fallback
+    const interval = setInterval(fetchUnreadCount, 5000);
+
+    // Subscribe to realtime database changes for instant notification updates
+    const supabase = createClient();
+    const channel = supabase
+      .channel('candidate_notifications_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+        },
+        () => {
+          fetchUnreadCount();
+          if (isOpen) {
+            fetchNotifications();
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {

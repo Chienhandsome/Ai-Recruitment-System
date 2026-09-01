@@ -11,18 +11,44 @@ import { format } from 'date-fns';
 interface JobsWorkspaceProps {
   initialData: JobsResponse | null;
   token: string;
+  selectedJobId?: string | null;
+  initialJobTab?: "info" | "candidates";
+  onClearSelectedJob?: () => void;
 }
 
-export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
+export function JobsWorkspace({
+  initialData,
+  token,
+  selectedJobId: externalJobId,
+  initialJobTab = "info",
+  onClearSelectedJob,
+}: JobsWorkspaceProps) {
   const [data, setData] = useState<JobsResponse | null>(initialData);
   const [loading, setLoading] = useState(!initialData);
   const [search, setSearch] = useState('');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('ALL');
   const [page, setPage] = useState(initialData?.meta.page ?? 1);
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(externalJobId || null);
+  const [jobDetailTab, setJobDetailTab] = useState<"info" | "candidates">(initialJobTab);
   const [editingJob, setEditingJob] = useState<JobPostingData | null>(null);
   const isFirstMount = useRef(true);
+
+  useEffect(() => {
+    if (externalJobId !== undefined) {
+      setSelectedJobId(externalJobId);
+      if (initialJobTab) {
+        setJobDetailTab(initialJobTab);
+      }
+    }
+  }, [externalJobId, initialJobTab]);
+
+  const handleBackFromDetail = () => {
+    setSelectedJobId(null);
+    if (onClearSelectedJob) {
+      onClearSelectedJob();
+    }
+  };
 
   const tabs = [
     { id: 'ALL', label: 'Tất cả' },
@@ -61,23 +87,18 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
   }, [initialData]);
 
   useEffect(() => {
-    // If initialData is available on first mount, skip the initial fetch
     if (isFirstMount.current) {
       isFirstMount.current = false;
-      if (initialData) {
-        return;
+      if (!initialData) {
+        loadJobs(activeTab, search, page);
       }
-      // If initialData is null/undefined, load jobs immediately on first mount
-      loadJobs(activeTab, search, page);
       return;
     }
-
-    // Fetch the requested page with debounce
-    const timeoutId = setTimeout(() => {
+    const timer = setTimeout(() => {
       loadJobs(activeTab, search, page);
     }, 300);
-    return () => clearTimeout(timeoutId);
-  }, [activeTab, search, page, loadJobs, initialData]);
+    return () => clearTimeout(timer);
+  }, [activeTab, search, page, loadJobs]);
 
   const handleStatusChange = async (jobId: string, newStatus: string) => {
     try {
@@ -97,13 +118,14 @@ export function JobsWorkspace({ initialData, token }: JobsWorkspaceProps) {
         <JobDetailView
           jobId={selectedJobId}
           token={token}
-          onBack={() => setSelectedJobId(null)}
+          defaultTab={jobDetailTab}
+          onBack={handleBackFromDetail}
           onEdit={(job) => {
             setEditingJob(job);
             setIsWizardOpen(true);
           }}
           onJobDeleted={() => {
-            setSelectedJobId(null);
+            handleBackFromDetail();
             loadJobs(activeTab, search, page);
           }}
         />

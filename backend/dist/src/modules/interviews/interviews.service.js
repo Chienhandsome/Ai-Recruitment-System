@@ -38,6 +38,7 @@ let InterviewsService = InterviewsService_1 = class InterviewsService {
                 candidate: {
                     select: {
                         id: true,
+                        userId: true,
                         user: { select: { id: true, fullName: true, email: true, phone: true } },
                     },
                 },
@@ -96,9 +97,10 @@ let InterviewsService = InterviewsService_1 = class InterviewsService {
                 },
             };
         });
-        if (this.notificationsService && application.candidate?.user?.id) {
+        const recipientUserId = application.candidate?.userId || application.candidate?.user?.id;
+        if (this.notificationsService && recipientUserId) {
             await this.notificationsService.createNotification({
-                recipientUserId: application.candidate.user.id,
+                recipientUserId,
                 applicationId: application.id,
                 type: client_1.NotificationType.INTERVIEW_SCHEDULED,
                 title: `Thư mời phỏng vấn: ${application.job?.title || 'Công việc'}`,

@@ -20,8 +20,8 @@ export class RecruitersService {
             email: true,
             phone: true,
             birthDay: true,
-          }
-        }
+          },
+        },
       },
     });
 
@@ -41,9 +41,9 @@ export class RecruitersService {
               email: true,
               phone: true,
               birthDay: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
     }
 
@@ -54,8 +54,6 @@ export class RecruitersService {
     let profile = await this.prisma.recruiterProfile.findUnique({
       where: { userId },
     });
-
-    // We don't throw 404 anymore, we will just upsert it below
 
     // Verify company if provided
     if (dto.companyId) {
@@ -77,7 +75,11 @@ export class RecruitersService {
       }
     }
 
-    const hasUserUpdate = dto.fullName !== undefined || dto.phone !== undefined || dto.avatarUrl !== undefined || dto.birthDay !== undefined;
+    const hasUserUpdate =
+      dto.fullName !== undefined ||
+      dto.phone !== undefined ||
+      dto.avatarUrl !== undefined ||
+      dto.birthDay !== undefined;
 
     if (hasUserUpdate) {
       await this.prisma.user.update({
@@ -86,7 +88,9 @@ export class RecruitersService {
           ...(dto.fullName !== undefined && { fullName: dto.fullName }),
           ...(dto.phone !== undefined && { phone: dto.phone }),
           ...(dto.avatarUrl !== undefined && { avatarUrl: dto.avatarUrl }),
-          ...(dto.birthDay !== undefined && { birthDay: dto.birthDay ? new Date(dto.birthDay) : null }),
+          ...(dto.birthDay !== undefined && {
+            birthDay: dto.birthDay ? new Date(dto.birthDay) : null,
+          }),
         },
       });
 
@@ -121,8 +125,8 @@ export class RecruitersService {
             email: true,
             phone: true,
             birthDay: true,
-          }
-        }
+          },
+        },
       },
     });
   }
@@ -130,39 +134,33 @@ export class RecruitersService {
   async getDashboardStats(userId: string) {
     const profile = await this.prisma.recruiterProfile.findUnique({
       where: { userId },
-      select: { companyId: true },
+      select: { id: true, companyId: true },
     });
 
     if (!profile) {
       throw new NotFoundException('Recruiter profile not found');
     }
 
-    if (!profile.companyId) {
-      return {
-        totalActiveJobs: 0,
-        totalCandidates: 0,
-        newApplicationsToday: 0,
-      };
-    }
-
-    const companyId = profile.companyId;
+    const recruiterJobFilter: Prisma.JobPostingWhereInput = profile.companyId
+      ? {
+          OR: [
+            { recruiter: { companyId: profile.companyId } },
+            { department: { companyId: profile.companyId } },
+            { recruiterId: profile.id },
+          ],
+        }
+      : { recruiterId: profile.id };
 
     const totalActiveJobs = await this.prisma.jobPosting.count({
       where: {
-        department: {
-          companyId: companyId,
-        },
+        ...recruiterJobFilter,
         status: 'PUBLISHED',
       },
     });
 
     const totalCandidates = await this.prisma.application.count({
       where: {
-        job: {
-          department: {
-            companyId: companyId,
-          },
-        },
+        job: recruiterJobFilter,
       },
     });
 
@@ -171,11 +169,7 @@ export class RecruitersService {
 
     const newApplicationsToday = await this.prisma.application.count({
       where: {
-        job: {
-          department: {
-            companyId: companyId,
-          },
-        },
+        job: recruiterJobFilter,
         appliedAt: {
           gte: today,
         },
@@ -192,52 +186,25 @@ export class RecruitersService {
   async getDashboardAnalytics(userId: string, jobId?: string) {
     const profile = await this.prisma.recruiterProfile.findUnique({
       where: { userId },
-      select: { companyId: true },
+      select: { id: true, companyId: true },
     });
 
     if (!profile) {
       throw new NotFoundException('Recruiter profile not found');
     }
 
-    const emptyResult = {
-      kpis: {
-        totalActiveJobs: 0,
-        totalApplications: 0,
-        newApplicationsToday: 0,
-        newApplicationsThisWeek: 0,
-        totalInterviews: 0,
-        totalHired: 0,
-        avgAiScore: 0,
-        hireConversionRate: 0,
-      },
-      funnel: [
-        { stage: 'RECEIVED', label: 'Ứng tuyển', count: 0, percentage: 0 },
-        { stage: 'SCREENING', label: 'Sơ loại', count: 0, percentage: 0 },
-        { stage: 'SHORTLISTED', label: 'Đạt chuẩn AI', count: 0, percentage: 0 },
-        { stage: 'INTERVIEW_SCHEDULED', label: 'Phỏng vấn', count: 0, percentage: 0 },
-        { stage: 'OFFERED', label: 'Gửi Offer', count: 0, percentage: 0 },
-        { stage: 'HIRED', label: 'Đã tuyển', count: 0, percentage: 0 },
-        { stage: 'REJECTED', label: 'Từ chối', count: 0, percentage: 0 },
-      ],
-      scoreDistribution: [
-        { range: '< 40', label: 'Kém', count: 0, percentage: 0, color: '#EF4444' },
-        { range: '40 - 59', label: 'Trung bình', count: 0, percentage: 0, color: '#F59E0B' },
-        { range: '60 - 79', label: 'Khá', count: 0, percentage: 0, color: '#3B82F6' },
-        { range: '80 - 89', label: 'Tốt', count: 0, percentage: 0, color: '#10B981' },
-        { range: '90 - 100', label: 'Xuất sắc', count: 0, percentage: 0, color: '#8B5CF6' },
-      ],
-      upcomingInterviews: [],
-      topSkills: [],
-    };
-
-    if (!profile.companyId) {
-      return emptyResult;
-    }
-
-    const companyId = profile.companyId;
+    const recruiterJobFilter: Prisma.JobPostingWhereInput = profile.companyId
+      ? {
+          OR: [
+            { recruiter: { companyId: profile.companyId } },
+            { department: { companyId: profile.companyId } },
+            { recruiterId: profile.id },
+          ],
+        }
+      : { recruiterId: profile.id };
 
     const jobWhere: Prisma.JobPostingWhereInput = {
-      department: { companyId },
+      ...recruiterJobFilter,
       ...(jobId ? { id: jobId } : {}),
     };
 
@@ -267,7 +234,7 @@ export class RecruitersService {
       jobSkillsRaw,
     ] = await Promise.all([
       this.prisma.jobPosting.count({
-        where: { department: { companyId }, status: 'PUBLISHED' },
+        where: { ...recruiterJobFilter, status: 'PUBLISHED' },
       }),
       this.prisma.application.count({ where: appWhere }),
       this.prisma.application.count({
@@ -541,6 +508,309 @@ export class RecruitersService {
       scoreDistribution,
       upcomingInterviews,
       topSkills,
+    };
+  }
+
+  async getDashboardActionHub(userId: string, jobId?: string) {
+    const profile = await this.prisma.recruiterProfile.findUnique({
+      where: { userId },
+      select: { id: true, companyId: true },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Recruiter profile not found');
+    }
+
+    const recruiterJobFilter: Prisma.JobPostingWhereInput = profile.companyId
+      ? {
+          OR: [
+            { recruiter: { companyId: profile.companyId } },
+            { department: { companyId: profile.companyId } },
+            { recruiterId: profile.id },
+          ],
+        }
+      : { recruiterId: profile.id };
+
+    const jobWhere: Prisma.JobPostingWhereInput = {
+      ...recruiterJobFilter,
+      ...(jobId ? { id: jobId } : {}),
+    };
+
+    const now = new Date();
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date(now);
+    endOfToday.setHours(23, 59, 59, 999);
+
+    // Fetch active jobs with their applications and interview status in optimized parallel query
+    const [
+      openJobsCount,
+      totalApplicationsCount,
+      pendingApplicationsCount,
+      rescheduleInterviewsCount,
+      upcomingInterviewsCount,
+      todayInterviewsRaw,
+      upcomingInterviewsRaw,
+      actionJobsRaw,
+    ] = await Promise.all([
+      // 1. Open Jobs Count
+      this.prisma.jobPosting.count({
+        where: { ...recruiterJobFilter, status: 'PUBLISHED' },
+      }),
+
+      // 2. Total Applications Count
+      this.prisma.application.count({
+        where: { job: jobWhere },
+      }),
+
+      // 3. Pending applications needing HR review
+      this.prisma.application.count({
+        where: {
+          job: jobWhere,
+          currentStage: { in: ['RECEIVED', 'SCREENING', 'SHORTLISTED', 'INTERVIEWED'] },
+          hrDecision: 'PENDING',
+        },
+      }),
+
+      // 3b. Reschedule requests from candidates needing HR response
+      this.prisma.interview.count({
+        where: {
+          application: { job: jobWhere },
+          candidateResponse: 'RESCHEDULE_REQUESTED',
+          status: 'SCHEDULED',
+        },
+      }),
+
+      // 4. Upcoming scheduled interviews count
+      this.prisma.interview.count({
+        where: {
+          application: { job: jobWhere },
+          status: { in: ['SCHEDULED', 'RESCHEDULED'] },
+          scheduledAt: { gte: startOfToday },
+        },
+      }),
+
+      // Today's interviews
+      this.prisma.interview.findMany({
+        where: {
+          application: { job: jobWhere },
+          status: { in: ['SCHEDULED', 'RESCHEDULED'] },
+          scheduledAt: { gte: startOfToday, lte: endOfToday },
+        },
+        orderBy: { scheduledAt: 'asc' },
+        include: {
+          application: {
+            select: {
+              id: true,
+              job: { select: { id: true, title: true, jobCode: true } },
+              candidate: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                  user: {
+                    select: {
+                      fullName: true,
+                      avatarUrl: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+
+      // Upcoming interviews (future days)
+      this.prisma.interview.findMany({
+        where: {
+          application: { job: jobWhere },
+          status: { in: ['SCHEDULED', 'RESCHEDULED'] },
+          scheduledAt: { gt: endOfToday },
+        },
+        take: 10,
+        orderBy: { scheduledAt: 'asc' },
+        include: {
+          application: {
+            select: {
+              id: true,
+              job: { select: { id: true, title: true, jobCode: true } },
+              candidate: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                  user: {
+                    select: {
+                      fullName: true,
+                      avatarUrl: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+
+      // Action Queue: Published Jobs with workload breakdown
+      this.prisma.jobPosting.findMany({
+        where: {
+          ...recruiterJobFilter,
+          status: 'PUBLISHED',
+          ...(jobId ? { id: jobId } : {}),
+        },
+        select: {
+          id: true,
+          jobCode: true,
+          title: true,
+          autoShortlistThreshold: true,
+          department: {
+            select: { name: true },
+          },
+          applications: {
+            select: {
+              id: true,
+              currentStage: true,
+              hrDecision: true,
+              appliedAt: true,
+              aiMatchingResults: {
+                select: {
+                  overallScore: true,
+                  matchLevel: true,
+                },
+                orderBy: { version: 'desc' },
+                take: 1,
+              },
+              interviews: {
+                select: {
+                  id: true,
+                  candidateResponse: true,
+                  status: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    // Format action queue
+    const actionQueue = actionJobsRaw
+      .map((job) => {
+        const threshold = Number(job.autoShortlistThreshold) || 80;
+        let newCount = 0;
+        let highMatchCount = 0;
+        let pendingReviewCount = 0;
+        let rescheduleCount = 0;
+
+        job.applications.forEach((app) => {
+          // New applications
+          if (app.currentStage === 'RECEIVED') {
+            newCount++;
+          }
+
+          // High match applications (AI score >= threshold or HIGH match)
+          const latestAi = app.aiMatchingResults?.[0];
+          const score = latestAi ? Number(latestAi.overallScore || 0) : 0;
+          const matchLevel = latestAi?.matchLevel;
+          if (
+            (score >= threshold || matchLevel === 'HIGH') &&
+            app.currentStage !== 'REJECTED' &&
+            app.currentStage !== 'HIRED' &&
+            app.currentStage !== 'WITHDRAWN'
+          ) {
+            highMatchCount++;
+          }
+
+          // Pending review count
+          if (
+            ['RECEIVED', 'SCREENING', 'SHORTLISTED', 'INTERVIEWED'].includes(
+              app.currentStage,
+            ) &&
+            app.hrDecision === 'PENDING'
+          ) {
+            pendingReviewCount++;
+          }
+
+          // Reschedule count
+          app.interviews.forEach((it) => {
+            if (
+              it.candidateResponse === 'RESCHEDULE_REQUESTED' &&
+              it.status === 'SCHEDULED'
+            ) {
+              rescheduleCount++;
+            }
+          });
+        });
+
+        return {
+          jobId: job.id,
+          jobCode: job.jobCode,
+          title: job.title,
+          departmentName: job.department?.name || 'Tuyển dụng',
+          totalApplications: job.applications.length,
+          newCount,
+          highMatchCount,
+          pendingReviewCount,
+          rescheduleCount,
+          autoShortlistThreshold: threshold,
+        };
+      })
+      .sort((a, b) => {
+        // Sort jobs needing attention first
+        const urgencyA =
+          a.newCount * 3 +
+          a.highMatchCount * 2 +
+          a.rescheduleCount * 4 +
+          a.pendingReviewCount;
+        const urgencyB =
+          b.newCount * 3 +
+          b.highMatchCount * 2 +
+          b.rescheduleCount * 4 +
+          b.pendingReviewCount;
+        return urgencyB - urgencyA;
+      });
+
+    const formatInterviewItem = (it: any) => {
+      const candUser = it.application?.candidate?.user;
+      const candProfile = it.application?.candidate;
+      return {
+        id: it.id,
+        title: it.title,
+        type: it.type,
+        scheduledAt: it.scheduledAt,
+        durationMinutes: it.durationMinutes,
+        locationOrLink: it.locationOrLink,
+        candidateResponse: it.candidateResponse,
+        candidate: {
+          id: candProfile?.id || '',
+          fullName: candUser?.fullName || candProfile?.fullName || 'Ứng viên',
+          avatarUrl: candUser?.avatarUrl || null,
+          email: candUser?.email || candProfile?.email || '',
+        },
+        job: {
+          id: it.application?.job?.id,
+          title: it.application?.job?.title,
+          jobCode: it.application?.job?.jobCode,
+        },
+      };
+    };
+
+    return {
+      kpis: {
+        openJobs: openJobsCount,
+        totalApplications: totalApplicationsCount,
+        pendingActions: pendingApplicationsCount + rescheduleInterviewsCount,
+        upcomingInterviews: upcomingInterviewsCount,
+      },
+      todayInterviews: todayInterviewsRaw.map(formatInterviewItem),
+      upcomingInterviews: upcomingInterviewsRaw.map(formatInterviewItem),
+      actionQueue,
     };
   }
 }

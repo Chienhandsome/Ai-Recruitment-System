@@ -40,6 +40,17 @@ export class RecruitersController {
     return this.recruitersService.getDashboardStats(user.id);
   }
 
+  @Get('dashboard/action-hub')
+  @ApiOperation({ summary: 'Get action-first dashboard data (work queue, pending actions, today & upcoming interviews)' })
+  @ApiQuery({ name: 'jobId', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Return action-first dashboard data' })
+  async getDashboardActionHub(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('jobId') jobId?: string,
+  ) {
+    return this.recruitersService.getDashboardActionHub(user.id, jobId);
+  }
+
   @Get('dashboard/analytics')
   @ApiOperation({ summary: 'Get recruitment funnel and analytics for recruiter' })
   @ApiQuery({ name: 'jobId', required: false, type: String })

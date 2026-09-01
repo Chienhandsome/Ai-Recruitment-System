@@ -849,7 +849,10 @@ export function JobDetailView({
                               }}
                               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-sm transition-all"
                             >
-                              <Plus className="w-3.5 h-3.5" /> Lên lịch phỏng vấn
+                              <Plus className="w-3.5 h-3.5" />
+                              {activeApp.interviews && activeApp.interviews.length > 0
+                                ? `+ Lên lịch vòng tiếp theo (Vòng ${activeApp.interviews.length + 1})`
+                                : 'Lên lịch phỏng vấn'}
                             </button>
                           </div>
 
@@ -1037,7 +1040,10 @@ export function JobDetailView({
                               </div>
                               <button
                                 type="button"
-                                onClick={() => setIsScheduleModalOpen(true)}
+                                onClick={() => {
+                                  setInterviewToEdit(null);
+                                  setIsScheduleModalOpen(true);
+                                }}
                                 className="text-xs font-bold text-[#2563EB] hover:underline"
                               >
                                 + Lên lịch phỏng vấn ngay
@@ -1515,6 +1521,7 @@ export function JobDetailView({
           candidateName={selectedApplicationDetail.candidate?.fullName || "Ứng viên"}
           jobTitle={job.title}
           interviewToEdit={interviewToEdit}
+          existingInterviewsCount={selectedApplicationDetail.interviews?.length || 0}
           onSuccess={refreshApplications}
         />
       )}

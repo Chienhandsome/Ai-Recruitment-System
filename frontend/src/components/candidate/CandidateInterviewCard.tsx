@@ -140,13 +140,32 @@ export function CandidateInterviewCard({
               {interviewTypeLabels[interview.type] || interview.type}
             </span>
 
-            {/* Candidate Response Badge */}
-            <span
-              className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${responseStyle.bg} ${responseStyle.text} ${responseStyle.border}`}
-            >
-              <span className={`size-1.5 rounded-full ${responseStyle.dot} ${isPending ? 'animate-ping' : ''}`} />
-              {candidateResponseLabels[responseStatus]}
-            </span>
+            {interview.status === 'COMPLETED' ? (
+              <>
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
+                  <CheckCircle2 className="size-3 text-emerald-600" />
+                  Đã hoàn thành
+                </span>
+                {interview.score !== null && interview.score !== undefined && (
+                  <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-white text-[#2563EB] border border-blue-200 shadow-2xs">
+                    Điểm: {Number(interview.score)}/100
+                  </span>
+                )}
+              </>
+            ) : interview.status === 'CANCELLED' ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200">
+                <XCircle className="size-3 text-rose-600" />
+                Đã hủy
+              </span>
+            ) : (
+              /* Candidate Response Badge */
+              <span
+                className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${responseStyle.bg} ${responseStyle.text} ${responseStyle.border}`}
+              >
+                <span className={`size-1.5 rounded-full ${responseStyle.dot} ${isPending ? 'animate-ping' : ''}`} />
+                {candidateResponseLabels[responseStatus]}
+              </span>
+            )}
           </div>
         </div>
 
@@ -322,11 +341,19 @@ export function CandidateInterviewCard({
               </>
             )}
 
-            {isAccepted && (
+            {interview.status === 'COMPLETED' ? (
               <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-3 py-1.5 rounded-xl">
-                <CheckCircle2 className="size-4" /> Đã sẵn sàng tham gia
+                <CheckCircle2 className="size-4 text-emerald-600" /> Buổi phỏng vấn đã hoàn tất
               </span>
-            )}
+            ) : interview.status === 'CANCELLED' ? (
+              <span className="flex items-center gap-1.5 text-xs font-bold text-rose-700 bg-rose-100/70 border border-rose-200 px-3 py-1.5 rounded-xl">
+                <XCircle className="size-4 text-rose-600" /> Buổi phỏng vấn đã kết thúc
+              </span>
+            ) : isAccepted ? (
+              <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-3 py-1.5 rounded-xl">
+                <CheckCircle2 className="size-4 text-emerald-600" /> Đã sẵn sàng tham gia
+              </span>
+            ) : null}
           </div>
         </div>
 

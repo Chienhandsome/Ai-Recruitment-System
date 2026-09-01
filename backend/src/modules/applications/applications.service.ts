@@ -394,13 +394,33 @@ export class ApplicationsService {
         candidate: {
           select: {
             id: true,
+            fullName: true,
+            email: true,
+            phone: true,
             desiredTitle: true,
+            professionalSummary: true,
+            expectedMinSalary: true,
+            expectedMaxSalary: true,
+            preferredModel: true,
             user: {
               select: {
                 fullName: true,
                 email: true,
                 phone: true,
                 avatarUrl: true,
+              },
+            },
+            workExperiences: {
+              orderBy: { startDate: 'desc' },
+            },
+            educations: {
+              orderBy: { startDate: 'desc' },
+            },
+            projects: true,
+            certificates: true,
+            candidateSkills: {
+              include: {
+                skill: true,
               },
             },
           },
@@ -451,8 +471,20 @@ export class ApplicationsService {
       job: this.serializeJob(application.job),
       candidate: {
         id: application.candidate.id,
+        fullName: application.candidate.fullName || application.candidate.user?.fullName,
+        email: application.candidate.email || application.candidate.user?.email,
+        phone: application.candidate.phone || application.candidate.user?.phone,
+        avatarUrl: application.candidate.user?.avatarUrl,
         desiredTitle: application.candidate.desiredTitle,
-        ...application.candidate.user,
+        professionalSummary: application.candidate.professionalSummary,
+        expectedMinSalary: application.candidate.expectedMinSalary,
+        expectedMaxSalary: application.candidate.expectedMaxSalary,
+        preferredModel: application.candidate.preferredModel,
+        workExperiences: application.candidate.workExperiences || [],
+        educations: application.candidate.educations || [],
+        projects: application.candidate.projects || [],
+        certificates: application.candidate.certificates || [],
+        candidateSkills: application.candidate.candidateSkills || [],
       },
       currentStage: application.currentStage,
       hrDecision: application.hrDecision,

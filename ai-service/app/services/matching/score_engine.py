@@ -39,17 +39,18 @@ class ScoreEngine:
         # 1. Macro Compatibility Gating (Domain Compatibility Gate)
         domain_factor = (0.35 + 0.65 * domain_compat)
 
-        # 2. Mandatory Satisfiability Multiplier (Psi_mandatory)
-        if mandatory_ratio >= 1.0:
-            psi_mandatory = 1.0
-        elif mandatory_ratio >= 0.50:
-            psi_mandatory = 0.85 + (0.15 * mandatory_ratio)
-        else:
-            psi_mandatory = max(0.20, 0.40 + (0.40 * mandatory_ratio))
+        # 2. Continuous Exponential Mandatory Gate (Gamma = 1.85)
+        # Guarantees missing 1/4 mandatory skills compresses total score ceiling below HIGH threshold (<= 60đ)
+        gamma = 1.85
+        psi_mandatory = max(0.0, min(1.0, float(mandatory_ratio) ** gamma))
 
-        effective_multiplier = domain_factor * psi_mandatory
+        # 3. Anti-Inflation Audit Credibility Multiplier
+        audit = match_metrics.get("audit", {})
+        audit_conf = float(audit.get("evidence_confidence", 1.0) or 1.0)
 
-        # Exact earned points per pillar
+        effective_multiplier = domain_factor * psi_mandatory * audit_conf
+
+        # Exact earned points per pillar (Consistent macro gating across all pillars)
         earned_skills = round(skills_raw * max_skills * effective_multiplier, 2)
         earned_exp = round(exp_raw * max_exp * effective_multiplier, 2)
         earned_edu = round(edu_raw * max_edu * effective_multiplier, 2)

@@ -155,6 +155,17 @@ class SemanticMatcher:
         ]
         return max(scores) if scores else 0.0
 
+    def embed_batch(self, texts: List[str]) -> np.ndarray:
+        """Return raw embedding matrix for a list of texts."""
+        if not texts:
+            return np.zeros((0, 384), dtype=float)
+        try:
+            vectors = self._vectors_for(texts)
+            return np.asarray(vectors, dtype=float)
+        except Exception as exc:
+            logger.warning("embed_batch failed: %s", exc)
+            return np.zeros((len(texts), 384), dtype=float)
+
     def _vectors_for(self, texts: List[str]) -> List[np.ndarray]:
         self.initialize()
         cache = dict(self._embedding_cache.get() or {})

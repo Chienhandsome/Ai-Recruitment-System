@@ -1,0 +1,62 @@
+{
+  "_metadata": {
+    "source": "Wikidata & Open Standards Knowledge Graph",
+    "description": "Chronological release and inception timeline of cross-industry tools, frameworks, accounting standards, and trade regulations.",
+    "version": "4.0.0"
+  },
+  "entities": {
+    "chatgpt": 2022,
+    "gpt-4": 2023,
+    "claude": 2023,
+    "langchain": 2022,
+    "llamaindex": 2022,
+    "deepseek": 2023,
+    "midjourney": 2022,
+    "stable diffusion": 2022,
+    "adobe firefly": 2023,
+    "sora": 2024,
+    "next.js": 2016,
+    "nextjs": 2016,
+    "vue 3": 2020,
+    "nuxt 3": 2022,
+    "fastapi": 2018,
+    "nestjs": 2017,
+    "flutter": 2017,
+    "tailwind css": 2017,
+    "tailwindcss": 2017,
+    "svelte": 2016,
+    "kubernetes": 2014,
+    "docker": 2013,
+    "react": 2013,
+    "angular": 2016,
+    "golang": 2009,
+    "rust": 2015,
+    "typescript": 2012,
+    "pytorch": 2016,
+    "tensorflow": 2015,
+
+    "tiktok shop": 2022,
+    "tiktok shop ads": 2022,
+    "threads": 2023,
+    "google analytics 4": 2020,
+    "ga4": 2020,
+    "meta advantage+": 2022,
+    "shopee video": 2022,
+
+    "figma figjam": 2021,
+    "figma": 2016,
+
+    "ifrs 17": 2023,
+    "ifrs 16": 2019,
+    "thông tư 78/2021": 2021,
+    "nghị định 123/2020": 2020,
+    "hóa đơn điện tử tt78": 2021,
+    "misa sme 2022": 2022,
+
+    "incoterms 2020": 2020,
+    "vnaccs/vcis": 2014,
+
+    "base hrm cloud": 2017,
+    "1office hrm": 2018
+  }
+}

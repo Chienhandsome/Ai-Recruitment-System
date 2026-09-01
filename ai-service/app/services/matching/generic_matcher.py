@@ -1,19 +1,25 @@
-from datetime import datetime
+import re
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from app.schemas.matching import CandidateProfilePayload, JobPayload
 from app.services.matching.experience_level_evaluator import experience_level_evaluator
 from app.services.matching.semantic import semantic_matcher
+from app.services.matching.knowledge_graph import skill_kg
+from app.services.matching.temporal_engine import temporal_engine
+from app.services.matching.late_interaction import late_interaction_scorer
+from app.services.matching.fraud_auditor import anti_inflation_auditor
 from app.utils.normalizer import normalize_skill_name
 
 
 class GenericMatchingEngine:
     """
-    Hierarchical Context-Aware Diagnostic Engine (H-CAME V3.1):
-    Integrates 3 Generalized Layers across all 14 Canonical Industry Verticals:
-    1. Sub-Domain & Business-Model Taxonomy Alignment Gating (Gamma_domain)
-    2. Context-Aware Semantic Skill Matching with Continuous Transferability Gradient
-    3. Mathematical Seniority & Duration Scaling
+    Unified Cognitive Matching Architecture (H-CAME V4):
+    Integrates 4 Unified Pillars:
+    1. Dynamic Skill & Ontology Knowledge Graph (Cross-skill Transferability)
+    2. Temporal Dynamics (Skill Recency Time-Decay e^-lambda*t & Career Velocity)
+    3. Dual-Stream Late Interaction (ColBERT-style MaxSim Token Matching)
+    4. Multi-Agent Anti-Inflation & Evidence Credibility Verification
     """
 
     def evaluate(
@@ -30,10 +36,19 @@ class GenericMatchingEngine:
 
             domain_compat = self._calc_domain_compatibility(job_subdomain, cand_subdomain)
 
+            # V4 Audit & Temporal Diagnostics
+            audit_res = anti_inflation_auditor.audit_profile(cand_profile, job)
+            career_vel_res = temporal_engine.calculate_career_velocity(cand_profile.work_experiences)
+
             skills_res = self._match_skills(cand_profile, job, domain_compat, job_subdomain, cand_subdomain)
             exp_res = self._match_experience(cand_profile, job, domain_compat)
             edu_res = self._match_education(cand_profile, job)
             other_res = self._match_certificates(cand_profile, job)
+
+            # V4 Late Interaction token alignment
+            jd_clauses = late_interaction_scorer.extract_clauses_from_job(job)
+            cand_passages = late_interaction_scorer.extract_passages_from_profile(cand_profile)
+            late_score, late_alignments = late_interaction_scorer.compute_clause_maxsim(jd_clauses, cand_passages)
 
             return {
                 "skills": skills_res,
@@ -43,6 +58,10 @@ class GenericMatchingEngine:
                 "job_subdomain": job_subdomain,
                 "cand_subdomain": cand_subdomain,
                 "domain_compatibility": domain_compat,
+                "audit": audit_res,
+                "career_velocity": career_vel_res,
+                "late_interaction_score": late_score,
+                "late_interaction_alignments": late_alignments,
             }
         finally:
             semantic_matcher.clear_cache()
@@ -53,7 +72,21 @@ class GenericMatchingEngine:
         """
         t = (text or "").lower()
 
-        # 1. DESIGN & CREATIVE (DESIGN_)
+        # 1. IT & SOFTWARE ENGINEERING (IT_) - Ưu tiên nhận diện vai trò kỹ thuật phần mềm
+        if any(k in t for k in ["fullstack", "full stack", "web developer", "lập trình web", "kỹ sư phần mềm"]):
+            return "IT_FULLSTACK_DEV"
+        if any(k in t for k in ["react", "vue", "nextjs", "next.js", "angular", "frontend", "front-end", "html/css", "tailwind", "ui developer"]):
+            return "IT_FRONTEND_WEB"
+        if any(k in t for k in ["java", "spring", "backend", "back-end", "microservices", "postgresql", "kafka", "redis", "golang", "nodejs", "node.js", "rest api", "database", "sql"]):
+            return "IT_BACKEND_SYSTEMS"
+        if any(k in t for k in ["devops", "kubernetes", "docker", "ci/cd", "aws", "terraform", "cloud architect", "sysadmin"]):
+            return "IT_DEVOPS_CLOUD"
+        if any(k in t for k in ["ai engineer", "machine learning", "deep learning", "nlp", "llm", "pytorch", "tensorflow", "data science", "data engineer"]):
+            return "IT_AI_DATA_SCIENCE"
+        if any(k in t for k in ["embedded", "firmware", "iot", "microcontroller", "stm32", "arm", "rtos", "c/c++", "phần cứng"]):
+            return "IT_EMBEDDED_FIRMWARE"
+
+        # 2. DESIGN & CREATIVE (DESIGN_)
         if any(k in t for k in ["figma", "ui/ux", "design system", "wirefram", "product design", "ux design", "ui designer", "product designer"]):
             return "DESIGN_UI_UX"
         if any(k in t for k in ["3d artist", "blender", "maya", "3d animation", "game art", "concept art"]):
@@ -61,7 +94,7 @@ class GenericMatchingEngine:
         if any(k in t for k in ["graphic designer", "illustrator", "photoshop", "thiết kế đồ họa", "in ấn", "branding"]):
             return "DESIGN_GRAPHIC_BRANDING"
 
-        # 2. FINANCE & ACCOUNTING (FIN_)
+        # 3. FINANCE & ACCOUNTING (FIN_)
         if any(k in t for k in ["chứng khoán", "định giá cổ phiếu", "equity research", "cfa", "quỹ đầu tư", "investment", "bloomberg", "m&a", "thẩm định đầu tư"]):
             return "FIN_INVESTMENT_BANKING"
         if any(k in t for k in ["kiểm toán", "auditing", "big 4", "soát xét", "internal audit", "kiểm soát nội bộ"]):
@@ -71,7 +104,7 @@ class GenericMatchingEngine:
         if any(k in t for k in ["tín dụng", "ngân hàng bán lẻ", "thẩm định tín dụng", "credit risk", "teller", "giao dịch viên"]):
             return "FIN_RETAIL_BANKING"
 
-        # 3. MARKETING & GROWTH (MKT_)
+        # 4. MARKETING & GROWTH (MKT_)
         if any(k in t for k in ["game", "gaming", "app install", "user acquisition", "cpi", "appsflyer", "adjust", "skadnetwork", "unity ads"]):
             return "MKT_MOBILE_GAMING_UA"
         if any(k in t for k in ["b2b marketing", "b2b saas", "lead gen", "mql", "sql lead", "hubspot"]):
@@ -82,18 +115,6 @@ class GenericMatchingEngine:
             return "MKT_ECOMMERCE_D2C"
         if any(k in t for k in ["content", "fanpage", "social media", "post engagement", "livestream", "canva", "copywriter"]):
             return "MKT_SOCIAL_CONTENT"
-
-        # 4. IT & SOFTWARE ENGINEERING (IT_)
-        if any(k in t for k in ["react", "vue", "nextjs", "angular", "frontend", "html/css", "web developer"]):
-            return "IT_FRONTEND_WEB"
-        if any(k in t for k in ["embedded", "firmware", "iot", "microcontroller", "stm32", "arm", "rtos", "c/c++", "phần cứng"]):
-            return "IT_EMBEDDED_FIRMWARE"
-        if any(k in t for k in ["ai engineer", "machine learning", "deep learning", "nlp", "llm", "pytorch", "tensorflow", "data science"]):
-            return "IT_AI_DATA_SCIENCE"
-        if any(k in t for k in ["devops", "kubernetes", "docker", "ci/cd", "aws", "terraform", "cloud architect"]):
-            return "IT_DEVOPS_CLOUD"
-        if any(k in t for k in ["java", "spring", "backend", "microservices", "postgresql", "kafka", "redis", "golang", "nodejs", "rest api", "database"]):
-            return "IT_BACKEND_SYSTEMS"
 
         # 5. EDUCATION & TRAINING (EDU_)
         if any(k in t for k in ["ielts", "academic english", "celta", "tesol", "tiếng anh học thuật", "giáo viên tiếng anh"]):
@@ -193,7 +214,21 @@ class GenericMatchingEngine:
 
         # CÙNG KHỐI NGÀNH (Intra-Family Distance)
 
-        # 1. Marketing
+        # 1. IT & Engineering
+        if "IT_" in job_dom and "IT_" in cand_dom:
+            if "FULLSTACK" in job_dom or "FULLSTACK" in cand_dom:
+                return 0.95
+            if ("FRONTEND" in job_dom and "BACKEND" in cand_dom) or ("BACKEND" in job_dom and "FRONTEND" in cand_dom):
+                return 0.85
+            if ("DEVOPS" in job_dom and "BACKEND" in cand_dom) or ("BACKEND" in job_dom and "DEVOPS" in cand_dom):
+                return 0.85
+            if ("AI" in job_dom and "BACKEND" in cand_dom) or ("BACKEND" in job_dom and "AI" in cand_dom):
+                return 0.80
+            if ("EMBEDDED" in job_dom or "EMBEDDED" in cand_dom):
+                return 0.35
+            return 0.90
+
+        # 2. Marketing
         if ("AGENCY" in job_dom and "ECOMMERCE" in cand_dom) or ("ECOMMERCE" in job_dom and "AGENCY" in cand_dom):
             return 0.88
         if ("B2B" in job_dom and "ECOMMERCE" in cand_dom) or ("ECOMMERCE" in job_dom and "B2B" in cand_dom):
@@ -201,16 +236,6 @@ class GenericMatchingEngine:
         if ("CONTENT" in job_dom or "CONTENT" in cand_dom):
             return 0.45
         if ("GAMING" in job_dom or "GAMING" in cand_dom):
-            return 0.22
-
-        # 2. IT & Engineering
-        if ("FRONTEND" in job_dom and "BACKEND" in cand_dom) or ("BACKEND" in job_dom and "FRONTEND" in cand_dom):
-            return 0.70
-        if ("DEVOPS" in job_dom and "BACKEND" in cand_dom) or ("BACKEND" in job_dom and "DEVOPS" in cand_dom):
-            return 0.75
-        if ("AI" in job_dom and "BACKEND" in cand_dom) or ("BACKEND" in job_dom and "AI" in cand_dom):
-            return 0.70
-        if ("EMBEDDED" in job_dom or "EMBEDDED" in cand_dom):
             return 0.22
 
         # 3. Finance & Accounting
@@ -342,13 +367,13 @@ class GenericMatchingEngine:
         }
         cand_norm_names = set(cand_skill_map.keys())
 
-        # Ngưỡng động
-        is_entry_level = self._is_entry_level(job)
-        mandatory_threshold = 0.70 if is_entry_level else 0.78
-        transferable_threshold = 0.50
+        # Ngưỡng động (Đồng nghĩa thực sự vs Chuyển giao)
+        mandatory_threshold = 0.88
+        transferable_threshold = 0.68
 
         mandatory_scores = []
         optional_scores = []
+        mandatory_credits = []
         matched = []
         missing = []
         missing_mandatory = []
@@ -359,6 +384,8 @@ class GenericMatchingEngine:
         for req in job_req_skills:
             norm_req_name = self._skill_match_key(req)
             is_man = req.is_mandatory
+            req_min_years = float(getattr(req, "minimum_years", 0.0) or 0.0)
+            cand_skill_years = self._calculate_skill_years(req.skill_name, cand_profile)
 
             # 1. Khớp chính xác danh sách kỹ năng
             cand_s = (
@@ -370,53 +397,120 @@ class GenericMatchingEngine:
             if cand_s is not None:
                 level_mult = min(1.0, self._get_level_val(cand_s.proficiency_level) / float(self._get_level_val(req.minimum_level)))
                 score = 1.0 * level_mult * (0.5 + 0.5 * domain_compat)
-                matched.append({"name": req.skill_name, "isMandatory": is_man, "source": "skills_list"})
-                if is_man: mandatory_scores.append(score)
-                else: optional_scores.append(score)
+                
+                # Check skill experience years requirement
+                years_gap_info = None
+                if req_min_years > 0:
+                    if cand_skill_years < req_min_years:
+                        ratio = cand_skill_years / req_min_years
+                        penalty_mult = 0.65 + 0.35 * max(0.2, min(1.0, ratio))
+                        score *= penalty_mult
+                        years_gap_info = {
+                            "req_years": req_min_years,
+                            "actual_years": cand_skill_years,
+                            "ratio": round(ratio, 2),
+                            "penalty_msg": f"Kỹ năng '{req.skill_name}': Thâm niên thực tế ({cand_skill_years:.1f} năm) chưa đủ số năm yêu cầu của JD ({req_min_years:.1f} năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+                        }
+                    else:
+                        years_gap_info = {
+                            "req_years": req_min_years,
+                            "actual_years": cand_skill_years,
+                            "bonus_msg": f"Kỹ năng '{req.skill_name}': Thâm niên thực tế ({cand_skill_years:.1f} năm) đáp ứng đủ yêu cầu ({req_min_years:.1f} năm)."
+                        }
+
+                matched.append({
+                    "name": req.skill_name,
+                    "isMandatory": is_man,
+                    "source": "skills_list",
+                    "actual_years": cand_skill_years,
+                    "req_years": req_min_years,
+                    "years_gap": years_gap_info
+                })
+                if is_man:
+                    mandatory_scores.append(score)
+                    mandatory_credits.append(1.0)
+                else:
+                    optional_scores.append(score)
                 continue
 
-            # 2. Khớp Ngữ nghĩa AI Đa ngành (Semantic Embedding)
+            # 2. Khớp Ngữ nghĩa AI Đa ngành & Chuyển giao Năng lực (Transferable Skills)
             ai_matched = False
-            req_context = f"{job_context} [CONTENT] {req.skill_name}"
-
             best_sem_score = 0.0
             best_cs_match = None
             for cs in cand_profile.skills:
-                cs_domain = self._detect_subdomain(cs.skill_name)
-                cs_context = f"[CONTEXT] Type: professional_employment | Domain: {cs_domain} | Seniority: experienced [CONTENT] {cs.skill_name}"
-                raw_sem = semantic_matcher.compute_similarity(req_context, cs_context)
-
-                # Áp dụng Gradient điều hòa mô hình (Smooth Multiplier)
+                # Kiểm tra tương đương trực tiếp qua semantic embedding
+                raw_sem = semantic_matcher.compute_similarity(req.skill_name.strip(), cs.skill_name.strip())
                 gated_sem = raw_sem * (0.2 + 0.8 * domain_compat)
-                if gated_sem > best_sem_score:
+                if gated_sem >= mandatory_threshold and gated_sem > best_sem_score:
                     best_sem_score = gated_sem
                     best_cs_match = cs
 
             if best_sem_score >= mandatory_threshold and best_cs_match:
                 level_multiplier = min(1.0, self._get_level_val(best_cs_match.proficiency_level) / float(self._get_level_val(req.minimum_level)))
                 final_skill_score = best_sem_score * level_multiplier
-                matched.append({"name": req.skill_name, "isMandatory": is_man, "source": f"Kỹ năng tương đương: {best_cs_match.skill_name}"})
+
+                # Check skill experience years requirement
+                years_gap_info = None
+                if req_min_years > 0:
+                    if cand_skill_years < req_min_years:
+                        ratio = cand_skill_years / req_min_years
+                        penalty_mult = 0.65 + 0.35 * max(0.2, min(1.0, ratio))
+                        final_skill_score *= penalty_mult
+                        years_gap_info = {
+                            "req_years": req_min_years,
+                            "actual_years": cand_skill_years,
+                            "ratio": round(ratio, 2),
+                            "penalty_msg": f"Kỹ năng '{req.skill_name}': Thâm niên thực tế ({cand_skill_years:.1f} năm) chưa đủ số năm yêu cầu của JD ({req_min_years:.1f} năm). Đã trừ điểm thâm niên kỹ năng tương ứng."
+                        }
+
+                matched.append({
+                    "name": req.skill_name,
+                    "isMandatory": is_man,
+                    "source": f"Kỹ năng tương đương: {best_cs_match.skill_name}",
+                    "actual_years": cand_skill_years,
+                    "req_years": req_min_years,
+                    "years_gap": years_gap_info
+                })
                 evidence_list.append({
                     "skillName": req.skill_name,
                     "evidenceText": f"AI nhận diện kỹ năng '{best_cs_match.skill_name}' tương đương '{req.skill_name}' (Độ khớp: {best_sem_score*100:.1f}%)",
                     "source": "semantic_embedding"
                 })
-                if is_man: mandatory_scores.append(final_skill_score)
-                else: optional_scores.append(final_skill_score)
+                if is_man:
+                    mandatory_scores.append(final_skill_score)
+                    mandatory_credits.append(1.0)
+                else:
+                    optional_scores.append(final_skill_score)
                 ai_matched = True
-            elif best_sem_score >= transferable_threshold and best_cs_match:
-                # Kỹ năng Chuyển giao được (Transferable Match)
-                level_multiplier = min(1.0, self._get_level_val(best_cs_match.proficiency_level) / float(self._get_level_val(req.minimum_level)))
-                final_skill_score = best_sem_score * level_multiplier * 0.85
-                matched.append({"name": req.skill_name, "isMandatory": is_man, "source": f"Kỹ năng chuyển giao: {best_cs_match.skill_name}"})
-                evidence_list.append({
-                    "skillName": req.skill_name,
-                    "evidenceText": f"Kỹ năng '{best_cs_match.skill_name}' có thể chuyển giao sang '{req.skill_name}' (Độ tương thích: {best_sem_score*100:.1f}%)",
-                    "source": "transferable_skill"
-                })
-                if is_man: mandatory_scores.append(final_skill_score)
-                else: optional_scores.append(final_skill_score)
-                ai_matched = True
+            else:
+                # Kiểm tra năng lực chuyển giao trong cùng nhóm nghiệp vụ (Functional Cluster)
+                for cs in cand_profile.skills:
+                    is_trans, trans_credit = self._is_transferable_skill(req.skill_name, cs.skill_name)
+                    if is_trans:
+                        level_multiplier = min(1.0, self._get_level_val(cs.proficiency_level) / float(self._get_level_val(req.minimum_level)))
+                        final_skill_score = trans_credit * level_multiplier
+
+                        matched.append({
+                            "name": req.skill_name,
+                            "isMandatory": is_man,
+                            "source": f"Kỹ năng chuyển giao: {cs.skill_name}",
+                            "actual_years": cand_skill_years,
+                            "req_years": req_min_years,
+                            "years_gap": None
+                        })
+                        evidence_list.append({
+                            "skillName": req.skill_name,
+                            "evidenceText": f"Kỹ năng '{cs.skill_name}' có thể chuyển giao sang '{req.skill_name}' (Cùng phân khúc công nghệ)",
+                            "source": "transferable_skill"
+                        })
+                        if is_man:
+                            mandatory_scores.append(final_skill_score)
+                            mandatory_credits.append(trans_credit)
+                            missing_mandatory.append(req.skill_name)
+                        else:
+                            optional_scores.append(final_skill_score)
+                        ai_matched = True
+                        break
 
             if ai_matched:
                 continue
@@ -424,23 +518,48 @@ class GenericMatchingEngine:
             # 3. Tìm kiếm trong Bối cảnh (Kinh nghiệm làm việc & Dự án thực tế)
             ctx_score, ctx_text, ctx_source = self._search_in_context(norm_req_name, req.skill_name, cand_profile, job, domain_compat, job_subdom)
             if ctx_score >= mandatory_threshold:
-                matched.append({"name": req.skill_name, "isMandatory": is_man, "source": ctx_source})
+                matched.append({
+                    "name": req.skill_name,
+                    "isMandatory": is_man,
+                    "source": ctx_source,
+                    "actual_years": cand_skill_years,
+                    "req_years": req_min_years
+                })
                 evidence_list.append({"skillName": req.skill_name, "evidenceText": ctx_text, "source": ctx_source})
-                if is_man: mandatory_scores.append(ctx_score)
-                else: optional_scores.append(ctx_score)
+                if is_man:
+                    mandatory_scores.append(ctx_score)
+                    mandatory_credits.append(0.95)
+                else:
+                    optional_scores.append(ctx_score)
             elif ctx_score >= transferable_threshold:
-                matched.append({"name": req.skill_name, "isMandatory": is_man, "source": f"{ctx_source} (Chuyển giao)"})
+                matched.append({
+                    "name": req.skill_name,
+                    "isMandatory": is_man,
+                    "source": f"{ctx_source} (Chuyển giao)",
+                    "actual_years": cand_skill_years,
+                    "req_years": req_min_years
+                })
                 evidence_list.append({"skillName": req.skill_name, "evidenceText": ctx_text, "source": ctx_source})
-                if is_man: mandatory_scores.append(ctx_score * 0.85)
-                else: optional_scores.append(ctx_score * 0.85)
+                if is_man:
+                    mandatory_scores.append(ctx_score * 0.85)
+                    mandatory_credits.append(0.50 * ctx_score)
+                    missing_mandatory.append(req.skill_name)
+                else:
+                    optional_scores.append(ctx_score * 0.85)
             else:
                 domain_credit = self._calc_domain_transferability(req.skill_name, cand_norm_names, is_man, job, domain_compat, job_subdom)
                 if is_man:
                     mandatory_scores.append(domain_credit)
                     missing_mandatory.append(req.skill_name)
+                    mandatory_credits.append(0.20 * domain_credit)
                 else:
                     optional_scores.append(max(0.0, domain_credit))
-                missing.append({"name": req.skill_name, "isMandatory": is_man, "transfer_credit": domain_credit})
+                missing.append({
+                    "name": req.skill_name,
+                    "isMandatory": is_man,
+                    "transfer_credit": domain_credit,
+                    "req_years": req_min_years
+                })
 
         if mandatory_scores and optional_scores:
             raw_score = 0.75 * (sum(mandatory_scores) / len(mandatory_scores)) + 0.25 * (sum(optional_scores) / len(optional_scores))
@@ -456,8 +575,8 @@ class GenericMatchingEngine:
             p_density = min(1.0, (len(cand_norm_names) / float(len(cand_profile.skills))) * 1.2)
 
         total_man = sum(1 for r in job_req_skills if r.is_mandatory)
-        passed_man = total_man - len(missing_mandatory)
-        man_ratio = (passed_man / float(total_man)) if total_man > 0 else 1.0
+        man_ratio = (sum(mandatory_credits) / float(total_man)) if total_man > 0 else 1.0
+        man_ratio = max(0.0, min(1.0, man_ratio))
 
         return {
             "score": raw_score * p_density,
@@ -471,6 +590,111 @@ class GenericMatchingEngine:
 
     def _get_level_val(self, lvl: str) -> int:
         return {"BEGINNER": 1, "INTERMEDIATE": 2, "ADVANCED": 3, "EXPERT": 4}.get((lvl or "BEGINNER").upper(), 1)
+
+    def _is_transferable_skill(self, skill_a: str, skill_b: str) -> Tuple[bool, float]:
+        """
+        Determines whether skill_a and skill_b belong to the same functional skill cluster
+        and returns (is_transferable, credit_score).
+        """
+        s_a = skill_a.lower().strip()
+        s_b = skill_b.lower().strip()
+
+        clusters = [
+            # Frontend Modern Frameworks
+            {"react", "reactjs", "react.js", "next.js", "nextjs", "vue", "vuejs", "vue.js", "nuxt", "nuxtjs", "nuxt.js", "angular", "angularjs", "svelte"},
+            # Backend Runtimes & Frameworks
+            {"node.js", "nodejs", "node", "nestjs", "express", "express.js", "fastapi", "django", "flask", "spring", "spring boot", "golang", "go", ".net", "dotnet", "asp.net", "laravel", "ruby on rails"},
+            # Relational SQL Databases
+            {"postgresql", "postgres", "mysql", "mariadb", "oracle", "sql server", "mssql", "sqlite"},
+            # NoSQL Document & Key-Value Databases
+            {"mongodb", "redis", "dynamodb", "cassandra", "couchdb", "elasticsearch"},
+            # DevOps, Containers & Orchestration
+            {"docker", "kubernetes", "k8s", "podman", "containerd", "helm", "terraform"},
+            # Cloud Service Providers
+            {"aws", "amazon web services", "azure", "gcp", "google cloud"},
+            # Accounting, ERP & Tax Software
+            {"misa", "bravo", "fast", "sap fico", "sap", "báo cáo tài chính", "kế toán thuế", "quyết toán thuế", "vas", "ifrs"},
+            # Digital Marketing Ad Platforms
+            {"facebook ads", "fb ads", "meta ads", "google ads", "tiktok ads", "zalo ads", "performance marketing"},
+            # Design & UI/UX Tools
+            {"figma", "sketch", "adobe xd", "photoshop", "illustrator"}
+        ]
+
+        for cluster in clusters:
+            if any(k in s_a for k in cluster) and any(k in s_b for k in cluster):
+                return True, 0.85
+
+        return False, 0.0
+
+    def _calculate_skill_years(self, skill_name: str, cand_profile: CandidateProfilePayload) -> float:
+        """Calculates cumulative years candidate has explicitly worked with this specific technology."""
+        s_clean = skill_name.lower().strip()
+        total_months = 0.0
+
+        # Strict explicit technology aliases mapping (no broad role spillover like 'frontend' or 'backend')
+        strict_tech_aliases: Dict[str, List[str]] = {
+            "react": ["react", "reactjs", "react.js", "react-native"],
+            "next.js": ["next.js", "nextjs", "next js"],
+            "node.js": ["node.js", "nodejs", "node js", "express", "expressjs", "nestjs"],
+            "postgresql": ["postgresql", "postgres", "psql"],
+            "typescript": ["typescript", "ts"],
+            "tailwind css": ["tailwind", "tailwindcss", "tailwind css"],
+            "docker": ["docker", "dockerfile", "docker-compose", "containerization"]
+        }
+        target_aliases = strict_tech_aliases.get(s_clean, [s_clean])
+
+        def contains_alias(text: str) -> bool:
+            if not text:
+                return False
+            text_lower = text.lower()
+            return any(re.search(rf"\b{re.escape(alias)}\b", text_lower) for alias in target_aliases)
+
+        for exp in getattr(cand_profile, "work_experiences", []) or []:
+            exp_text = f"{exp.position_title or ''} {exp.description or ''} {exp.achievements or ''}"
+            if contains_alias(exp_text):
+                start_d = getattr(exp, "start_date", None)
+                end_d = getattr(exp, "end_date", None)
+                if start_d:
+                    try:
+                        dt_start = datetime.fromisoformat(str(start_d).replace("Z", "+00:00"))
+                        if getattr(exp, "is_current", False) or not end_d:
+                            dt_end = datetime.now(timezone.utc)
+                        else:
+                            dt_end = datetime.fromisoformat(str(end_d).replace("Z", "+00:00"))
+                        months = max(1.0, (dt_end.year - dt_start.year) * 12 + (dt_end.month - dt_start.month))
+                        total_months += months
+                    except Exception:
+                        total_months += 6.0
+
+        for proj in getattr(cand_profile, "projects", []) or []:
+            proj_techs = [t.lower().strip() for t in (getattr(proj, "technologies", []) or [])]
+            proj_text = f"{proj.project_name or ''} {proj.description or ''}"
+            has_in_techs = any(any(re.search(rf"\b{re.escape(alias)}\b", t) for alias in target_aliases) for t in proj_techs)
+            if has_in_techs or contains_alias(proj_text):
+                if getattr(proj, "start_date", None) and getattr(proj, "end_date", None):
+                    try:
+                        dt_start = datetime.fromisoformat(str(proj.start_date).replace("Z", "+00:00"))
+                        dt_end = datetime.fromisoformat(str(proj.end_date).replace("Z", "+00:00"))
+                        months = max(1.0, (dt_end.year - dt_start.year) * 12 + (dt_end.month - dt_start.month))
+                        total_months += min(months, 12.0)
+                    except Exception:
+                        total_months += 3.0
+                else:
+                    total_months += 3.0
+
+        # If total_months is 0 but candidate explicitly listed skill in profile.skills:
+        if total_months == 0:
+            for cs in getattr(cand_profile, "skills", []) or []:
+                cs_name = cs.skill_name.lower().strip()
+                if any(alias == cs_name or alias in cs_name for alias in target_aliases):
+                    lvl = (getattr(cs, "proficiency_level", None) or "BEGINNER").upper()
+                    if lvl == "EXPERT": total_months = 48.0
+                    elif lvl == "ADVANCED": total_months = 24.0
+                    elif lvl == "INTERMEDIATE": total_months = 12.0
+                    else: total_months = 6.0
+                    break
+
+        return round(total_months / 12.0, 1)
 
     def _skill_match_key(self, skill) -> str:
         """Return a stable key while preserving V3 matching semantics."""
@@ -503,37 +727,51 @@ class GenericMatchingEngine:
         self, norm_req, req_name, profile, job: JobPayload = None, domain_compat: float = 1.0, job_subdom: str = "GENERAL"
     ):
         best_score, best_text, best_source = 0.0, "", ""
+        is_explicit = False
         job_context = f"[CONTEXT] Domain: {job_subdom} | Environment: {job.work_mode if job else 'Professional'}"
         req_name_v2 = f"{job_context} [CONTENT] {req_name}"
 
         multiplier = (0.2 + 0.8 * domain_compat)
+        target_aliases = [norm_req, req_name] if norm_req else [req_name]
+        alias_clean = [a.lower().strip() for a in target_aliases if a]
 
         for exp in profile.work_experiences:
             exp_text = f"{exp.position_title or ''} {exp.description or ''} {exp.achievements or ''}"
+            exp_text_lower = exp_text.lower()
             exp_domain = self._detect_subdomain(exp_text)
             seniority = "senior" if any(k in (exp.position_title or "").lower() for k in ["senior", "trưởng", "manager", "lead", "head"]) else "experienced"
             cand_context_pro = f"[CONTEXT] Type: professional_employment | Domain: {exp_domain} | Seniority: {seniority}"
             text_v2 = f"{cand_context_pro} [CONTENT] {exp_text}"
 
-            if (norm_req or '').lower() in exp_text.lower() or (req_name or '').lower() in exp_text.lower():
+            has_direct_kw = any(re.search(rf"\b{re.escape(a)}\b", exp_text_lower) for a in alias_clean)
+            if has_direct_kw:
                 score_val = 0.95 * multiplier
-                if score_val > best_score: best_score, best_text, best_source = score_val, exp_text, f"Kinh nghiệm: {exp.position_title}"
-            else:
+                if score_val > best_score:
+                    best_score, best_text, best_source = score_val, exp_text, f"Kinh nghiệm: {exp.position_title}"
+                    is_explicit = True
+            elif not is_explicit:
                 sim = semantic_matcher.compute_similarity(req_name_v2, text_v2) * multiplier
+                # Gián tiếp qua văn cảnh chỉ đạt tối đa mức chuyển giao (capped at 0.70)
+                sim = min(0.70, sim * 0.80)
                 if sim > best_score:
                     best_score, best_text, best_source = sim, exp_text, f"Kinh nghiệm: {exp.position_title}"
 
         for proj in profile.projects:
             proj_text = f"{proj.project_name or ''} {proj.description or ''} {' '.join(proj.technologies or [])}"
+            proj_text_lower = proj_text.lower()
             proj_domain = self._detect_subdomain(proj_text)
             cand_context_proj = f"[CONTEXT] Type: project | Domain: {proj_domain} | Seniority: experienced"
             text_v2 = f"{cand_context_proj} [CONTENT] {proj_text}"
 
-            if (norm_req or '').lower() in proj_text.lower() or (req_name or '').lower() in proj_text.lower():
+            has_direct_kw = any(re.search(rf"\b{re.escape(a)}\b", proj_text_lower) for a in alias_clean)
+            if has_direct_kw:
                 score_val = 0.95 * multiplier
-                if score_val > best_score: best_score, best_text, best_source = score_val, proj_text, f"Dự án: {proj.project_name}"
-            else:
+                if score_val > best_score:
+                    best_score, best_text, best_source = score_val, proj_text, f"Dự án: {proj.project_name}"
+                    is_explicit = True
+            elif not is_explicit:
                 sim = semantic_matcher.compute_similarity(req_name_v2, text_v2) * multiplier
+                sim = min(0.70, sim * 0.80)
                 if sim > best_score:
                     best_score, best_text, best_source = sim, proj_text, f"Dự án: {proj.project_name}"
 

@@ -66,6 +66,10 @@ class MatchingEngine:
             missing_required_skills=match_metrics["skills"]["missing_mandatory"],
             evidence=match_metrics["skills"]["evidence"],
             confidence_score=final_scores["confidence_score"],
+            evidence_confidence=match_metrics.get("audit", {}).get("evidence_confidence", 1.0),
+            temporal_recency_score=1.0,
+            inflation_flags=match_metrics.get("audit", {}).get("inflation_flags", []),
+            career_velocity=match_metrics.get("career_velocity"),
             summary=explanations["summary"],
             experience_assessment=match_metrics["experience"].get("level_assessment"),
         )

@@ -90,6 +90,10 @@ export const AiResultSchema = z.object({
   missing_required_skills: z.array(z.string()).default([]),
   evidence: z.array(EvidenceSchema).default([]),
   confidence_score: z.number().default(1.0),
+  evidence_confidence: z.number().default(1.0).optional(),
+  temporal_recency_score: z.number().default(1.0).optional(),
+  inflation_flags: z.array(z.string()).default([]).optional(),
+  career_velocity: z.record(z.string(), z.any()).nullable().optional(),
   summary: z.string().default(''),
   experience_assessment: ExperienceAssessmentSchema.nullable().optional(),
 });

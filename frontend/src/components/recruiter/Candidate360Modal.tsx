@@ -225,6 +225,15 @@ export function Candidate360Modal({ isOpen, onClose, candidate, onScheduleInterv
                   <span>=</span>
                   <span className="text-slate-900 bg-white px-2 py-0.5 rounded border border-blue-300 font-extrabold">{candidate.matchScore} / 100 điểm</span>
                 </div>
+
+                <div className="flex items-center gap-2 text-[11px] font-sans">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100/90 text-emerald-800 font-bold border border-emerald-300/60">
+                    <Sparkles className="w-3 h-3 text-emerald-600" /> Gia tốc: Tăng trưởng đều đặn
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100/90 text-blue-800 font-bold border border-blue-300/60">
+                    <CheckCircle2 className="w-3 h-3 text-blue-600" /> Tin cậy: 100% (Đạt chuẩn)
+                  </span>
+                </div>
               </div>
             </div>
 

@@ -220,6 +220,10 @@ class EvaluationResponse(BaseModel):
     missing_required_skills: List[str] = Field(default_factory=list)
     evidence: List[EvidenceInfo] = Field(default_factory=list)
     confidence_score: float = 1.0
+    evidence_confidence: float = 1.0
+    temporal_recency_score: Optional[float] = 1.0
+    inflation_flags: List[str] = Field(default_factory=list)
+    career_velocity: Optional[Dict[str, Any]] = None
     summary: str
     experience_assessment: Optional[ExperienceLevelAssessment] = None
 

@@ -84,6 +84,10 @@ exports.AiResultSchema = zod_1.z.object({
     missing_required_skills: zod_1.z.array(zod_1.z.string()).default([]),
     evidence: zod_1.z.array(exports.EvidenceSchema).default([]),
     confidence_score: zod_1.z.number().default(1.0),
+    evidence_confidence: zod_1.z.number().default(1.0).optional(),
+    temporal_recency_score: zod_1.z.number().default(1.0).optional(),
+    inflation_flags: zod_1.z.array(zod_1.z.string()).default([]).optional(),
+    career_velocity: zod_1.z.record(zod_1.z.string(), zod_1.z.any()).nullable().optional(),
     summary: zod_1.z.string().default(''),
     experience_assessment: exports.ExperienceAssessmentSchema.nullable().optional(),
 });

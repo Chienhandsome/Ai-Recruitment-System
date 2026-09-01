@@ -206,6 +206,10 @@ export declare const AiResultSchema: z.ZodObject<{
         source: z.ZodDefault<z.ZodString>;
     }, z.core.$strip>>>;
     confidence_score: z.ZodDefault<z.ZodNumber>;
+    evidence_confidence: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+    temporal_recency_score: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+    inflation_flags: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    career_velocity: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodAny>>>;
     summary: z.ZodDefault<z.ZodString>;
     experience_assessment: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         candidate_level: z.ZodDefault<z.ZodNullable<z.ZodEnum<{

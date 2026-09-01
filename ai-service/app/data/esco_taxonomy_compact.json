@@ -1,0 +1,106 @@
+{
+  "_metadata": {
+    "source": "European Commission ESCO (European Skills, Competences, and Occupations) & O*NET Open Taxonomy",
+    "description": "Standardized canonical hierarchical skill ontology clusters across 14 major economic sectors",
+    "version": "4.0.0"
+  },
+  "domains": {
+    "IT": {
+      "name": "Information & Communication Technology",
+      "canonical_skills": [
+        "javascript", "typescript", "python", "java", "c#", "golang", "c++", "rust", "php",
+        "react", "next.js", "vue", "nuxt.js", "angular", "svelte", "tailwind css", "html5", "css3",
+        "node.js", "nestjs", "express.js", "fastapi", "django", "spring boot", ".net core",
+        "sql", "postgresql", "mysql", "mongodb", "redis", "elasticsearch",
+        "docker", "kubernetes", "aws", "azure", "gcp", "ci/cd",
+        "machine learning", "deep learning", "pytorch", "tensorflow", "nlp", "computer vision", "llm"
+      ]
+    },
+    "Marketing": {
+      "name": "Marketing, Growth & Communications",
+      "canonical_skills": [
+        "digital marketing", "performance marketing", "facebook ads", "google ads", "tiktok ads",
+        "seo", "content marketing", "google analytics", "brand marketing", "social media marketing"
+      ]
+    },
+    "Finance": {
+      "name": "Finance, Accounting & Banking",
+      "canonical_skills": [
+        "corporate accounting", "tax accounting", "auditing", "financial analysis", "financial modeling",
+        "ifrs", "vas", "misa", "credit risk assessment", "internal control"
+      ]
+    },
+    "Sales": {
+      "name": "Sales & Business Development",
+      "canonical_skills": [
+        "b2b sales", "b2c sales", "telesales", "crm", "key account management", "lead generation"
+      ]
+    },
+    "HR": {
+      "name": "Human Resources & Talent Management",
+      "canonical_skills": [
+        "talent acquisition", "compensation & benefits", "hrbp", "learning & development", "performance management"
+      ]
+    },
+    "Logistics": {
+      "name": "Logistics, Trade & Supply Chain",
+      "canonical_skills": [
+        "customs clearance", "freight forwarding", "warehouse management", "procurement", "incoterms", "supply chain management"
+      ]
+    },
+    "Construction": {
+      "name": "Construction & Civil Architecture",
+      "canonical_skills": [
+        "autocad", "revit bim", "site supervision", "structural engineering", "quantity surveying", "project management construction"
+      ]
+    },
+    "Manufacturing": {
+      "name": "Manufacturing & Industrial Automation",
+      "canonical_skills": [
+        "plc programming", "lean manufacturing", "qa/qc manufacturing", "cnc machining", "scada", "six sigma"
+      ]
+    },
+    "Healthcare": {
+      "name": "Healthcare, Medicine & Pharmacy",
+      "canonical_skills": [
+        "clinical pharmacy", "gdp/gsp standards", "medical sales", "nursing care", "patient management"
+      ]
+    },
+    "Education": {
+      "name": "Education, ESL & Academic Training",
+      "canonical_skills": [
+        "ielts teaching", "curriculum development", "tesol", "academic counseling", "e-learning management"
+      ]
+    },
+    "Hospitality": {
+      "name": "Hospitality, Tourism & F&B",
+      "canonical_skills": [
+        "hotel operations", "food & beverage", "tour operations", "front office management", "event planning"
+      ]
+    },
+    "Legal": {
+      "name": "Legal, Compliance & Corporate Governance",
+      "canonical_skills": [
+        "corporate law", "contract drafting", "regulatory compliance", "intellectual property", "litigation"
+      ]
+    },
+    "CustomerService": {
+      "name": "Customer Service & Contact Center",
+      "canonical_skills": [
+        "customer support", "call center operations", "complaint resolution", "omnichannel support"
+      ]
+    },
+    "RealEstate": {
+      "name": "Real Estate & Property Management",
+      "canonical_skills": [
+        "real estate brokerage", "property management", "real estate valuation", "leasing operations"
+      ]
+    },
+    "Design": {
+      "name": "Design & Creative Arts",
+      "canonical_skills": [
+        "ui/ux design", "graphic design", "3d modeling", "motion design", "design system"
+      ]
+    }
+  }
+}

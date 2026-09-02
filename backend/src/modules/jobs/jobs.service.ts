@@ -329,7 +329,7 @@ export class JobsService {
     };
   }
 
-  async findCandidateJobById(id: string, userId: string) {
+  async findCandidateJobById(id: string, userId?: string | null) {
     const job = await this.prisma.jobPosting.findFirst({
       where: {
         id,
@@ -345,34 +345,36 @@ export class JobsService {
 
     let application = null;
 
-    const profile = await this.prisma.candidateProfile.findUnique({
-      where: { userId },
-      select: { id: true },
-    });
-
-    if (profile) {
-      const app = await this.prisma.application.findUnique({
-        where: {
-          jobId_candidateId: {
-            jobId: id,
-            candidateId: profile.id,
-          },
-        },
-        select: {
-          id: true,
-          processingStatus: true,
-          currentStage: true,
-          appliedAt: true,
-        },
+    if (userId) {
+      const profile = await this.prisma.candidateProfile.findUnique({
+        where: { userId },
+        select: { id: true },
       });
 
-      if (app) {
-        application = {
-          id: app.id,
-          processingStatus: app.processingStatus,
-          currentStage: app.currentStage,
-          appliedAt: app.appliedAt,
-        };
+      if (profile) {
+        const app = await this.prisma.application.findUnique({
+          where: {
+            jobId_candidateId: {
+              jobId: id,
+              candidateId: profile.id,
+            },
+          },
+          select: {
+            id: true,
+            processingStatus: true,
+            currentStage: true,
+            appliedAt: true,
+          },
+        });
+
+        if (app) {
+          application = {
+            id: app.id,
+            processingStatus: app.processingStatus,
+            currentStage: app.currentStage,
+            appliedAt: app.appliedAt,
+          };
+        }
       }
     }
 

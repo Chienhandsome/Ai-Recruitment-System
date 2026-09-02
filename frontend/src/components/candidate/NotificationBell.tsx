@@ -64,42 +64,58 @@ export function NotificationBell() {
     }
   };
 
+  const isOpenRef = useRef(isOpen);
   useEffect(() => {
-    fetchUnreadCount();
-    // Poll unread count every 5s for fast fallback
-    const interval = setInterval(fetchUnreadCount, 5000);
-
-    // Subscribe to realtime database changes for instant notification updates
-    const supabase = createClient();
-    const channel = supabase
-      .channel('candidate_notifications_realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-        },
-        () => {
-          fetchUnreadCount();
-          if (isOpen) {
-            fetchNotifications();
-          }
-        },
-      )
-      .subscribe();
-
-    return () => {
-      clearInterval(interval);
-      supabase.removeChannel(channel);
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
+    isOpenRef.current = isOpen;
     if (isOpen) {
       fetchNotifications();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    fetchUnreadCount();
+    // Poll unread count every 30s as a fallback
+    const interval = setInterval(fetchUnreadCount, 30000);
+
+    // Subscribe to realtime database changes for instant notification updates
+    const supabase = createClient();
+    let channel: any = null;
+
+    const setupRealtime = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      channel = supabase
+        .channel('candidate_notifications_realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: userId ? `recipient_user_id=eq.${userId}` : undefined,
+          },
+          () => {
+            fetchUnreadCount();
+            if (isOpenRef.current) {
+              fetchNotifications();
+            }
+          },
+        )
+        .subscribe();
+    };
+
+    setupRealtime();
+
+    return () => {
+      clearInterval(interval);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, []);
 
   // Handle click outside to close dropdown
   useEffect(() => {

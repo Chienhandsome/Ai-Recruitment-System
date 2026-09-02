@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSupabasePublicConfig } from "./config";
 
 const protectedPrefixes = [
-  "/candidate",
+  "/candidate/applications",
+  "/candidate/profile",
   "/recruiter",
   "/admin/",
   "/update-password",

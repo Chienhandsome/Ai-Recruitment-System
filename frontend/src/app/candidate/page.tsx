@@ -70,10 +70,9 @@ export default async function CandidateHomePage({
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session?.access_token) redirect('/login');
 
   const [jobs, categories] = await Promise.all([
-    getCandidateJobs(session.access_token, query),
+    getCandidateJobs(session?.access_token, query),
     getCandidateJobCategories(),
   ]);
 

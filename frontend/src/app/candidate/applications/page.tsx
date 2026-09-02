@@ -17,7 +17,6 @@ import {
 } from '@/lib/candidate-api';
 import { applicationStageLabels, applicationStageStyles } from '@/lib/application-stage';
 import { interviewTypeLabels } from '@/lib/interview-api';
-import { AutoMarkRead } from '@/components/candidate/AutoMarkRead';
 import { CandidateApplicationInterviews } from '@/components/candidate/CandidateApplicationInterviews';
 import { createClient } from '@/lib/supabase/server';
 
@@ -98,8 +97,6 @@ export default async function CandidateApplicationsPage({
           <Button type="submit" variant="outline">Lọc</Button>
         </form>
       </header>
-
-      <AutoMarkRead />
 
       {applications.data.length === 0 ? (
         <section className="mt-8 rounded-2xl border bg-surface px-6 py-16 text-center">

@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Globe,
   Sparkles,
+  FileText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -144,6 +145,30 @@ export function ProfileView({
             )}
           </div>
         </CardContent>
+      </Card>
+
+      {/* CV / Resume Banner */}
+      <Card className="border border-blue-100 bg-[#F0F7FF] shadow-sm rounded-2xl p-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white text-[#2563EB] flex items-center justify-center border border-blue-200 shadow-2xs shrink-0">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-[#0F172A]">CV chính trong hệ thống</p>
+              <p className="text-[11px] text-[#64748B]">
+                CV này được sử dụng tự động khi bạn nộp đơn ứng tuyển các vị trí trên hệ thống.
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={onEdit}
+            variant="outline"
+            className="bg-white border-blue-200 text-[#2563EB] hover:bg-blue-50 font-bold text-xs rounded-xl px-3 py-1.5 shrink-0"
+          >
+            Tải lên / Cập nhật CV
+          </Button>
+        </div>
       </Card>
 
       {/* Professional Summary */}

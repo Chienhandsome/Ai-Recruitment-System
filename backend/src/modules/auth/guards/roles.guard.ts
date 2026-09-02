@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../../database/prisma.service';
-import { REQUIRED_ROLES_KEY, type AuthRole } from '../auth.constants';
+import { PUBLIC_ROUTE_KEY, REQUIRED_ROLES_KEY, type AuthRole } from '../auth.constants';
 import type { AuthenticatedRequest } from '../auth.types';
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -21,6 +21,15 @@ export class RolesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(
+      PUBLIC_ROUTE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    if (isPublic) {
+      return true;
+    }
+
     const requiredRoles = this.reflector.getAllAndOverride<AuthRole[]>(
       REQUIRED_ROLES_KEY,
       [context.getHandler(), context.getClass()],

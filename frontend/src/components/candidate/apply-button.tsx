@@ -3,43 +3,37 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { applyForJob } from '@/lib/candidate-api';
-import { toast } from 'sonner';
-import { createClient } from '@/lib/supabase/client';
-import { Send, Loader2, Sparkles, CheckCircle } from 'lucide-react';
+import { Send, CheckCircle } from 'lucide-react';
+import { ApplyJobModal } from '@/components/candidate/ApplyJobModal';
 
 interface ApplyButtonProps {
   jobId: string;
   hasApplied?: boolean;
+  jobTitle?: string;
+  companyName?: string;
+  requiresProofOfWork?: boolean;
+  proofOfWorkType?: string | null;
+  isAuthenticated?: boolean;
 }
 
-export function ApplyButton({ jobId, hasApplied }: ApplyButtonProps) {
-  const [isApplying, setIsApplying] = useState(false);
+export function ApplyButton({
+  jobId,
+  hasApplied,
+  jobTitle = 'Vị trí tuyển dụng',
+  companyName = 'Công ty tuyển dụng',
+  requiresProofOfWork = false,
+  proofOfWorkType = 'PORTFOLIO',
+  isAuthenticated = true,
+}: ApplyButtonProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
-  const handleApply = async () => {
-    setIsApplying(true);
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('Vui lòng đăng nhập để ứng tuyển');
-        router.push('/login');
-        return;
-      }
-
-      const res = await applyForJob(session.access_token, jobId);
-      toast.success(res.message);
-      
-      // Refresh the page to show application status
-      router.refresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Có lỗi xảy ra khi ứng tuyển');
-    } finally {
-      setIsApplying(false);
+  const handleOpenApply = () => {
+    if (!isAuthenticated) {
+      router.push(`/login?next=/candidate/jobs/${jobId}`);
+      return;
     }
+    setIsModalOpen(true);
   };
 
   if (hasApplied) {
@@ -56,23 +50,30 @@ export function ApplyButton({ jobId, hasApplied }: ApplyButtonProps) {
   }
 
   return (
-    <Button
-      className="mt-4 w-full active:translate-y-px"
-      onClick={handleApply}
-      disabled={isApplying}
-      size="lg"
-    >
-      {isApplying ? (
-        <>
-          <Loader2 className="mr-2 size-4 animate-spin" />
-          AI đang phân tích hồ sơ...
-        </>
-      ) : (
-        <>
-          <Send className="mr-2 size-4" />
-          Ứng tuyển ngay
-        </>
+    <>
+      <Button
+        className="mt-4 w-full active:translate-y-px font-bold"
+        onClick={handleOpenApply}
+        size="lg"
+      >
+        <Send className="mr-2 size-4" />
+        Ứng tuyển ngay
+      </Button>
+
+      {isModalOpen && (
+        <ApplyJobModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          jobId={jobId}
+          jobTitle={jobTitle}
+          companyName={companyName}
+          requiresProofOfWork={requiresProofOfWork}
+          proofOfWorkType={proofOfWorkType}
+          onSuccess={() => {
+            router.refresh();
+          }}
+        />
       )}
-    </Button>
+    </>
   );
 }

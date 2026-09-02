@@ -2,18 +2,35 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Menu, X, BrainCircuit } from "lucide-react"
+import { Menu, X, BrainCircuit, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/client"
 
 export function PublicHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
+  const [hasSession, setHasSession] = React.useState(false)
+
+  React.useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const supabase = createClient()
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        setHasSession(!!session?.access_token)
+      } catch {
+        setHasSession(false)
+      }
+    }
+    checkSession()
+  }, [])
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60 font-sans">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
@@ -30,24 +47,35 @@ export function PublicHeader() {
             <Link href="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
               Trang chủ
             </Link>
-            <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <Link href="/candidate" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
               Việc làm
             </Link>
-            <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Phòng ban
+            <Link href="/#categories" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+              Ngành nghề
             </Link>
-            <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Về chúng tôi
+            <Link href="/register/recruiter" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+              Dành cho Nhà tuyển dụng
             </Link>
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" asChild>
-              <Link href="/login">Đăng nhập</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/register">Đăng ký</Link>
-            </Button>
+          <div className="hidden md:flex items-center gap-3">
+            {hasSession ? (
+              <Button asChild className="rounded-xl font-bold">
+                <Link href="/candidate" className="flex items-center gap-1.5">
+                  Vào khu vực tìm việc
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" asChild className="rounded-xl font-semibold">
+                  <Link href="/login">Đăng nhập</Link>
+                </Button>
+                <Button asChild className="rounded-xl font-bold">
+                  <Link href="/register/candidate">Đăng ký</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -65,34 +93,58 @@ export function PublicHeader() {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t">
+        <div className="md:hidden border-t bg-surface">
           <div className="space-y-1 px-4 pb-3 pt-2">
             <Link
               href="/"
-              className="block rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-muted hover:text-primary"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-base font-medium text-foreground hover:bg-muted hover:text-primary"
             >
               Trang chủ
             </Link>
             <Link
-              href="#"
-              className="block rounded-md px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-primary"
+              href="/candidate"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-primary"
             >
               Việc làm
             </Link>
             <Link
-              href="#"
-              className="block rounded-md px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-primary"
+              href="/#categories"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-primary"
             >
-              Phòng ban
+              Ngành nghề
+            </Link>
+            <Link
+              href="/register/recruiter"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-primary"
+            >
+              Dành cho Nhà tuyển dụng
             </Link>
           </div>
-          <div className="border-t border-muted pb-4 pt-4 px-4 space-y-3">
-            <Button variant="outline" className="w-full justify-center" asChild>
-              <Link href="/login">Đăng nhập</Link>
-            </Button>
-            <Button className="w-full justify-center" asChild>
-              <Link href="/register">Đăng ký</Link>
-            </Button>
+          <div className="border-t border-muted pb-4 pt-4 px-4 space-y-2">
+            {hasSession ? (
+              <Button className="w-full justify-center rounded-xl font-bold" asChild>
+                <Link href="/candidate" onClick={() => setIsMobileMenuOpen(false)}>
+                  Vào khu vực tìm việc
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" className="w-full justify-center rounded-xl font-semibold" asChild>
+                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    Đăng nhập
+                  </Link>
+                </Button>
+                <Button className="w-full justify-center rounded-xl font-bold" asChild>
+                  <Link href="/register/candidate" onClick={() => setIsMobileMenuOpen(false)}>
+                    Đăng ký ứng viên
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

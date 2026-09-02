@@ -135,8 +135,7 @@ export function ProfilePageClient({
           onSaved={() => {
             setIsReviewingParsedResume(false)
             setIsEditing(false)
-            // Reload page to get fresh data from server
-            window.location.reload()
+            router.refresh()
           }}
         />
 

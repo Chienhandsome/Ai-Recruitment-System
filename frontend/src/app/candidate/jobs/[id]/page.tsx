@@ -10,6 +10,7 @@ import {
   GraduationCap,
   MapPin,
   WalletCards,
+  FileText,
 } from 'lucide-react';
 import { CompanyLogo } from '@/components/candidate/company-logo';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,8 @@ import { applicationStageLabels, applicationStageStyles } from '@/lib/applicatio
 
 export const dynamic = 'force-dynamic';
 
+import { BackToListButton } from '@/components/candidate/BackToListButton';
+
 export default async function CandidateJobDetailPage({
   params,
 }: {
@@ -37,11 +40,10 @@ export default async function CandidateJobDetailPage({
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session?.access_token) redirect('/login');
 
   let job;
   try {
-    job = await getCandidateJobDetail(session.access_token, id);
+    job = await getCandidateJobDetail(session?.access_token, id);
   } catch (error) {
     if (error instanceof CandidateApiError && error.status === 404) notFound();
     throw error;
@@ -50,14 +52,8 @@ export default async function CandidateJobDetailPage({
   const companyName = job.company?.name ?? 'Công ty tuyển dụng';
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <Link
-        href="/candidate"
-        className="inline-flex items-center gap-2 rounded-md text-sm font-semibold text-muted-foreground outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <ArrowLeft className="size-4" strokeWidth={1.8} />
-        Quay lại danh sách
-      </Link>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10 pb-24 lg:pb-10">
+      <BackToListButton />
 
       <div className="mt-5 rounded-2xl border bg-surface p-5 sm:p-7">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
@@ -145,6 +141,19 @@ export default async function CandidateJobDetailPage({
               </div>
             </section>
           )}
+
+          {job.requiresProofOfWork && (
+            <section className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5 sm:p-6">
+              <div className="flex items-center gap-2 text-amber-900 font-bold">
+                <FileText className="size-5 text-amber-700" />
+                <h2>Yêu cầu Bằng chứng năng lực (Proof of Work)</h2>
+              </div>
+              <p className="mt-2 text-sm text-amber-800 leading-relaxed">
+                Vị trí này yêu cầu ứng viên cung cấp liên kết chứng minh năng lực thực tế (loại hình:{' '}
+                <strong className="uppercase">{job.proofOfWorkType ?? 'Portfolio'}</strong>). Bạn có thể đính kèm đường dẫn khi bấm nộp hồ sơ.
+              </p>
+            </section>
+          )}
         </main>
 
         <aside className="space-y-4 lg:sticky lg:top-24">
@@ -193,6 +202,11 @@ export default async function CandidateJobDetailPage({
             <ApplyButton
               jobId={job.id}
               hasApplied={job.hasApplied}
+              jobTitle={job.title}
+              companyName={companyName}
+              requiresProofOfWork={job.requiresProofOfWork}
+              proofOfWorkType={job.proofOfWorkType}
+              isAuthenticated={!!session?.access_token}
             />
             {!job.hasApplied && (
               <Button asChild variant="outline" className="mt-3 w-full">
@@ -201,6 +215,29 @@ export default async function CandidateJobDetailPage({
             )}
           </section>
         </aside>
+      </div>
+
+      {/* Mobile Sticky Bottom Apply Bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 p-3 backdrop-blur lg:hidden shadow-lg">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-bold text-foreground">{job.title}</p>
+            <p className="text-xs font-extrabold text-primary">
+              {formatSalary(job.minSalary, job.maxSalary, job.currency)}
+            </p>
+          </div>
+          <div className="shrink-0 w-36">
+            <ApplyButton
+              jobId={job.id}
+              hasApplied={job.hasApplied}
+              jobTitle={job.title}
+              companyName={companyName}
+              requiresProofOfWork={job.requiresProofOfWork}
+              proofOfWorkType={job.proofOfWorkType}
+              isAuthenticated={!!session?.access_token}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

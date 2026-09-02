@@ -34,8 +34,6 @@ export function CandidateNav() {
 
   useEffect(() => {
     checkUnread();
-    const interval = setInterval(checkUnread, 30000);
-    return () => clearInterval(interval);
   }, [pathname]);
 
   return (

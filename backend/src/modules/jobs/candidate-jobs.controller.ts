@@ -4,48 +4,62 @@ import {
   Param,
   ParseUUIDPipe,
   Query,
-  UseGuards,
+  Req,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import type { AuthenticatedUser } from '../auth/auth.types';
+import { Public } from '../auth/decorators/public.decorator';
+import { SupabaseAuthService } from '../auth/supabase-auth.service';
 import { QueryCandidateJobDto } from './dto/query-candidate-job.dto';
 import { JobsService } from './jobs.service';
 
 @ApiTags('Candidate Jobs')
 @ApiBearerAuth()
-@UseGuards(SupabaseAuthGuard, RolesGuard)
-@Roles('CANDIDATE')
 @Controller('candidate/jobs')
 export class CandidateJobsController {
-  constructor(private readonly jobsService: JobsService) {}
+  constructor(
+    private readonly jobsService: JobsService,
+    private readonly supabaseAuthService: SupabaseAuthService,
+  ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Browse active published jobs as a candidate' })
+  @Public()
+  @ApiOperation({ summary: 'Browse active published jobs (Public)' })
   @ApiResponse({ status: 200, description: 'Return paginated active jobs' })
   findAll(@Query() query: QueryCandidateJobDto) {
     return this.jobsService.findCandidateJobs(query);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get an active published job for a candidate' })
+  @Public()
+  @ApiOperation({ summary: 'Get an active published job for a candidate or guest' })
   @ApiResponse({
     status: 200,
     description: 'Return candidate-safe job details',
   })
   @ApiResponse({ status: 404, description: 'Job is unavailable' })
-  findOne(
+  async findOne(
     @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: Request,
   ) {
-    return this.jobsService.findCandidateJobById(id, user.id);
+    let userId: string | null = null;
+    const authHeader = req.headers['authorization'];
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice('Bearer '.length).trim();
+      if (token) {
+        try {
+          const authUser = await this.supabaseAuthService.verifyAccessToken(token);
+          userId = authUser.id;
+        } catch {
+          userId = null;
+        }
+      }
+    }
+    return this.jobsService.findCandidateJobById(id, userId);
   }
 }

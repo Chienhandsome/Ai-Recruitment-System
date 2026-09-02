@@ -164,7 +164,7 @@ export interface CandidateJobQuery {
 }
 
 export async function getCandidateJobs(
-  token: string,
+  token?: string | null,
   query: CandidateJobQuery = {},
 ): Promise<CandidateJobsResponse> {
   const params = new URLSearchParams();
@@ -172,8 +172,13 @@ export async function getCandidateJobs(
     if (value !== undefined && value !== '') params.set(key, String(value));
   });
 
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_URL}/candidate/jobs?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers,
     cache: 'no-store',
   });
 
@@ -188,11 +193,16 @@ export async function getCandidateJobs(
 }
 
 export async function getCandidateJobDetail(
-  token: string,
+  token: string | null | undefined,
   jobId: string,
 ): Promise<CandidateJobDetail> {
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_URL}/candidate/jobs/${jobId}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers,
     cache: 'no-store',
   });
 
@@ -388,12 +398,17 @@ export interface UpdateCandidateProfileInput {
     startDate?: string | null;
     endDate?: string | null;
   }>;
+  expectedMinSalary?: number | null;
+  expectedMaxSalary?: number | null;
+  preferredModel?: CandidateWorkingModel | null;
   certificates?: Array<{
     id?: string;
     source?: 'MANUAL' | 'EXTRACTED';
     certificateName: string;
     issuingOrganization?: string | null;
     issueDate?: string | null;
+    expiryDate?: string | null;
+    credentialUrl?: string | null;
   }>;
 }
 

@@ -16,6 +16,7 @@ import {
   User,
   Loader2,
   ChevronDown,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -50,6 +51,8 @@ export function CandidateInterviewCard({
   roundIndex = 1,
 }: CandidateInterviewCardProps) {
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
+  const [declineReason, setDeclineReason] = useState('Đã tìm được công việc phù hợp khác');
   const [submittingAction, setSubmittingAction] = useState<'ACCEPT' | 'DECLINE' | null>(null);
   const [showCalendarMenu, setShowCalendarMenu] = useState(false);
 
@@ -73,25 +76,15 @@ export function CandidateInterviewCard({
     }
   };
 
-  const handleDecline = async () => {
-    const confirmDecline = window.confirm(
-      'Bạn có chắc chắn muốn từ chối buổi phỏng vấn này không? Hành động này sẽ hủy lịch hẹn hiện tại.',
-    );
-    if (!confirmDecline) return;
-
-    const reason = window.prompt(
-      'Vui lòng nhập lý do từ chối (để HR nắm được thông tin):',
-      'Đã tìm được công việc phù hợp khác',
-    );
-    if (reason === null) return;
-
+  const handleConfirmDecline = async () => {
     setSubmittingAction('DECLINE');
     try {
       await respondToInterview(token, interview.id, {
         response: 'DECLINED',
-        candidateNotes: reason.trim() || 'Ứng viên từ chối phỏng vấn',
+        candidateNotes: declineReason.trim() || 'Ứng viên từ chối phỏng vấn',
       });
       toast.info('Đã gửi thông báo từ chối tới nhà tuyển dụng.');
+      setIsDeclineModalOpen(false);
       await onRefresh();
     } catch (error) {
       toast.error(
@@ -328,7 +321,7 @@ export function CandidateInterviewCard({
                   <button
                     type="button"
                     disabled={submittingAction !== null}
-                    onClick={handleDecline}
+                    onClick={() => setIsDeclineModalOpen(true)}
                     className="rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition"
                   >
                     {submittingAction === 'DECLINE' ? (
@@ -398,6 +391,75 @@ export function CandidateInterviewCard({
           currentScheduledAt={interview.scheduledAt}
           onSuccess={onRefresh}
         />
+      )}
+
+      {/* Decline Interview Modal */}
+      {isDeclineModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <button
+              type="button"
+              onClick={() => setIsDeclineModalOpen(false)}
+              disabled={submittingAction === 'DECLINE'}
+              className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+            >
+              <X className="size-5" />
+            </button>
+
+            <div className="flex items-start gap-3 pb-3 border-b border-slate-100">
+              <div className="rounded-xl bg-rose-50 p-2.5 text-rose-600 shrink-0">
+                <XCircle className="size-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Từ chối tham gia phỏng vấn</h3>
+                <p className="text-xs text-slate-500 mt-0.5">{interview.title}</p>
+              </div>
+            </div>
+
+            <p className="mt-3 text-xs text-slate-600 leading-relaxed">
+              Bạn có chắc chắn muốn từ chối buổi phỏng vấn này không? Hành động này sẽ hủy lịch hẹn hiện tại và thông báo tới nhà tuyển dụng.
+            </p>
+
+            <div className="mt-4 space-y-1.5">
+              <label className="block text-xs font-bold text-slate-900">
+                Lý do từ chối (để HR nắm thông tin):
+              </label>
+              <textarea
+                value={declineReason}
+                onChange={(e) => setDeclineReason(e.target.value)}
+                rows={3}
+                placeholder="Ví dụ: Đã tìm được công việc phù hợp khác, vướng lịch đột xuất..."
+                className="w-full rounded-xl border border-slate-200 p-3 text-xs focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+              />
+            </div>
+
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsDeclineModalOpen(false)}
+                disabled={submittingAction === 'DECLINE'}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDecline}
+                disabled={submittingAction === 'DECLINE'}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 transition active:scale-95"
+              >
+                {submittingAction === 'DECLINE' ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" />
+                    Đang xử lý...
+                  </>
+                ) : (
+                  'Xác nhận từ chối'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

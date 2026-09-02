@@ -236,55 +236,102 @@ export function ProfileForm({
       // Filter out empty rows
       const validWorkExps = workExps
         .filter((w) => w.companyName.trim() && w.positionTitle.trim())
-        .map((w) => ({
-          id: w.id.startsWith("temp-") ? undefined : w.id,
-          source: w.source ?? "MANUAL",
-          companyName: w.companyName.trim(),
-          positionTitle: w.positionTitle.trim(),
-          startDate: w.startDate || undefined,
-          endDate: w.endDate || null,
-          isCurrent: w.isCurrent,
-          description: w.description || null,
-          achievements: w.achievements || null
-        }))
+        .map((w) => {
+          let startDateStr = w.startDate?.trim();
+          if (startDateStr && !startDateStr.includes('T')) {
+            startDateStr = new Date(startDateStr).toISOString();
+          }
+          let endDateStr = w.endDate?.trim();
+          if (endDateStr && !endDateStr.includes('T')) {
+            endDateStr = new Date(endDateStr).toISOString();
+          }
+          return {
+            id: w.id.startsWith("temp-") ? undefined : w.id,
+            source: w.source ?? "MANUAL",
+            companyName: w.companyName.trim(),
+            positionTitle: w.positionTitle.trim(),
+            startDate: startDateStr || new Date().toISOString(),
+            endDate: w.isCurrent ? null : (endDateStr || null),
+            isCurrent: !!w.isCurrent,
+            description: w.description || null,
+            achievements: w.achievements || null,
+          };
+        });
 
       const validEducations = educations
         .filter((e) => e.schoolName.trim())
-        .map((e) => ({
-          id: e.id.startsWith("temp-") ? undefined : e.id,
-          source: e.source ?? "MANUAL",
-          schoolName: e.schoolName.trim(),
-          major: e.major || null,
-          degree: e.degree || null,
-          startDate: e.startDate || null,
-          endDate: e.endDate || null
-        }))
+        .map((e) => {
+          let startDateStr = e.startDate?.trim();
+          if (startDateStr && !startDateStr.includes('T')) {
+            startDateStr = new Date(startDateStr).toISOString();
+          }
+          let endDateStr = e.endDate?.trim();
+          if (endDateStr && !endDateStr.includes('T')) {
+            endDateStr = new Date(endDateStr).toISOString();
+          }
+          return {
+            id: e.id.startsWith("temp-") ? undefined : e.id,
+            source: e.source ?? "MANUAL",
+            schoolName: e.schoolName.trim(),
+            major: e.major || null,
+            degree: e.degree || null,
+            startDate: startDateStr || null,
+            endDate: endDateStr || null,
+            description: e.description || null,
+          };
+        });
 
       const validProjects = projects
         .filter((p) => p.projectName.trim())
-        .map((p) => ({
-          id: p.id.startsWith("temp-") ? undefined : p.id,
-          source: p.source ?? "MANUAL",
-          projectName: p.projectName.trim(),
-          projectRole: p.projectRole || null,
-          description: p.description || null,
-          technologies: p.technologies
-            ? p.technologies.map((technology) => technology.trim()).filter(Boolean)
-            : null,
-          projectUrl: p.projectUrl || null,
-          startDate: p.startDate || null,
-          endDate: p.endDate || null
-        }))
+        .map((p) => {
+          let startDateStr = p.startDate?.trim();
+          if (startDateStr && !startDateStr.includes('T')) {
+            startDateStr = new Date(startDateStr).toISOString();
+          }
+          let endDateStr = p.endDate?.trim();
+          if (endDateStr && !endDateStr.includes('T')) {
+            endDateStr = new Date(endDateStr).toISOString();
+          }
+          return {
+            id: p.id.startsWith("temp-") ? undefined : p.id,
+            source: p.source ?? "MANUAL",
+            projectName: p.projectName.trim(),
+            projectRole: p.projectRole || null,
+            description: p.description || null,
+            technologies: p.technologies
+              ? p.technologies.map((tech) => (typeof tech === 'string' ? tech.trim() : tech)).filter(Boolean)
+              : null,
+            projectUrl: p.projectUrl || null,
+            startDate: startDateStr || null,
+            endDate: endDateStr || null,
+          };
+        });
 
       const validCertificates = certificates
         .filter((c) => c.certificateName.trim())
-        .map((c) => ({
-          id: c.id.startsWith("temp-") ? undefined : c.id,
-          source: c.source ?? "MANUAL",
-          certificateName: c.certificateName.trim(),
-          issuingOrganization: c.issuingOrganization || "Unknown",
-          issueDate: c.issueDate || null
-        }))
+        .map((c) => {
+          let issueDateStr = c.issueDate?.trim();
+          if (issueDateStr && !issueDateStr.includes('T')) {
+            issueDateStr = new Date(issueDateStr).toISOString();
+          }
+          let expiryDateStr = c.expiryDate?.trim();
+          if (expiryDateStr && !expiryDateStr.includes('T')) {
+            expiryDateStr = new Date(expiryDateStr).toISOString();
+          }
+          return {
+            id: c.id.startsWith("temp-") ? undefined : c.id,
+            source: c.source ?? "MANUAL",
+            certificateName: c.certificateName.trim(),
+            issuingOrganization: c.issuingOrganization || "Chưa cập nhật",
+            issueDate: issueDateStr || null,
+            expiryDate: expiryDateStr || null,
+            credentialUrl: c.credentialUrl || null,
+          };
+        });
+
+      const minSalaryInput = formData.get("expectedMinSalary") ? Number(formData.get("expectedMinSalary")) : null;
+      const maxSalaryInput = formData.get("expectedMaxSalary") ? Number(formData.get("expectedMaxSalary")) : null;
+      const prefModelInput = (formData.get("preferredModel") as any) || null;
 
       await updateCandidateProfile(session.access_token, {
         fullName: formData.get("fullName") as string,
@@ -292,14 +339,17 @@ export function ProfileForm({
         address: (formData.get("address") as string) || null,
         desiredTitle: (formData.get("desiredTitle") as string) || null,
         professionalSummary: (formData.get("professionalSummary") as string) || null,
+        expectedMinSalary: minSalaryInput,
+        expectedMaxSalary: maxSalaryInput,
+        preferredModel: prefModelInput,
         linkedinUrl: (formData.get("linkedinUrl") as string) || null,
         githubUrl: (formData.get("githubUrl") as string) || null,
         portfolioUrl: (formData.get("portfolioUrl") as string) || null,
         workExperiences: validWorkExps,
         educations: validEducations,
         projects: validProjects,
-        certificates: validCertificates
-      })
+        certificates: validCertificates,
+      });
 
       setSaveMessage("Đã lưu thông tin thành công!")
       setTimeout(() => {
@@ -459,6 +509,48 @@ export function ProfileForm({
               className="bg-[#F8FAFC] border-[#E2E8F0] text-sm focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 rounded-xl leading-relaxed"
             />
           </div>
+
+          <div className="grid gap-4 sm:grid-cols-3 pt-3 border-t border-slate-100">
+            <div className="space-y-1.5">
+              <Label htmlFor="expectedMinSalary" className="text-xs font-bold text-[#0F172A]">
+                Lương tối thiểu (VND/tháng)
+              </Label>
+              <Input
+                id="expectedMinSalary"
+                name="expectedMinSalary"
+                type="number"
+                placeholder="Ví dụ: 15000000"
+                className="bg-[#F8FAFC] border-[#E2E8F0] text-sm focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 rounded-xl"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="expectedMaxSalary" className="text-xs font-bold text-[#0F172A]">
+                Lương tối đa (VND/tháng)
+              </Label>
+              <Input
+                id="expectedMaxSalary"
+                name="expectedMaxSalary"
+                type="number"
+                placeholder="Ví dụ: 30000000"
+                className="bg-[#F8FAFC] border-[#E2E8F0] text-sm focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 rounded-xl"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="preferredModel" className="text-xs font-bold text-[#0F172A]">
+                Hình thức làm việc ưu tiên
+              </Label>
+              <select
+                id="preferredModel"
+                name="preferredModel"
+                className="w-full h-9 bg-[#F8FAFC] border border-[#E2E8F0] text-sm rounded-xl px-3 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[#0F172A]"
+              >
+                <option value="">Không yêu cầu cụ thể</option>
+                <option value="ON_SITE">Tại văn phòng (On-site)</option>
+                <option value="HYBRID">Linh hoạt (Hybrid)</option>
+                <option value="REMOTE">Làm việc từ xa (Remote)</option>
+              </select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -522,14 +614,65 @@ export function ProfileForm({
                   </div>
                 </div>
 
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Ngày bắt đầu</Label>
+                    <Input
+                      type="date"
+                      value={exp.startDate ? exp.startDate.split('T')[0] : ""}
+                      onChange={(e) => updateWorkExp(idx, "startDate", e.target.value)}
+                      className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Ngày kết thúc</Label>
+                    <Input
+                      type="date"
+                      disabled={exp.isCurrent}
+                      value={exp.endDate ? exp.endDate.split('T')[0] : ""}
+                      onChange={(e) => updateWorkExp(idx, "endDate", e.target.value)}
+                      className="bg-white border-[#E2E8F0] text-xs rounded-xl disabled:bg-slate-100"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 pt-6">
+                    <input
+                      type="checkbox"
+                      id={`current-${idx}`}
+                      checked={exp.isCurrent}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        updateWorkExp(idx, "isCurrent", checked);
+                        if (checked) updateWorkExp(idx, "endDate", null);
+                      }}
+                      className="size-4 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
+                    />
+                    <Label htmlFor={`current-${idx}`} className="text-xs font-semibold text-[#0F172A] cursor-pointer">
+                      Đang làm việc tại đây
+                    </Label>
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <Label className="text-xs font-bold text-[#0F172A]">
-                    Mô tả công việc & Thành tựu
+                    Mô tả công việc
                   </Label>
                   <Textarea
                     value={exp.description ?? ""}
                     onChange={(e) => updateWorkExp(idx, "description", e.target.value)}
                     placeholder="Mô tả các công việc chính đã thực hiện..."
+                    rows={2}
+                    className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-bold text-[#0F172A]">
+                    Thành tựu nổi bật (Tùy chọn)
+                  </Label>
+                  <Textarea
+                    value={exp.achievements ?? ""}
+                    onChange={(e) => updateWorkExp(idx, "achievements", e.target.value)}
+                    placeholder="Các kết quả hoặc giải thưởng đạt được..."
                     rows={2}
                     className="bg-white border-[#E2E8F0] text-xs rounded-xl"
                   />
@@ -606,6 +749,38 @@ export function ProfileForm({
                       className="bg-white border-[#E2E8F0] text-xs rounded-xl"
                     />
                   </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Ngày bắt đầu</Label>
+                    <Input
+                      type="date"
+                      value={edu.startDate ? edu.startDate.split('T')[0] : ""}
+                      onChange={(e) => updateEducation(idx, "startDate", e.target.value)}
+                      className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Ngày tốt nghiệp</Label>
+                    <Input
+                      type="date"
+                      value={edu.endDate ? edu.endDate.split('T')[0] : ""}
+                      onChange={(e) => updateEducation(idx, "endDate", e.target.value)}
+                      className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-bold text-[#0F172A]">Mô tả / Đề tài tốt nghiệp (Tùy chọn)</Label>
+                  <Textarea
+                    value={edu.description ?? ""}
+                    onChange={(e) => updateEducation(idx, "description", e.target.value)}
+                    placeholder="Mô tả thành tích học tập, xếp loại tốt nghiệp..."
+                    rows={2}
+                    className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                  />
                 </div>
               </div>
             ))
@@ -701,6 +876,27 @@ export function ProfileForm({
                   </div>
                 </div>
 
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Ngày bắt đầu</Label>
+                    <Input
+                      type="date"
+                      value={proj.startDate ? proj.startDate.split('T')[0] : ""}
+                      onChange={(e) => updateProject(idx, "startDate", e.target.value)}
+                      className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Ngày hoàn thành</Label>
+                    <Input
+                      type="date"
+                      value={proj.endDate ? proj.endDate.split('T')[0] : ""}
+                      onChange={(e) => updateProject(idx, "endDate", e.target.value)}
+                      className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <Label className="text-xs font-bold text-[#0F172A]">Mô tả dự án</Label>
                   <Textarea
@@ -773,6 +969,36 @@ export function ProfileForm({
                         updateCertificate(idx, "issuingOrganization", e.target.value)
                       }
                       placeholder="Ví dụ: Amazon Web Services"
+                      className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Ngày cấp</Label>
+                    <Input
+                      type="date"
+                      value={cert.issueDate ? cert.issueDate.split('T')[0] : ""}
+                      onChange={(e) => updateCertificate(idx, "issueDate", e.target.value)}
+                      className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Ngày hết hạn</Label>
+                    <Input
+                      type="date"
+                      value={cert.expiryDate ? cert.expiryDate.split('T')[0] : ""}
+                      onChange={(e) => updateCertificate(idx, "expiryDate", e.target.value)}
+                      className="bg-white border-[#E2E8F0] text-xs rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Đường dẫn chứng chỉ (URL)</Label>
+                    <Input
+                      value={cert.credentialUrl ?? ""}
+                      onChange={(e) => updateCertificate(idx, "credentialUrl", e.target.value)}
+                      placeholder="https://..."
                       className="bg-white border-[#E2E8F0] text-xs rounded-xl"
                     />
                   </div>

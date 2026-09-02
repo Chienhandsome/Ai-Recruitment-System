@@ -45,32 +45,38 @@ export default async function HomePage() {
               </p>
 
               {/* Job Search Form */}
-              <div className="bg-surface p-4 rounded-xl shadow-sm border flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
+              <form
+                action="/candidate"
+                method="GET"
+                className="bg-surface p-3 sm:p-4 rounded-2xl shadow-sm border flex flex-col md:flex-row gap-3 sm:gap-4 max-w-4xl mx-auto"
+              >
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                  <Search className="absolute left-3.5 top-3.5 h-5 w-5 text-muted-foreground" />
                   <Input 
+                    name="search"
                     placeholder="Chức danh, kỹ năng, tên công ty..." 
-                    className="pl-10 h-12 text-base border-0 focus-visible:ring-0 bg-muted/50" 
+                    className="pl-11 h-12 text-base border-0 focus-visible:ring-0 bg-muted/50 rounded-xl" 
                   />
                 </div>
                 <div className="hidden md:block w-px bg-border my-2"></div>
                 <div className="relative flex-1">
-                  <MapPin className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                  <MapPin className="absolute left-3.5 top-3.5 h-5 w-5 text-muted-foreground" />
                   <Input 
-                    placeholder="Tất cả địa điểm" 
-                    className="pl-10 h-12 text-base border-0 focus-visible:ring-0 bg-muted/50" 
+                    name="location"
+                    placeholder="Tất cả địa điểm (Hà Nội, TP.HCM...)" 
+                    className="pl-11 h-12 text-base border-0 focus-visible:ring-0 bg-muted/50 rounded-xl" 
                   />
                 </div>
-                <Button className="h-12 px-8 text-base shrink-0 w-full md:w-auto" asChild>
-                  <Link href="/candidate/jobs">Tìm việc</Link>
+                <Button type="submit" className="h-12 px-8 text-base font-bold shrink-0 w-full md:w-auto rounded-xl">
+                  Tìm việc
                 </Button>
-              </div>
+              </form>
             </div>
           </div>
         </section>
 
         {/* Featured Departments / Categories */}
-        <section className="py-20 bg-background">
+        <section id="categories" className="py-20 bg-background">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <SectionHeading 
               title="Ngành nghề nổi bật" 
@@ -81,7 +87,7 @@ export default async function HomePage() {
             {categories.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
                 {categories.map((cat) => (
-                  <Link key={cat.id} href={`/candidate/jobs?categoryId=${cat.id}`}>
+                  <Link key={cat.id} href={`/candidate?categoryId=${cat.id}`}>
                     <Card className="hover:shadow-md transition-shadow cursor-pointer border-border group h-full">
                       <CardHeader className="flex flex-row items-center gap-4 pb-4">
                         <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center group-hover:bg-primary/10 transition-colors">
@@ -100,7 +106,7 @@ export default async function HomePage() {
               <div className="text-center text-muted-foreground py-10">
                 <p>Khám phá tất cả các vị trí việc làm đang mở trên hệ thống</p>
                 <Button variant="outline" className="mt-4" asChild>
-                  <Link href="/candidate/jobs">Xem danh sách việc làm</Link>
+                  <Link href="/candidate">Xem danh sách việc làm</Link>
                 </Button>
               </div>
             )}

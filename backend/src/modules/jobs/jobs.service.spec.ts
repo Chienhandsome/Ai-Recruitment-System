@@ -153,4 +153,111 @@ describe('JobsService candidate browsing', () => {
       service.findCandidateJobById('unavailable-job', 'user-1'),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
+
+  it('recommends mobile and frontend jobs and filters out unrelated jobs for a React Native profile', async () => {
+    const mobileJob = {
+      ...publishedJob,
+      id: 'job-mobile',
+      title: 'React Native Developer',
+      jobSkills: [
+        {
+          requirementType: 'MANDATORY',
+          skill: { id: 'skill-rn', name: 'React Native', normalizedName: 'react-native' },
+        },
+        {
+          requirementType: 'PREFERRED',
+          skill: { id: 'skill-ts', name: 'TypeScript', normalizedName: 'typescript' },
+        },
+      ],
+    };
+    const feJob = {
+      ...publishedJob,
+      id: 'job-fe',
+      title: 'Frontend Developer (ReactJS)',
+      jobSkills: [
+        {
+          requirementType: 'MANDATORY',
+          skill: { id: 'skill-react', name: 'ReactJS', normalizedName: 'react' },
+        },
+      ],
+    };
+    const accountantJob = {
+      ...publishedJob,
+      id: 'job-accountant',
+      title: 'Chuyên viên Kế toán',
+      category: {
+        id: 'cat-acc',
+        name: 'Kế toán / Kiểm toán',
+        slug: 'accounting-audit',
+      },
+      jobSkills: [
+        {
+          requirementType: 'MANDATORY',
+          skill: { id: 'skill-tax', name: 'Kế toán thuế', normalizedName: 'tax-accounting' },
+        },
+      ],
+    };
+
+    const candidateProfile = {
+      id: 'cand-1',
+      desiredTitle: 'React Native Developer',
+      candidateSkills: [
+        {
+          skillId: 'skill-rn',
+          proficiencyLevel: 'INTERMEDIATE',
+          skill: { id: 'skill-rn', name: 'React Native', normalizedName: 'react-native' },
+        },
+        {
+          skillId: 'skill-ts',
+          proficiencyLevel: 'INTERMEDIATE',
+          skill: { id: 'skill-ts', name: 'TypeScript', normalizedName: 'typescript' },
+        },
+      ],
+    };
+
+    const prisma = {
+      candidateProfile: {
+        findUnique: jest.fn().mockResolvedValue(candidateProfile),
+      },
+      jobPosting: {
+        findMany: jest.fn().mockResolvedValue([feJob, accountantJob, mobileJob]),
+      },
+    } as any;
+    const service = new JobsService(prisma);
+
+    const result = await service.findRecommendedCandidateJobs('user-1', {
+      page: 1,
+      limit: 10,
+    });
+
+    // Accounting job should be filtered out (score < 15)
+    expect(result.data.find((j) => j.id === 'job-accountant')).toBeUndefined();
+
+    // Mobile job should rank first with higher matchScore than FE job
+    expect(result.data[0].id).toBe('job-mobile');
+    expect(result.data[0].matchScore).toBeGreaterThan(result.data[1].matchScore || 0);
+    expect(result.data[0].matchedSkills).toContain('React Native');
+    expect(result.data[0].matchedSkills).toContain('TypeScript');
+  });
+
+  it('falls back to findCandidateJobs when candidate has an empty profile', async () => {
+    const prisma = {
+      candidateProfile: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+      jobPosting: {
+        count: jest.fn().mockResolvedValue(1),
+        findMany: jest.fn().mockResolvedValue([publishedJob]),
+      },
+    } as any;
+    const service = new JobsService(prisma);
+
+    const result = await service.findRecommendedCandidateJobs('user-no-profile', {
+      page: 1,
+      limit: 10,
+    });
+
+    expect(prisma.jobPosting.count).toHaveBeenCalled();
+    expect(result.data.length).toBe(1);
+  });
 });

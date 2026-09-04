@@ -5,13 +5,28 @@ import { CandidateJobsController } from './candidate-jobs.controller';
 import { QueryCandidateJobDto } from './dto/query-candidate-job.dto';
 
 describe('CandidateJobsController contract', () => {
-  it('requires the CANDIDATE role and is not public', () => {
+  it('requires the CANDIDATE role on recommended endpoint and is not public', () => {
     expect(
-      Reflect.getMetadata(REQUIRED_ROLES_KEY, CandidateJobsController),
+      Reflect.getMetadata(
+        REQUIRED_ROLES_KEY,
+        CandidateJobsController.prototype.findRecommended,
+      ),
     ).toEqual(['CANDIDATE']);
     expect(
-      Reflect.getMetadata(PUBLIC_ROUTE_KEY, CandidateJobsController),
+      Reflect.getMetadata(
+        PUBLIC_ROUTE_KEY,
+        CandidateJobsController.prototype.findRecommended,
+      ),
     ).toBeUndefined();
+  });
+
+  it('exposes findAll as public', () => {
+    expect(
+      Reflect.getMetadata(
+        PUBLIC_ROUTE_KEY,
+        CandidateJobsController.prototype.findAll,
+      ),
+    ).toBe(true);
   });
 
   it('rejects page sizes over the public API limit', async () => {

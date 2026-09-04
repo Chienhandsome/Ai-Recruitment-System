@@ -5,10 +5,10 @@ node_modules/
 .pnp.js
 
 # Build/distribution directories
-/dist/
-/.next/
-/out/
-/build/
+dist/
+.next/
+out/
+build/
 
 # Debug logs
 npm-debug.log*

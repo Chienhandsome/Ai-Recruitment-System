@@ -72,6 +72,8 @@ export interface CandidateJobSummary {
     name: string;
     requirementType: 'MANDATORY' | 'PREFERRED' | 'NICE_TO_HAVE';
   }>;
+  matchScore?: number;
+  matchedSkills?: string[];
 }
 
 export interface CandidateJobDetail extends CandidateJobSummary {
@@ -190,6 +192,37 @@ export async function getCandidateJobs(
   }
 
   return response.json();
+}
+
+export async function getCandidateRecommendedJobs(
+  token?: string | null,
+  query: CandidateJobQuery = {},
+): Promise<CandidateJobsResponse> {
+  if (!token) {
+    return getCandidateJobs(token, query);
+  }
+
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') params.set(key, String(value));
+  });
+
+  try {
+    const response = await fetch(`${API_URL}/candidate/jobs/recommended?${params.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      return getCandidateJobs(token, query);
+    }
+
+    return response.json();
+  } catch {
+    return getCandidateJobs(token, query);
+  }
 }
 
 export async function getCandidateJobDetail(

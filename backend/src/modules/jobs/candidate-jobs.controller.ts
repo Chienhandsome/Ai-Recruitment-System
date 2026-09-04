@@ -13,7 +13,10 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
+import type { AuthenticatedUser } from '../auth/auth.types';
 import { SupabaseAuthService } from '../auth/supabase-auth.service';
 import { QueryCandidateJobDto } from './dto/query-candidate-job.dto';
 import { JobsService } from './jobs.service';
@@ -33,6 +36,22 @@ export class CandidateJobsController {
   @ApiResponse({ status: 200, description: 'Return paginated active jobs' })
   findAll(@Query() query: QueryCandidateJobDto) {
     return this.jobsService.findCandidateJobs(query);
+  }
+
+  @Get('recommended')
+  @Roles('CANDIDATE')
+  @ApiOperation({
+    summary: 'Get personalized job recommendations for the candidate',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return recommended active jobs matching candidate profile',
+  })
+  findRecommended(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: QueryCandidateJobDto,
+  ) {
+    return this.jobsService.findRecommendedCandidateJobs(user.id, query);
   }
 
   @Get(':id')

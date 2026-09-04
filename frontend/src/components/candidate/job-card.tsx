@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, BriefcaseBusiness, Clock3, MapPin, WalletCards } from 'lucide-react';
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, Clock3, MapPin, Sparkles, WalletCards } from 'lucide-react';
 import type { CandidateJobSummary } from '@/lib/candidate-api';
 import {
   employmentTypeLabels,
@@ -17,7 +17,15 @@ export function JobCard({ job }: { job: CandidateJobSummary }) {
       <div className="flex items-start gap-3">
         <CompanyLogo name={companyName} logoUrl={job.company?.logoUrl} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-muted-foreground">{companyName}</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="truncate text-sm font-medium text-muted-foreground">{companyName}</p>
+            {typeof job.matchScore === 'number' && job.matchScore > 0 && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#EFF6FF] px-2.5 py-0.5 text-xs font-bold text-[#2563EB] ring-1 ring-inset ring-[#2563EB]/20">
+                <Sparkles className="size-3" />
+                {job.matchScore}% Phù hợp
+              </span>
+            )}
+          </div>
           <Link
             href={`/candidate/jobs/${job.id}`}
             className="mt-1 block text-lg font-bold leading-snug text-foreground outline-none transition-colors hover:text-primary focus-visible:rounded focus-visible:ring-2 focus-visible:ring-ring"
@@ -47,6 +55,13 @@ export function JobCard({ job }: { job: CandidateJobSummary }) {
           Đăng {formatJobDate(job.publishedAt)}
         </span>
       </div>
+
+      {job.matchedSkills && job.matchedSkills.length > 0 && (
+        <div className="mt-3 flex items-center gap-1.5 rounded-lg bg-[#EFF6FF] px-2.5 py-1 text-xs font-medium text-[#2563EB]">
+          <CheckCircle2 className="size-3.5 shrink-0 text-[#2563EB]" />
+          <span className="truncate">Khớp kỹ năng: {job.matchedSkills.join(', ')}</span>
+        </div>
+      )}
 
       <div className="mt-4 flex flex-wrap gap-2">
         <span className="rounded-md bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground">

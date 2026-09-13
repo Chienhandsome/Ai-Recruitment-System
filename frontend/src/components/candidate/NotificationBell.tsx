@@ -170,6 +170,11 @@ export function NotificationBell() {
     }
 
     setIsOpen(false);
+    const launchUrl = item.payload?.launchUrl;
+    if (typeof launchUrl === 'string' && /^https?:\/\//.test(launchUrl)) {
+      window.location.assign(launchUrl);
+      return;
+    }
     router.push('/candidate/applications');
   };
 

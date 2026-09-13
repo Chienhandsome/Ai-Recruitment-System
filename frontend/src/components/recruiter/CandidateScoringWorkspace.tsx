@@ -21,6 +21,7 @@ import {
   candidateResponseLabels,
 } from "@/lib/interview-api";
 import { format } from "date-fns";
+import { AiInterviewManager } from "./interviews/AiInterviewManager";
 
 export type PillarDimension = "skills" | "experience" | "education" | "other";
 
@@ -585,15 +586,24 @@ export function CandidateScoringWorkspace({
                     <span className="text-xs text-slate-500 font-medium">
                       Quyết định tuyển dụng cho ứng viên này:
                     </span>
-                    <ApplicationStageActions
-                      token={token}
-                      applicationId={detail.id}
-                      currentStage={detail.currentStage}
-                      allowedTransitions={detail.allowedTransitions}
-                      currentHrNotes={detail.hrNotes}
-                      onUpdated={onRefresh}
-                      onScheduleInterview={onScheduleInterview}
-                    />
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                      <AiInterviewManager
+                        token={token}
+                        applicationId={detail.id}
+                        candidateName={candUser?.fullName || "Ứng viên"}
+                        jobTitle={job.title}
+                        onCreated={onRefresh}
+                      />
+                      <ApplicationStageActions
+                        token={token}
+                        applicationId={detail.id}
+                        currentStage={detail.currentStage}
+                        allowedTransitions={detail.allowedTransitions}
+                        currentHrNotes={detail.hrNotes}
+                        onUpdated={onRefresh}
+                        onScheduleInterview={onScheduleInterview}
+                      />
+                    </div>
                   </div>
                 )}
               </div>

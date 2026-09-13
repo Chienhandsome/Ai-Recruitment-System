@@ -18,6 +18,7 @@ async function bootstrap() {
   logger.log(`AI_SERVICE_URL: ${process.env.AI_SERVICE_URL ?? 'NOT SET'}`);
 
   const app = await NestFactory.create(AppModule, {
+    rawBody: true,
     logger:
       process.env.NODE_ENV === 'production'
         ? ['log', 'warn', 'error']

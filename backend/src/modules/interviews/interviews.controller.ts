@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,8 +10,12 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { RawBodyRequest } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -28,13 +33,88 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { Public } from '../auth/decorators/public.decorator';
+import { AiInterviewsService } from './ai-interviews.service';
+import { CreateAiInterviewDto } from './dto/create-ai-interview.dto';
 
 @ApiTags('Interviews')
 @ApiBearerAuth()
 @UseGuards(SupabaseAuthGuard, RolesGuard)
 @Controller('interviews')
 export class InterviewsController {
-  constructor(private readonly interviewsService: InterviewsService) {}
+  constructor(
+    private readonly interviewsService: InterviewsService,
+    private readonly aiInterviewsService: AiInterviewsService,
+  ) {}
+
+  @Post('ai')
+  @Roles('RECRUITER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Tạo cuộc phỏng vấn online với AI' })
+  async createAiInterview(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateAiInterviewDto,
+  ) {
+    return this.aiInterviewsService.create(user.id, dto);
+  }
+
+  @Post('ai/callback')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Nhận callback có chữ ký từ Interview Service' })
+  async receiveAiInterviewCallback(
+    @Req() request: RawBodyRequest<Request>,
+    @Body() body: unknown,
+    @Headers('x-interview-event-id') eventId?: string,
+    @Headers('x-interview-timestamp') timestamp?: string,
+    @Headers('x-interview-signature') signature?: string,
+  ) {
+    return this.aiInterviewsService.receiveCallback(request.rawBody, {
+      eventId,
+      timestamp,
+      signature,
+    }, body);
+  }
+
+  @Get('ai/application/:applicationId')
+  @Roles('RECRUITER')
+  @ApiOperation({ summary: 'Lấy các cuộc phỏng vấn AI của một đơn ứng tuyển' })
+  async findAiInterviewsForApplication(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('applicationId', ParseUUIDPipe) applicationId: string,
+  ) {
+    return this.aiInterviewsService.findForApplication(user.id, applicationId);
+  }
+
+  @Get('ai/:id')
+  @Roles('RECRUITER')
+  @ApiOperation({ summary: 'Lấy kết quả phỏng vấn AI dành cho HR' })
+  async findAiInterview(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.aiInterviewsService.findOne(user.id, id);
+  }
+
+  @Get('ai/:id/videos/:videoId')
+  @Roles('RECRUITER')
+  @ApiOperation({ summary: 'Tải video phỏng vấn AI qua proxy bảo mật' })
+  async downloadAiInterviewVideo(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('videoId', ParseUUIDPipe) videoId: string,
+    @Res() response: Response,
+  ) {
+    const video = await this.aiInterviewsService.downloadVideo(
+      user.id,
+      id,
+      videoId,
+    );
+    response.setHeader('Content-Type', video.contentType);
+    response.setHeader('Content-Disposition', video.contentDisposition);
+    response.setHeader('Cache-Control', 'private, no-store');
+    response.send(video.body);
+  }
 
   @Post()
   @Roles('RECRUITER')

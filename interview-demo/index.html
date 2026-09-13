@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interview MVP Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">SMARTRECRUIT · PROTOTYPE</p>
+          <h1>Adaptive Interview</h1>
+          <p class="subtitle">CV + JD JSON → câu hỏi cá nhân hóa theo từng lượt trả lời.</p>
+        </div>
+        <div class="service-status" id="serviceStatus">Chưa kiểm tra service</div>
+      </header>
+
+      <section class="setup-card" id="setupPanel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">01 · INPUT</p>
+            <h2>Chuẩn bị buổi phỏng vấn</h2>
+          </div>
+          <label class="api-field">API URL<input id="apiBaseUrl" value="http://127.0.0.1:8010" /></label>
+        </div>
+
+        <div class="editor-grid">
+          <label>CV (JSON)<textarea id="cvInput" spellcheck="false"></textarea></label>
+          <label>JD (JSON)<textarea id="jdInput" spellcheck="false"></textarea></label>
+        </div>
+        <details>
+          <summary>Cấu hình phỏng vấn (tùy chọn)</summary>
+          <textarea id="configInput" spellcheck="false"></textarea>
+        </details>
+        <div class="setup-actions">
+          <p id="setupError" class="error-message" role="alert"></p>
+          <button class="primary-button" id="startButton">Bắt đầu phỏng vấn <span>→</span></button>
+        </div>
+      </section>
+
+      <section class="interview-card hidden" id="interviewPanel">
+        <div class="interview-header">
+          <div>
+            <p class="eyebrow">02 · INTERVIEW SESSION</p>
+            <h2 id="questionProgress">Câu hỏi 1</h2>
+          </div>
+          <div class="controls">
+            <label class="toggle"><input id="autoSpeak" type="checkbox" checked /> Đọc câu hỏi</label>
+            <button class="secondary-button" id="finishButton">Kết thúc sớm</button>
+          </div>
+        </div>
+        <div class="conversation" id="conversation" aria-live="polite"></div>
+        <div class="answer-box" id="answerBox">
+          <div class="recording-panel">
+            <video id="cameraPreview" autoplay muted playsinline></video>
+            <div>
+              <p class="eyebrow">CAMERA &amp; MICROPHONE</p>
+              <p class="recording-status" id="recordingStatus">Đang chờ AI đọc câu hỏi.</p>
+              <p class="answer-timer" id="answerTimer">--</p>
+              <p class="quiet" id="uploadStatus">Video sẽ được gửi ngầm sau mỗi câu trả lời.</p>
+            </div>
+          </div>
+          <label for="answerInput">Câu trả lời của ứng viên</label>
+          <textarea id="answerInput" disabled placeholder="Nói hoặc nhập câu trả lời trong thời gian ghi hình…"></textarea>
+          <div class="answer-actions">
+            <p class="quiet">AI chờ tối đa 30 giây. Bạn có thể nộp sớm bất cứ lúc nào.</p>
+            <div>
+              <button class="primary-button" id="answerButton" disabled>Nộp câu trả lời <span>→</span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="report-card hidden" id="reportPanel">
+        <p class="eyebrow">03 · HR REVIEW</p>
+        <h2>Phiên phỏng vấn đã hoàn thành</h2>
+        <p id="reportSummary"></p>
+        <div id="evidenceList" class="evidence-list"></div>
+        <p class="review-note" id="reviewerNote"></p>
+        <button class="secondary-button" id="restartButton">Tạo phiên mới</button>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>

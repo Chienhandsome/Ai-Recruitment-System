@@ -61,4 +61,7 @@ desktop.ini
 # AI Models and Virtual Env
 ai-service/app/models/fine_tuned_embedder/
 ai-service/venv/
+interview-service/uploads/
+interview-service/private-media/
+interview-service/data/
 

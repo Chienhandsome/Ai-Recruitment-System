@@ -69,6 +69,57 @@ export interface CreateInterviewInput {
   interviewerNotes?: string;
 }
 
+export type AiInterviewStatus =
+  | 'CREATED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'TERMINATED'
+  | 'EXPIRED';
+
+export interface AiInterviewTurn {
+  question: {
+    number: number;
+    text: string;
+    competency: string;
+    source: 'opening' | 'llm' | 'fallback';
+  };
+  transcript: string;
+  answered_at: string;
+}
+
+export interface AiInterviewVideo {
+  id: string;
+  question_number: number;
+  content_type: 'video/webm' | 'video/mp4';
+  size_bytes: number;
+  created_at: string;
+}
+
+export interface AiInterviewSession {
+  id: string;
+  applicationId: string;
+  interviewServiceId: string;
+  status: AiInterviewStatus;
+  launchUrl: string;
+  expiresAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  terminationReason?: string | null;
+  transcript?: AiInterviewTurn[] | null;
+  videos?: AiInterviewVideo[] | null;
+  securityEvents?: Array<{ type: string; happened_at: string }> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAiInterviewInput {
+  applicationId: string;
+  openingQuestions: string[];
+  competencies: string[];
+  maxQuestions: number;
+  expiresInHours: number;
+}
+
 export interface UpdateInterviewInput {
   title?: string;
   type?: InterviewType;
@@ -130,6 +181,69 @@ export async function createInterview(
   }
 
   return response.json();
+}
+
+export async function createAiInterview(
+  token: string,
+  input: CreateAiInterviewInput,
+): Promise<AiInterviewSession> {
+  const response = await fetch(`${API_URL}/interviews/ai`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) {
+    throw new InterviewApiError(
+      await readInterviewApiError(response, 'Không thể tạo phỏng vấn AI'),
+      response.status,
+    );
+  }
+  return response.json();
+}
+
+export async function getAiInterviewsForApplication(
+  token: string,
+  applicationId: string,
+): Promise<AiInterviewSession[]> {
+  const response = await fetch(
+    `${API_URL}/interviews/ai/application/${applicationId}`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' },
+  );
+  if (!response.ok) {
+    throw new InterviewApiError(
+      await readInterviewApiError(response, 'Không thể tải phỏng vấn AI'),
+      response.status,
+    );
+  }
+  return response.json();
+}
+
+export async function downloadAiInterviewVideo(
+  token: string,
+  sessionId: string,
+  videoId: string,
+): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/interviews/ai/${sessionId}/videos/${videoId}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!response.ok) {
+    throw new InterviewApiError(
+      await readInterviewApiError(response, 'Không thể tải video phỏng vấn'),
+      response.status,
+    );
+  }
+  const blobUrl = URL.createObjectURL(await response.blob());
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = `ai-interview-${sessionId}-${videoId}.${response.headers.get('content-type')?.includes('mp4') ? 'mp4' : 'webm'}`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(blobUrl);
 }
 
 export async function getInterviews(

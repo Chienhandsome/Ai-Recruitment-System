@@ -172,6 +172,14 @@ enum InterviewStatus {
   RESCHEDULED
 }
 
+enum AiInterviewStatus {
+  CREATED
+  IN_PROGRESS
+  COMPLETED
+  TERMINATED
+  EXPIRED
+}
+
 enum CandidateResponseStatus {
   PENDING
   ACCEPTED
@@ -687,6 +695,7 @@ model Application {
 
   aiMatchingResults AiMatchingResult[]
   interviews        Interview[]
+  aiInterviewSessions AiInterviewSession[]
   notifications     Notification[]
   statusHistories   ApplicationStatusHistory[]
 
@@ -758,6 +767,43 @@ model Interview {
   updatedAt        DateTime        @updatedAt @map("updated_at")
 
   @@map("interviews")
+}
+
+model AiInterviewSession {
+  id                       String            @id @default(uuid())
+  applicationId            String            @map("application_id")
+  application              Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  interviewServiceId       String            @unique @map("interview_service_id")
+  status                   AiInterviewStatus @default(CREATED)
+  launchUrl                String            @map("launch_url") @db.Text
+  expiresAt                DateTime          @map("expires_at")
+  startedAt                DateTime?         @map("started_at")
+  completedAt              DateTime?         @map("completed_at")
+  terminationReason        String?           @map("termination_reason")
+  config                   Json
+  transcript               Json?
+  videos                   Json?
+  securityEvents           Json?             @map("security_events")
+  createdByUserId          String?           @map("created_by_user_id") @db.Uuid
+  createdAt                DateTime          @default(now()) @map("created_at")
+  updatedAt                DateTime          @updatedAt @map("updated_at")
+  callbackEvents           AiInterviewCallbackEvent[]
+
+  @@index([applicationId, createdAt])
+  @@index([status, expiresAt])
+  @@map("ai_interview_sessions")
+}
+
+model AiInterviewCallbackEvent {
+  id                   String             @id @db.Uuid
+  aiInterviewSessionId String             @map("ai_interview_session_id")
+  aiInterviewSession   AiInterviewSession @relation(fields: [aiInterviewSessionId], references: [id], onDelete: Cascade)
+  eventType            String             @map("event_type")
+  payload              Json
+  receivedAt           DateTime           @default(now()) @map("received_at")
+
+  @@index([aiInterviewSessionId, receivedAt])
+  @@map("ai_interview_callback_events")
 }
 
 model Notification {

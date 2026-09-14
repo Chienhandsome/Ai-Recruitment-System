@@ -320,10 +320,13 @@ local_demo_origins = {
     "http://127.0.0.1:3000",
 }
 configured_origins = {
-    origin.strip()
+    origin.strip().rstrip("/")
     for origin in os.getenv("INTERVIEW_CORS_ORIGINS", "").split(",")
     if origin.strip()
 }
+interview_web_origin = os.getenv("INTERVIEW_WEB_ORIGIN", "").strip().rstrip("/")
+if interview_web_origin:
+    configured_origins.add(interview_web_origin)
 cors_origins = sorted(local_demo_origins | configured_origins)
 
 from online_interviews import monitor_heartbeats

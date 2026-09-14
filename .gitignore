@@ -64,4 +64,8 @@ ai-service/venv/
 interview-service/uploads/
 interview-service/private-media/
 interview-service/data/
+# Google Cloud service-account keys must stay local/Render Secret Files only.
+interview-service/*service-account*.json
+interview-service/*credentials*.json
+interview-service/secrets/
 

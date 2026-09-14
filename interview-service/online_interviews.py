@@ -39,7 +39,11 @@ MAX_EXPIRY_HOURS = 10 * 24
 VIDEO_ROOT = Path(os.getenv("INTERVIEW_VIDEO_STORAGE_PATH", str(Path(__file__).parent / "private-media"))).resolve()
 DATABASE_PATH = Path(os.getenv("INTERVIEW_DATABASE_PATH", str(Path(__file__).parent / "data" / "interviews.sqlite3"))).resolve()
 MAX_VIDEO_BYTES = int(os.getenv("INTERVIEW_VIDEO_MAX_BYTES", str(50 * 1024 * 1024)))
-MAX_SPEECH_BYTES = int(os.getenv("AZURE_SPEECH_MAX_AUDIO_BYTES", str(3 * 1024 * 1024)))
+SPEECH_PROVIDER = os.getenv("INTERVIEW_SPEECH_PROVIDER", "google").strip().lower()
+MAX_SPEECH_BYTES = int(os.getenv("INTERVIEW_SPEECH_MAX_AUDIO_BYTES", str(3 * 1024 * 1024)))
+GOOGLE_SPEECH_LANGUAGE = os.getenv("GOOGLE_SPEECH_LANGUAGE", "vi-VN").strip()
+GOOGLE_TTS_LANGUAGE_CODE = os.getenv("GOOGLE_TTS_LANGUAGE_CODE", "vi-VN").strip()
+GOOGLE_TTS_VOICE = os.getenv("GOOGLE_TTS_VOICE", "").strip()
 AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY", "").strip()
 AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "").strip()
 AZURE_SPEECH_LANGUAGE = os.getenv("AZURE_SPEECH_LANGUAGE", "vi-VN").strip()
@@ -60,6 +64,19 @@ def supabase_is_configured() -> bool:
 
 def azure_speech_is_configured() -> bool:
     return bool(AZURE_SPEECH_KEY and AZURE_SPEECH_REGION)
+
+
+def google_speech_is_configured() -> bool:
+    """Google Cloud clients use Application Default Credentials."""
+    return bool(os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "").strip())
+
+
+def speech_is_configured() -> bool:
+    if SPEECH_PROVIDER == "google":
+        return google_speech_is_configured()
+    if SPEECH_PROVIDER == "azure":
+        return azure_speech_is_configured()
+    return False
 
 
 def create_supabase_client() -> Any:
@@ -526,9 +543,66 @@ def participant_from_request(request: Request) -> OnlineInterview:
     return interview
 
 
-def require_azure_speech() -> None:
-    if not azure_speech_is_configured():
-        raise HTTPException(status_code=503, detail="Azure Speech chưa được cấu hình trên Interview Service")
+def require_speech() -> None:
+    if SPEECH_PROVIDER not in {"google", "azure"}:
+        raise HTTPException(status_code=503, detail="INTERVIEW_SPEECH_PROVIDER phải là 'google' hoặc 'azure'")
+    if not speech_is_configured():
+        provider_name = "Google Cloud Speech" if SPEECH_PROVIDER == "google" else "Azure Speech"
+        raise HTTPException(status_code=503, detail=f"{provider_name} chưa được cấu hình trên Interview Service")
+
+
+async def transcribe_with_google(audio: bytes) -> str:
+    """Transcribe one 16 kHz mono LINEAR16 WAV answer with Google Cloud STT."""
+    try:
+        from google.cloud import speech_v1 as speech
+    except ImportError as exc:
+        raise HTTPException(status_code=503, detail="Thiếu package google-cloud-speech") from exc
+
+    def recognize() -> str:
+        client = speech.SpeechClient()
+        config = speech.RecognitionConfig(
+            encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+            sample_rate_hertz=16000,
+            language_code=GOOGLE_SPEECH_LANGUAGE,
+            enable_automatic_punctuation=True,
+        )
+        response = client.recognize(config=config, audio=speech.RecognitionAudio(content=audio))
+        return " ".join(
+            result.alternatives[0].transcript.strip()
+            for result in response.results
+            if result.alternatives and result.alternatives[0].transcript.strip()
+        )
+
+    try:
+        return await asyncio.to_thread(recognize)
+    except Exception as exc:  # noqa: BLE001 - normalize provider/auth failures for the API.
+        logger.warning("Google STT failed: %s", exc)
+        raise HTTPException(status_code=502, detail="Google Speech-to-Text hiện không phản hồi") from exc
+
+
+async def synthesize_with_google(text: str) -> bytes:
+    try:
+        from google.cloud import texttospeech
+    except ImportError as exc:
+        raise HTTPException(status_code=503, detail="Thiếu package google-cloud-texttospeech") from exc
+
+    def synthesize() -> bytes:
+        client = texttospeech.TextToSpeechClient()
+        voice_options: dict[str, Any] = {"language_code": GOOGLE_TTS_LANGUAGE_CODE}
+        if GOOGLE_TTS_VOICE:
+            voice_options["name"] = GOOGLE_TTS_VOICE
+        response = client.synthesize_speech(
+            input=texttospeech.SynthesisInput(text=text),
+            voice=texttospeech.VoiceSelectionParams(**voice_options),
+            audio_config=texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3),
+        )
+        return response.audio_content
+
+    try:
+        return await asyncio.to_thread(synthesize)
+    except Exception as exc:  # noqa: BLE001 - normalize provider/auth failures for the API.
+        logger.warning("Google TTS failed: %s", exc)
+        raise HTTPException(status_code=502, detail="Google Text-to-Speech hiện không phản hồi") from exc
 
 
 async def transcribe_with_azure(audio: bytes) -> str:
@@ -569,6 +643,18 @@ async def synthesize_with_azure(text: str) -> bytes:
     except httpx.HTTPError as exc:
         logger.warning("Azure TTS failed: %s", exc)
         raise HTTPException(status_code=502, detail="Azure Text-to-Speech hiện không phản hồi") from exc
+
+
+async def transcribe_speech(audio: bytes) -> str:
+    if SPEECH_PROVIDER == "google":
+        return await transcribe_with_google(audio)
+    return await transcribe_with_azure(audio)
+
+
+async def synthesize_speech(text: str) -> bytes:
+    if SPEECH_PROVIDER == "google":
+        return await synthesize_with_google(text)
+    return await synthesize_with_azure(text)
 
 
 def fallback_question(interview: OnlineInterview) -> Question:
@@ -755,13 +841,13 @@ def heartbeat(request: Request) -> dict[str, str]:
 
 @router.post("/v1/participant/speech/transcribe")
 async def transcribe_answer(request: Request) -> dict[str, str]:
-    """Accept a browser-generated 16 kHz mono PCM WAV answer; never expose Azure keys."""
+    """Accept a browser-generated 16 kHz mono PCM WAV answer; never expose provider keys."""
     interview = participant_from_request(request)
     if interview.status != "IN_PROGRESS" or not interview.active_question:
         raise HTTPException(status_code=409, detail="Không có câu hỏi đang chờ trả lời")
     content_type = request.headers.get("content-type", "").lower()
     if not content_type.startswith("audio/wav"):
-        raise HTTPException(status_code=415, detail="Azure STT yêu cầu audio WAV PCM 16 kHz mono")
+        raise HTTPException(status_code=415, detail="Speech-to-Text yêu cầu audio WAV PCM 16 kHz mono")
     try:
         question_number = int(request.headers.get("x-interview-question-number", ""))
     except ValueError as exc:
@@ -770,9 +856,9 @@ async def transcribe_answer(request: Request) -> dict[str, str]:
         raise HTTPException(status_code=409, detail="Audio không thuộc câu hỏi hiện tại")
     audio = await request.body()
     if not audio or len(audio) > MAX_SPEECH_BYTES:
-        raise HTTPException(status_code=413, detail="Audio rỗng hoặc vượt giới hạn Azure Speech")
-    require_azure_speech()
-    return {"text": await transcribe_with_azure(audio)}
+        raise HTTPException(status_code=413, detail="Audio rỗng hoặc vượt giới hạn Speech-to-Text")
+    require_speech()
+    return {"text": await transcribe_speech(audio)}
 
 
 @router.post("/v1/participant/speech/synthesize")
@@ -783,8 +869,8 @@ async def synthesize_question(request: Request, body: SynthesisRequest) -> Respo
         raise HTTPException(status_code=409, detail="Không có câu hỏi đang chờ trả lời")
     if body.question_number != interview.active_question.number:
         raise HTTPException(status_code=409, detail="Không thể đọc câu hỏi không thuộc phiên hiện tại")
-    require_azure_speech()
-    audio = await synthesize_with_azure(interview.active_question.text)
+    require_speech()
+    audio = await synthesize_speech(interview.active_question.text)
     return Response(content=audio, media_type="audio/mpeg", headers={"Cache-Control": "no-store"})
 
 

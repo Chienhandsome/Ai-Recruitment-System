@@ -46,12 +46,13 @@ Content-Type: application/json
 Candidate Web calls the two authenticated participant endpoints internally:
 
 - `POST /v1/participant/speech/synthesize` with `{ "question_number": 1 }`
-  returns Azure-generated MP3 for the current server-issued question.
+  returns provider-generated MP3 for the current server-issued question.
 - `POST /v1/participant/speech/transcribe` uploads a 16 kHz mono PCM WAV body
   with `X-Interview-Question-Number`. It returns `{ "text": "..." }`.
 
-Both endpoints require Azure Speech configuration on the service. Azure keys are
-never returned to the browser.
+Both endpoints require Google Cloud Speech configuration on the service by
+default. Provider credentials are never returned to the browser. Azure can be
+selected as a fallback with `INTERVIEW_SPEECH_PROVIDER=azure`.
 
 ## Completion callback
 

@@ -42,9 +42,9 @@ def test_one_time_link_otp_and_candidate_flow(monkeypatch, tmp_path) -> None:
 
     monkeypatch.setattr(online_interviews.secrets, "randbelow", lambda _: 123456)
     monkeypatch.setattr(online_interviews, "VIDEO_ROOT", tmp_path)
-    monkeypatch.setattr(online_interviews, "azure_speech_is_configured", lambda: True)
-    monkeypatch.setattr(online_interviews, "transcribe_with_azure", fake_transcribe)
-    monkeypatch.setattr(online_interviews, "synthesize_with_azure", fake_synthesize)
+    monkeypatch.setattr(online_interviews, "speech_is_configured", lambda: True)
+    monkeypatch.setattr(online_interviews, "transcribe_speech", fake_transcribe)
+    monkeypatch.setattr(online_interviews, "synthesize_speech", fake_synthesize)
     monkeypatch.setattr(online_interviews, "send_callback_http", fake_callback)
     monkeypatch.setenv("INTERVIEW_CALLBACK_SECRET", "unit-test-callback-secret")
     created = client.post("/v1/internal/interviews", json=create_payload(), headers=SYSTEM_HEADERS)

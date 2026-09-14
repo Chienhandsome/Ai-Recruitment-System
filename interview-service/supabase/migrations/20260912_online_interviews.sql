@@ -10,6 +10,12 @@ create table if not exists public.online_interviews (
 
 alter table public.online_interviews enable row level security;
 
+-- The Interview Service authenticates with Supabase's server-only service_role.
+-- Grant only the schema access and table operations this service needs. RLS
+-- remains enabled and no anon/authenticated grants are added.
+grant usage on schema public to service_role;
+grant select, insert, update, delete on table public.online_interviews to service_role;
+
 create or replace function public.set_online_interviews_updated_at()
 returns trigger
 language plpgsql

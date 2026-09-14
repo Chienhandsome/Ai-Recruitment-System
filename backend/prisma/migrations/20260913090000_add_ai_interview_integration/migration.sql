@@ -1,8 +1,8 @@
 CREATE TYPE "AiInterviewStatus" AS ENUM ('CREATED', 'IN_PROGRESS', 'COMPLETED', 'TERMINATED', 'EXPIRED');
 
 CREATE TABLE "ai_interview_sessions" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "application_id" UUID NOT NULL,
+    "id" TEXT NOT NULL,
+    "application_id" TEXT NOT NULL,
     "interview_service_id" TEXT NOT NULL,
     "status" "AiInterviewStatus" NOT NULL DEFAULT 'CREATED',
     "launch_url" TEXT NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE "ai_interview_sessions" (
 
 CREATE TABLE "ai_interview_callback_events" (
     "id" UUID NOT NULL,
-    "ai_interview_session_id" UUID NOT NULL,
+    "ai_interview_session_id" TEXT NOT NULL,
     "event_type" TEXT NOT NULL,
     "payload" JSONB NOT NULL,
     "received_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

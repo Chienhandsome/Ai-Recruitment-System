@@ -17,8 +17,10 @@ import os
 import secrets
 import smtplib
 import sqlite3
+import ssl
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
+from email.utils import formataddr
 from html import escape
 from pathlib import Path
 from typing import Any, Literal
@@ -701,20 +703,39 @@ def next_question(interview: OnlineInterview) -> Question | None:
 
 
 def send_otp(interview: OnlineInterview, otp: str) -> str:
-    smtp_host = os.getenv("INTERVIEW_SMTP_HOST", "")
+    smtp_host = os.getenv("INTERVIEW_SMTP_HOST", "").strip()
     if not smtp_host:
         logger.warning("DEV OTP for %s: %s", interview.candidate.email, otp)
         return "console"
+    username = os.getenv("INTERVIEW_SMTP_USERNAME", "").strip()
+    password = os.getenv("INTERVIEW_SMTP_PASSWORD", "")
+    sender_email = os.getenv("INTERVIEW_SMTP_FROM", "").strip() or username
+    sender_name = os.getenv("INTERVIEW_SMTP_FROM_NAME", "AI Recruitment").strip()
+    if not sender_email:
+        raise HTTPException(status_code=503, detail="SMTP chưa cấu hình địa chỉ người gửi")
     message = EmailMessage()
     message["Subject"] = "Mã xác thực phỏng vấn AI"
-    message["From"] = os.getenv("INTERVIEW_SMTP_FROM", "no-reply@example.com")
+    message["From"] = formataddr((sender_name, sender_email))
     message["To"] = interview.candidate.email
     message.set_content(f"Mã OTP của bạn là {otp}. Mã có hiệu lực trong 5 phút.")
-    with smtplib.SMTP(smtp_host, int(os.getenv("INTERVIEW_SMTP_PORT", "587"))) as smtp:
-        smtp.starttls()
-        username, password = os.getenv("INTERVIEW_SMTP_USERNAME", ""), os.getenv("INTERVIEW_SMTP_PASSWORD", "")
-        if username: smtp.login(username, password)
-        smtp.send_message(message)
+    try:
+        with smtplib.SMTP(
+            smtp_host,
+            int(os.getenv("INTERVIEW_SMTP_PORT", "587")),
+            timeout=float(os.getenv("INTERVIEW_SMTP_TIMEOUT_SECONDS", "15")),
+        ) as smtp:
+            smtp.ehlo()
+            smtp.starttls(context=ssl.create_default_context())
+            smtp.ehlo()
+            if username:
+                smtp.login(username, password)
+            smtp.send_message(message)
+    except (OSError, smtplib.SMTPException) as exc:
+        logger.warning("OTP email delivery failed: %s", exc)
+        raise HTTPException(
+            status_code=502,
+            detail="Không thể gửi email OTP. Vui lòng thử lại sau hoặc liên hệ HR.",
+        ) from exc
     return "email"
 
 

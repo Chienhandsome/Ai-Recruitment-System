@@ -75,7 +75,8 @@ def azure_speech_is_configured() -> bool:
 
 def google_speech_is_configured() -> bool:
     """Google Cloud clients use Application Default Credentials."""
-    return bool(os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "").strip())
+    credential_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "").strip()
+    return bool(credential_path and Path(credential_path).is_file())
 
 
 def speech_is_configured() -> bool:
@@ -609,8 +610,17 @@ async def synthesize_with_google(text: str) -> bytes:
     try:
         return await asyncio.to_thread(synthesize)
     except Exception as exc:  # noqa: BLE001 - normalize provider/auth failures for the API.
-        logger.warning("Google TTS failed: %s", exc)
-        raise HTTPException(status_code=502, detail="Google Text-to-Speech hiện không phản hồi") from exc
+        error_type = type(exc).__name__
+        logger.warning("Google TTS failed (%s): %s", error_type, exc)
+        if error_type in {"DefaultCredentialsError", "RefreshError"}:
+            detail = "Google credential không hợp lệ hoặc không đọc được"
+        elif error_type in {"PermissionDenied", "Forbidden"}:
+            detail = "Google Text-to-Speech chưa được bật hoặc service account thiếu quyền"
+        elif error_type in {"InvalidArgument", "NotFound"}:
+            detail = "Giọng đọc Google TTS không hợp lệ với ngôn ngữ đã cấu hình"
+        else:
+            detail = "Google Text-to-Speech hiện không phản hồi"
+        raise HTTPException(status_code=502, detail=detail) from exc
 
 
 async def transcribe_with_azure(audio: bytes) -> str:

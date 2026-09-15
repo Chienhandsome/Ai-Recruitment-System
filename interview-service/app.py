@@ -329,7 +329,7 @@ if interview_web_origin:
     configured_origins.add(interview_web_origin)
 cors_origins = sorted(local_demo_origins | configured_origins)
 
-from online_interviews import OTP_PROVIDER, monitor_heartbeats
+from online_interviews import OTP_PROVIDER, SPEECH_PROVIDER, monitor_heartbeats, speech_is_configured
 from online_interviews import router as online_interviews_router
 
 
@@ -362,12 +362,14 @@ app.include_router(online_interviews_router)
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
+def health() -> dict[str, str | bool]:
     return {
         "service": "interview-service",
         "status": "UP",
         "llm_mode": "gemini" if os.getenv("GEMINI_API_KEY", "").strip() else "fallback",
         "otp_provider": OTP_PROVIDER,
+        "speech_provider": SPEECH_PROVIDER,
+        "speech_configured": speech_is_configured(),
     }
 
 

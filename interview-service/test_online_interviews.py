@@ -139,6 +139,10 @@ def test_one_time_link_otp_and_candidate_flow(monkeypatch, tmp_path) -> None:
     assert delivered["url"] == "http://localhost:3001/api/interview-events"
     assert callback_payload["event_type"] == "interview.completed"
     assert callback_payload["data"]["recruitment_application_id"] == "application-1"
+    assert "T" in callback_payload["data"]["started_at"]
+    assert "T" in callback_payload["data"]["completed_at"]
+    assert "T" in callback_payload["data"]["transcript"][0]["answered_at"]
+    assert "T" in callback_payload["data"]["videos"][0]["created_at"]
     timestamp = delivered["headers"]["X-Interview-Timestamp"]
     expected = hmac.new(
         b"unit-test-callback-secret",

@@ -389,7 +389,7 @@ def video_metadata(video: VideoAsset) -> dict[str, Any]:
         "question_number": video.question_number,
         "content_type": video.content_type,
         "size_bytes": video.size_bytes,
-        "created_at": video.created_at,
+        "created_at": video.created_at.isoformat(),
     }
 
 
@@ -398,8 +398,8 @@ def report_payload(interview: OnlineInterview) -> dict[str, Any]:
         "interview_id": interview.id,
         "recruitment_application_id": interview.recruitment_application_id,
         "status": interview.status,
-        "started_at": interview.started_at,
-        "completed_at": interview.completed_at,
+        "started_at": interview.started_at.isoformat() if interview.started_at else None,
+        "completed_at": interview.completed_at.isoformat() if interview.completed_at else None,
         "transcript": [turn.model_dump(mode="json") for turn in interview.turns],
         "videos": [video_metadata(video) for video in interview.videos],
         "security_events": [event.model_dump(mode="json") for event in interview.events],

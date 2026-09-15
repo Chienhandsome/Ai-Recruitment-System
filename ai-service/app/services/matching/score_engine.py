@@ -1,16 +1,46 @@
 from typing import Dict, Any
 from app.schemas.matching import EvaluationRequest
 
+
 class ScoreEngine:
     """
-    Mathematical Gated Compatibility Scoring Engine (V3.1):
-    100% Continuous & Mathematical.
-    
-    Formula:
-    S_overall = 100 * [ (0.35 + 0.65 * domain_compat) * Sum(w_k * S_k) ] * Psi_mandatory(R_man)
+    Weighted compatibility scoring engine.
+
+    The component scores already include domain relevance and skill-match quality.
+    Missing mandatory skills therefore limit the maximum attainable score instead
+    of multiplying every pillar by another global penalty. Evidence confidence is
+    diagnostic metadata and never changes candidate-job compatibility.
     """
 
-    def calculate(self, match_metrics: Dict[str, Any], request: EvaluationRequest) -> Dict[str, Any]:
+    @staticmethod
+    def _mandatory_score_cap(mandatory_ratio: float) -> float | None:
+        """Return the score ceiling for the achieved mandatory-skill ratio."""
+        ratio = max(0.0, min(1.0, float(mandatory_ratio)))
+        if ratio >= 0.80:
+            return None
+        if ratio >= 0.60:
+            return 74.0
+        if ratio >= 0.40:
+            return 59.0
+        return 39.0
+
+    @staticmethod
+    def _allocate_capped_points(
+        base_points: list[float], final_overall: float
+    ) -> list[float]:
+        """Allocate a score-cap reduction proportionally and preserve the sum."""
+        base_overall = sum(base_points)
+        if base_overall <= 0.0 or final_overall >= base_overall:
+            return [round(point, 2) for point in base_points]
+
+        scale = final_overall / base_overall
+        allocated = [round(point * scale, 2) for point in base_points[:-1]]
+        allocated.append(round(final_overall - sum(allocated), 2))
+        return allocated
+
+    def calculate(
+        self, match_metrics: Dict[str, Any], request: EvaluationRequest
+    ) -> Dict[str, Any]:
         weights = self._resolve_weights(request)
 
         skills_raw = match_metrics["skills"]["score"]
@@ -19,7 +49,7 @@ class ScoreEngine:
         other_raw = match_metrics["other"]["score"]
 
         mandatory_ratio = match_metrics["skills"].get("mandatory_ratio", 1.0)
-        domain_compat = match_metrics.get("domain_compatibility", 1.0)
+        domain_compat = float(match_metrics.get("domain_compatibility", 1.0))
 
         # Scale component raw scores to 0-100
         skills_score = round(skills_raw * 100.0, 2)
@@ -27,8 +57,14 @@ class ScoreEngine:
         edu_score = round(edu_raw * 100.0, 2)
         other_score = round(other_raw * 100.0, 2)
 
-        total_weight = weights["skills"] + weights["experience"] + weights["education"] + weights["other"]
-        if total_weight <= 0: total_weight = 100.0
+        total_weight = (
+            weights["skills"]
+            + weights["experience"]
+            + weights["education"]
+            + weights["other"]
+        )
+        if total_weight <= 0:
+            total_weight = 100.0
 
         # Calculate max points per pillar based on normalized weights
         max_skills = round((weights["skills"] / float(total_weight)) * 100.0, 1)
@@ -36,57 +72,80 @@ class ScoreEngine:
         max_edu = round((weights["education"] / float(total_weight)) * 100.0, 1)
         max_other = round((weights["other"] / float(total_weight)) * 100.0, 1)
 
-        # 1. Macro Compatibility Gating (Domain Compatibility Gate)
-        domain_factor = (0.35 + 0.65 * domain_compat)
+        # Component matchers already account for domain relevance. Keep their
+        # weighted contribution as the base score without another global factor.
+        base_points = [
+            round(skills_raw * max_skills, 2),
+            round(exp_raw * max_exp, 2),
+            round(edu_raw * max_edu, 2),
+            round(other_raw * max_other, 2),
+        ]
+        base_overall = max(0.0, min(100.0, round(sum(base_points), 2)))
 
-        # 2. Continuous Exponential Mandatory Gate (Gamma = 1.85)
-        # Guarantees missing 1/4 mandatory skills compresses total score ceiling below HIGH threshold (<= 60đ)
-        gamma = 1.85
-        psi_mandatory = max(0.0, min(1.0, float(mandatory_ratio) ** gamma))
+        # Mandatory requirements act as an eligibility ceiling. They no longer
+        # suppress unrelated education/certificate scores exponentially.
+        mandatory_score_cap = self._mandatory_score_cap(mandatory_ratio)
+        final_overall = (
+            min(base_overall, mandatory_score_cap)
+            if mandatory_score_cap is not None
+            else base_overall
+        )
+        final_overall = round(final_overall, 2)
 
-        # 3. Anti-Inflation Audit Credibility Multiplier
-        audit = match_metrics.get("audit", {})
-        audit_conf = float(audit.get("evidence_confidence", 1.0) or 1.0)
+        earned_skills, earned_exp, earned_edu, earned_other = (
+            self._allocate_capped_points(base_points, final_overall)
+        )
 
-        effective_multiplier = domain_factor * psi_mandatory * audit_conf
-
-        # Exact earned points per pillar (Consistent macro gating across all pillars)
-        earned_skills = round(skills_raw * max_skills * effective_multiplier, 2)
-        earned_exp = round(exp_raw * max_exp * effective_multiplier, 2)
-        earned_edu = round(edu_raw * max_edu * effective_multiplier, 2)
-        earned_other = round(other_raw * max_other * effective_multiplier, 2)
-
-        final_overall = round(earned_skills + earned_exp + earned_edu + earned_other, 2)
-        final_overall = max(0.0, min(100.0, final_overall))
-
-        match_level = "HIGH" if final_overall >= 75.0 else ("MEDIUM" if final_overall >= 50.0 else "LOW")
+        match_level = (
+            "HIGH"
+            if final_overall >= 75.0
+            else ("MEDIUM" if final_overall >= 50.0 else "LOW")
+        )
 
         # Confidence score based on profile richness
         profile = request.candidate_profile
-        data_pts = len(profile.skills) + len(profile.work_experiences) + len(profile.projects) + len(profile.educations) + len(profile.certificates)
-        conf = 0.3 if data_pts < 3 else (0.6 if data_pts < 7 else (0.85 if data_pts < 12 else 1.0))
+        data_pts = (
+            len(profile.skills)
+            + len(profile.work_experiences)
+            + len(profile.projects)
+            + len(profile.educations)
+            + len(profile.certificates)
+        )
+        conf = (
+            0.3
+            if data_pts < 3
+            else (0.6 if data_pts < 7 else (0.85 if data_pts < 12 else 1.0))
+        )
 
         score_breakdown = {
             "skills": {
                 "earned_points": earned_skills,
+                "base_points": base_points[0],
+                "adjustment_points": round(earned_skills - base_points[0], 2),
                 "max_points": max_skills,
                 "weight_pct": max_skills,
                 "normalized_score": skills_score,
             },
             "experience": {
                 "earned_points": earned_exp,
+                "base_points": base_points[1],
+                "adjustment_points": round(earned_exp - base_points[1], 2),
                 "max_points": max_exp,
                 "weight_pct": max_exp,
                 "normalized_score": exp_score,
             },
             "education": {
                 "earned_points": earned_edu,
+                "base_points": base_points[2],
+                "adjustment_points": round(earned_edu - base_points[2], 2),
                 "max_points": max_edu,
                 "weight_pct": max_edu,
                 "normalized_score": edu_score,
             },
             "other": {
                 "earned_points": earned_other,
+                "base_points": base_points[3],
+                "adjustment_points": round(earned_other - base_points[3], 2),
                 "max_points": max_other,
                 "weight_pct": max_other,
                 "normalized_score": other_score,
@@ -103,7 +162,10 @@ class ScoreEngine:
             "match_level": match_level,
             "confidence_score": conf,
             "domain_compatibility": round(domain_compat, 3),
-            "mandatory_ratio": round(mandatory_ratio, 2)
+            "mandatory_ratio": round(mandatory_ratio, 3),
+            "base_score": base_overall,
+            "mandatory_score_cap": mandatory_score_cap,
+            "score_adjustment": round(final_overall - base_overall, 2),
         }
 
     def _resolve_weights(self, request: EvaluationRequest) -> Dict[str, float]:
@@ -123,5 +185,6 @@ class ScoreEngine:
                 "other": float(cfg.other),
             }
         return {"skills": 40.0, "experience": 30.0, "education": 15.0, "other": 15.0}
+
 
 score_engine = ScoreEngine()

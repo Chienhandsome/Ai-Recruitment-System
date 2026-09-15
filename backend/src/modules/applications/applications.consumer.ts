@@ -93,6 +93,18 @@ export class ApplicationsConsumer implements OnModuleInit {
               reasoningSummary: validatedResult.summary,
               evidence: validatedResult.evidence,
               confidenceScore: validatedResult.confidence_score,
+              inputSnapshot: {
+                score_breakdown: validatedResult.score_breakdown ?? null,
+                pillar_explanations:
+                  validatedResult.pillar_explanations ?? null,
+                domain_compatibility: validatedResult.domain_compatibility ?? 1,
+                mandatory_ratio: validatedResult.mandatory_ratio ?? 1,
+                base_score: validatedResult.base_score ?? 0,
+                mandatory_score_cap:
+                  validatedResult.mandatory_score_cap ?? null,
+                score_adjustment: validatedResult.score_adjustment ?? 0,
+                evidence_confidence: validatedResult.evidence_confidence ?? 1,
+              },
               candidateExperienceLevel:
                 experienceAssessment?.candidate_level ?? null,
               requiredExperienceLevel:

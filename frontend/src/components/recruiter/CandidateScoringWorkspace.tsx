@@ -191,8 +191,10 @@ export function CandidateScoringWorkspace({
   const isPending = !aiResult && isAiEvaluationPending(currentAppListItem?.processingStatus);
   const isFailed = !aiResult && currentAppListItem?.processingStatus === "FAILED";
 
-  // Calibrate pillar points from pillar_explanations (post domain modifier & mandatory penalties)
-  const pillarExplanations = (aiResult?.inputSnapshot as any)?.pillar_explanations || (aiResult?.pillarExplanations as any);
+  // Persisted scoring details contain post-cap points and diagnostics.
+  const scoringDetails = (aiResult?.inputSnapshot as any) || {};
+  const scoreBreakdown = scoringDetails.score_breakdown || (aiResult?.scoreBreakdown as any);
+  const pillarExplanations = scoringDetails.pillar_explanations || (aiResult?.pillarExplanations as any);
 
   // Raw base calculations
   const rawSkillsPts = (Number(aiResult?.skillScore) || 0) * (sWeight / 100);
@@ -201,22 +203,37 @@ export function CandidateScoringWorkspace({
   const rawOtherPts = (Number(aiResult?.projectScore) || 0) * (oWeight / 100);
   const rawTotalPts = +(rawSkillsPts + rawExpPts + rawEduPts + rawOtherPts).toFixed(1);
 
-  // Calibrated pillar points
-  const sPts = pillarExplanations?.skills?.earned_points != null
+  // Post-cap pillar points. New results always persist score_breakdown; the
+  // explanation and raw calculations remain compatibility fallbacks.
+  const sPts = scoreBreakdown?.skills?.earned_points != null
+    ? Number(Number(scoreBreakdown.skills.earned_points).toFixed(1))
+    : pillarExplanations?.skills?.earned_points != null
     ? Number(Number(pillarExplanations.skills.earned_points).toFixed(1))
     : +rawSkillsPts.toFixed(1);
 
-  const ePts = pillarExplanations?.experience?.earned_points != null
+  const ePts = scoreBreakdown?.experience?.earned_points != null
+    ? Number(Number(scoreBreakdown.experience.earned_points).toFixed(1))
+    : pillarExplanations?.experience?.earned_points != null
     ? Number(Number(pillarExplanations.experience.earned_points).toFixed(1))
     : +rawExpPts.toFixed(1);
 
-  const edPts = pillarExplanations?.education?.earned_points != null
+  const edPts = scoreBreakdown?.education?.earned_points != null
+    ? Number(Number(scoreBreakdown.education.earned_points).toFixed(1))
+    : pillarExplanations?.education?.earned_points != null
     ? Number(Number(pillarExplanations.education.earned_points).toFixed(1))
     : +rawEduPts.toFixed(1);
 
-  const oPts = pillarExplanations?.other?.earned_points != null
+  const oPts = scoreBreakdown?.other?.earned_points != null
+    ? Number(Number(scoreBreakdown.other.earned_points).toFixed(1))
+    : pillarExplanations?.other?.earned_points != null
     ? Number(Number(pillarExplanations.other.earned_points).toFixed(1))
     : +rawOtherPts.toFixed(1);
+
+  const displayedBreakdownTotal = +(sPts + ePts + edPts + oPts).toFixed(1);
+  const mandatoryRatio = Number(scoringDetails.mandatory_ratio ?? 1);
+  const mandatoryScoreCap = scoringDetails.mandatory_score_cap == null
+    ? null
+    : Number(scoringDetails.mandatory_score_cap);
 
   // Effective percentages (score achieved relative to pillar weight)
   const sPercent = Math.min(100, Math.round((sPts / sWeight) * 100));
@@ -224,8 +241,7 @@ export function CandidateScoringWorkspace({
   const edPercent = Math.min(100, Math.round((edPts / edWeight) * 100));
   const oPercent = Math.min(100, Math.round((oPts / oWeight) * 100));
 
-  // Check if domain modifier or mandatory gating reduced the score
-  const hasPenaltyAdjustment = rawTotalPts > overallScore + 5;
+  const hasCapAdjustment = mandatoryScoreCap != null && rawTotalPts > overallScore;
 
   // Pillar configuration items
   const pillarCards = [
@@ -683,20 +699,20 @@ export function CandidateScoringWorkspace({
                   })}
                 </div>
 
-                {/* Domain / Gating Adjustment Alert Banner */}
-                {hasPenaltyAdjustment && (
+                {/* Mandatory score-cap explanation */}
+                {hasCapAdjustment && (
                   <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5 text-xs text-amber-900 shadow-2xs">
                     <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2 font-black">
-                        <span>ĐIỂM SỐ ĐÃ ĐƯỢC ĐIỀU CHỈNH GIẢM THEO TIÊU CHUẨN ĐẶC THÙ NGÀNH</span>
+                        <span>TỔNG ĐIỂM ĐƯỢC GIỚI HẠN DO THIẾU KỸ NĂNG BẮT BUỘC</span>
                         <span className="text-[10px] px-2 py-0.5 bg-amber-200 text-amber-900 rounded font-bold uppercase">
-                          Hệ số Ngành / Gating Tiên quyết
+                          Trần điểm tiên quyết
                         </span>
                       </div>
                       <p className="text-[11px] text-amber-800 leading-relaxed">
-                        Điểm kỹ thuật ban đầu: <strong>{rawTotalPts}/100 đ</strong> (Kỹ năng: {rawSkillsPts.toFixed(1)}đ, Kinh nghiệm: {rawExpPts.toFixed(1)}đ, Học vấn: {rawEduPts.toFixed(1)}đ, Dự án: {rawOtherPts.toFixed(1)}đ).
-                        Hồ sơ có <strong>sai lệch về mô hình ngành hàng cốt lõi</strong> hoặc <strong>thiếu hụt tiêu chí tiên quyết</strong>, nên điểm thực nhận của các tiêu chí đã được tự động áp dụng hệ số điều chỉnh chính xác ({sPts} + {ePts} + {edPts} + {oPts} = {overallScore} đ).
+                        Điểm cơ sở: <strong>{rawTotalPts}/100 đ</strong> (Kỹ năng: {rawSkillsPts.toFixed(1)}đ, Kinh nghiệm: {rawExpPts.toFixed(1)}đ, Học vấn: {rawEduPts.toFixed(1)}đ, Tiêu chí khác: {rawOtherPts.toFixed(1)}đ).{" "}
+                        Ứng viên đáp ứng <strong>{Math.round(mandatoryRatio * 100)}% kỹ năng bắt buộc</strong>, nên tổng điểm tối đa là <strong>{mandatoryScoreCap} điểm</strong>. Breakdown sau điều chỉnh: {sPts} + {ePts} + {edPts} + {oPts} = {displayedBreakdownTotal} đ.
                       </p>
                     </div>
                   </div>

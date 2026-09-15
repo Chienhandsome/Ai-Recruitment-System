@@ -22,13 +22,13 @@ def make_weights(
     skills: float = 40.0,
     experience: float = 30.0,
     education: float = 15.0,
-    projects: float = 15.0,
+    other: float = 15.0,
 ) -> Dict[str, float]:
     return {
         "skills": skills,
         "experience": experience,
         "education": education,
-        "projects": projects,
+        "other": other,
     }
 
 
@@ -39,9 +39,21 @@ def make_job(
     weights: Optional[Dict[str, float]] = None,
 ) -> Dict[str, Any]:
     default_req_skills = [
-        make_required_skill("NestJS", is_mandatory=True, minimum_level="INTERMEDIATE", minimum_years=1.0),
-        make_required_skill("PostgreSQL", is_mandatory=True, minimum_level="INTERMEDIATE", minimum_years=1.0),
-        make_required_skill("Docker", is_mandatory=False, minimum_level="INTERMEDIATE", minimum_years=0.0),
+        make_required_skill(
+            "NestJS", is_mandatory=True, minimum_level="INTERMEDIATE", minimum_years=1.0
+        ),
+        make_required_skill(
+            "PostgreSQL",
+            is_mandatory=True,
+            minimum_level="INTERMEDIATE",
+            minimum_years=1.0,
+        ),
+        make_required_skill(
+            "Docker",
+            is_mandatory=False,
+            minimum_level="INTERMEDIATE",
+            minimum_years=0.0,
+        ),
     ]
     return {
         "id": str(uuid.uuid4()),
@@ -58,5 +70,7 @@ def make_job(
         "benefits": "Lương thưởng hấp dẫn.",
         "ai_weights_config": weights or make_weights(),
         "status": "PUBLISHED",
-        "required_skills": required_skills if required_skills is not None else default_req_skills,
+        "required_skills": required_skills
+        if required_skills is not None
+        else default_req_skills,
     }

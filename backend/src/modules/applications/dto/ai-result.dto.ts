@@ -45,6 +45,8 @@ export const ExperienceAssessmentSchema = z.object({
 
 export const PillarScoreBreakdownItemSchema = z.object({
   earned_points: z.number().default(0),
+  base_points: z.number().optional(),
+  adjustment_points: z.number().optional(),
   max_points: z.number().default(0),
   weight_pct: z.number().default(0),
   normalized_score: z.number().default(0),
@@ -91,6 +93,11 @@ export const AiResultSchema = z.object({
   evidence: z.array(EvidenceSchema).default([]),
   confidence_score: z.number().default(1.0),
   evidence_confidence: z.number().default(1.0).optional(),
+  domain_compatibility: z.number().min(0).max(1).default(1.0).optional(),
+  mandatory_ratio: z.number().min(0).max(1).default(1.0).optional(),
+  base_score: z.number().min(0).max(100).default(0).optional(),
+  mandatory_score_cap: z.number().min(0).max(100).nullable().optional(),
+  score_adjustment: z.number().default(0).optional(),
   temporal_recency_score: z.number().default(1.0).optional(),
   inflation_flags: z.array(z.string()).default([]).optional(),
   career_velocity: z.record(z.string(), z.any()).nullable().optional(),

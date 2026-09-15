@@ -1,9 +1,11 @@
 from typing import Any, Dict, List, Literal, Optional
+
 # pyrefly: ignore [missing-import]
 from pydantic import BaseModel, Field
 
 
 # --- Candidate Schemas ---
+
 
 class ProfileDetail(BaseModel):
     id: Optional[str] = None
@@ -57,6 +59,7 @@ class CandidateCertificate(BaseModel):
     certificate_name: str
     issuing_organization: Optional[str] = None
 
+
 class CandidateSkill(BaseModel):
     candidate_profile_id: Optional[str] = None
     skill_id: Optional[str] = None
@@ -77,12 +80,15 @@ class CandidateProfilePayload(BaseModel):
 
 # --- Job Schemas ---
 
+
 class JobRequiredSkill(BaseModel):
     job_id: Optional[str] = None
     skill_id: Optional[str] = None
     normalized_name: Optional[str] = None
     is_mandatory: bool = True
-    minimum_level: Optional[str] = "BEGINNER"  # BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+    minimum_level: Optional[str] = (
+        "BEGINNER"  # BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+    )
     minimum_years: float = 0.0
     skill_name: str
 
@@ -138,6 +144,7 @@ class JobPayload(BaseModel):
 
 # --- Request Payload ---
 
+
 class EvaluationRequest(BaseModel):
     application_id: str
     schema_version: int = 1
@@ -149,9 +156,11 @@ class EvaluationRequest(BaseModel):
 
 # --- Response Payload ---
 
+
 class SkillInfo(BaseModel):
     name: str
     isMandatory: Optional[bool] = False
+
 
 class EvidenceInfo(BaseModel):
     skillName: str
@@ -179,17 +188,22 @@ class ExperienceLevelAssessment(BaseModel):
     evidence: List[str] = Field(default_factory=list)
     reason_codes: List[str] = Field(default_factory=list)
 
+
 class PillarScoreBreakdownItem(BaseModel):
     earned_points: float
+    base_points: Optional[float] = None
+    adjustment_points: Optional[float] = None
     max_points: float
     weight_pct: float
     normalized_score: float
+
 
 class ScoreBreakdown(BaseModel):
     skills: PillarScoreBreakdownItem
     experience: PillarScoreBreakdownItem
     education: PillarScoreBreakdownItem
     other: PillarScoreBreakdownItem
+
 
 class PillarExplanationItem(BaseModel):
     earned_points: float
@@ -198,11 +212,13 @@ class PillarExplanationItem(BaseModel):
     minus_reasons: List[str] = Field(default_factory=list)
     summary: str = ""
 
+
 class PillarExplanations(BaseModel):
     skills: PillarExplanationItem
     experience: PillarExplanationItem
     education: PillarExplanationItem
     other: PillarExplanationItem
+
 
 class EvaluationResponse(BaseModel):
     overall_score: float
@@ -221,9 +237,13 @@ class EvaluationResponse(BaseModel):
     evidence: List[EvidenceInfo] = Field(default_factory=list)
     confidence_score: float = 1.0
     evidence_confidence: float = 1.0
+    domain_compatibility: float = 1.0
+    mandatory_ratio: float = 1.0
+    base_score: float = 0.0
+    mandatory_score_cap: Optional[float] = None
+    score_adjustment: float = 0.0
     temporal_recency_score: Optional[float] = 1.0
     inflation_flags: List[str] = Field(default_factory=list)
     career_velocity: Optional[Dict[str, Any]] = None
     summary: str
     experience_assessment: Optional[ExperienceLevelAssessment] = None
-

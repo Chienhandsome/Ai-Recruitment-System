@@ -1,12 +1,15 @@
 import time
 from typing import Dict, List
+
 # pyrefly: ignore [missing-import]
 from app.schemas.matching import EvaluationRequest, EvaluationResponse
 from app.services.matching.generic_matcher import generic_matching_engine
 from app.services.matching.score_engine import score_engine
 from app.services.matching.explainability_engine import explainability_engine
+
 # pyrefly: ignore [missing-import]
 from app.utils.logger import StepTimer, log_evaluation_step
+
 
 class MatchingEngine:
     """
@@ -30,12 +33,16 @@ class MatchingEngine:
 
         # STEP 3: Explainability Engine (Human-readable Strengths/Gaps)
         with StepTimer("Explainability Engine"):
-            candidate_name = cand_profile.profile.desired_title if cand_profile.profile else "Ứng viên"
+            candidate_name = (
+                cand_profile.profile.desired_title
+                if cand_profile.profile
+                else "Ứng viên"
+            )
             explanations = explainability_engine.explain(
-                metrics=match_metrics, 
-                scores=final_scores, 
-                candidate_name=candidate_name or "Ứng viên", 
-                job_title=job.title
+                metrics=match_metrics,
+                scores=final_scores,
+                candidate_name=candidate_name or "Ứng viên",
+                job_title=job.title,
             )
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
@@ -66,13 +73,21 @@ class MatchingEngine:
             missing_required_skills=match_metrics["skills"]["missing_mandatory"],
             evidence=match_metrics["skills"]["evidence"],
             confidence_score=final_scores["confidence_score"],
-            evidence_confidence=match_metrics.get("audit", {}).get("evidence_confidence", 1.0),
+            evidence_confidence=match_metrics.get("audit", {}).get(
+                "evidence_confidence", 1.0
+            ),
+            domain_compatibility=final_scores["domain_compatibility"],
+            mandatory_ratio=final_scores["mandatory_ratio"],
+            base_score=final_scores["base_score"],
+            mandatory_score_cap=final_scores["mandatory_score_cap"],
+            score_adjustment=final_scores["score_adjustment"],
             temporal_recency_score=1.0,
             inflation_flags=match_metrics.get("audit", {}).get("inflation_flags", []),
             career_velocity=match_metrics.get("career_velocity"),
             summary=explanations["summary"],
             experience_assessment=match_metrics["experience"].get("level_assessment"),
         )
+
 
 # Singleton engine instance
 matching_engine = MatchingEngine()

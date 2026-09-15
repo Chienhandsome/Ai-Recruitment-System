@@ -19,6 +19,13 @@ export class CreateInterviewDto {
   @IsNotEmpty()
   applicationId!: string;
 
+  @ApiPropertyOptional({
+    description: 'Round UUID khi lịch thuộc quy trình nhiều vòng',
+  })
+  @IsOptional()
+  @IsUUID()
+  roundId?: string;
+
   @ApiProperty({
     description: 'Tiêu đề buổi phỏng vấn (vd: Phỏng vấn Vòng 1 - Kỹ thuật)',
     example: 'Phỏng vấn Vòng 1 - Kỹ thuật',
@@ -58,7 +65,8 @@ export class CreateInterviewDto {
   durationMinutes?: number = 60;
 
   @ApiPropertyOptional({
-    description: 'Link phòng họp trực tuyến (Google Meet/Zoom) hoặc địa chỉ văn phòng',
+    description:
+      'Link phòng họp trực tuyến (Google Meet/Zoom) hoặc địa chỉ văn phòng',
     example: 'https://meet.google.com/abc-defg-hij',
   })
   @IsOptional()

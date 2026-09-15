@@ -246,7 +246,7 @@ Choose one competency that still needs evidence. Ground the question in CV/JD on
 """
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model=os.getenv("INTERVIEW_LLM_MODEL", "gemini-2.5-flash"),
+            model=os.getenv("INTERVIEW_LLM_MODEL", "gemini-2.5-flash-lite"),
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,

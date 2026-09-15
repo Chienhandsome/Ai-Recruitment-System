@@ -12,6 +12,8 @@ import {
   JobStatus,
   NotificationStatus,
   NotificationType,
+  InterviewProcessStatus,
+  InterviewRoundStatus,
   Prisma,
   ResumeParsingStatus,
 } from '@prisma/client';
@@ -471,7 +473,9 @@ export class ApplicationsService {
       job: this.serializeJob(application.job),
       candidate: {
         id: application.candidate.id,
-        fullName: application.candidate.fullName || application.candidate.user?.fullName,
+        fullName:
+          application.candidate.fullName ||
+          application.candidate.user?.fullName,
         email: application.candidate.email || application.candidate.user?.email,
         phone: application.candidate.phone || application.candidate.user?.phone,
         avatarUrl: application.candidate.user?.avatarUrl,
@@ -575,6 +579,40 @@ export class ApplicationsService {
         throw new ConflictException(
           'Application was updated by another recruiter. Refresh and try again.',
         );
+      }
+
+      if (
+        dto.targetStage === ApplicationStage.REJECTED ||
+        dto.targetStage === ApplicationStage.WITHDRAWN
+      ) {
+        await prisma.interviewProcess.updateMany({
+          where: {
+            applicationId,
+            status: {
+              in: [InterviewProcessStatus.DRAFT, InterviewProcessStatus.ACTIVE],
+            },
+          },
+          data: {
+            status: InterviewProcessStatus.CANCELLED,
+            currentRoundOrder: null,
+            completedAt: new Date(),
+          },
+        });
+        await prisma.interviewRound.updateMany({
+          where: {
+            process: { applicationId },
+            status: {
+              in: [
+                InterviewRoundStatus.DRAFT,
+                InterviewRoundStatus.READY,
+                InterviewRoundStatus.SCHEDULED,
+                InterviewRoundStatus.IN_PROGRESS,
+                InterviewRoundStatus.AWAITING_REVIEW,
+              ],
+            },
+          },
+          data: { status: InterviewRoundStatus.CANCELLED },
+        });
       }
 
       const historyEntry = await prisma.applicationStatusHistory.create({

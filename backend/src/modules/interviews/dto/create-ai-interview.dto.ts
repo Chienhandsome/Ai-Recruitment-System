@@ -9,12 +9,20 @@ import {
   Max,
   MaxLength,
   Min,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateAiInterviewDto {
   @ApiProperty({ description: 'Application UUID' })
   @IsUUID()
   applicationId!: string;
+
+  @ApiPropertyOptional({
+    description: 'Round UUID khi phiên AI thuộc quy trình nhiều vòng',
+  })
+  @IsOptional()
+  @IsUUID()
+  roundId?: string;
 
   @ApiProperty({
     type: [String],

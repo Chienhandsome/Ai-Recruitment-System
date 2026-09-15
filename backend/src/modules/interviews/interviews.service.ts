@@ -10,6 +10,8 @@ import {
   ApplicationStage,
   CandidateResponseStatus,
   InterviewStatus,
+  InterviewConductedBy,
+  InterviewRoundStatus,
   NotificationType,
   Prisma,
 } from '@prisma/client';
@@ -48,14 +50,39 @@ export class InterviewsService {
           select: {
             id: true,
             userId: true,
-            user: { select: { id: true, fullName: true, email: true, phone: true } },
+            user: {
+              select: { id: true, fullName: true, email: true, phone: true },
+            },
           },
         },
       },
     });
 
     if (!application) {
-      throw new NotFoundException('Đơn ứng tuyển không tồn tại hoặc bạn không có quyền truy cập.');
+      throw new NotFoundException(
+        'Đơn ứng tuyển không tồn tại hoặc bạn không có quyền truy cập.',
+      );
+    }
+
+    if (dto.roundId) {
+      const round = await this.prisma.interviewRound.findFirst({
+        where: {
+          id: dto.roundId,
+          process: { applicationId: application.id },
+        },
+        select: { id: true, conductedBy: true, status: true },
+      });
+      if (!round) {
+        throw new NotFoundException('Không tìm thấy vòng phỏng vấn tương ứng.');
+      }
+      if (round.conductedBy !== InterviewConductedBy.HUMAN) {
+        throw new BadRequestException('Vòng này phải được thực hiện bởi AI.');
+      }
+      if (round.status !== InterviewRoundStatus.READY) {
+        throw new ConflictException(
+          'Vòng phỏng vấn chưa sẵn sàng hoặc đã được lên lịch.',
+        );
+      }
     }
 
     const scheduledDate = new Date(dto.scheduledAt);
@@ -67,6 +94,7 @@ export class InterviewsService {
       const interview = await prisma.interview.create({
         data: {
           applicationId: dto.applicationId,
+          roundId: dto.roundId,
           title: dto.title,
           type: dto.type,
           scheduledAt: scheduledDate,
@@ -76,6 +104,18 @@ export class InterviewsService {
           status: InterviewStatus.SCHEDULED,
         },
       });
+
+      if (dto.roundId) {
+        await prisma.interviewRound.update({
+          where: { id: dto.roundId },
+          data: {
+            status: InterviewRoundStatus.SCHEDULED,
+            scheduledAt: scheduledDate,
+            durationMinutes: dto.durationMinutes ?? 60,
+            locationOrLink: dto.locationOrLink,
+          },
+        });
+      }
 
       // Automatically advance stage to INTERVIEW_SCHEDULED if transition is allowed
       if (
@@ -89,7 +129,9 @@ export class InterviewsService {
           where: { id: application.id },
           data: {
             currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
-            hrDecision: hrDecisionForStage(ApplicationStage.INTERVIEW_SCHEDULED),
+            hrDecision: hrDecisionForStage(
+              ApplicationStage.INTERVIEW_SCHEDULED,
+            ),
           },
         });
 
@@ -122,7 +164,8 @@ export class InterviewsService {
       };
     });
 
-    const recipientUserId = application.candidate?.userId || application.candidate?.user?.id;
+    const recipientUserId =
+      application.candidate?.userId || application.candidate?.user?.id;
     if (this.notificationsService && recipientUserId) {
       await this.notificationsService.createNotification({
         recipientUserId,
@@ -236,7 +279,9 @@ export class InterviewsService {
                         phone: true,
                       },
                     },
-                    company: { select: { id: true, name: true, logoUrl: true } },
+                    company: {
+                      select: { id: true, name: true, logoUrl: true },
+                    },
                   },
                 },
               },
@@ -292,7 +337,9 @@ export class InterviewsService {
               select: {
                 id: true,
                 title: true,
-                recruiter: { select: { id: true, userId: true, companyId: true } },
+                recruiter: {
+                  select: { id: true, userId: true, companyId: true },
+                },
               },
             },
             candidate: {
@@ -362,7 +409,9 @@ export class InterviewsService {
       throw new NotFoundException('Không tìm thấy lịch phỏng vấn để cập nhật.');
     }
 
-    const scheduledDate = dto.scheduledAt ? new Date(dto.scheduledAt) : undefined;
+    const scheduledDate = dto.scheduledAt
+      ? new Date(dto.scheduledAt)
+      : undefined;
     if (scheduledDate && isNaN(scheduledDate.getTime())) {
       throw new BadRequestException('Thời gian phỏng vấn không hợp lệ.');
     }
@@ -370,13 +419,20 @@ export class InterviewsService {
     // Determine candidate response & status transitions
     let targetCandidateResponse = dto.candidateResponse;
     if (targetCandidateResponse === undefined && scheduledDate) {
-      if (existing.candidateResponse === CandidateResponseStatus.RESCHEDULE_REQUESTED) {
+      if (
+        existing.candidateResponse ===
+        CandidateResponseStatus.RESCHEDULE_REQUESTED
+      ) {
         targetCandidateResponse = CandidateResponseStatus.PENDING;
       }
     }
 
     let targetStatus = dto.status;
-    if (!targetStatus && scheduledDate && existing.status === InterviewStatus.RESCHEDULED) {
+    if (
+      !targetStatus &&
+      scheduledDate &&
+      existing.status === InterviewStatus.RESCHEDULED
+    ) {
       targetStatus = InterviewStatus.SCHEDULED;
     }
 
@@ -419,7 +475,9 @@ export class InterviewsService {
 
     if (this.notificationsService && existing.application.candidate?.userId) {
       const jobTitle = existing.application.job?.title || 'Công việc';
-      const dateStr = (scheduledDate || existing.scheduledAt).toLocaleString('vi-VN');
+      const dateStr = (scheduledDate || existing.scheduledAt).toLocaleString(
+        'vi-VN',
+      );
 
       let notifTitle = `Cập nhật lịch phỏng vấn: ${jobTitle}`;
       let notifMsg = `Lịch phỏng vấn "${updated.title}" cho vị trí ${jobTitle} đã được cập nhật lại vào lúc ${dateStr}. Vui lòng kiểm tra và xác nhận trên hệ thống.`;
@@ -477,7 +535,9 @@ export class InterviewsService {
       throw new NotFoundException('Không tìm thấy lịch phỏng vấn.');
     }
 
-    const targetStage = dto.nextStage ?? ApplicationStage.INTERVIEWED;
+    const targetStage = existing.roundId
+      ? existing.application.currentStage
+      : (dto.nextStage ?? ApplicationStage.INTERVIEWED);
 
     const result = await this.prisma.$transaction(async (prisma) => {
       const updatedInterview = await prisma.interview.update({
@@ -489,8 +549,19 @@ export class InterviewsService {
         },
       });
 
+      if (existing.roundId) {
+        await prisma.interviewRound.update({
+          where: { id: existing.roundId },
+          data: {
+            status: InterviewRoundStatus.AWAITING_REVIEW,
+            resultScore: dto.score,
+          },
+        });
+      }
+
       const currentStage = existing.application.currentStage;
       if (
+        !existing.roundId &&
         currentStage !== targetStage &&
         canTransitionApplication(currentStage, targetStage)
       ) {
@@ -512,6 +583,7 @@ export class InterviewsService {
           },
         });
       } else if (
+        !existing.roundId &&
         currentStage !== targetStage &&
         !canTransitionApplication(currentStage, targetStage)
       ) {
@@ -521,7 +593,7 @@ export class InterviewsService {
       }
 
       this.logger.log(
-        `Feedback submitted for interview ${id}. Score: ${dto.score}, target stage: ${targetStage}`,
+        `Feedback submitted for interview ${id}. Score: ${dto.score}, application stage: ${targetStage}`,
       );
 
       return {
@@ -531,7 +603,11 @@ export class InterviewsService {
       };
     });
 
-    if (this.notificationsService && existing.application.candidate?.userId) {
+    if (
+      !existing.roundId &&
+      this.notificationsService &&
+      existing.application.candidate?.userId
+    ) {
       await this.notificationsService.createNotification({
         recipientUserId: existing.application.candidate.userId,
         applicationId: existing.application.id,
@@ -591,7 +667,9 @@ export class InterviewsService {
     }
 
     if (interview.application.candidate.userId !== userId) {
-      throw new NotFoundException('Bạn không có quyền phản hồi lịch phỏng vấn này.');
+      throw new NotFoundException(
+        'Bạn không có quyền phản hồi lịch phỏng vấn này.',
+      );
     }
 
     if (
@@ -616,10 +694,22 @@ export class InterviewsService {
         data: {
           candidateResponse: dto.response,
           candidateNotes: dto.candidateNotes,
-          proposedSlots: dto.proposedSlots ? (dto.proposedSlots as Prisma.InputJsonValue) : Prisma.JsonNull,
+          proposedSlots: dto.proposedSlots
+            ? (dto.proposedSlots as Prisma.InputJsonValue)
+            : Prisma.JsonNull,
           status: newStatus,
         },
       });
+
+      if (
+        interview.roundId &&
+        dto.response === CandidateResponseStatus.DECLINED
+      ) {
+        await prisma.interviewRound.update({
+          where: { id: interview.roundId },
+          data: { status: InterviewRoundStatus.CANCELLED },
+        });
+      }
 
       const candidateName =
         interview.application.candidate.user?.fullName || 'Ứng viên';
@@ -643,7 +733,10 @@ export class InterviewsService {
       return result;
     });
 
-    if (this.notificationsService && interview.application.job.recruiter?.userId) {
+    if (
+      this.notificationsService &&
+      interview.application.job.recruiter?.userId
+    ) {
       const candidateName =
         interview.application.candidate.user?.fullName || 'Ứng viên';
       let statusText = 'đã xác nhận tham gia';

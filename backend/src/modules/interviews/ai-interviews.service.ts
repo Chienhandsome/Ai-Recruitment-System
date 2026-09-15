@@ -11,6 +11,8 @@ import {
   AiInterviewStatus,
   ApplicationStage,
   NotificationType,
+  InterviewConductedBy,
+  InterviewRoundStatus,
   Prisma,
 } from '@prisma/client';
 import { createHmac, timingSafeEqual } from 'node:crypto';
@@ -123,6 +125,29 @@ export class AiInterviewsService {
       );
     }
 
+    if (dto.roundId) {
+      const round = await this.prisma.interviewRound.findFirst({
+        where: {
+          id: dto.roundId,
+          process: { applicationId: application.id },
+        },
+        select: { id: true, conductedBy: true, status: true },
+      });
+      if (!round) {
+        throw new NotFoundException('Không tìm thấy vòng phỏng vấn tương ứng.');
+      }
+      if (round.conductedBy !== InterviewConductedBy.AI) {
+        throw new ConflictException(
+          'Vòng này phải do người phỏng vấn thực hiện.',
+        );
+      }
+      if (round.status !== InterviewRoundStatus.READY) {
+        throw new ConflictException(
+          'Vòng phỏng vấn chưa sẵn sàng hoặc đã được tạo link.',
+        );
+      }
+    }
+
     const interviewServiceUrl = (
       process.env.INTERVIEW_SERVICE_URL ?? 'http://127.0.0.1:8010'
     ).replace(/\/$/, '');
@@ -218,7 +243,9 @@ export class AiInterviewsService {
       this.logger.error(
         `Invalid Interview Service response: ${parsedResponse.error.message}`,
       );
-      throw new BadGatewayException('Interview Service trả về dữ liệu không hợp lệ.');
+      throw new BadGatewayException(
+        'Interview Service trả về dữ liệu không hợp lệ.',
+      );
     }
 
     const remote = parsedResponse.data;
@@ -226,14 +253,25 @@ export class AiInterviewsService {
       const created = await prisma.aiInterviewSession.create({
         data: {
           applicationId: application.id,
+          roundId: dto.roundId,
           interviewServiceId: remote.interview_id,
           status: AiInterviewStatus.CREATED,
           launchUrl: remote.launch_url,
           expiresAt: new Date(remote.expires_at),
-          config: config as Prisma.InputJsonValue,
+          config,
           createdByUserId: userId,
         },
       });
+
+      if (dto.roundId) {
+        await prisma.interviewRound.update({
+          where: { id: dto.roundId },
+          data: {
+            status: InterviewRoundStatus.SCHEDULED,
+            evaluationCriteria: config,
+          },
+        });
+      }
 
       if (
         application.currentStage !== ApplicationStage.INTERVIEW_SCHEDULED &&
@@ -325,7 +363,9 @@ export class AiInterviewsService {
         item.id === videoId,
     );
     if (!video) {
-      throw new NotFoundException('Không tìm thấy video trong kết quả phỏng vấn.');
+      throw new NotFoundException(
+        'Không tìm thấy video trong kết quả phỏng vấn.',
+      );
     }
 
     const serviceUrl = (
@@ -344,7 +384,9 @@ export class AiInterviewsService {
       );
     } catch (error) {
       this.logger.error(`Video proxy failed: ${String(error)}`);
-      throw new ServiceUnavailableException('Không thể kết nối Interview Service.');
+      throw new ServiceUnavailableException(
+        'Không thể kết nối Interview Service.',
+      );
     }
     if (!response.ok) {
       throw new BadGatewayException('Không thể tải video phỏng vấn.');
@@ -376,10 +418,12 @@ export class AiInterviewsService {
       throw new UnauthorizedException('Callback event ID không khớp.');
     }
 
-    const existingEvent = await this.prisma.aiInterviewCallbackEvent.findUnique({
-      where: { id: event.event_id },
-      select: { id: true },
-    });
+    const existingEvent = await this.prisma.aiInterviewCallbackEvent.findUnique(
+      {
+        where: { id: event.event_id },
+        select: { id: true },
+      },
+    );
     if (existingEvent) {
       return { accepted: true, duplicate: true };
     }
@@ -387,6 +431,7 @@ export class AiInterviewsService {
     const session = await this.prisma.aiInterviewSession.findUnique({
       where: { interviewServiceId: event.data.interview_id },
       include: {
+        round: { select: { id: true } },
         application: {
           select: {
             id: true,
@@ -416,7 +461,7 @@ export class AiInterviewsService {
             id: event.event_id,
             aiInterviewSessionId: session.id,
             eventType: event.event_type,
-            payload: event as unknown as Prisma.InputJsonValue,
+            payload: event,
           },
         });
         await prisma.aiInterviewSession.update({
@@ -430,14 +475,28 @@ export class AiInterviewsService {
               ? new Date(event.data.completed_at)
               : new Date(event.occurred_at),
             terminationReason: event.data.termination_reason,
-            transcript: event.data.transcript as Prisma.InputJsonValue,
-            videos: event.data.videos as Prisma.InputJsonValue,
-            securityEvents:
-              event.data.security_events as Prisma.InputJsonValue,
+            transcript: event.data.transcript,
+            videos: event.data.videos,
+            securityEvents: event.data.security_events,
           },
         });
 
+        if (session.roundId) {
+          await prisma.interviewRound.update({
+            where: { id: session.roundId },
+            data: {
+              status:
+                status === AiInterviewStatus.COMPLETED
+                  ? InterviewRoundStatus.AWAITING_REVIEW
+                  : status === AiInterviewStatus.EXPIRED
+                    ? InterviewRoundStatus.EXPIRED
+                    : InterviewRoundStatus.CANCELLED,
+            },
+          });
+        }
+
         if (
+          !session.roundId &&
           status === AiInterviewStatus.COMPLETED &&
           canTransitionApplication(
             session.application.currentStage,

@@ -1,5 +1,9 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { AiInterviewStatus, ApplicationStage } from '@prisma/client';
+import {
+  AiInterviewStatus,
+  ApplicationStage,
+  InterviewRoundStatus,
+} from '@prisma/client';
 import { createHmac } from 'node:crypto';
 import { PrismaService } from '../../database/prisma.service';
 import { ApplicationAccessService } from '../applications/application-access.service';
@@ -33,6 +37,10 @@ describe('AiInterviewsService', () => {
       aiInterviewCallbackEvent: {
         findUnique: jest.fn(),
         create: jest.fn(),
+      },
+      interviewRound: {
+        findFirst: jest.fn(),
+        update: jest.fn(),
       },
       $transaction: jest.fn(async (callback) => callback(prisma)),
     };
@@ -198,5 +206,58 @@ describe('AiInterviewsService', () => {
         {},
       ),
     ).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('moves a managed AI round to review without completing the application', async () => {
+    const payload = {
+      event_id: EVENT_ID,
+      event_type: 'interview.completed',
+      occurred_at: '2026-09-13T10:00:00+00:00',
+      data: {
+        interview_id: REMOTE_ID,
+        recruitment_application_id: APPLICATION_ID,
+        status: 'COMPLETED',
+        started_at: '2026-09-13T09:55:00+00:00',
+        completed_at: '2026-09-13T10:00:00+00:00',
+        transcript: [],
+        videos: [],
+        security_events: [],
+        termination_reason: null,
+      },
+    };
+    const rawBody = Buffer.from(JSON.stringify(payload));
+    const timestamp = String(Math.floor(Date.now() / 1000));
+    const signature = createHmac('sha256', 'callback-test-secret')
+      .update(timestamp)
+      .update('.')
+      .update(rawBody)
+      .digest('hex');
+    prisma.aiInterviewCallbackEvent.findUnique.mockResolvedValue(null);
+    prisma.aiInterviewSession.findUnique.mockResolvedValue({
+      id: SESSION_ID,
+      applicationId: APPLICATION_ID,
+      roundId: 'round-1',
+      round: { id: 'round-1' },
+      application: {
+        id: APPLICATION_ID,
+        currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
+        job: {
+          title: 'Backend Engineer',
+          recruiter: { userId: '88888888-8888-4888-8888-888888888888' },
+        },
+      },
+    });
+
+    await service.receiveCallback(
+      rawBody,
+      { eventId: EVENT_ID, timestamp, signature: `v1=${signature}` },
+      payload,
+    );
+
+    expect(prisma.interviewRound.update).toHaveBeenCalledWith({
+      where: { id: 'round-1' },
+      data: { status: InterviewRoundStatus.AWAITING_REVIEW },
+    });
+    expect(prisma.application.update).not.toHaveBeenCalled();
   });
 });

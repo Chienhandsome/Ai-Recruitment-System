@@ -19,6 +19,7 @@ import secrets
 import smtplib
 import sqlite3
 import ssl
+import time
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from email.utils import formataddr
@@ -736,22 +737,35 @@ def llm_question(interview: OnlineInterview) -> Question | None:
         from google import genai
         from google.genai import types
 
-        transcript = [{"question": turn.question.text, "answer": turn.transcript} for turn in interview.turns]
+        transcript = [
+            {"question": turn.question.text, "answer": turn.transcript[:1200]}
+            for turn in interview.turns[-4:]
+        ]
         previous_questions = [turn.question.text for turn in interview.turns]
         prompt = f"""Generate exactly one concise Vietnamese follow-up job interview question.
-CV JSON: {json.dumps(interview.cv, ensure_ascii=False)[:8000]}
-JD JSON: {json.dumps(interview.jd, ensure_ascii=False)[:8000]}
+CV JSON: {json.dumps(interview.cv, ensure_ascii=False)[:5000]}
+JD JSON: {json.dumps(interview.jd, ensure_ascii=False)[:3500]}
 Required competencies: {interview.config.competencies}
-Prior transcript JSON: {json.dumps(transcript, ensure_ascii=False)[:8000]}
+Recent transcript JSON: {json.dumps(transcript, ensure_ascii=False)[:5000]}
 Questions already asked and strictly forbidden: {json.dumps(previous_questions, ensure_ascii=False)}
 Use the candidate's most recent answer to choose a new angle and request concrete evidence that is still missing.
 Ask about work-relevant evidence only. Do not ask about sensitive personal traits and do not make hiring decisions."""
         client = genai.Client(api_key=api_key)
+        model = os.getenv("INTERVIEW_LLM_MODEL", "gemini-2.5-flash-lite")
+        generation_config: dict[str, Any] = {
+            "response_mime_type": "application/json",
+            "response_schema": LlmQuestion,
+            "temperature": 0.4,
+        }
+        if model.startswith("gemini-2.5-"):
+            generation_config["thinking_config"] = types.ThinkingConfig(thinking_budget=0)
+        started_at = time.perf_counter()
         for attempt in range(2):
             retry_instruction = "" if attempt == 0 else "\nYour previous output duplicated an earlier question. Use a substantially different topic and wording."
             response = client.models.generate_content(
-                model=os.getenv("INTERVIEW_LLM_MODEL", "gemini-2.5-flash"), contents=prompt + retry_instruction,
-                config=types.GenerateContentConfig(response_mime_type="application/json", response_schema=LlmQuestion, temperature=0.4),
+                model=model,
+                contents=prompt + retry_instruction,
+                config=types.GenerateContentConfig(**generation_config),
             )
             if not response.text:
                 continue
@@ -762,6 +776,7 @@ Ask about work-relevant evidence only. Do not ask about sensitive personal trait
             competency = generated.competency
             if competency not in interview.config.competencies:
                 competency = interview.config.competencies[len(interview.turns) % len(interview.config.competencies)]
+            logger.info("Gemini generated question %s in %.2fs", len(interview.turns) + 1, time.perf_counter() - started_at)
             return Question(number=len(interview.turns) + 1, text=generated.text, competency=competency, source="llm")
     except Exception as exc:  # noqa: BLE001 - a provider failure must not stop an interview.
         logger.warning("LLM follow-up failed; falling back: %s", exc)
@@ -1090,11 +1105,17 @@ async def upload_video(request: Request) -> dict[str, Any]:
     interview = participant_from_request(request)
     try: question_number = int(request.headers.get("x-interview-question-number", ""))
     except ValueError as exc: raise HTTPException(status_code=422, detail="Thiếu question number") from exc
+    upload_id = request.headers.get("x-interview-upload-id", "").strip()
+    if not upload_id or len(upload_id) > 100:
+        upload_id = str(uuid4())
+    existing = next((video for video in interview.videos if video.id == upload_id), None)
+    if existing:
+        return {"status": "stored", "size_bytes": existing.size_bytes}
     content_type = request.headers.get("content-type", "").split(";", 1)[0].lower()
     extension = {"video/webm": ".webm", "video/mp4": ".mp4"}.get(content_type)
     if not extension: raise HTTPException(status_code=415, detail="Chỉ hỗ trợ WebM hoặc MP4")
     object_key, size = await media_storage.upload(interview.id, question_number, extension, content_type, request)
-    interview.videos.append(VideoAsset(id=str(uuid4()), question_number=question_number, path=object_key, content_type=content_type, size_bytes=size, created_at=now()))
+    interview.videos.append(VideoAsset(id=upload_id, question_number=question_number, path=object_key, content_type=content_type, size_bytes=size, created_at=now()))
     if interview.callback_status == "PENDING":
         interview.callback_next_attempt_at = now()
     store.save(interview)

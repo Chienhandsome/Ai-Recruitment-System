@@ -187,6 +187,46 @@ enum CandidateResponseStatus {
   DECLINED
 }
 
+enum InterviewProcessStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum InterviewRoundStatus {
+  DRAFT
+  READY
+  SCHEDULED
+  IN_PROGRESS
+  AWAITING_REVIEW
+  PASSED
+  FAILED
+  CANCELLED
+  EXPIRED
+  NO_SHOW
+}
+
+enum InterviewConductedBy {
+  HUMAN
+  AI
+}
+
+enum InterviewMode {
+  IN_PERSON
+  VIDEO_CALL
+  ASYNC_WEB
+}
+
+enum InterviewPurpose {
+  SCREENING
+  TECHNICAL
+  BEHAVIORAL
+  CULTURE_FIT
+  FINAL
+  CUSTOM
+}
+
 enum NotificationType {
   APPLICATION_STATUS_CHANGED
   INTERVIEW_SCHEDULED
@@ -693,11 +733,12 @@ model Application {
   appliedAt             DateTime                    @default(now()) @map("applied_at")
   updatedAt             DateTime                    @updatedAt @map("updated_at")
 
-  aiMatchingResults AiMatchingResult[]
-  interviews        Interview[]
+  aiMatchingResults   AiMatchingResult[]
+  interviews          Interview[]
   aiInterviewSessions AiInterviewSession[]
-  notifications     Notification[]
-  statusHistories   ApplicationStatusHistory[]
+  interviewProcess    InterviewProcess?
+  notifications       Notification[]
+  statusHistories     ApplicationStatusHistory[]
 
   @@unique([jobId, candidateId])
   @@index([jobId])
@@ -749,47 +790,100 @@ model AiMatchingResult {
 }
 
 model Interview {
-  id               String          @id @default(uuid())
-  applicationId    String          @map("application_id")
-  application      Application     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  title            String
-  type             InterviewType   @default(TECHNICAL)
-  status           InterviewStatus @default(SCHEDULED)
-  scheduledAt      DateTime        @map("scheduled_at")
-  durationMinutes  Int             @default(60) @map("duration_minutes")
+  id                String                  @id @default(uuid())
+  applicationId     String                  @map("application_id")
+  application       Application             @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  title             String
+  type              InterviewType           @default(TECHNICAL)
+  status            InterviewStatus         @default(SCHEDULED)
+  scheduledAt       DateTime                @map("scheduled_at")
+  durationMinutes   Int                     @default(60) @map("duration_minutes")
   locationOrLink    String?                 @map("location_or_link")
   interviewerNotes  String?                 @map("interviewer_notes")
   candidateResponse CandidateResponseStatus @default(PENDING) @map("candidate_response")
   candidateNotes    String?                 @map("candidate_notes")
   proposedSlots     Json?                   @map("proposed_slots")
   score             Decimal?                @db.Decimal(5, 2)
-  createdAt        DateTime        @default(now()) @map("created_at")
-  updatedAt        DateTime        @updatedAt @map("updated_at")
+  roundId           String?                 @map("round_id")
+  round             InterviewRound?         @relation(fields: [roundId], references: [id], onDelete: SetNull)
+  createdAt         DateTime                @default(now()) @map("created_at")
+  updatedAt         DateTime                @updatedAt @map("updated_at")
 
+  @@index([roundId])
   @@map("interviews")
 }
 
+model InterviewProcess {
+  id                String                 @id @default(uuid())
+  applicationId     String                 @unique @map("application_id")
+  application       Application            @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  status            InterviewProcessStatus @default(DRAFT)
+  currentRoundOrder Int?                   @map("current_round_order")
+  createdByUserId   String?                @map("created_by_user_id") @db.Uuid
+  startedAt         DateTime?              @map("started_at")
+  completedAt       DateTime?              @map("completed_at")
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
+  rounds            InterviewRound[]
+
+  @@index([status, updatedAt])
+  @@map("interview_processes")
+}
+
+model InterviewRound {
+  id                  String               @id @default(uuid())
+  processId           String               @map("process_id")
+  process             InterviewProcess     @relation(fields: [processId], references: [id], onDelete: Cascade)
+  order               Int
+  title               String
+  description         String?
+  conductedBy         InterviewConductedBy @map("conducted_by")
+  mode                InterviewMode
+  purpose             InterviewPurpose     @default(CUSTOM)
+  status              InterviewRoundStatus @default(DRAFT)
+  required            Boolean              @default(true)
+  scheduledAt         DateTime?            @map("scheduled_at")
+  durationMinutes     Int                  @default(60) @map("duration_minutes")
+  locationOrLink      String?              @map("location_or_link")
+  evaluationCriteria  Json?                @map("evaluation_criteria")
+  resultScore         Decimal?             @map("result_score") @db.Decimal(5, 2)
+  decisionNote        String?              @map("decision_note")
+  decidedByUserId     String?              @map("decided_by_user_id") @db.Uuid
+  decidedAt           DateTime?            @map("decided_at")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+  interviews          Interview[]
+  aiInterviewSessions AiInterviewSession[]
+
+  @@unique([processId, order])
+  @@index([processId, status])
+  @@map("interview_rounds")
+}
+
 model AiInterviewSession {
-  id                       String            @id @default(uuid())
-  applicationId            String            @map("application_id")
-  application              Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  interviewServiceId       String            @unique @map("interview_service_id")
-  status                   AiInterviewStatus @default(CREATED)
-  launchUrl                String            @map("launch_url") @db.Text
-  expiresAt                DateTime          @map("expires_at")
-  startedAt                DateTime?         @map("started_at")
-  completedAt              DateTime?         @map("completed_at")
-  terminationReason        String?           @map("termination_reason")
-  config                   Json
-  transcript               Json?
-  videos                   Json?
-  securityEvents           Json?             @map("security_events")
-  createdByUserId          String?           @map("created_by_user_id") @db.Uuid
-  createdAt                DateTime          @default(now()) @map("created_at")
-  updatedAt                DateTime          @updatedAt @map("updated_at")
-  callbackEvents           AiInterviewCallbackEvent[]
+  id                 String                     @id @default(uuid())
+  applicationId      String                     @map("application_id")
+  application        Application                @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  interviewServiceId String                     @unique @map("interview_service_id")
+  status             AiInterviewStatus          @default(CREATED)
+  launchUrl          String                     @map("launch_url") @db.Text
+  expiresAt          DateTime                   @map("expires_at")
+  startedAt          DateTime?                  @map("started_at")
+  completedAt        DateTime?                  @map("completed_at")
+  terminationReason  String?                    @map("termination_reason")
+  config             Json
+  transcript         Json?
+  videos             Json?
+  securityEvents     Json?                      @map("security_events")
+  roundId            String?                    @map("round_id")
+  round              InterviewRound?            @relation(fields: [roundId], references: [id], onDelete: SetNull)
+  createdByUserId    String?                    @map("created_by_user_id") @db.Uuid
+  createdAt          DateTime                   @default(now()) @map("created_at")
+  updatedAt          DateTime                   @updatedAt @map("updated_at")
+  callbackEvents     AiInterviewCallbackEvent[]
 
   @@index([applicationId, createdAt])
+  @@index([roundId])
   @@index([status, expiresAt])
   @@map("ai_interview_sessions")
 }

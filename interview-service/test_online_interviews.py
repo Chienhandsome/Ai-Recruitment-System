@@ -122,8 +122,17 @@ def test_one_time_link_otp_and_candidate_flow(monkeypatch, tmp_path) -> None:
     assert ended.status_code == 200
     assert ended.json()["status"] == "COMPLETED"
 
-    uploaded = client.post("/v1/participant/videos", content=b"video", headers={**access_headers, "Content-Type": "video/webm", "X-Interview-Question-Number": "1"})
+    upload_headers = {
+        **access_headers,
+        "Content-Type": "video/webm",
+        "X-Interview-Question-Number": "1",
+        "X-Interview-Upload-Id": "7e6d1139-6a5d-4fb5-849d-a03cb53cbce2",
+    }
+    uploaded = client.post("/v1/participant/videos", content=b"video", headers=upload_headers)
     assert uploaded.status_code == 202
+    duplicate_upload = client.post("/v1/participant/videos", content=b"video", headers=upload_headers)
+    assert duplicate_upload.status_code == 202
+    assert len(online_interviews.store.get(interview_id).videos) == 1
 
     asyncio.run(online_interviews.deliver_due_callbacks())
     callback_payload = json.loads(delivered["body"])

@@ -18,6 +18,7 @@ interface ApplicationStageActionsProps {
   currentHrNotes?: string | null;
   onUpdated: () => void | Promise<void>;
   onScheduleInterview?: () => void;
+  managedInterviewProcess?: boolean;
 }
 
 function noteRequired(current: ApplicationStage, target: ApplicationStage) {
@@ -38,13 +39,19 @@ export function ApplicationStageActions({
   currentHrNotes,
   onUpdated,
   onScheduleInterview,
+  managedInterviewProcess = false,
 }: ApplicationStageActionsProps) {
   const [target, setTarget] = useState<ApplicationStage | null>(null);
   const [note, setNote] = useState("");
   const [hrNotes, setHrNotes] = useState(currentHrNotes ?? "");
   const [submitting, setSubmitting] = useState(false);
 
-  if (allowedTransitions.length === 0) {
+  const actionableTransitions = managedInterviewProcess
+    ? allowedTransitions.filter((stage) => stage !== "INTERVIEW_SCHEDULED")
+    : allowedTransitions;
+
+  if (actionableTransitions.length === 0) {
+    if (managedInterviewProcess) return null;
     return <p className="text-xs font-semibold text-slate-500">Không còn thao tác khả dụng.</p>;
   }
 
@@ -97,7 +104,7 @@ export function ApplicationStageActions({
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        {allowedTransitions.map((stage) => (
+        {actionableTransitions.map((stage) => (
           <button
             key={stage}
             type="button"

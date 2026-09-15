@@ -1,26 +1,14 @@
-export type InterviewType =
-  | 'ONLINE'
-  | 'OFFLINE'
-  | 'AI_SCREENING'
-  | 'TECHNICAL'
-  | 'BEHAVIORAL';
+export type InterviewType = 'ONLINE' | 'OFFLINE' | 'AI_SCREENING' | 'TECHNICAL' | 'BEHAVIORAL';
 
 export type InterviewStatus =
-  | 'SCHEDULED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'CANCELLED'
-  | 'RESCHEDULED';
+  'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'RESCHEDULED';
 
-export type CandidateResponseStatus =
-  | 'PENDING'
-  | 'ACCEPTED'
-  | 'RESCHEDULE_REQUESTED'
-  | 'DECLINED';
+export type CandidateResponseStatus = 'PENDING' | 'ACCEPTED' | 'RESCHEDULE_REQUESTED' | 'DECLINED';
 
 export interface InterviewData {
   id: string;
   applicationId: string;
+  roundId?: string | null;
   title: string;
   type: InterviewType;
   status: InterviewStatus;
@@ -61,6 +49,7 @@ export interface InterviewData {
 
 export interface CreateInterviewInput {
   applicationId: string;
+  roundId?: string;
   title: string;
   type?: InterviewType;
   scheduledAt: string;
@@ -69,12 +58,7 @@ export interface CreateInterviewInput {
   interviewerNotes?: string;
 }
 
-export type AiInterviewStatus =
-  | 'CREATED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'TERMINATED'
-  | 'EXPIRED';
+export type AiInterviewStatus = 'CREATED' | 'IN_PROGRESS' | 'COMPLETED' | 'TERMINATED' | 'EXPIRED';
 
 export interface AiInterviewTurn {
   question: {
@@ -98,6 +82,7 @@ export interface AiInterviewVideo {
 export interface AiInterviewSession {
   id: string;
   applicationId: string;
+  roundId?: string | null;
   interviewServiceId: string;
   status: AiInterviewStatus;
   launchUrl: string;
@@ -114,10 +99,77 @@ export interface AiInterviewSession {
 
 export interface CreateAiInterviewInput {
   applicationId: string;
+  roundId?: string;
   openingQuestions: string[];
   competencies: string[];
   maxQuestions: number;
   expiresInHours: number;
+}
+
+export type InterviewProcessStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+export type InterviewRoundStatus =
+  | 'DRAFT'
+  | 'READY'
+  | 'SCHEDULED'
+  | 'IN_PROGRESS'
+  | 'AWAITING_REVIEW'
+  | 'PASSED'
+  | 'FAILED'
+  | 'CANCELLED'
+  | 'EXPIRED'
+  | 'NO_SHOW';
+export type InterviewConductedBy = 'HUMAN' | 'AI';
+export type InterviewMode = 'IN_PERSON' | 'VIDEO_CALL' | 'ASYNC_WEB';
+export type InterviewPurpose =
+  'SCREENING' | 'TECHNICAL' | 'BEHAVIORAL' | 'CULTURE_FIT' | 'FINAL' | 'CUSTOM';
+
+export interface InterviewRoundData {
+  id: string;
+  processId: string;
+  order: number;
+  title: string;
+  description?: string | null;
+  conductedBy: InterviewConductedBy;
+  mode: InterviewMode;
+  purpose: InterviewPurpose;
+  status: InterviewRoundStatus;
+  required: boolean;
+  scheduledAt?: string | null;
+  durationMinutes: number;
+  locationOrLink?: string | null;
+  evaluationCriteria?: {
+    openingQuestions?: string[];
+    competencies?: string[];
+    maxQuestions?: number;
+    expiresInHours?: number;
+  } | null;
+  resultScore?: number | null;
+  decisionNote?: string | null;
+  interviews: InterviewData[];
+  aiInterviewSessions: AiInterviewSession[];
+}
+
+export interface InterviewProcessData {
+  id: string;
+  applicationId: string;
+  status: InterviewProcessStatus;
+  currentRoundOrder?: number | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  rounds: InterviewRoundData[];
+}
+
+export interface CreateInterviewRoundInput {
+  title: string;
+  description?: string;
+  conductedBy: InterviewConductedBy;
+  mode: InterviewMode;
+  purpose: InterviewPurpose;
+  required?: boolean;
+  scheduledAt?: string;
+  durationMinutes?: number;
+  locationOrLink?: string;
+  evaluationCriteria?: InterviewRoundData['evaluationCriteria'];
 }
 
 export interface UpdateInterviewInput {
@@ -158,6 +210,93 @@ async function readInterviewApiError(response: Response, fallback: string) {
   } catch {
     return fallback;
   }
+}
+
+async function interviewRequest<T>(
+  token: string,
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+      ...init.headers,
+    },
+    cache: 'no-store',
+  });
+  if (!response.ok) {
+    throw new InterviewApiError(
+      await readInterviewApiError(response, 'Không thể xử lý quy trình phỏng vấn'),
+      response.status,
+    );
+  }
+  return response.json() as Promise<T>;
+}
+
+export function getInterviewProcess(token: string, applicationId: string) {
+  return interviewRequest<InterviewProcessData | null>(
+    token,
+    `/interviews/processes/application/${applicationId}`,
+  );
+}
+
+export function createInterviewProcess(token: string, applicationId: string) {
+  return interviewRequest<InterviewProcessData>(token, '/interviews/processes', {
+    method: 'POST',
+    body: JSON.stringify({ applicationId }),
+  });
+}
+
+export function addInterviewRound(
+  token: string,
+  processId: string,
+  input: CreateInterviewRoundInput,
+) {
+  return interviewRequest<InterviewRoundData>(token, `/interviews/processes/${processId}/rounds`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function deleteInterviewRound(token: string, roundId: string) {
+  return interviewRequest<{ deleted: boolean }>(token, `/interviews/rounds/${roundId}`, {
+    method: 'DELETE',
+  });
+}
+
+export function reorderInterviewRounds(token: string, processId: string, roundIds: string[]) {
+  return interviewRequest<InterviewProcessData>(
+    token,
+    `/interviews/processes/${processId}/rounds/reorder`,
+    { method: 'PATCH', body: JSON.stringify({ roundIds }) },
+  );
+}
+
+export function activateInterviewProcess(token: string, processId: string) {
+  return interviewRequest<InterviewProcessData>(
+    token,
+    `/interviews/processes/${processId}/activate`,
+    { method: 'POST' },
+  );
+}
+
+export function decideInterviewRound(
+  token: string,
+  roundId: string,
+  input: { decision: 'PASSED' | 'FAILED'; score?: number; note?: string },
+) {
+  return interviewRequest<InterviewProcessData>(token, `/interviews/rounds/${roundId}/decision`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function retryInterviewRound(token: string, roundId: string) {
+  return interviewRequest<InterviewProcessData>(token, `/interviews/rounds/${roundId}/retry`, {
+    method: 'POST',
+  });
 }
 
 export async function createInterview(
@@ -208,10 +347,10 @@ export async function getAiInterviewsForApplication(
   token: string,
   applicationId: string,
 ): Promise<AiInterviewSession[]> {
-  const response = await fetch(
-    `${API_URL}/interviews/ai/application/${applicationId}`,
-    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' },
-  );
+  const response = await fetch(`${API_URL}/interviews/ai/application/${applicationId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
   if (!response.ok) {
     throw new InterviewApiError(
       await readInterviewApiError(response, 'Không thể tải phỏng vấn AI'),
@@ -226,10 +365,9 @@ export async function downloadAiInterviewVideo(
   sessionId: string,
   videoId: string,
 ): Promise<void> {
-  const response = await fetch(
-    `${API_URL}/interviews/ai/${sessionId}/videos/${videoId}`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
+  const response = await fetch(`${API_URL}/interviews/ai/${sessionId}/videos/${videoId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   if (!response.ok) {
     throw new InterviewApiError(
       await readInterviewApiError(response, 'Không thể tải video phỏng vấn'),
@@ -256,7 +394,10 @@ export async function getInterviews(
     page?: number;
     limit?: number;
   },
-): Promise<{ data: InterviewData[]; meta: { total: number; page: number; limit: number; totalPages: number } }> {
+): Promise<{
+  data: InterviewData[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}> {
   const query = new URLSearchParams();
   if (params?.applicationId) query.set('applicationId', params.applicationId);
   if (params?.jobId) query.set('jobId', params.jobId);
@@ -296,10 +437,7 @@ export async function getMyInterviews(token: string): Promise<InterviewData[]> {
   return response.json();
 }
 
-export async function getInterviewDetail(
-  token: string,
-  id: string,
-): Promise<InterviewData> {
+export async function getInterviewDetail(token: string, id: string): Promise<InterviewData> {
   const response = await fetch(`${API_URL}/interviews/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
@@ -457,8 +595,7 @@ export function generateGoogleCalendarUrl(interview: {
   const duration = interview.durationMinutes || 60;
   const endDate = new Date(startDate.getTime() + duration * 60 * 1000);
 
-  const formatGCalDate = (d: Date) =>
-    d.toISOString().replace(/-|:|\.\d\d\d/g, '');
+  const formatGCalDate = (d: Date) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
 
   const datesParam = `${formatGCalDate(startDate)}/${formatGCalDate(endDate)}`;
 
@@ -492,16 +629,13 @@ export function downloadIcsFile(interview: {
   const duration = interview.durationMinutes || 60;
   const endDate = new Date(startDate.getTime() + duration * 60 * 1000);
 
-  const formatIcsDate = (d: Date) =>
-    d.toISOString().replace(/-|:|\.\d\d\d/g, '');
+  const formatIcsDate = (d: Date) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
 
   const now = formatIcsDate(new Date());
   const start = formatIcsDate(startDate);
   const end = formatIcsDate(endDate);
 
-  const cleanDesc = (interview.interviewerNotes || '')
-    .replace(/\n/g, '\\n')
-    .replace(/,/g, '\\,');
+  const cleanDesc = (interview.interviewerNotes || '').replace(/\n/g, '\\n').replace(/,/g, '\\,');
 
   const icsContent = [
     'BEGIN:VCALENDAR',

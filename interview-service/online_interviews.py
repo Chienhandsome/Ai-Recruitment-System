@@ -56,7 +56,12 @@ CALLBACK_MEDIA_GRACE_SECONDS = int(os.getenv("INTERVIEW_CALLBACK_MEDIA_GRACE_SEC
 CALLBACK_RETRY_SECONDS = (0, 10, 30, 120, 300, 900, 3600, 10800)
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+SUPABASE_PUBLISHABLE_KEY = os.getenv("SUPABASE_PUBLISHABLE_KEY", "").strip()
 SUPABASE_INTERVIEW_BUCKET = os.getenv("SUPABASE_INTERVIEW_BUCKET", "interview-videos").strip()
+OTP_PROVIDER = os.getenv(
+    "INTERVIEW_OTP_PROVIDER",
+    "supabase_auth" if SUPABASE_PUBLISHABLE_KEY else "smtp",
+).strip().lower()
 
 
 def supabase_is_configured() -> bool:
@@ -702,7 +707,63 @@ def next_question(interview: OnlineInterview) -> Question | None:
     return llm_question(interview) or fallback_question(interview)
 
 
-def send_otp(interview: OnlineInterview, otp: str) -> str:
+def supabase_auth_headers() -> dict[str, str]:
+    if not SUPABASE_URL or not SUPABASE_PUBLISHABLE_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="Supabase Auth OTP chưa được cấu hình trên Interview Service",
+        )
+    return {
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": f"Bearer {SUPABASE_PUBLISHABLE_KEY}",
+        "Content-Type": "application/json",
+    }
+
+
+def send_supabase_auth_otp(email: str) -> str:
+    try:
+        response = httpx.post(
+            f"{SUPABASE_URL.rstrip('/')}/auth/v1/otp",
+            headers=supabase_auth_headers(),
+            json={"email": email, "create_user": False},
+            timeout=15,
+        )
+    except httpx.HTTPError as exc:
+        logger.warning("Supabase Auth OTP delivery failed: %s", exc)
+        raise HTTPException(status_code=502, detail="Supabase Auth hiện không phản hồi") from exc
+    if response.status_code == 429:
+        raise HTTPException(status_code=429, detail="Vui lòng chờ trước khi yêu cầu mã OTP mới")
+    if not response.is_success:
+        logger.warning("Supabase Auth OTP delivery rejected with status %s", response.status_code)
+        raise HTTPException(
+            status_code=502,
+            detail="Không thể gửi OTP qua Supabase Auth. Hãy kiểm tra tài khoản ứng viên và email template.",
+        )
+    return "supabase_auth"
+
+
+def verify_supabase_auth_otp(email: str, code: str) -> bool:
+    try:
+        response = httpx.post(
+            f"{SUPABASE_URL.rstrip('/')}/auth/v1/verify",
+            headers=supabase_auth_headers(),
+            json={"email": email, "token": code, "type": "email"},
+            timeout=15,
+        )
+    except httpx.HTTPError as exc:
+        logger.warning("Supabase Auth OTP verification failed: %s", exc)
+        raise HTTPException(status_code=502, detail="Supabase Auth hiện không phản hồi") from exc
+    if response.status_code == 429:
+        raise HTTPException(status_code=429, detail="Bạn đã xác thực quá nhiều lần. Vui lòng thử lại sau")
+    if response.status_code in {400, 401, 403}:
+        return False
+    if not response.is_success:
+        logger.warning("Supabase Auth OTP verification rejected with status %s", response.status_code)
+        raise HTTPException(status_code=502, detail="Không thể xác thực OTP qua Supabase Auth")
+    return True
+
+
+def send_smtp_otp(interview: OnlineInterview, otp: str) -> str:
     smtp_host = os.getenv("INTERVIEW_SMTP_HOST", "").strip()
     if not smtp_host:
         logger.warning("DEV OTP for %s: %s", interview.candidate.email, otp)
@@ -737,6 +798,24 @@ def send_otp(interview: OnlineInterview, otp: str) -> str:
             detail="Không thể gửi email OTP. Vui lòng thử lại sau hoặc liên hệ HR.",
         ) from exc
     return "email"
+
+
+def send_otp(interview: OnlineInterview, otp: str | None) -> str:
+    if OTP_PROVIDER == "supabase_auth":
+        return send_supabase_auth_otp(interview.candidate.email)
+    if OTP_PROVIDER == "smtp":
+        if otp is None:
+            raise HTTPException(status_code=500, detail="Không thể tạo OTP")
+        return send_smtp_otp(interview, otp)
+    if OTP_PROVIDER == "console":
+        if otp is None:
+            raise HTTPException(status_code=500, detail="Không thể tạo OTP")
+        logger.warning("DEV OTP for %s: %s", interview.candidate.email, otp)
+        return "console"
+    raise HTTPException(
+        status_code=503,
+        detail="INTERVIEW_OTP_PROVIDER phải là 'supabase_auth', 'smtp' hoặc 'console'",
+    )
 
 
 @router.post("/v1/internal/interviews", response_model=CreateInterviewResponse, status_code=status.HTTP_201_CREATED)
@@ -816,11 +895,13 @@ def request_otp(launch_token: str, request: OtpRequest) -> dict[str, str]:
     interview = store.find_by_launch_token(launch_token); expire_if_needed(interview)
     if interview.link_consumed or interview.status == "EXPIRED" or request.email.lower() != interview.candidate.email.lower():
         raise HTTPException(status_code=400, detail="Không thể gửi OTP cho link này")
-    otp = f"{secrets.randbelow(1_000_000):06d}"
-    interview.otp_hash, interview.otp_expires_at, interview.otp_attempts = digest(otp, "INTERVIEW_OTP_SECRET"), now() + timedelta(minutes=5), 0
+    otp = None if OTP_PROVIDER == "supabase_auth" else f"{secrets.randbelow(1_000_000):06d}"
+    delivery = send_otp(interview, otp)
+    interview.otp_hash = digest(otp, "INTERVIEW_OTP_SECRET") if otp else None
+    interview.otp_expires_at, interview.otp_attempts = now() + timedelta(minutes=5), 0
     interview.status = "AWAITING_OTP"
     store.save(interview)
-    return {"delivery": send_otp(interview, otp)}
+    return {"delivery": delivery}
 
 
 @router.post("/v1/public/launch/{launch_token}/verify")
@@ -828,12 +909,21 @@ def verify_otp(launch_token: str, request: VerifyOtpRequest) -> dict[str, Any]:
     interview = store.find_by_launch_token(launch_token); expire_if_needed(interview)
     if interview.link_consumed or interview.status == "EXPIRED" or request.email.lower() != interview.candidate.email.lower():
         raise HTTPException(status_code=400, detail="Không thể xác thực link này")
-    if not interview.otp_hash or not interview.otp_expires_at or now() > interview.otp_expires_at:
+    if not interview.otp_expires_at or now() > interview.otp_expires_at:
         raise HTTPException(status_code=400, detail="OTP đã hết hạn")
     interview.otp_attempts += 1
     if interview.otp_attempts > 5:
+        store.save(interview)
         raise HTTPException(status_code=429, detail="Bạn đã nhập OTP sai quá số lần cho phép")
-    if not hmac.compare_digest(interview.otp_hash, digest(request.code, "INTERVIEW_OTP_SECRET")):
+    store.save(interview)
+    if OTP_PROVIDER == "supabase_auth":
+        valid_otp = verify_supabase_auth_otp(interview.candidate.email, request.code)
+    else:
+        valid_otp = bool(interview.otp_hash) and hmac.compare_digest(
+            interview.otp_hash,
+            digest(request.code, "INTERVIEW_OTP_SECRET"),
+        )
+    if not valid_otp:
         raise HTTPException(status_code=400, detail="OTP không đúng")
     interview.link_consumed, interview.status = True, "VERIFIED"
     store.save(interview)

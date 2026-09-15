@@ -35,6 +35,18 @@ Candidate Web runs at `http://127.0.0.1:4174`. Set the same address in
 
 Set `GEMINI_API_KEY` in `.env` to use Gemini for adaptive follow-up questions. Without it, the service deliberately uses a deterministic fallback generator so the demo remains usable and testable.
 
+## Candidate email OTP
+
+Render Free blocks outbound SMTP ports, so production uses Supabase Auth over
+HTTPS. Set `INTERVIEW_OTP_PROVIDER=supabase_auth` and configure
+`SUPABASE_PUBLISHABLE_KEY`. The Supabase Magic Link email template must include
+`{{ .Token }}` so candidates receive a six-digit code. Existing candidates are
+required; the Interview Service requests OTP with user creation disabled and
+discards the Supabase session returned after verification.
+
+Direct SMTP remains available with `INTERVIEW_OTP_PROVIDER=smtp` on hosts that
+permit SMTP traffic. Use `console` only for local development.
+
 ## Google Cloud Speech-to-Text and Text-to-Speech
 
 Enable the Cloud Speech-to-Text and Cloud Text-to-Speech APIs and create a

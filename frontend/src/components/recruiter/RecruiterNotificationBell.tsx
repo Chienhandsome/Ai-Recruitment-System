@@ -54,32 +54,32 @@ export function RecruiterNotificationBell({
   }, []);
 
   const loadData = useCallback(async () => {
-    if (!token) return;
+    if (!token || !token.trim()) return;
     try {
       const [notifRes, countRes, interviewsRes] = await Promise.all([
         getMyNotifications(token, { limit: 15 }),
         getUnreadNotificationCount(token),
-        getInterviews(token, { limit: 50 }),
+        getInterviews(token, { limit: 50 }).catch(() => ({ data: [] })),
       ]);
 
-      setNotifications(notifRes.data || []);
-      setUnreadCount(countRes.unreadCount || 0);
+      setNotifications(notifRes?.data || []);
+      setUnreadCount(countRes?.unreadCount || 0);
 
       // Filter today's interviews
-      const todaySessions = (interviewsRes.data || []).filter((it) => {
+      const todaySessions = (interviewsRes?.data || []).filter((it) => {
         const d = parseISO(it.scheduledAt);
         return isToday(d) && it.status !== 'CANCELLED' && it.status !== 'COMPLETED';
       });
       setTodayInterviews(todaySessions);
     } catch (err) {
-      console.error('Failed to load recruiter notifications or interviews:', err);
+      console.warn('Failed to load recruiter notifications or interviews:', err);
     }
   }, [token]);
 
   useEffect(() => {
     loadData();
-    // Poll every 5 seconds as fallback
-    const interval = setInterval(loadData, 5000);
+    // Poll every 30 seconds as fallback
+    const interval = setInterval(loadData, 30000);
 
     // Subscribe to realtime changes on notifications & interviews
     const supabase = createClient();

@@ -33,12 +33,14 @@ import {
   reorderInterviewRounds,
   retryInterviewRound,
   submitInterviewFeedback,
+  type AiInterviewSession,
   type InterviewConductedBy,
   type InterviewMode,
   type InterviewProcessData,
   type InterviewPurpose,
   type InterviewRoundData,
 } from '@/lib/interview-api';
+import { AiInterviewReviewModal } from './AiInterviewReviewModal';
 
 interface InterviewProcessManagerProps {
   token: string;
@@ -99,6 +101,7 @@ export function InterviewProcessManager({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [reviewingAiSession, setReviewingAiSession] = useState<AiInterviewSession | null>(null);
 
   const [title, setTitle] = useState('Sơ tuyển với AI');
   const [description, setDescription] = useState('');
@@ -596,6 +599,7 @@ export function InterviewProcessManager({
                       onSubmitFeedback={() => void submitHumanFeedback(currentRound)}
                       onDecide={(decision) => void decide(currentRound.id, decision)}
                       onRetry={() => void retry(currentRound.id)}
+                      onReviewAiSession={setReviewingAiSession}
                     />
                   ) : (
                     <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
@@ -627,6 +631,7 @@ export function InterviewProcessManager({
                           token={token}
                           onMove={(direction) => void moveRound(index, direction)}
                           onRemove={() => void removeRound(round.id)}
+                          onReviewAiSession={setReviewingAiSession}
                         />
                       ))}
                     </div>
@@ -652,6 +657,22 @@ export function InterviewProcessManager({
           </div>
         </div>
       )}
+
+      {reviewingAiSession && (
+        <AiInterviewReviewModal
+          isOpen={!!reviewingAiSession}
+          session={reviewingAiSession}
+          token={token}
+          candidateName={candidateName}
+          jobTitle={jobTitle}
+          onClose={() => setReviewingAiSession(null)}
+          onEvaluated={() => {
+            setReviewingAiSession(null);
+            void loadProcess();
+            onCreated?.();
+          }}
+        />
+      )}
     </>
   );
 }
@@ -671,6 +692,7 @@ function RoundActionPanel({
   onSubmitFeedback,
   onDecide,
   onRetry,
+  onReviewAiSession,
 }: {
   round: InterviewRoundData;
   scheduledAt: string;
@@ -686,6 +708,7 @@ function RoundActionPanel({
   onSubmitFeedback: () => void;
   onDecide: (decision: 'PASSED' | 'FAILED') => void;
   onRetry: () => void;
+  onReviewAiSession?: (session: AiInterviewSession) => void;
 }) {
   const latestInterview = round.interviews[0];
   const canRetry = ['FAILED', 'EXPIRED', 'NO_SHOW', 'CANCELLED'].includes(round.status);
@@ -694,6 +717,22 @@ function RoundActionPanel({
       <p className="text-xs font-black text-blue-800">Vòng hiện tại</p>
       <h4 className="mt-1 text-base font-black text-slate-950">{round.title}</h4>
       <p className="mt-1 text-sm text-slate-600">{statusLabels[round.status]}</p>
+
+      {round.conductedBy === 'AI' && round.aiInterviewSessions?.[0] && (
+        <div className="mt-3 rounded-xl border border-blue-200 bg-white p-3 shadow-xs">
+          <p className="text-xs font-black text-slate-900">Video & Câu trả lời của ứng viên</p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {round.aiInterviewSessions[0].videos?.length || 0} video câu trả lời lưu trên Supabase.
+          </p>
+          <button
+            type="button"
+            onClick={() => onReviewAiSession?.(round.aiInterviewSessions[0])}
+            className="mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700 transition-colors shadow-xs"
+          >
+            <Video className="h-4 w-4" /> Xem video & Đánh giá từng câu hỏi
+          </button>
+        </div>
+      )}
 
       {round.status === 'READY' && round.conductedBy === 'HUMAN' && (
         <div className="mt-4 space-y-3">
@@ -840,6 +879,7 @@ function RoundRow({
   token,
   onMove,
   onRemove,
+  onReviewAiSession,
 }: {
   round: InterviewRoundData;
   draft: boolean;
@@ -849,6 +889,7 @@ function RoundRow({
   token: string;
   onMove: (direction: -1 | 1) => void;
   onRemove: () => void;
+  onReviewAiSession?: (session: AiInterviewSession) => void;
 }) {
   const latestAi = round.aiInterviewSessions[0];
   return (
@@ -924,10 +965,25 @@ function RoundRow({
         )}
       </div>
 
+      {latestAi && (
+        <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+          <span className="text-xs font-semibold text-slate-500">
+            {latestAi.status === 'COMPLETED' ? 'Đã nộp bài phỏng vấn AI' : 'Phiên phỏng vấn AI'}
+          </span>
+          <button
+            type="button"
+            onClick={() => onReviewAiSession?.(latestAi)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-700 hover:bg-blue-100 transition-colors"
+          >
+            <Video className="h-3.5 w-3.5 text-blue-600" /> Xem video & Đánh giá từng câu
+          </button>
+        </div>
+      )}
+
       {latestAi?.transcript?.length ? (
         <details className="mt-3 border-t border-slate-100 pt-3">
           <summary className="cursor-pointer text-xs font-black text-blue-800">
-            Xem transcript và video
+            Xem nhanh transcript và video
           </summary>
           <div className="mt-3 space-y-2">
             {latestAi.transcript.map((turn) => (

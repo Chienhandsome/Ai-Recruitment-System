@@ -374,7 +374,6 @@ export function CandidateScoringWorkspace({
                 const appUser = app.candidate?.user || app.candidate;
                 const score = appAi ? Math.round(Number(appAi.overallScore)) : 0;
                 const isSelected = activeAppId === app.id;
-                const matchedCount = appAi?.matchedSkills?.length || 0;
                 const appPending = !appAi && isAiEvaluationPending(app.processingStatus);
 
                 return (
@@ -467,11 +466,8 @@ export function CandidateScoringWorkspace({
                       </div>
                     </div>
 
-                    {/* Bottom Metadata: Stage & Skills matched */}
-                    <div className="flex items-center justify-between gap-2 mt-2.5 pt-2 border-t border-slate-100 text-[10px]">
-                      <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        ✓ {matchedCount} Kỹ năng
-                      </span>
+                    {/* Bottom Metadata: Stage */}
+                    <div className="flex items-center justify-end gap-2 mt-2.5 pt-2 border-t border-slate-100 text-[10px]">
                       <span
                         className={`font-bold px-2 py-0.5 rounded border ${
                           applicationStageStyles[app.currentStage as keyof typeof applicationStageStyles] ||

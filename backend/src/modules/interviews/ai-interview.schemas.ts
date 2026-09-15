@@ -10,27 +10,27 @@ export const interviewServiceCreateResponseSchema = z.object({
 const questionSchema = z.object({
   number: z.number().int().positive(),
   text: z.string(),
-  competency: z.string(),
-  source: z.enum(['opening', 'llm', 'fallback']),
+  competency: z.string().optional().default('general'),
+  source: z.string().optional().default('opening'),
 });
 
 const turnSchema = z.object({
   question: questionSchema,
   transcript: z.string(),
-  answered_at: z.string().datetime({ offset: true }),
+  answered_at: z.string(),
 });
 
 const videoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   question_number: z.number().int().positive(),
-  content_type: z.enum(['video/webm', 'video/mp4']),
+  content_type: z.string(),
   size_bytes: z.number().int().nonnegative(),
-  created_at: z.string().datetime({ offset: true }),
+  created_at: z.string(),
 });
 
 const securityEventSchema = z.object({
   type: z.string(),
-  happened_at: z.string().datetime({ offset: true }),
+  happened_at: z.string(),
 });
 
 export const aiInterviewCallbackSchema = z.object({

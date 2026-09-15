@@ -280,24 +280,43 @@ export async function getRecruiterJobs(
   token: string,
   params?: { page?: number; limit?: number; status?: string; search?: string }
 ): Promise<JobsResponse> {
+  const fallback: JobsResponse = {
+    data: [],
+    meta: { total: 0, page: params?.page || 1, limit: params?.limit || 10, totalPages: 0 },
+  };
+
+  if (!token || !token.trim()) {
+    return fallback;
+  }
+
   const query = new URLSearchParams();
   if (params?.page) query.append("page", params.page.toString());
   if (params?.limit) query.append("limit", params.limit.toString());
   if (params?.status) query.append("status", params.status);
   if (params?.search) query.append("search", params.search);
 
-  const res = await fetch(`${API_URL}/jobs?${query.toString()}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    next: { revalidate: 0 },
-  });
+  try {
+    const res = await fetch(`${API_URL}/jobs?${query.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      next: { revalidate: 0 },
+    });
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch recruiter jobs");
+    if (res.status === 401 || res.status === 403) {
+      return fallback;
+    }
+
+    if (!res.ok) {
+      const errDetail = await res.text().catch(() => "");
+      throw new Error(`Failed to fetch recruiter jobs (${res.status}): ${errDetail}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.warn("Failed to fetch recruiter jobs:", error);
+    return fallback;
   }
-
-  return res.json();
 }
 
 export async function createRecruiterJob(

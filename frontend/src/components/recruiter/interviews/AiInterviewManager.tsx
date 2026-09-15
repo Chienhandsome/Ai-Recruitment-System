@@ -18,6 +18,7 @@ import {
   downloadAiInterviewVideo,
   getAiInterviewsForApplication,
 } from "@/lib/interview-api";
+import { AiInterviewReviewModal } from "./AiInterviewReviewModal";
 
 interface AiInterviewManagerProps {
   token: string;
@@ -44,6 +45,7 @@ export function AiInterviewManager({
 }: AiInterviewManagerProps) {
   const [open, setOpen] = useState(false);
   const [sessions, setSessions] = useState<AiInterviewSession[]>([]);
+  const [selectedSessionForReview, setSelectedSessionForReview] = useState<AiInterviewSession | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [question1, setQuestion1] = useState(
@@ -246,6 +248,16 @@ export function AiInterviewManager({
                         </p>
                       )}
 
+                      {session.status === "COMPLETED" && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSessionForReview(session)}
+                          className="mt-3.5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-3.5 py-2.5 text-xs font-black text-white hover:bg-blue-700 shadow-md shadow-blue-600/20 transition cursor-pointer"
+                        >
+                          <Video className="h-4 w-4" /> Xem video & Đánh giá từng câu hỏi ({session.transcript?.length || 0} câu)
+                        </button>
+                      )}
+
                       {!!session.transcript?.length && (
                         <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
                           {session.transcript.map((turn) => (
@@ -279,6 +291,21 @@ export function AiInterviewManager({
             </div>
           </div>
         </div>
+      )}
+
+      {selectedSessionForReview && (
+        <AiInterviewReviewModal
+          isOpen={!!selectedSessionForReview}
+          onClose={() => setSelectedSessionForReview(null)}
+          token={token}
+          session={selectedSessionForReview}
+          candidateName={candidateName}
+          jobTitle={jobTitle}
+          onEvaluated={() => {
+            void loadSessions();
+            onCreated?.();
+          }}
+        />
       )}
     </>
   );

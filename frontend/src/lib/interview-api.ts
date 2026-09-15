@@ -384,6 +384,39 @@ export async function downloadAiInterviewVideo(
   URL.revokeObjectURL(blobUrl);
 }
 
+export async function getAiInterviewVideoBlobUrl(
+  token: string,
+  sessionId: string,
+  videoId: string,
+): Promise<string> {
+  const response = await fetch(`${API_URL}/interviews/ai/${sessionId}/videos/${videoId}?inline=true`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    throw new InterviewApiError(
+      await readInterviewApiError(response, 'Không thể tải video câu trả lời'),
+      response.status,
+    );
+  }
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
+}
+
+export function decideAiInterview(
+  token: string,
+  sessionId: string,
+  input: { decision: 'PASSED' | 'FAILED'; score?: number; note?: string },
+) {
+  return interviewRequest<AiInterviewSession | InterviewProcessData>(
+    token,
+    `/interviews/ai/${sessionId}/decision`,
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
 export async function getInterviews(
   token: string,
   params?: {

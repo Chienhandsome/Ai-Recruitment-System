@@ -9,6 +9,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { ApplicationAccessService } from '../applications/application-access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AiInterviewsService } from './ai-interviews.service';
+import { InterviewRoundDecision } from './dto/decide-interview-round.dto';
 
 const APPLICATION_ID = '11111111-1111-4111-8111-111111111111';
 const SESSION_ID = '22222222-2222-4222-8222-222222222222';
@@ -259,5 +260,33 @@ describe('AiInterviewsService', () => {
       data: { status: InterviewRoundStatus.AWAITING_REVIEW },
     });
     expect(prisma.application.update).not.toHaveBeenCalled();
+  });
+
+  it('allows recruiter to decide an AI session and updates application stage', async () => {
+    prisma.aiInterviewSession.findFirst.mockResolvedValue({
+      id: SESSION_ID,
+      applicationId: APPLICATION_ID,
+      roundId: null,
+      status: AiInterviewStatus.COMPLETED,
+    });
+    prisma.application.findUnique = jest.fn().mockResolvedValue({
+      currentStage: ApplicationStage.INTERVIEWED,
+    });
+
+    await service.decideSession('recruiter-1', SESSION_ID, {
+      decision: InterviewRoundDecision.PASSED,
+      score: 85,
+      note: 'Ứng viên trả lời rất lưu loát các câu hỏi tình huống.',
+    });
+
+    expect(prisma.application.update).toHaveBeenCalledWith({
+      where: { id: APPLICATION_ID },
+      data: {
+        currentStage: ApplicationStage.INTERVIEWED,
+        hrDecision: 'ACCEPTED',
+        hrNotes: 'Ứng viên trả lời rất lưu loát các câu hỏi tình huống.',
+      },
+    });
+    expect(prisma.applicationStatusHistory.create).toHaveBeenCalled();
   });
 });

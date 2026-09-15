@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -29,6 +30,11 @@ import {
   interviewServiceCreateResponseSchema,
 } from './ai-interview.schemas';
 import { CreateAiInterviewDto } from './dto/create-ai-interview.dto';
+import {
+  DecideInterviewRoundDto,
+  InterviewRoundDecision,
+} from './dto/decide-interview-round.dto';
+import { InterviewProcessService } from './interview-process.service';
 
 type CallbackHeaders = {
   eventId?: string;
@@ -44,6 +50,8 @@ export class AiInterviewsService {
     private readonly prisma: PrismaService,
     private readonly accessService: ApplicationAccessService,
     private readonly notificationsService: NotificationsService,
+    @Optional()
+    private readonly interviewProcessService?: InterviewProcessService,
   ) {}
 
   async create(userId: string, dto: CreateAiInterviewDto) {
@@ -219,12 +227,12 @@ export class AiInterviewsService {
           expires_in_hours: dto.expiresInHours,
           callback_url: `${callbackBaseUrl}/interviews/ai/callback`,
         }),
-        signal: AbortSignal.timeout(15_000),
+        signal: AbortSignal.timeout(60_000),
       });
     } catch (error) {
       this.logger.error(`Interview Service unavailable: ${String(error)}`);
       throw new ServiceUnavailableException(
-        'Interview Service hiện không phản hồi.',
+        'Interview Service đang khởi động hoặc chưa phản hồi, vui lòng thử lại sau vài giây.',
       );
     }
 
@@ -352,7 +360,12 @@ export class AiInterviewsService {
     return this.serializeSession(session);
   }
 
-  async downloadVideo(userId: string, id: string, videoId: string) {
+  async downloadVideo(
+    userId: string,
+    id: string,
+    videoId: string,
+    inline = false,
+  ) {
     const session = await this.findAuthorizedSession(userId, id);
     const videos = Array.isArray(session.videos) ? session.videos : [];
     const video = videos.find(
@@ -379,7 +392,7 @@ export class AiInterviewsService {
         `${serviceUrl}/v1/internal/interviews/${session.interviewServiceId}/videos/${videoId}`,
         {
           headers: { 'X-Interview-System-Key': systemKey },
-          signal: AbortSignal.timeout(30_000),
+          signal: AbortSignal.timeout(60_000),
         },
       );
     } catch (error) {
@@ -391,13 +404,60 @@ export class AiInterviewsService {
     if (!response.ok) {
       throw new BadGatewayException('Không thể tải video phỏng vấn.');
     }
+    const contentType = response.headers.get('content-type') ?? 'video/webm';
+    const contentDisposition = inline
+      ? 'inline'
+      : (response.headers.get('content-disposition') ??
+        `attachment; filename="interview-${id}-${videoId}.webm"`);
+
     return {
       body: Buffer.from(await response.arrayBuffer()),
-      contentType: response.headers.get('content-type') ?? 'video/webm',
-      contentDisposition:
-        response.headers.get('content-disposition') ??
-        `attachment; filename="interview-${id}-${videoId}.webm"`,
+      contentType,
+      contentDisposition,
     };
+  }
+
+  async decideSession(
+    userId: string,
+    id: string,
+    dto: DecideInterviewRoundDto,
+  ) {
+    const session = await this.findAuthorizedSession(userId, id);
+    if (session.roundId && this.interviewProcessService) {
+      return this.interviewProcessService.decide(userId, session.roundId, dto);
+    }
+
+    const passed = dto.decision === InterviewRoundDecision.PASSED;
+    await this.prisma.$transaction(async (prisma) => {
+      const app = await prisma.application.findUnique({
+        where: { id: session.applicationId },
+        select: { currentStage: true },
+      });
+      if (app) {
+        const newStage = passed
+          ? ApplicationStage.INTERVIEWED
+          : app.currentStage;
+        await prisma.application.update({
+          where: { id: session.applicationId },
+          data: {
+            currentStage: newStage,
+            hrDecision: passed ? 'ACCEPTED' : 'REJECTED',
+            hrNotes: dto.note?.trim() || undefined,
+          },
+        });
+        await prisma.applicationStatusHistory.create({
+          data: {
+            applicationId: session.applicationId,
+            previousStage: app.currentStage,
+            newStage,
+            changedByUserId: userId,
+            note: `HR đánh giá phỏng vấn online AI: ${passed ? 'ĐẠT (Vượt qua)' : 'KHÔNG ĐẠT'}. Điểm: ${dto.score ?? 'N/A'}/100. ${dto.note ?? ''}`.trim(),
+          },
+        });
+      }
+    });
+
+    return this.findOne(userId, id);
   }
 
   async receiveCallback(
@@ -409,8 +469,21 @@ export class AiInterviewsService {
       throw new UnauthorizedException('Callback raw body không khả dụng.');
     }
     this.verifySignature(rawBody, headers);
-    const parsed = aiInterviewCallbackSchema.safeParse(input);
+
+    let rawInput = input;
+    if (!rawInput || (typeof rawInput === 'object' && Object.keys(rawInput as object).length === 0)) {
+      try {
+        rawInput = JSON.parse(rawBody.toString('utf-8'));
+      } catch {
+        // ignore
+      }
+    }
+
+    const parsed = aiInterviewCallbackSchema.safeParse(rawInput);
     if (!parsed.success) {
+      this.logger.error(
+        `Callback payload validation error: ${JSON.stringify(parsed.error.format())}`,
+      );
       throw new ConflictException('Callback payload không hợp lệ.');
     }
     const event = parsed.data;

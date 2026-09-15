@@ -26,6 +26,11 @@ def create_payload() -> dict:
     }
 
 
+def test_verify_otp_request_accepts_local_and_supabase_lengths() -> None:
+    assert online_interviews.VerifyOtpRequest(email="candidate@example.com", code="123456").code == "123456"
+    assert online_interviews.VerifyOtpRequest(email="candidate@example.com", code="12345678").code == "12345678"
+
+
 def test_one_time_link_otp_and_candidate_flow(monkeypatch, tmp_path) -> None:
     delivered: dict = {}
 

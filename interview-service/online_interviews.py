@@ -177,7 +177,8 @@ class OtpRequest(BaseModel):
 
 
 class VerifyOtpRequest(OtpRequest):
-    code: str = Field(pattern=r"^\d{6}$")
+    # Local/SMTP OTP uses 6 digits; Supabase Auth can be configured for 8.
+    code: str = Field(pattern=r"^(?:\d{6}|\d{8})$")
 
 
 class AnswerRequest(BaseModel):

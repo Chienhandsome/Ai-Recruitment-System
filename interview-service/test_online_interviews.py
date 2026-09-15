@@ -31,6 +31,53 @@ def test_verify_otp_request_accepts_local_and_supabase_lengths() -> None:
     assert online_interviews.VerifyOtpRequest(email="candidate@example.com", code="12345678").code == "12345678"
 
 
+def test_fallback_questions_are_unique_with_nested_recruitment_cv() -> None:
+    interview = online_interviews.OnlineInterview(
+        id="interview-unique",
+        recruitment_application_id="application-unique",
+        candidate={"id": "candidate-unique", "email": "candidate@example.com", "display_name": "Candidate"},
+        cv={"candidate_profile": {"professional_summary": "Flutter developer with three years of mobile application experience."}},
+        jd={"title": "Flutter Developer"},
+        config={"opening_questions": ["Giới thiệu bản thân"], "competencies": ["technical", "problem_solving"], "max_questions": 6},
+        callback_url=None,
+        launch_token_hash="hash",
+        expires_at=online_interviews.now(),
+    )
+
+    questions: list[str] = []
+    for _ in range(5):
+        question = online_interviews.fallback_question(interview)
+        questions.append(question.text)
+        interview.turns.append(
+            online_interviews.Turn(question=question, transcript="Candidate answer", answered_at=online_interviews.now())
+        )
+
+    assert len(questions) == len(set(questions))
+    assert "Flutter developer" in questions[0]
+
+
+def test_duplicate_question_detection_ignores_case_and_punctuation() -> None:
+    interview = online_interviews.OnlineInterview(
+        id="interview-duplicate",
+        recruitment_application_id="application-duplicate",
+        candidate={"id": "candidate-duplicate", "email": "candidate@example.com", "display_name": "Candidate"},
+        cv={},
+        jd={},
+        config={"opening_questions": ["Giới thiệu bản thân"], "competencies": ["technical"], "max_questions": 2},
+        callback_url=None,
+        launch_token_hash="hash",
+        expires_at=online_interviews.now(),
+        turns=[{
+            "question": {"number": 1, "text": "Bạn hãy mô tả dự án gần đây?", "competency": "technical", "source": "opening"},
+            "transcript": "Candidate answer",
+            "answered_at": online_interviews.now(),
+        }],
+    )
+
+    assert online_interviews.question_is_duplicate("BẠN HÃY MÔ TẢ DỰ ÁN GẦN ĐÂY!", interview)
+    assert not online_interviews.question_is_duplicate("Bạn xử lý bất đồng trong nhóm như thế nào?", interview)
+
+
 def test_one_time_link_otp_and_candidate_flow(monkeypatch, tmp_path) -> None:
     delivered: dict = {}
 

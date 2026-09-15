@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+from difflib import SequenceMatcher
 import hashlib
 import hmac
 import json
@@ -675,11 +676,56 @@ async def synthesize_speech(text: str) -> bytes:
     return await synthesize_with_azure(text)
 
 
+def normalized_question(text: str) -> str:
+    """Normalize punctuation and casing so repeated LLM questions are detectable."""
+    return " ".join("".join(character if character.isalnum() else " " for character in text.casefold()).split())
+
+
+def question_is_duplicate(text: str, interview: OnlineInterview) -> bool:
+    candidate = normalized_question(text)
+    if not candidate:
+        return True
+    for turn in interview.turns:
+        previous = normalized_question(turn.question.text)
+        if candidate == previous or SequenceMatcher(None, candidate, previous).ratio() >= 0.88:
+            return True
+    return False
+
+
+def nested_evidence(value: Any) -> list[str]:
+    """Collect usable CV evidence even when Recruitment System sends nested JSON."""
+    if isinstance(value, str):
+        cleaned = " ".join(value.split())
+        return [cleaned] if 15 <= len(cleaned) <= 500 else []
+    if isinstance(value, dict):
+        return [item for child in value.values() for item in nested_evidence(child)]
+    if isinstance(value, list):
+        return [item for child in value for item in nested_evidence(child)]
+    return []
+
+
 def fallback_question(interview: OnlineInterview) -> Question:
     number = len(interview.turns) + 1
     competency = interview.config.competencies[(number - 1) % len(interview.config.competencies)]
-    evidence = next((str(value) for value in interview.cv.values() if isinstance(value, str) and len(value) > 15), "kinh nghiệm trong CV")
-    return Question(number=number, competency=competency, source="fallback", text=f"Bạn có thể làm rõ vai trò cụ thể, cách thực hiện và kết quả của bạn liên quan đến {evidence[:160]} không?")
+    evidence = next(iter(nested_evidence(interview.cv)), "một dự án liên quan nhất trong CV")[:160]
+    candidates = [
+        f"Hãy chọn một dự án liên quan đến {evidence} và mô tả rõ vai trò, cách thực hiện cùng kết quả của bạn.",
+        "Trong một quyết định kỹ thuật gần đây, bạn đã cân nhắc những phương án nào và vì sao chọn phương án cuối cùng?",
+        "Bạn hãy kể về một lỗi khó từng gặp, cách tìm nguyên nhân gốc và biện pháp ngăn lỗi tái diễn.",
+        "Khi nhận một yêu cầu chưa rõ ràng, bạn thường làm gì để xác định đúng vấn đề trước khi triển khai?",
+        "Hãy nêu một phương án ban đầu không hiệu quả, cách bạn nhận ra vấn đề và điều chỉnh sau đó.",
+        "Trong một lần phải làm việc dưới áp lực thời gian, bạn đã ưu tiên công việc và kiểm soát rủi ro như thế nào?",
+        "Bạn kiểm thử và đánh giá chất lượng sản phẩm của mình bằng những tiêu chí hoặc chỉ số cụ thể nào?",
+        "Hãy kể về một lần nhóm có bất đồng quan điểm và cách bạn giúp cả nhóm đi đến quyết định.",
+        "Bạn từng nhận một phản hồi khó nào trong công việc, và đã thay đổi cách làm ra sao từ phản hồi đó?",
+        "Khi cần học nhanh một công nghệ mới cho dự án, bạn lập kế hoạch học và kiểm chứng khả năng áp dụng như thế nào?",
+        "Nếu được làm lại một dự án gần đây, bạn sẽ thay đổi quyết định nào và vì sao?",
+        "Hãy đưa một ví dụ có kết quả đo lường được để chứng minh năng lực bạn cho là phù hợp nhất với vị trí này.",
+    ]
+    text = next((item for item in candidates if not question_is_duplicate(item, interview)), None)
+    if text is None:
+        text = f"Ở một tình huống khác với các ví dụ trước, bạn có thể cung cấp thêm bằng chứng cho năng lực {competency} không?"
+    return Question(number=number, competency=competency, source="fallback", text=text)
 
 
 def llm_question(interview: OnlineInterview) -> Question | None:
@@ -691,19 +737,32 @@ def llm_question(interview: OnlineInterview) -> Question | None:
         from google.genai import types
 
         transcript = [{"question": turn.question.text, "answer": turn.transcript} for turn in interview.turns]
+        previous_questions = [turn.question.text for turn in interview.turns]
         prompt = f"""Generate exactly one concise Vietnamese follow-up job interview question.
 CV JSON: {json.dumps(interview.cv, ensure_ascii=False)[:8000]}
 JD JSON: {json.dumps(interview.jd, ensure_ascii=False)[:8000]}
 Required competencies: {interview.config.competencies}
 Prior transcript JSON: {json.dumps(transcript, ensure_ascii=False)[:8000]}
-Ask about work-relevant evidence only. Do not ask about sensitive personal traits, do not repeat prior questions, and do not make hiring decisions."""
-        response = genai.Client(api_key=api_key).models.generate_content(
-            model=os.getenv("INTERVIEW_LLM_MODEL", "gemini-2.5-flash"), contents=prompt,
-            config=types.GenerateContentConfig(response_mime_type="application/json", response_schema=LlmQuestion, temperature=0.25),
-        )
-        if response.text:
+Questions already asked and strictly forbidden: {json.dumps(previous_questions, ensure_ascii=False)}
+Use the candidate's most recent answer to choose a new angle and request concrete evidence that is still missing.
+Ask about work-relevant evidence only. Do not ask about sensitive personal traits and do not make hiring decisions."""
+        client = genai.Client(api_key=api_key)
+        for attempt in range(2):
+            retry_instruction = "" if attempt == 0 else "\nYour previous output duplicated an earlier question. Use a substantially different topic and wording."
+            response = client.models.generate_content(
+                model=os.getenv("INTERVIEW_LLM_MODEL", "gemini-2.5-flash"), contents=prompt + retry_instruction,
+                config=types.GenerateContentConfig(response_mime_type="application/json", response_schema=LlmQuestion, temperature=0.4),
+            )
+            if not response.text:
+                continue
             generated = LlmQuestion.model_validate_json(response.text)
-            return Question(number=len(interview.turns) + 1, text=generated.text, competency=generated.competency, source="llm")
+            if question_is_duplicate(generated.text, interview):
+                logger.warning("Gemini returned a duplicate interview question on attempt %s", attempt + 1)
+                continue
+            competency = generated.competency
+            if competency not in interview.config.competencies:
+                competency = interview.config.competencies[len(interview.turns) % len(interview.config.competencies)]
+            return Question(number=len(interview.turns) + 1, text=generated.text, competency=competency, source="llm")
     except Exception as exc:  # noqa: BLE001 - a provider failure must not stop an interview.
         logger.warning("LLM follow-up failed; falling back: %s", exc)
     return None
@@ -715,7 +774,12 @@ def next_question(interview: OnlineInterview) -> Question | None:
         return None
     if number <= len(interview.config.opening_questions):
         return Question(number=number, competency="introduction" if number == 1 else "motivation", source="opening", text=interview.config.opening_questions[number - 1])
-    return llm_question(interview) or fallback_question(interview)
+    generated = llm_question(interview)
+    if generated:
+        logger.info("Question %s generated by Gemini", number)
+        return generated
+    logger.warning("Question %s is using the deterministic fallback", number)
+    return fallback_question(interview)
 
 
 def supabase_auth_headers() -> dict[str, str]:

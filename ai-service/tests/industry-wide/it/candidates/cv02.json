@@ -1,0 +1,67 @@
+{
+  "profile": {
+    "desired_title": "Senior Backend Developer",
+    "professional_summary": "Backend Engineer with 4.5 years developing resilient microservices in Java Spring Boot and relational database design."
+  },
+  "candidate_name": "Nguyễn Thế Dũng",
+  "desired_title": "Senior Backend Developer",
+  "professional_summary": "Backend Engineer with 4.5 years developing resilient microservices in Java Spring Boot and relational database design.",
+  "work_experiences": [
+    {
+      "company_name": "ZaloPay",
+      "position_title": "Senior Backend Engineer",
+      "start_date": "2022-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Design and implement backend microservices with Java, Spring Boot, PostgreSQL, and Docker container workflows.",
+      "achievements": ""
+    },
+    {
+      "company_name": "TMA Solutions",
+      "position_title": "Software Engineer",
+      "start_date": "2019-08-01T00:00:00Z",
+      "end_date": "2021-12-31T00:00:00Z",
+      "is_current": false,
+      "description": "Developed backend endpoints with Java and PostgreSQL databases.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "VNU University of Engineering and Technology",
+      "major": "Software Engineering",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Java"
+    },
+    {
+      "skill_name": "Spring Boot"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    },
+    {
+      "skill_name": "Docker"
+    },
+    {
+      "skill_name": "Microservices"
+    },
+    {
+      "skill_name": "Kafka"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

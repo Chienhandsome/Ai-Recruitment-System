@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Supply Chain Trainee",
+    "professional_summary": "Recent graduate who participated in national university supply chain simulation challenges."
+  },
+  "candidate_name": "Bùi Hoàng Long",
+  "desired_title": "Supply Chain Trainee",
+  "professional_summary": "Recent graduate who participated in national university supply chain simulation challenges.",
+  "work_experiences": [],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "International Economics and Logistics",
+      "degree": "Bachelor",
+      "start_date": "2020-09-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [
+    {
+      "project_name": "National Supply Chain Case Competition 2023",
+      "project_role": "Team Analyst",
+      "description": "Modeled hypothetical warehouse layout and simulated WMS inventory dispatch pipeline under Incoterms conditions.",
+      "technologies": [
+        "Warehouse Management",
+        "Inventory Management",
+        "Supply Chain Planning",
+        "WMS",
+        "Incoterms"
+      ],
+      "start_date": "2023-08-01T00:00:00Z",
+      "end_date": "2023-11-01T00:00:00Z"
+    }
+  ],
+  "skills": [
+    {
+      "skill_name": "Warehouse Management"
+    },
+    {
+      "skill_name": "Inventory Management"
+    },
+    {
+      "skill_name": "Supply Chain Planning"
+    },
+    {
+      "skill_name": "WMS"
+    },
+    {
+      "skill_name": "Incoterms"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

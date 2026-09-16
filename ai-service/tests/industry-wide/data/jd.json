@@ -1,0 +1,65 @@
+{
+  "id": "jd-data-analytics-08",
+  "title": "Senior BI & Data Analytics Specialist",
+  "description": "TechFin Data Labs is seeking a highly analytical Senior BI & Data Analytics Specialist to transform enterprise data into actionable business intelligence. You will write complex SQL queries across cloud data warehouses, build automated ETL data pipelines with Python, design executive Power BI dashboards with advanced DAX measures, and perform statistical exploratory analysis.",
+  "requirements": "Required Qualifications:\n- Professional Experience: Minimum 4+ years of data analytics, business intelligence, and data pipeline experience.\n- Core Technical Skills: SQL, Power BI, Python, ETL, Data Visualization.\n- Preferred Skills: Tableau, A/B Testing, Cloud Warehousing (BigQuery/Snowflake), Data Modeling.\n- Education: Bachelor's degree or above in Data Science, Computer Science, Statistics, Information Systems, Mathematics, or related field.\n- Language: Working English proficiency (IELTS 6.5 or equivalent) for technical documentation and regional presentations.\n- Certifications: Microsoft Certified: Power BI Data Analyst Associate (PL-300) preferred.",
+  "required_experience_years": 4.0,
+  "experience_level": "SENIOR",
+  "level_requirement_mode": "REQUIRED",
+  "required_skills": [
+    {
+      "skill_name": "SQL",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Power BI",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Python",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "ETL",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "Data Visualization",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "Tableau",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    },
+    {
+      "skill_name": "A/B Testing",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    }
+  ],
+  "required_certificates": [
+    {
+      "certificate_name": "Microsoft Certified: Power BI Data Analyst Associate",
+      "is_mandatory": false
+    }
+  ],
+  "required_languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5",
+      "is_mandatory": true
+    }
+  ],
+  "ai_weights_config": {
+    "skills": 40.0,
+    "experience": 30.0,
+    "education": 15.0,
+    "other": 15.0
+  }
+}

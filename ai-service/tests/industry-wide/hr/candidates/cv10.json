@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "HR Trainee",
+    "professional_summary": "Candidate with multiple short recruitment internships totaling 3.5 years part-time."
+  },
+  "candidate_name": "Nguyễn Đức Thịnh",
+  "desired_title": "HR Trainee",
+  "professional_summary": "Candidate with multiple short recruitment internships totaling 3.5 years part-time.",
+  "work_experiences": [
+    {
+      "company_name": "ManpowerGroup Vietnam",
+      "position_title": "Recruitment Sourcing Intern",
+      "start_date": "2021-01-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Search LinkedIn profiles, copy email addresses into spreadsheets.",
+      "achievements": ""
+    },
+    {
+      "company_name": "Navigos Search",
+      "position_title": "Talent Acquisition Intern",
+      "start_date": "2022-07-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Call candidates to check availability and format resumes into standard company agency templates.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Human Resource Management",
+      "degree": "Bachelor",
+      "start_date": "2019-09-01T00:00:00Z",
+      "end_date": "2023-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

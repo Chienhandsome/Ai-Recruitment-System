@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "HRBP Specialist",
+    "professional_summary": "HRBP specialist with 5.5 years experience, fluent in French."
+  },
+  "candidate_name": "Trương Quỳnh Chi",
+  "desired_title": "HRBP Specialist",
+  "professional_summary": "HRBP specialist with 5.5 years experience, fluent in French.",
+  "work_experiences": [
+    {
+      "company_name": "Sanofi Vietnam",
+      "position_title": "Senior HRBP",
+      "start_date": "2018-12-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Coordinate Talent Acquisition, HRBP functions, Labor Law statutory reports, Performance Management, and Employee Relations.",
+      "achievements": "Managed French expatriate relocation."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Languages and International Studies",
+      "major": "French Studies and Business",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "French",
+      "proficiency": "DELF B2"
+    }
+  ]
+}

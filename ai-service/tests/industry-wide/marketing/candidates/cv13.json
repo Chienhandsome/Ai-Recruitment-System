@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Performance Marketing Manager",
+    "professional_summary": "Performance marketer with 4.5 years experience in Google Ads, Meta Ads, and GA4 holding HubSpot Inbound Marketing certificate."
+  },
+  "candidate_name": "Ngô Thanh Tùng",
+  "desired_title": "Performance Marketing Manager",
+  "professional_summary": "Performance marketer with 4.5 years experience in Google Ads, Meta Ads, and GA4 holding HubSpot Inbound Marketing certificate.",
+  "work_experiences": [
+    {
+      "company_name": "E-Logistics Solutions",
+      "position_title": "Growth Marketing Manager",
+      "start_date": "2019-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Run Google Ads and Meta Ads campaigns, manage GA4 funnel reporting, and execute Conversion Rate Optimization tests.",
+      "achievements": "Decreased acquisition cost per lead by 28%."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Marketing",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Google Ads"
+    },
+    {
+      "skill_name": "Meta Ads"
+    },
+    {
+      "skill_name": "GA4"
+    },
+    {
+      "skill_name": "Performance Marketing"
+    },
+    {
+      "skill_name": "Conversion Rate Optimization"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "HubSpot Inbound Marketing Certification",
+      "issuing_organization": "HubSpot"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

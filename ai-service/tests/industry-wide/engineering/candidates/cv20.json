@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "PCB Assembly Line Solderer",
+    "professional_summary": "Manual Electronics Solderer with 5.5 years holding hot copper irons to melt tin solder onto resistor pins on PCB boards."
+  },
+  "candidate_name": "Phạm Thu Cúc",
+  "desired_title": "PCB Assembly Line Solderer",
+  "professional_summary": "Manual Electronics Solderer with 5.5 years holding hot copper irons to melt tin solder onto resistor pins on PCB boards.",
+  "work_experiences": [
+    {
+      "company_name": "Samsung Electronics Vietnam (SEVT)",
+      "position_title": "SMD Manual Solderer",
+      "start_date": "2018-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Hold magnifying glass, touch soldering iron to circuit boards to solder lead wire pins, place completed boards on conveyor rack. Never programmed PLCs, configured SCADA systems, or managed Lean Six Sigma.",
+      "achievements": "Soldered 500 circuit boards daily under microscope."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Thai Nguyen University of Technology",
+      "major": "Electronics Technology",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Manual Soldering"
+    },
+    {
+      "skill_name": "PCB Inspection"
+    },
+    {
+      "skill_name": "Microscope Inspection"
+    },
+    {
+      "skill_name": "Flux Cleaning"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 710"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Automation Engineer",
+    "professional_summary": "Automation engineer with 5.5 years in PLC, SCADA, and Lean Six Sigma, holding a degree in English Linguistics."
+  },
+  "candidate_name": "Hoàng Thị Mai",
+  "desired_title": "Automation Engineer",
+  "professional_summary": "Automation engineer with 5.5 years in PLC, SCADA, and Lean Six Sigma, holding a degree in English Linguistics.",
+  "work_experiences": [
+    {
+      "company_name": "VinFast Automotive",
+      "position_title": "Automation Specialist",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Program Siemens PLC units, monitor SCADA interfaces, drive Lean Manufacturing, execute Six Sigma root-cause studies, and manage Preventive Maintenance.",
+      "achievements": "Reduced plant energy consumption by 15%."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Languages and International Studies",
+      "major": "English Linguistics & Translation",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "PLC"
+    },
+    {
+      "skill_name": "SCADA"
+    },
+    {
+      "skill_name": "Lean Manufacturing"
+    },
+    {
+      "skill_name": "Six Sigma"
+    },
+    {
+      "skill_name": "Preventive Maintenance"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Six Sigma Black Belt",
+      "issuing_organization": "ASQ"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 850"
+    }
+  ]
+}

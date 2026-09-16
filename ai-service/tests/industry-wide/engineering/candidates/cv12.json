@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "Automation Engineer",
+    "professional_summary": "Engineer holding concurrent factory maintenance positions."
+  },
+  "candidate_name": "Ngô Văn Trọng",
+  "desired_title": "Automation Engineer",
+  "professional_summary": "Engineer holding concurrent factory maintenance positions.",
+  "work_experiences": [
+    {
+      "company_name": "Sumitomo Bakelite",
+      "position_title": "Maintenance Engineer",
+      "start_date": "2021-08-01T00:00:00Z",
+      "end_date": "2024-01-01T00:00:00Z",
+      "is_current": false,
+      "description": "Maintain PLC equipment and SCADA systems.",
+      "achievements": ""
+    },
+    {
+      "company_name": "Hoya Glass Disk (Concurrent)",
+      "position_title": "Automation Technician",
+      "start_date": "2021-10-01T00:00:00Z",
+      "end_date": "2023-12-31T00:00:00Z",
+      "is_current": false,
+      "description": "Concurrent factory equipment maintenance.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Industry",
+      "major": "Electrical Engineering",
+      "degree": "Bachelor",
+      "start_date": "2017-09-01T00:00:00Z",
+      "end_date": "2021-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "PLC"
+    },
+    {
+      "skill_name": "SCADA"
+    },
+    {
+      "skill_name": "Lean Manufacturing"
+    },
+    {
+      "skill_name": "Six Sigma"
+    },
+    {
+      "skill_name": "Preventive Maintenance"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 710"
+    }
+  ]
+}

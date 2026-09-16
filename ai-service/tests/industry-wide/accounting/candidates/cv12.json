@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "General Accountant",
+    "professional_summary": "Accountant holding two concurrent company bookkeeping roles."
+  },
+  "candidate_name": "Ngô Văn Toàn",
+  "desired_title": "General Accountant",
+  "professional_summary": "Accountant holding two concurrent company bookkeeping roles.",
+  "work_experiences": [
+    {
+      "company_name": "Minh Quang Trading",
+      "position_title": "General Accountant",
+      "start_date": "2021-06-01T00:00:00Z",
+      "end_date": "2024-01-01T00:00:00Z",
+      "is_current": false,
+      "description": "Manage General Ledger and Tax Accounting.",
+      "achievements": ""
+    },
+    {
+      "company_name": "Thanh Do Construction (Concurrent)",
+      "position_title": "Tax Accountant",
+      "start_date": "2021-08-01T00:00:00Z",
+      "end_date": "2023-12-31T00:00:00Z",
+      "is_current": false,
+      "description": "Concurrent tax accounting job.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Academy of Finance",
+      "major": "Accounting",
+      "degree": "Bachelor",
+      "start_date": "2017-09-01T00:00:00Z",
+      "end_date": "2021-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "General Ledger"
+    },
+    {
+      "skill_name": "Financial Reporting"
+    },
+    {
+      "skill_name": "Tax Accounting"
+    },
+    {
+      "skill_name": "VAS"
+    },
+    {
+      "skill_name": "Corporate Income Tax"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 710"
+    }
+  ]
+}

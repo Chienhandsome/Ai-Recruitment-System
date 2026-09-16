@@ -21,7 +21,8 @@
     "auth:bootstrap-admin": "ts-node scripts/bootstrap-admin.ts",
     "skills:seed": "ts-node scripts/seed-skills-broad.ts",
     "jobs:seed-recruiter": "ts-node scripts/seed-recruiter-jobs.ts",
-    "applications:reevaluate": "ts-node scripts/reevaluate-application.ts"
+    "applications:reevaluate": "ts-node scripts/reevaluate-application.ts",
+    "applications:rescore-all": "ts-node scripts/rescore-all-applications.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.1.3",

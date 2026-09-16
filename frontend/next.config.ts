@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react'],
   },
   turbopack: {
-    root: process.cwd(),
+    root: __dirname,
   },
 };
 

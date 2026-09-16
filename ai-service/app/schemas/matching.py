@@ -69,6 +69,11 @@ class CandidateSkill(BaseModel):
     skill_name: str
 
 
+class CandidateLanguage(BaseModel):
+    language: str
+    proficiency: Optional[str] = None
+
+
 class CandidateProfilePayload(BaseModel):
     profile: Optional[ProfileDetail] = None
     work_experiences: List[WorkExperience] = Field(default_factory=list)
@@ -76,6 +81,7 @@ class CandidateProfilePayload(BaseModel):
     projects: List[CandidateProject] = Field(default_factory=list)
     certificates: List[CandidateCertificate] = Field(default_factory=list)
     skills: List[CandidateSkill] = Field(default_factory=list)
+    languages: List[CandidateLanguage] = Field(default_factory=list)
 
 
 # --- Job Schemas ---
@@ -96,6 +102,12 @@ class JobRequiredSkill(BaseModel):
 class JobRequiredCertificate(BaseModel):
     certificate_name: str
     is_mandatory: bool = True
+
+
+class JobRequiredLanguage(BaseModel):
+    language: str
+    proficiency: Optional[str] = None
+    is_mandatory: bool = False
 
 
 class JobWeightsConfig(BaseModel):
@@ -140,6 +152,7 @@ class JobPayload(BaseModel):
     closed_at: Optional[str] = None
     required_skills: List[JobRequiredSkill] = Field(default_factory=list)
     required_certificates: List[JobRequiredCertificate] = Field(default_factory=list)
+    required_languages: List[JobRequiredLanguage] = Field(default_factory=list)
 
 
 # --- Request Payload ---
@@ -160,12 +173,15 @@ class EvaluationRequest(BaseModel):
 class SkillInfo(BaseModel):
     name: str
     isMandatory: Optional[bool] = False
+    source: Optional[str] = None
+    requires_interview_verification: Optional[bool] = False
 
 
 class EvidenceInfo(BaseModel):
     skillName: str
     evidenceText: str
     source: Optional[str] = "Context"
+    requires_interview_verification: Optional[bool] = False
 
 
 class ExperienceLevelAssessment(BaseModel):
@@ -227,6 +243,8 @@ class EvaluationResponse(BaseModel):
     experience_score: float
     education_score: float
     other_score: float
+    mandatory_status: str = "PASS"  # PASS, FAIL, NOT_APPLICABLE
+    mandatory_failures: List[Dict[str, Any]] = Field(default_factory=list)
     score_breakdown: Optional[ScoreBreakdown] = None
     pillar_explanations: Optional[PillarExplanations] = None
     strengths: List[str] = Field(default_factory=list)

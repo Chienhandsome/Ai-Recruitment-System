@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Data Analyst",
+    "professional_summary": "Data analyst with 4.5 years experience holding Google Ads Search advertising certificate."
+  },
+  "candidate_name": "Ngô Quốc Huy",
+  "desired_title": "Data Analyst",
+  "professional_summary": "Data analyst with 4.5 years experience holding Google Ads Search advertising certificate.",
+  "work_experiences": [
+    {
+      "company_name": "VietinBank Securities",
+      "position_title": "Data Analyst",
+      "start_date": "2019-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Execute SQL queries, build Power BI dashboards, automate ETL in Python, and construct Data Visualization views.",
+      "achievements": "Automated market liquidity reporting."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "Economics",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Google Ads Search Certification",
+      "issuing_organization": "Google"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

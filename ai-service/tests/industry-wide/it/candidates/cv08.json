@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Game & Graphics Engineer",
+    "professional_summary": "Senior Game Developer with 5 years designing 3D mobile games using Unity, C#, and local SQLite storage."
+  },
+  "candidate_name": "Lâm Quang Vinh",
+  "desired_title": "Game & Graphics Engineer",
+  "professional_summary": "Senior Game Developer with 5 years designing 3D mobile games using Unity, C#, and local SQLite storage.",
+  "work_experiences": [
+    {
+      "company_name": "Amanotes",
+      "position_title": "Senior Unity Game Developer",
+      "start_date": "2019-04-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Develop mobile music games with Unity3D, C#, shaders, and gameplay logic.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "HUST",
+      "major": "Information Technology",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Unity"
+    },
+    {
+      "skill_name": "C#"
+    },
+    {
+      "skill_name": "Game Physics"
+    },
+    {
+      "skill_name": "3D Animation"
+    },
+    {
+      "skill_name": "SQLite"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

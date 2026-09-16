@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "UI/UX Designer",
+    "professional_summary": "UI/UX designer with 4.5 years experience holding Java programming certificate."
+  },
+  "candidate_name": "Trần Văn Tài",
+  "desired_title": "UI/UX Designer",
+  "professional_summary": "UI/UX designer with 4.5 years experience holding Java programming certificate.",
+  "work_experiences": [
+    {
+      "company_name": "Giao Hang Nhanh (GHN)",
+      "position_title": "UI/UX Designer",
+      "start_date": "2019-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Build UI Design, UX Research flows, Design System components, Prototyping, and Figma screens for logistics portal.",
+      "achievements": "Standardized merchant dashboard UI."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Industrial Fine Arts",
+      "major": "Graphic Design",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Figma"
+    },
+    {
+      "skill_name": "UI Design"
+    },
+    {
+      "skill_name": "UX Research"
+    },
+    {
+      "skill_name": "Design System"
+    },
+    {
+      "skill_name": "Prototyping"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Oracle Certified Associate Java SE",
+      "issuing_organization": "Oracle"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

@@ -63,6 +63,11 @@ const resumeSnapshotSelect = {
   fileSizeBytes: true,
   parsingStatus: true,
   createdAt: true,
+  parsedData: {
+    select: {
+      languageData: true,
+    },
+  },
 } satisfies Prisma.ResumeSelect;
 
 const latestAiResultSelect = {
@@ -863,11 +868,18 @@ export class ApplicationsService {
     job: JobForApplication,
     capturedAt: Date,
   ): ApplicationProfileSnapshot {
+    const parseWeight = (val: unknown, fallback: number): number => {
+      if (val !== null && val !== undefined && !Number.isNaN(Number(val))) {
+        const num = Number(val);
+        if (num >= 0 && num <= 100) return num;
+      }
+      return fallback;
+    };
     const weights = {
-      skills: Number(job.skillWeight) || 40,
-      experience: Number(job.experienceWeight) || 30,
-      education: Number(job.educationWeight) || 15,
-      other: Number(job.otherWeight) || 15,
+      skills: parseWeight(job.skillWeight, 40),
+      experience: parseWeight(job.experienceWeight, 30),
+      education: parseWeight(job.educationWeight, 15),
+      other: parseWeight(job.otherWeight, 15),
     };
 
     return {
@@ -951,6 +963,17 @@ export class ApplicationsService {
             is_primary: candidateSkill.isPrimary,
             source: candidateSkill.source,
           })),
+          languages: Array.isArray(resume.parsedData?.languageData)
+            ? (
+                resume.parsedData.languageData as Array<{
+                  language?: string;
+                  proficiency?: string;
+                }>
+              ).map((l) => ({
+                language: l.language ?? '',
+                proficiency: l.proficiency ?? null,
+              }))
+            : [],
         },
         job: {
           id: job.id,

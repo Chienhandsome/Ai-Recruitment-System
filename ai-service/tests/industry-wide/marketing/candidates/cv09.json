@@ -1,0 +1,58 @@
+{
+  "profile": {
+    "desired_title": "Growth Marketer",
+    "professional_summary": "Fresh graduate with multiple university club Google Ads projects and personal affiliate blogs."
+  },
+  "candidate_name": "Hoàng Kim Ngân",
+  "desired_title": "Growth Marketer",
+  "professional_summary": "Fresh graduate with multiple university club Google Ads projects and personal affiliate blogs.",
+  "work_experiences": [],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "Marketing",
+      "degree": "Bachelor",
+      "start_date": "2020-09-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [
+    {
+      "project_name": "University Student Club Ad Campaign",
+      "project_role": "Media Lead",
+      "description": "Ran small $100 test campaign on Google Ads and Meta Ads for university cultural festival.",
+      "technologies": [
+        "Google Ads",
+        "Meta Ads",
+        "GA4"
+      ],
+      "start_date": "2023-03-01T00:00:00Z",
+      "end_date": "2023-05-01T00:00:00Z"
+    }
+  ],
+  "skills": [
+    {
+      "skill_name": "Google Ads"
+    },
+    {
+      "skill_name": "Meta Ads"
+    },
+    {
+      "skill_name": "GA4"
+    },
+    {
+      "skill_name": "Performance Marketing"
+    },
+    {
+      "skill_name": "Conversion Rate Optimization"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

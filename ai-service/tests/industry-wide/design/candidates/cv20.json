@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Frontend CSS Developer",
+    "professional_summary": "Web Markup Developer with 4.5 years coding responsive CSS grid stylesheets and Bootstrap layouts from provided PSD mockups."
+  },
+  "candidate_name": "Nguyễn Thị Thanh Thủy",
+  "desired_title": "Frontend CSS Developer",
+  "professional_summary": "Web Markup Developer with 4.5 years coding responsive CSS grid stylesheets and Bootstrap layouts from provided PSD mockups.",
+  "work_experiences": [
+    {
+      "company_name": "FPT Software",
+      "position_title": "Web Markup Developer",
+      "start_date": "2019-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Slice static images, write HTML5/CSS3 stylesheets, ensure cross-browser compatibility. Do not create original design concepts, conduct UX research, or build Figma design systems.",
+      "achievements": "Coded responsive markup for 40 web portals."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Science and Technology",
+      "major": "Information Technology",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "HTML5"
+    },
+    {
+      "skill_name": "CSS3"
+    },
+    {
+      "skill_name": "Bootstrap"
+    },
+    {
+      "skill_name": "Responsive Layout"
+    },
+    {
+      "skill_name": "SASS"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

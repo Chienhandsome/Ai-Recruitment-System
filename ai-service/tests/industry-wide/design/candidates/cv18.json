@@ -1,0 +1,32 @@
+{
+  "profile": {
+    "desired_title": "UI Designer",
+    "professional_summary": "Designer in Figma."
+  },
+  "candidate_name": "Nguyễn Văn Lâm",
+  "desired_title": "UI Designer",
+  "professional_summary": "Designer in Figma.",
+  "work_experiences": [
+    {
+      "company_name": "Design Studio",
+      "position_title": "UI Designer",
+      "start_date": "",
+      "end_date": null,
+      "is_current": false,
+      "description": "Design screens.",
+      "achievements": ""
+    }
+  ],
+  "educations": [],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Figma"
+    },
+    {
+      "skill_name": "UI Design"
+    }
+  ],
+  "certificates": [],
+  "languages": []
+}

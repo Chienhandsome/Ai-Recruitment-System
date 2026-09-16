@@ -1,0 +1,57 @@
+{
+  "profile": {
+    "desired_title": "Senior Financial Accountant",
+    "professional_summary": "Senior GL Accountant with 5.5 years focusing strictly on internal cost accounting and VAS financial statements, with tax outsourced."
+  },
+  "candidate_name": "Hoàng Thị Mai",
+  "desired_title": "Senior Financial Accountant",
+  "professional_summary": "Senior GL Accountant with 5.5 years focusing strictly on internal cost accounting and VAS financial statements, with tax outsourced.",
+  "work_experiences": [
+    {
+      "company_name": "CP Group Vietnam",
+      "position_title": "General Ledger Accountant",
+      "start_date": "2019-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Maintain General Ledger and produce VAS Financial Reporting. Coordinate with external tax advisory firm who handles all Corporate Income Tax and tax declarations.",
+      "achievements": "Consolidated financial reports across 4 subsidiaries."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Economics HCMC",
+      "major": "Accounting",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "General Ledger"
+    },
+    {
+      "skill_name": "Financial Reporting"
+    },
+    {
+      "skill_name": "VAS"
+    },
+    {
+      "skill_name": "Corporate Income Tax"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "CPA",
+      "issuing_organization": "Ministry of Finance"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

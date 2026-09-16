@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "BI Analyst",
+    "professional_summary": "Data analyst with 4.5 years in SQL and Power BI, holding a degree in archaeology."
+  },
+  "candidate_name": "Hoàng Minh Trí",
+  "desired_title": "BI Analyst",
+  "professional_summary": "Data analyst with 4.5 years in SQL and Power BI, holding a degree in archaeology.",
+  "work_experiences": [
+    {
+      "company_name": "Tiki Data Team",
+      "position_title": "BI Analyst",
+      "start_date": "2019-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Write SQL, construct Power BI dashboards, automate ETL in Python, and build Data Visualization reports.",
+      "achievements": "Managed e-commerce seller metrics."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Social Sciences and Humanities",
+      "major": "Archaeology & Ancient Civilizations",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Microsoft Certified: Power BI Data Analyst Associate",
+      "issuing_organization": "Microsoft"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

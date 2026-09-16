@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "HRBP Manager",
+    "professional_summary": "Human Resources Business Partner with 5.5 years in Talent Acquisition, Vietnamese Labor Law, and Performance Management."
+  },
+  "candidate_name": "Trần Thu Hương",
+  "desired_title": "HRBP Manager",
+  "professional_summary": "Human Resources Business Partner with 5.5 years in Talent Acquisition, Vietnamese Labor Law, and Performance Management.",
+  "work_experiences": [
+    {
+      "company_name": "Masan High-Tech Materials",
+      "position_title": "Senior HRBP",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead Talent Acquisition for corporate division, partner as HRBP with business unit heads, ensure Labor Law compliance, administer Performance Management and Employee Relations.",
+      "achievements": "Streamlined performance appraisal process across 600 employees."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Social Sciences and Humanities",
+      "major": "Industrial Psychology",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

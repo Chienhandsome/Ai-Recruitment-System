@@ -1,0 +1,32 @@
+{
+  "profile": {
+    "desired_title": "Sales Manager",
+    "professional_summary": "Sales professional with enterprise deals."
+  },
+  "candidate_name": "Trần Văn Nam",
+  "desired_title": "Sales Manager",
+  "professional_summary": "Sales professional with enterprise deals.",
+  "work_experiences": [
+    {
+      "company_name": "Sales Agency",
+      "position_title": "Sales Manager",
+      "start_date": "",
+      "end_date": null,
+      "is_current": false,
+      "description": "Sell products to corporate customers.",
+      "achievements": ""
+    }
+  ],
+  "educations": [],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "B2B Sales"
+    },
+    {
+      "skill_name": "Enterprise Sales"
+    }
+  ],
+  "certificates": [],
+  "languages": []
+}

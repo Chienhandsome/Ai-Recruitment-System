@@ -1,0 +1,193 @@
+{
+  "CV01": {
+    "pattern_name": "Near Perfect Match",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 90.0,
+    "max_score": 100.0,
+    "rationale": "Meets all mandatory skills, 5.5 yrs experience, NN/g cert, IELTS 7.5, Design degree."
+  },
+  "CV02": {
+    "pattern_name": "Strong Match",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 84.0,
+    "max_score": 92.0,
+    "rationale": "Meets all mandatory criteria, missing optional NN/g certificate."
+  },
+  "CV03": {
+    "pattern_name": "Mandatory Threshold Failure",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 65.0,
+    "max_score": 80.0,
+    "rationale": "Missing mandatory UX Research skill."
+  },
+  "CV04": {
+    "pattern_name": "Similar Skill Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 30.0,
+    "max_score": 55.0,
+    "rationale": "Print shop banner prepress is not digital UI/UX product design."
+  },
+  "CV05": {
+    "pattern_name": "Education Major Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EDUCATION"
+    ],
+    "min_score": 70.0,
+    "max_score": 85.0,
+    "rationale": "Degree in Mining & Petroleum Geology fails Design/HCI major requirement."
+  },
+  "CV06": {
+    "pattern_name": "Higher Degree Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EDUCATION"
+    ],
+    "min_score": 70.0,
+    "max_score": 85.0,
+    "rationale": "Master of Criminology fails Design/Fine Arts field requirement."
+  },
+  "CV07": {
+    "pattern_name": "Experience Threshold Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EXPERIENCE"
+    ],
+    "min_score": 60.0,
+    "max_score": 75.0,
+    "rationale": "Has 1.5 years experience vs required 4.0 years."
+  },
+  "CV08": {
+    "pattern_name": "Experience Domain Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 30.0,
+    "max_score": 55.0,
+    "rationale": "Fashion tailoring & textile draping lacks digital UI/UX app design competencies."
+  },
+  "CV09": {
+    "pattern_name": "Project vs Professional Experience",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EXPERIENCE"
+    ],
+    "min_score": 35.0,
+    "max_score": 60.0,
+    "rationale": "Dribbble hobby mockups cannot replace 4.0 years professional product design."
+  },
+  "CV10": {
+    "pattern_name": "Internship Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EXPERIENCE"
+    ],
+    "min_score": 45.0,
+    "max_score": 70.0,
+    "rationale": "Banner resizing internships do not satisfy Senior Product Designer level."
+  },
+  "CV11": {
+    "pattern_name": "Freelance Trap",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 75.0,
+    "max_score": 90.0,
+    "rationale": "Verified freelance product designer meets tenure, Figma skills, and shipped apps."
+  },
+  "CV12": {
+    "pattern_name": "Overlapping Dates",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EXPERIENCE"
+    ],
+    "min_score": 60.0,
+    "max_score": 75.0,
+    "rationale": "Non-overlapping employment duration is 2.0 years < 4.0 years required."
+  },
+  "CV13": {
+    "pattern_name": "Certification Equivalent Trap",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 80.0,
+    "max_score": 90.0,
+    "rationale": "Optional cert missing does not fail mandatory, but doesn't get NN/g cert credit."
+  },
+  "CV14": {
+    "pattern_name": "Certification Unrelated",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 80.0,
+    "max_score": 90.0,
+    "rationale": "Java programmer cert does not grant UI/UX design bonus points."
+  },
+  "CV15": {
+    "pattern_name": "Language Threshold Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "LANGUAGE"
+    ],
+    "min_score": 70.0,
+    "max_score": 85.0,
+    "rationale": "IELTS 5.0 is below mandatory threshold IELTS 6.5."
+  },
+  "CV16": {
+    "pattern_name": "Wrong Language Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "LANGUAGE"
+    ],
+    "min_score": 70.0,
+    "max_score": 85.0,
+    "rationale": "Spanish DELE B2 does not substitute for required English IELTS 6.5."
+  },
+  "CV17": {
+    "pattern_name": "Semantic Similarity Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 30.0,
+    "max_score": 55.0,
+    "rationale": "Whitespace aura buzzwords lack concrete Figma and UX research evidence."
+  },
+  "CV18": {
+    "pattern_name": "Missing Information",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EDUCATION",
+      "EXPERIENCE"
+    ],
+    "min_score": 10.0,
+    "max_score": 40.0,
+    "rationale": "Missing dates and education fails multiple mandatory gates."
+  },
+  "CV19": {
+    "pattern_name": "Strong Resume / Wrong Role",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 30.0,
+    "max_score": 55.0,
+    "rationale": "3D Monster Sculptor lacks Figma, UI Design Systems, and UX research."
+  },
+  "CV20": {
+    "pattern_name": "Cross-Domain Near Match",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 40.0,
+    "max_score": 65.0,
+    "rationale": "Frontend CSS coder lacks UX research, design systems, and original UI creation."
+  }
+}

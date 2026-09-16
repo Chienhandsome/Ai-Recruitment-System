@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Plant Quality Lead",
+    "professional_summary": "Plant engineering specialist with 5.2 years experience holding a PhD in Ancient Oriental Theology."
+  },
+  "candidate_name": "Võ Văn Hậu",
+  "desired_title": "Plant Quality Lead",
+  "professional_summary": "Plant engineering specialist with 5.2 years experience holding a PhD in Ancient Oriental Theology.",
+  "work_experiences": [
+    {
+      "company_name": "LG Electronics Haiphong",
+      "position_title": "Automation & Quality Lead",
+      "start_date": "2019-04-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage PLC control loops, SCADA integration, Lean Manufacturing processes, Six Sigma quality inspections, and Preventive Maintenance.",
+      "achievements": "Standardized automated soldering inspection."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Vietnam Academy of Social Sciences",
+      "major": "Oriental Religious Philosophy & Theology",
+      "degree": "Doctorate",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "PLC"
+    },
+    {
+      "skill_name": "SCADA"
+    },
+    {
+      "skill_name": "Lean Manufacturing"
+    },
+    {
+      "skill_name": "Six Sigma"
+    },
+    {
+      "skill_name": "Preventive Maintenance"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 800"
+    }
+  ]
+}

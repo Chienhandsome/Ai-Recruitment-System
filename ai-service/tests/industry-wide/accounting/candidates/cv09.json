@@ -1,0 +1,59 @@
+{
+  "profile": {
+    "desired_title": "Accounting Graduate",
+    "professional_summary": "Recent graduate with mock audit projects and academic coursework in VAS financial reporting."
+  },
+  "candidate_name": "Nguyễn Thu Trang",
+  "desired_title": "Accounting Graduate",
+  "professional_summary": "Recent graduate with mock audit projects and academic coursework in VAS financial reporting.",
+  "work_experiences": [],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Auditing",
+      "degree": "Bachelor",
+      "start_date": "2020-09-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [
+    {
+      "project_name": "Mock Corporate Tax Finalization",
+      "project_role": "Student Lead",
+      "description": "Simulated Corporate Income Tax calculation and General Ledger closure for hypothetical enterprise.",
+      "technologies": [
+        "General Ledger",
+        "VAS",
+        "Corporate Income Tax",
+        "Tax Accounting"
+      ],
+      "start_date": "2023-10-01T00:00:00Z",
+      "end_date": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "skills": [
+    {
+      "skill_name": "General Ledger"
+    },
+    {
+      "skill_name": "Financial Reporting"
+    },
+    {
+      "skill_name": "Tax Accounting"
+    },
+    {
+      "skill_name": "VAS"
+    },
+    {
+      "skill_name": "Corporate Income Tax"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

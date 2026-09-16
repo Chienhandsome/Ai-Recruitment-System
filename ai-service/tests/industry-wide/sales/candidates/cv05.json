@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Enterprise B2B Sales Manager",
+    "professional_summary": "Enterprise sales manager with 5.5 years closing corporate deals, transitioned from veterinary medicine degree."
+  },
+  "candidate_name": "Trần Thế Hùng",
+  "desired_title": "Enterprise B2B Sales Manager",
+  "professional_summary": "Enterprise sales manager with 5.5 years closing corporate deals, transitioned from veterinary medicine degree.",
+  "work_experiences": [
+    {
+      "company_name": "Base.vn Enterprise Platform",
+      "position_title": "Enterprise Sales Manager",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead enterprise B2B Sales, Enterprise Sales, Solution Selling, Key Account Management, and master Contract Negotiation.",
+      "achievements": "Overachieved corporate sales target by 125% in 2023."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Vietnam National University of Agriculture",
+      "major": "Veterinary Medicine",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "B2B Sales"
+    },
+    {
+      "skill_name": "Enterprise Sales"
+    },
+    {
+      "skill_name": "Contract Negotiation"
+    },
+    {
+      "skill_name": "Key Account Management"
+    },
+    {
+      "skill_name": "Solution Selling"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Certified Sales Professional (CSP)",
+      "issuing_organization": "Sales Association"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

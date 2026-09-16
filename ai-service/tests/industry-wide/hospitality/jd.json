@@ -1,0 +1,65 @@
+{
+  "id": "jd-hospitality-front-office-10",
+  "title": "Hotel Front Office & Guest Experience Manager",
+  "description": "InterContinental Landmark Resort is seeking an accomplished Hotel Front Office & Guest Experience Manager to elevate our luxury 5-star guest journey. You will lead 40+ front desk agents, concierges, and guest relations officers, master Opera PMS room inventory allocations, oversee VIP arrival protocols, manage front-line guest escalation resolution, and collaborate with Housekeeping and Revenue Management to maximize RevPAR and guest satisfaction (GSS).",
+  "requirements": "Required Qualifications:\n- Professional Experience: Minimum 5+ years of international 4-star/5-star hotel front office and guest relations management experience.\n- Core Technical Skills: Front Office, Guest Relations, Opera PMS, Customer Service, Reservation Systems.\n- Preferred Skills: Revenue Management, Housekeeping Operations, VIP Protocol, Night Audit.\n- Education: Bachelor's degree or above in Hospitality Management, Tourism, Hotel Administration, Foreign Languages, Business Administration, or related field.\n- Language: Fluent English (IELTS 6.5 or equivalent) for foreign VIP and diplomatic guest service.\n- Certifications: Certified Hospitality Supervisor (CHS) or Certified Hotel Administrator (CHA) preferred.",
+  "required_experience_years": 5.0,
+  "experience_level": "SENIOR",
+  "level_requirement_mode": "REQUIRED",
+  "required_skills": [
+    {
+      "skill_name": "Front Office",
+      "is_mandatory": true,
+      "minimum_years": 4.0
+    },
+    {
+      "skill_name": "Guest Relations",
+      "is_mandatory": true,
+      "minimum_years": 4.0
+    },
+    {
+      "skill_name": "Opera PMS",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Customer Service",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Reservation Systems",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Revenue Management",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    },
+    {
+      "skill_name": "Housekeeping Operations",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    }
+  ],
+  "required_certificates": [
+    {
+      "certificate_name": "Certified Hospitality Supervisor (CHS)",
+      "is_mandatory": false
+    }
+  ],
+  "required_languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5",
+      "is_mandatory": true
+    }
+  ],
+  "ai_weights_config": {
+    "skills": 35.0,
+    "experience": 35.0,
+    "education": 15.0,
+    "other": 15.0
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Front Office Manager",
+    "professional_summary": "Front Office Manager with 5.5 years experience holding CompTIA Security+ IT certificate."
+  },
+  "candidate_name": "Trần Minh Tuấn",
+  "desired_title": "Front Office Manager",
+  "professional_summary": "Front Office Manager with 5.5 years experience holding CompTIA Security+ IT certificate.",
+  "work_experiences": [
+    {
+      "company_name": "Novotel Danang Premier",
+      "position_title": "Front Office Manager",
+      "start_date": "2018-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead Front Office, Guest Relations, Opera PMS, Customer Service, and Reservation Systems.",
+      "achievements": "Reduced check-in wait times by 30%."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "Business Administration",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "CompTIA Security+ Certification",
+      "issuing_organization": "CompTIA"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

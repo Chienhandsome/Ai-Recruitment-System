@@ -1,0 +1,75 @@
+{
+  "profile": {
+    "desired_title": "Senior BI & Data Analytics Specialist",
+    "professional_summary": "Senior BI Specialist with 5.5 years designing cloud data pipelines, writing high-performance SQL, and architecting enterprise Power BI models."
+  },
+  "candidate_name": "Nguyễn Văn An",
+  "desired_title": "Senior BI & Data Analytics Specialist",
+  "professional_summary": "Senior BI Specialist with 5.5 years designing cloud data pipelines, writing high-performance SQL, and architecting enterprise Power BI models.",
+  "work_experiences": [
+    {
+      "company_name": "VPBank Digital Banking",
+      "position_title": "Senior BI Analyst",
+      "start_date": "2021-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Write complex SQL queries on BigQuery, orchestrate automated ETL pipelines in Python, build executive Power BI dashboards with DAX, and deliver Data Visualization.",
+      "achievements": "Reduced executive reporting latency from 3 days to real-time automated refresh."
+    },
+    {
+      "company_name": "Shopee Data Team",
+      "position_title": "Data Analyst",
+      "start_date": "2018-09-01T00:00:00Z",
+      "end_date": "2021-02-28T00:00:00Z",
+      "is_current": false,
+      "description": "Built automated daily metrics reports using SQL and Python, developed Tableau visualizations.",
+      "achievements": "Optimized SQL query runtime by 40%."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Science and Technology",
+      "major": "Information Systems and Data Science",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    },
+    {
+      "skill_name": "Tableau"
+    },
+    {
+      "skill_name": "A/B Testing"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Microsoft Certified: Power BI Data Analyst Associate",
+      "issuing_organization": "Microsoft"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

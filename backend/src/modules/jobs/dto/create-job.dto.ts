@@ -176,21 +176,29 @@ export class CreateJobDto {
   @ApiPropertyOptional({ description: 'Skill weight (0-100)' })
   @IsOptional()
   @IsNumber()
+  @Min(0)
+  @Max(100)
   skillWeight?: number;
 
   @ApiPropertyOptional({ description: 'Experience weight (0-100)' })
   @IsOptional()
   @IsNumber()
+  @Min(0)
+  @Max(100)
   experienceWeight?: number;
 
   @ApiPropertyOptional({ description: 'Education weight (0-100)' })
   @IsOptional()
   @IsNumber()
+  @Min(0)
+  @Max(100)
   educationWeight?: number;
 
   @ApiPropertyOptional({ description: 'Other weight (0-100)' })
   @IsOptional()
   @IsNumber()
+  @Min(0)
+  @Max(100)
   otherWeight?: number;
 
   @ApiPropertyOptional({ description: 'Skills associated with this job' })

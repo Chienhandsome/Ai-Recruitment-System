@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Performance Marketer",
+    "professional_summary": "Performance Marketer with 4.5 years experience in paid ads holding unrelated Cisco IT networking certificates."
+  },
+  "candidate_name": "Đoàn Mạnh Hùng",
+  "desired_title": "Performance Marketer",
+  "professional_summary": "Performance Marketer with 4.5 years experience in paid ads holding unrelated Cisco IT networking certificates.",
+  "work_experiences": [
+    {
+      "company_name": "Appota Corporation",
+      "position_title": "Senior User Acquisition Specialist",
+      "start_date": "2019-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Deploy Google Ads App campaigns and Meta Ads for gaming apps with GA4 analytics and Conversion Rate Optimization.",
+      "achievements": "Drove 500K app installs under target CPI."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Economics HCMC",
+      "major": "Marketing",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Google Ads"
+    },
+    {
+      "skill_name": "Meta Ads"
+    },
+    {
+      "skill_name": "GA4"
+    },
+    {
+      "skill_name": "Performance Marketing"
+    },
+    {
+      "skill_name": "Conversion Rate Optimization"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Cisco CCNA Routing and Switching",
+      "issuing_organization": "Cisco"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

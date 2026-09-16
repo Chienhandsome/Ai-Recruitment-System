@@ -1,0 +1,58 @@
+{
+  "profile": {
+    "desired_title": "Senior Investment Associate",
+    "professional_summary": "Investment Banking Associate with 8 years building discounted cash flow (DCF) models, LBO models, and leading startup fundraising rounds."
+  },
+  "candidate_name": "Võ Gia Huy",
+  "desired_title": "Senior Investment Associate",
+  "professional_summary": "Investment Banking Associate with 8 years building discounted cash flow (DCF) models, LBO models, and leading startup fundraising rounds.",
+  "work_experiences": [
+    {
+      "company_name": "VinaCapital Private Equity",
+      "position_title": "Senior Investment Analyst",
+      "start_date": "2016-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Evaluate tech startup financial pitch decks, build financial forecast projections, write investment memos for IC committee. No daily accounting ledger booking or tax filing.",
+      "achievements": "Executed 4 Series-B venture capital transactions worth $40M."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "International Finance",
+      "degree": "Bachelor",
+      "start_date": "2011-09-01T00:00:00Z",
+      "end_date": "2015-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "DCF Modeling"
+    },
+    {
+      "skill_name": "LBO Valuation"
+    },
+    {
+      "skill_name": "M&A Due Diligence"
+    },
+    {
+      "skill_name": "Financial Modeling"
+    },
+    {
+      "skill_name": "Private Equity"
+    },
+    {
+      "skill_name": "Venture Capital"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 950"
+    }
+  ]
+}

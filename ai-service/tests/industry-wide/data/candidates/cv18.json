@@ -1,0 +1,32 @@
+{
+  "profile": {
+    "desired_title": "Data Analyst",
+    "professional_summary": "Data analyst."
+  },
+  "candidate_name": "Nguyễn Văn Lâm",
+  "desired_title": "Data Analyst",
+  "professional_summary": "Data analyst.",
+  "work_experiences": [
+    {
+      "company_name": "Analytics Corp",
+      "position_title": "Data Analyst",
+      "start_date": "",
+      "end_date": null,
+      "is_current": false,
+      "description": "Analyze data with SQL.",
+      "achievements": ""
+    }
+  ],
+  "educations": [],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    }
+  ],
+  "certificates": [],
+  "languages": []
+}

@@ -1,0 +1,70 @@
+{
+  "profile": {
+    "desired_title": "Backend Intern / Trainee",
+    "professional_summary": "Dedicated software engineering graduate who completed 4 consecutive internships across major tech companies."
+  },
+  "candidate_name": "Ngô Gia Bảo",
+  "desired_title": "Backend Intern / Trainee",
+  "professional_summary": "Dedicated software engineering graduate who completed 4 consecutive internships across major tech companies.",
+  "work_experiences": [
+    {
+      "company_name": "Shopee Vietnam",
+      "position_title": "Backend Engineering Intern",
+      "start_date": "2023-01-01T00:00:00Z",
+      "end_date": "2023-09-30T00:00:00Z",
+      "is_current": false,
+      "description": "Supported bug fixes in Java microservices under senior engineer mentorship.",
+      "achievements": ""
+    },
+    {
+      "company_name": "VNG Corporation",
+      "position_title": "Java Developer Intern",
+      "start_date": "2022-03-01T00:00:00Z",
+      "end_date": "2022-11-30T00:00:00Z",
+      "is_current": false,
+      "description": "Wrote unit tests and basic PostgreSQL queries.",
+      "achievements": ""
+    },
+    {
+      "company_name": "DEK Technologies",
+      "position_title": "Software Intern",
+      "start_date": "2021-06-01T00:00:00Z",
+      "end_date": "2022-01-31T00:00:00Z",
+      "is_current": false,
+      "description": "Assisted software testing team.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "HUST",
+      "major": "Computer Science",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Java"
+    },
+    {
+      "skill_name": "Spring Boot"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    },
+    {
+      "skill_name": "Docker"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

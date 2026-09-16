@@ -1,0 +1,96 @@
+{
+  "profile": {
+    "desired_title": "Senior Backend Engineer",
+    "professional_summary": "Senior Backend Engineer with 5.5 years of expertise in Java microservices, high-throughput payment systems, and distributed databases."
+  },
+  "candidate_name": "Lê Hoàng Long",
+  "desired_title": "Senior Backend Engineer",
+  "professional_summary": "Senior Backend Engineer with 5.5 years of expertise in Java microservices, high-throughput payment systems, and distributed databases.",
+  "work_experiences": [
+    {
+      "company_name": "MoMo Payment Systems",
+      "position_title": "Senior Backend Engineer",
+      "start_date": "2022-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Architect and maintain core Java Spring Boot payment microservices handling 8,000 TPS. Optimize PostgreSQL query execution plans and database sharding. Deploy distributed event pipelines using Apache Kafka and Docker.",
+      "achievements": "Reduced transaction latency by 35% and scaled system to support Tet peak volume without downtime."
+    },
+    {
+      "company_name": "FPT Software Global",
+      "position_title": "Backend Software Engineer",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": "2022-02-28T00:00:00Z",
+      "is_current": false,
+      "description": "Built RESTful APIs with Java, Spring Framework, PostgreSQL, and Docker containerization for Japanese fintech clients.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Science and Technology",
+      "major": "Computer Science",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-30T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [
+    {
+      "project_name": "High-scale Wallet Engine",
+      "project_role": "Lead Backend Architect",
+      "description": "Engineered ledger service with Java, Kafka, and PostgreSQL.",
+      "technologies": [
+        "Java",
+        "Spring Boot",
+        "PostgreSQL",
+        "Kafka",
+        "Docker"
+      ],
+      "start_date": null,
+      "end_date": null
+    }
+  ],
+  "skills": [
+    {
+      "skill_name": "Java"
+    },
+    {
+      "skill_name": "Spring Boot"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    },
+    {
+      "skill_name": "Docker"
+    },
+    {
+      "skill_name": "Microservices"
+    },
+    {
+      "skill_name": "Kafka"
+    },
+    {
+      "skill_name": "Kubernetes"
+    },
+    {
+      "skill_name": "AWS"
+    },
+    {
+      "skill_name": "Redis"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "AWS Certified Solutions Architect - Associate",
+      "issuing_organization": "Amazon Web Services"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

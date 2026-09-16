@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Junior Performance Executive",
+    "professional_summary": "Enthusiastic Junior Performance Marketer with 1.5 years experience executing Google Ads and Meta Ads."
+  },
+  "candidate_name": "Bùi Phương Linh",
+  "desired_title": "Junior Performance Executive",
+  "professional_summary": "Enthusiastic Junior Performance Marketer with 1.5 years experience executing Google Ads and Meta Ads.",
+  "work_experiences": [
+    {
+      "company_name": "CleverAds Agency",
+      "position_title": "Performance Marketing Executive",
+      "start_date": "2023-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Assist in keyword bidding on Google Ads, creative testing on Meta Ads, and basic reporting in GA4.",
+      "achievements": "Successfully assisted 15 client ad accounts."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Marketing",
+      "degree": "Bachelor",
+      "start_date": "2018-09-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Google Ads"
+    },
+    {
+      "skill_name": "Meta Ads"
+    },
+    {
+      "skill_name": "GA4"
+    },
+    {
+      "skill_name": "Performance Marketing"
+    },
+    {
+      "skill_name": "Conversion Rate Optimization"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

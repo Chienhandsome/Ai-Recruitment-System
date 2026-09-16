@@ -70,7 +70,6 @@ interview-service/*service-account*.json
 interview-service/*credentials*.json
 interview-service/secrets/
 
-*.py
 /ai-service/.venv-local/Lib/site-packages/annotated_doc-0.0.5.dist-info
 /ai-service/.venv-local/Lib/site-packages
 /ai-service/.venv-local/Scripts

@@ -115,10 +115,10 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobD
         autoShortlistThreshold: initialJobData.autoShortlistThreshold || 85,
         autoRejectThreshold: initialJobData.autoRejectThreshold || 40,
         rejectOnMissingMandatory: initialJobData.rejectOnMissingMandatory ?? true,
-        skillWeight: initialJobData.skillWeight || 40,
-        experienceWeight: initialJobData.experienceWeight || 30,
-        educationWeight: initialJobData.educationWeight || 15,
-        otherWeight: initialJobData.otherWeight || 15,
+        skillWeight: initialJobData.skillWeight ?? 40,
+        experienceWeight: initialJobData.experienceWeight ?? 30,
+        educationWeight: initialJobData.educationWeight ?? 15,
+        otherWeight: initialJobData.otherWeight ?? 15,
       });
     }
   }, [initialJobData]);

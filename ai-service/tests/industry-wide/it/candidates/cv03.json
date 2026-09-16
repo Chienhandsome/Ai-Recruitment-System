@@ -1,0 +1,58 @@
+{
+  "profile": {
+    "desired_title": "Backend Developer",
+    "professional_summary": "Experienced Java enterprise developer with 5 years building on-premise monolithic and early microservice architectures."
+  },
+  "candidate_name": "Trần Văn Nam",
+  "desired_title": "Backend Developer",
+  "professional_summary": "Experienced Java enterprise developer with 5 years building on-premise monolithic and early microservice architectures.",
+  "work_experiences": [
+    {
+      "company_name": "Agribank Core Banking",
+      "position_title": "Senior Java Developer",
+      "start_date": "2019-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage Java Spring Boot core banking services. Extensive SQL tuning on PostgreSQL and Oracle. Build microservices on traditional bare-metal servers.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Post and Telecommunications Institute of Technology",
+      "major": "Information Technology",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Java"
+    },
+    {
+      "skill_name": "Spring Boot"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    },
+    {
+      "skill_name": "Microservices"
+    },
+    {
+      "skill_name": "Oracle DB"
+    },
+    {
+      "skill_name": "Linux"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

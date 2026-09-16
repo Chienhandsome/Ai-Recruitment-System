@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "Front Desk Manager",
+    "professional_summary": "Hotelier claiming overlapping concurrent front office jobs."
+  },
+  "candidate_name": "Ngô Văn Trọng",
+  "desired_title": "Front Desk Manager",
+  "professional_summary": "Hotelier claiming overlapping concurrent front office jobs.",
+  "work_experiences": [
+    {
+      "company_name": "Hotel De L'Opera Hanoi",
+      "position_title": "Front Desk Supervisor",
+      "start_date": "2021-08-01T00:00:00Z",
+      "end_date": "2024-01-01T00:00:00Z",
+      "is_current": false,
+      "description": "Manage Front Office check-in and Opera PMS.",
+      "achievements": ""
+    },
+    {
+      "company_name": "Silk Path Hotel (Concurrent)",
+      "position_title": "Guest Relations Officer",
+      "start_date": "2021-10-01T00:00:00Z",
+      "end_date": "2023-12-31T00:00:00Z",
+      "is_current": false,
+      "description": "Concurrent guest relations officer.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Open University",
+      "major": "Hospitality",
+      "degree": "Bachelor",
+      "start_date": "2017-09-01T00:00:00Z",
+      "end_date": "2021-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

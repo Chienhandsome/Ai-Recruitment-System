@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Senior Freelance B2B Sales Broker",
+    "professional_summary": "Independent B2B Technology Broker with 5.5 years representing foreign software vendors in closing deals with Vietnamese banks and corporations."
+  },
+  "candidate_name": "Bùi Tuấn Kiệt",
+  "desired_title": "Senior Freelance B2B Sales Broker",
+  "professional_summary": "Independent B2B Technology Broker with 5.5 years representing foreign software vendors in closing deals with Vietnamese banks and corporations.",
+  "work_experiences": [
+    {
+      "company_name": "Independent B2B Sales Consultancy",
+      "position_title": "Principal Corporate Sales Consultant",
+      "start_date": "2018-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Contracted by enterprise software firms to execute end-to-end B2B Sales, Enterprise Sales, high-stakes Contract Negotiation, Solution Selling, and Key Account Management.",
+      "achievements": "Facilitated $4M+ in cumulative software licensing transactions over 5 years."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "International Economics",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "B2B Sales"
+    },
+    {
+      "skill_name": "Enterprise Sales"
+    },
+    {
+      "skill_name": "Contract Negotiation"
+    },
+    {
+      "skill_name": "Key Account Management"
+    },
+    {
+      "skill_name": "Solution Selling"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Certified Sales Professional (CSP)",
+      "issuing_organization": "Sales Association"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

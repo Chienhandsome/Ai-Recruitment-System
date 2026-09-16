@@ -1,0 +1,4335 @@
+{
+  "CV01": {
+    "overall_score": 95.13,
+    "match_level": "HIGH",
+    "skills_score": 93.24,
+    "experience_score": 98.32,
+    "education_score": 100.0,
+    "other_score": 90.0,
+    "mandatory_status": "PASS",
+    "mandatory_failures": [],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 32.63,
+        "base_points": 32.63,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 93.24
+      },
+      "experience": {
+        "earned_points": 29.5,
+        "base_points": 29.5,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 98.32
+      },
+      "education": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 100.0
+      },
+      "other": {
+        "earned_points": 18.0,
+        "base_points": 18.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 90.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 32.63,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "AI nhận diện kỹ năng 'Campaign Optimization' qua Kỹ năng tương đương: ROAS Optimization (Đạt chuẩn chuyên môn).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Senior Performance Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 32.6 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 29.5,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.5 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 15.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 18.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 18.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "AI nhận diện kỹ năng 'Campaign Optimization' qua Kỹ năng tương đương: ROAS Optimization (Đạt chuẩn chuyên môn).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Senior Performance Marketing Specialist (Chuyển giao).",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kỹ năng tương đương: ROAS Optimization",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Senior Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "AI nhận diện kỹ năng 'ROAS Optimization' tương đương 'Campaign Optimization' (Độ khớp: 80.4%)",
+        "source": "semantic_embedding",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Senior Performance Marketing Specialist Own paid acquisition across Google and Meta for e-commerce categories. Manage monthly advertising budgets based on CAC, ROAS and revenue targets. Build GA4 reports to monitor acquisition and conversion funnels. Run structured A/B tests across audiences, creatives and landing pages. ",
+        "source": "Kinh nghiệm: Senior Performance Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 1.0,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.88,
+    "mandatory_ratio": 1.0,
+    "base_score": 95.13,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.05,
+      "promotion_count": 1,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Quỹ đạo phát triển thăng tiến đều đặn qua các vị trí công việc."
+    },
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (95.1/100 - CẤP ĐỘ HIGH) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Digital Agency & Quản lý Chiến dịch Đa nhãn hàng khớp với Bán lẻ E-commerce & Tăng trưởng D2C) với điểm kỹ năng chuyên môn đạt 93.2/100 và kinh nghiệm đạt 98.3/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).; Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.7,
+      "duration_score": 100.0,
+      "relevance_score": 96.64,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.95,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.70 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Senior Performance Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE",
+        "RECENT_TITLE_SIGNAL"
+      ]
+    }
+  },
+  "CV02": {
+    "overall_score": 89.07,
+    "match_level": "HIGH",
+    "skills_score": 90.86,
+    "experience_score": 97.9,
+    "education_score": 86.0,
+    "other_score": 75.0,
+    "mandatory_status": "PASS",
+    "mandatory_failures": [],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 31.8,
+        "base_points": 31.8,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 90.86
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "base_points": 29.37,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 97.9
+      },
+      "education": {
+        "earned_points": 12.9,
+        "base_points": 12.9,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 86.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 31.8,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.8 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.4 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 12.9,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Business Administration) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 12.9 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Business Administration)."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Business Administration) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Performance Marketing Specialist Manage Google Ads Search and Performance Max. Operate Meta Ads for acquisition. GA4 data. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Performance Marketing Specialist Manage Google Ads Search and Performance Max. Operate Meta Ads for acquisition. GA4 data. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 89.07,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "EXPERIENCED_STABLE",
+      "trajectory_evidence": "Quỹ đạo làm việc ổn định tại các vị trí chuyên môn tương đương."
+    },
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (89.1/100 - CẤP ĐỘ HIGH) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C) với điểm kỹ năng chuyên môn đạt 90.9/100 và kinh nghiệm đạt 97.9/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).; Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.7,
+      "duration_score": 100.0,
+      "relevance_score": 95.8,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.70 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Performance Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV03": {
+    "overall_score": 87.51,
+    "match_level": "HIGH",
+    "skills_score": 90.88,
+    "experience_score": 97.9,
+    "education_score": 94.0,
+    "other_score": 61.15,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "LANGUAGE",
+        "requirement": "English IELTS 6.5",
+        "candidateValue": "IELTS 6.0",
+        "status": "FAIL",
+        "reason": "Yêu cầu ngoại ngữ bắt buộc 'English IELTS 6.5' chưa được thỏa mãn (Giá trị ứng viên: IELTS 6.0)."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 31.81,
+        "base_points": 31.81,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 90.88
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "base_points": 29.37,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 97.9
+      },
+      "education": {
+        "earned_points": 14.1,
+        "base_points": 14.1,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 94.0
+      },
+      "other": {
+        "earned_points": 12.23,
+        "base_points": 12.23,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 61.15
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 31.81,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.8 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (5.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.4 / 30.0 điểm: Đánh giá dựa trên 5.6 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 14.1,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Digital Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Digital Marketing)."
+      },
+      "other": {
+        "earned_points": 12.23,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 12.2 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Tổng thâm niên tích lũy (5.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Digital Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Performance Marketing Specialist Manage Google and Meta acquisition campaigns. Monitor ROAS, CAC. GA4 reports. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Performance Marketing Specialist Manage Google and Meta acquisition campaigns. Monitor ROAS, CAC. GA4 reports. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 87.51,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC (87.5/100 - CẤP ĐỘ HIGH - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên có điểm kỹ năng chuyên môn (90.9/100) và kinh nghiệm (97.9/100) tương đồng tốt với yêu cầu thực tế (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C). Cảnh báo vi phạm điều kiện tiên quyết: [LANGUAGE: English IELTS 6.5 - Yêu cầu ngoại ngữ bắt buộc 'English IELTS 6.5' chưa được thỏa mãn (Giá trị ứng viên: IELTS 6.0).]. Khuyến nghị HR: Cân nhắc phỏng vấn nếu chấp nhận linh hoạt điều chỉnh tiêu chuẩn tiên quyết (Ngoại ngữ/Kinh nghiệm), hoặc xem xét cho vị trí cấp bậc tương đương (Middle thay vì Senior).",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.62,
+      "duration_score": 100.0,
+      "relevance_score": 95.8,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.62 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Performance Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV04": {
+    "overall_score": 85.66,
+    "match_level": "HIGH",
+    "skills_score": 90.75,
+    "experience_score": 95.0,
+    "education_score": 86.0,
+    "other_score": 62.5,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "LANGUAGE",
+        "requirement": "English IELTS 6.5",
+        "candidateValue": "English conversational",
+        "status": "FAIL",
+        "reason": "Yêu cầu ngoại ngữ bắt buộc 'English IELTS 6.5' chưa được thỏa mãn (Giá trị ứng viên: English conversational)."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 31.76,
+        "base_points": 31.76,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 90.75
+      },
+      "experience": {
+        "earned_points": 28.5,
+        "base_points": 28.5,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 95.0
+      },
+      "education": {
+        "earned_points": 12.9,
+        "base_points": 12.9,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 86.0
+      },
+      "other": {
+        "earned_points": 12.5,
+        "base_points": 12.5,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 62.5
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 31.76,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.8 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 28.5,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 28.5 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 12.9,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Business Administration) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 12.9 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Business Administration)."
+      },
+      "other": {
+        "earned_points": 12.5,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 12.5 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Business Administration) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Digital Marketing Specialist Plan and optimize paid advertising campaigns on Google Ads and Meta Ads. GA4 traffic. ",
+        "source": "Kinh nghiệm: Digital Marketing Specialist",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Digital Marketing Specialist Plan and optimize paid advertising campaigns on Google Ads and Meta Ads. GA4 traffic. ",
+        "source": "Kinh nghiệm: Digital Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 85.66,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC (85.7/100 - CẤP ĐỘ HIGH - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên có điểm kỹ năng chuyên môn (90.8/100) và kinh nghiệm (95.0/100) tương đồng tốt với yêu cầu thực tế (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C). Cảnh báo vi phạm điều kiện tiên quyết: [LANGUAGE: English IELTS 6.5 - Yêu cầu ngoại ngữ bắt buộc 'English IELTS 6.5' chưa được thỏa mãn (Giá trị ứng viên: English conversational).]. Khuyến nghị HR: Cân nhắc phỏng vấn nếu chấp nhận linh hoạt điều chỉnh tiêu chuẩn tiên quyết (Ngoại ngữ/Kinh nghiệm), hoặc xem xét cho vị trí cấp bậc tương đương (Middle thay vì Senior).",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.71,
+      "duration_score": 100.0,
+      "relevance_score": 90.01,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Digital Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV05": {
+    "overall_score": 83.02,
+    "match_level": "HIGH",
+    "skills_score": 90.91,
+    "experience_score": 94.67,
+    "education_score": 52.0,
+    "other_score": 75.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "EDUCATION",
+        "requirement": "Chuyên ngành đào tạo phù hợp: Senior Performance Marketing Specialist",
+        "candidateValue": "Kế toán (Accounting)",
+        "status": "FAIL",
+        "reason": "Chuyên ngành đào tạo (Kế toán (Accounting)) không phù hợp với yêu cầu chuyên môn của công việc (Senior Performance Marketing Specialist)."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 31.82,
+        "base_points": 31.82,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 90.91
+      },
+      "experience": {
+        "earned_points": 28.4,
+        "base_points": 28.4,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 94.67
+      },
+      "education": {
+        "earned_points": 7.8,
+        "base_points": 7.8,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 52.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 31.82,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Manager (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Manager (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.8 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 28.4,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (7.3 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Manager) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 28.4 / 30.0 điểm: Đánh giá dựa trên 7.3 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 7.8,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đạt yêu cầu về trình độ học vấn."
+        ],
+        "minus_reasons": [
+          "Chuyên ngành tốt nghiệp (Kế toán (Accounting)) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn."
+        ],
+        "summary": "Đạt 7.8 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Kế toán (Accounting))."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Manager (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Manager (Chuyển giao).",
+      "Tổng thâm niên tích lũy (7.3 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Manager) -> Cộng điểm tương quan cấp bậc."
+    ],
+    "gaps": [
+      "Chuyên ngành tốt nghiệp (Kế toán (Accounting)) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Manager (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Manager (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Performance Marketing Manager Manage Google and Meta acquisition campaigns. CAC, conversion rates, GA4 funnels. ",
+        "source": "Kinh nghiệm: Performance Marketing Manager",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Performance Marketing Manager Manage Google and Meta acquisition campaigns. CAC, conversion rates, GA4 funnels. ",
+        "source": "Kinh nghiệm: Performance Marketing Manager",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 83.02,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.05,
+      "promotion_count": 1,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Quỹ đạo phát triển thăng tiến đều đặn qua các vị trí công việc."
+    },
+    "summary": "ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC (83.0/100 - CẤP ĐỘ HIGH - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên có điểm kỹ năng chuyên môn (90.9/100) và kinh nghiệm (94.7/100) tương đồng tốt với yêu cầu thực tế (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C). Cảnh báo vi phạm điều kiện tiên quyết: [EDUCATION: Chuyên ngành đào tạo phù hợp: Senior Performance Marketing Specialist - Chuyên ngành đào tạo (Kế toán (Accounting)) không phù hợp với yêu cầu chuyên môn của công việc (Senior Performance Marketing Specialist).]. Khuyến nghị HR: Cân nhắc loại hồ sơ (Reject) do không thỏa mãn tiêu chuẩn bắt buộc của vị trí tuyển dụng.",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 7.29,
+      "duration_score": 100.0,
+      "relevance_score": 89.34,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.72,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "7.29 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Performance Marketing Manager",
+        "Chưa đủ bằng chứng trách nhiệm quản lý trong mô tả"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE",
+        "RECENT_TITLE_SIGNAL",
+        "INSUFFICIENT_MANAGEMENT_EVIDENCE"
+      ]
+    }
+  },
+  "CV06": {
+    "overall_score": 91.91,
+    "match_level": "HIGH",
+    "skills_score": 95.46,
+    "experience_score": 95.0,
+    "education_score": 100.0,
+    "other_score": 75.0,
+    "mandatory_status": "PASS",
+    "mandatory_failures": [],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 33.41,
+        "base_points": 33.41,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 95.46
+      },
+      "experience": {
+        "earned_points": 28.5,
+        "base_points": 28.5,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 95.0
+      },
+      "education": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 100.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 33.41,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Sở hữu kỹ năng bổ trợ: 'Campaign Optimization'.",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 33.4 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 28.5,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (3.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 28.5 / 30.0 điểm: Đánh giá dựa trên 3.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 15.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Sở hữu kỹ năng bổ trợ: 'Campaign Optimization'.",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+      "Tổng thâm niên tích lũy (3.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Digital Marketing Specialist Manage Google and Meta campaigns. Monitor GA4 dashboards. Review conversion, A/B testing. ",
+        "source": "Kinh nghiệm: Digital Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 91.91,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (91.9/100 - CẤP ĐỘ HIGH) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C) với điểm kỹ năng chuyên môn đạt 95.5/100 và kinh nghiệm đạt 95.0/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).; Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "experience_assessment": {
+      "candidate_level": "MIDDLE",
+      "required_level": "SENIOR",
+      "total_experience_years": 3.71,
+      "duration_score": 100.0,
+      "relevance_score": 90.01,
+      "level_fit_score": 70.0,
+      "level_gap": 1,
+      "level_eligible": false,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "NOT_ELIGIBLE_LEVEL",
+      "evidence": [
+        "3.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Digital Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV07": {
+    "overall_score": 64.65,
+    "match_level": "MEDIUM",
+    "skills_score": 61.86,
+    "experience_score": 83.99,
+    "education_score": 52.0,
+    "other_score": 50.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "SKILL",
+        "requirement": "Google Ads",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Google Ads' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "Meta Ads",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Meta Ads' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "GA4",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'GA4' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "Performance Marketing",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu."
+      },
+      {
+        "type": "EDUCATION",
+        "requirement": "Chuyên ngành đào tạo phù hợp: Senior Performance Marketing Specialist",
+        "candidateValue": "Cơ khí chế tạo máy (Mechanical Engineering)",
+        "status": "FAIL",
+        "reason": "Chuyên ngành đào tạo (Cơ khí chế tạo máy (Mechanical Engineering)) không phù hợp với yêu cầu chuyên môn của công việc (Senior Performance Marketing Specialist)."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 21.65,
+        "base_points": 21.65,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 61.86
+      },
+      "experience": {
+        "earned_points": 25.2,
+        "base_points": 25.2,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 83.99
+      },
+      "education": {
+        "earned_points": 7.8,
+        "base_points": 7.8,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 52.0
+      },
+      "other": {
+        "earned_points": 10.0,
+        "base_points": 10.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 50.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 21.65,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Kỹ năng 'Google Ads' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+          "Kỹ năng 'Meta Ads' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+          "Kỹ năng 'GA4' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+          "Kỹ năng 'Performance Marketing' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 21.6 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 25.2,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (7.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 25.2 / 30.0 điểm: Đánh giá dựa trên 7.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 7.8,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đạt yêu cầu về trình độ học vấn."
+        ],
+        "minus_reasons": [
+          "Chuyên ngành tốt nghiệp (Cơ khí chế tạo máy (Mechanical Engineering)) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn."
+        ],
+        "summary": "Đạt 7.8 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Cơ khí chế tạo máy (Mechanical Engineering))."
+      },
+      "other": {
+        "earned_points": 10.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 10.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Kỹ năng 'Google Ads' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+      "Kỹ năng 'Meta Ads' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+      "Kỹ năng 'GA4' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+      "Kỹ năng 'Performance Marketing' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Engineering Manager (Chuyển giao).",
+      "Tổng thâm niên tích lũy (7.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án."
+    ],
+    "gaps": [
+      "Chuyên ngành tốt nghiệp (Cơ khí chế tạo máy (Mechanical Engineering)) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "Kinh nghiệm: Engineering Manager (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "Kinh nghiệm: Engineering Manager (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "Kinh nghiệm: Engineering Manager (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "Kinh nghiệm: Engineering Manager (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Engineering Manager (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Engineering Manager (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [
+      "Google Ads",
+      "Meta Ads",
+      "GA4",
+      "Performance Marketing"
+    ],
+    "evidence": [
+      {
+        "skillName": "Google Ads",
+        "evidenceText": "Engineering Manager Manage team of engineers, manufacturing projects, suppliers, CAD, budgets. ",
+        "source": "Kinh nghiệm: Engineering Manager",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Meta Ads",
+        "evidenceText": "Engineering Manager Manage team of engineers, manufacturing projects, suppliers, CAD, budgets. ",
+        "source": "Kinh nghiệm: Engineering Manager",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "GA4",
+        "evidenceText": "Engineering Manager Manage team of engineers, manufacturing projects, suppliers, CAD, budgets. ",
+        "source": "Kinh nghiệm: Engineering Manager",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Performance Marketing",
+        "evidenceText": "Engineering Manager Manage team of engineers, manufacturing projects, suppliers, CAD, budgets. ",
+        "source": "Kinh nghiệm: Engineering Manager",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Engineering Manager Manage team of engineers, manufacturing projects, suppliers, CAD, budgets. ",
+        "source": "Kinh nghiệm: Engineering Manager",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Engineering Manager Manage team of engineers, manufacturing projects, suppliers, CAD, budgets. ",
+        "source": "Kinh nghiệm: Engineering Manager",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 0.363,
+    "base_score": 64.65,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN KHÔNG PHÙ HỢP (64.7/100 - CẤP ĐỘ MEDIUM - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Lý do cốt lõi: Vi phạm tiêu chí tiên quyết ([SKILL: Google Ads - Kỹ năng bắt buộc 'Google Ads' chưa đạt yêu cầu.]; [SKILL: Meta Ads - Kỹ năng bắt buộc 'Meta Ads' chưa đạt yêu cầu.]; [SKILL: GA4 - Kỹ năng bắt buộc 'GA4' chưa đạt yêu cầu.]; [SKILL: Performance Marketing - Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu.]; [EDUCATION: Chuyên ngành đào tạo phù hợp: Senior Performance Marketing Specialist - Chuyên ngành đào tạo (Cơ khí chế tạo máy (Mechanical Engineering)) không phù hợp với yêu cầu chuyên môn của công việc (Senior Performance Marketing Specialist).]). Khuyến nghị: Từ chối hồ sơ (Auto-Reject).",
+    "experience_assessment": {
+      "candidate_level": "MANAGER",
+      "required_level": "SENIOR",
+      "total_experience_years": 7.71,
+      "duration_score": 100.0,
+      "relevance_score": 78.59,
+      "level_fit_score": 100.0,
+      "level_gap": -2,
+      "level_eligible": true,
+      "level_confidence": 0.9,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "7.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Engineering Manager",
+        "Có bằng chứng quản lý hoặc chịu trách nhiệm đội ngũ"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE",
+        "RECENT_TITLE_SIGNAL",
+        "MANAGEMENT_EVIDENCE"
+      ]
+    }
+  },
+  "CV08": {
+    "overall_score": 89.16,
+    "match_level": "HIGH",
+    "skills_score": 90.83,
+    "experience_score": 97.9,
+    "education_score": 100.0,
+    "other_score": 65.0,
+    "mandatory_status": "PASS",
+    "mandatory_failures": [],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 31.79,
+        "base_points": 31.79,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 90.83
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "base_points": 29.37,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 97.9
+      },
+      "education": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 100.0
+      },
+      "other": {
+        "earned_points": 13.0,
+        "base_points": 13.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 65.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 31.79,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.8 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.4 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 15.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 13.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 13.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Performance Marketing Specialist Manage paid acquisition across Google and Meta. GA4 analysis. ROAS, CAC, conversion. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Performance Marketing Specialist Manage paid acquisition across Google and Meta. GA4 analysis. ROAS, CAC, conversion. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 89.16,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (89.2/100 - CẤP ĐỘ HIGH) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C) với điểm kỹ năng chuyên môn đạt 90.8/100 và kinh nghiệm đạt 97.9/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).; Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.71,
+      "duration_score": 100.0,
+      "relevance_score": 95.8,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Performance Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV09": {
+    "overall_score": 85.31,
+    "match_level": "HIGH",
+    "skills_score": 89.51,
+    "experience_score": 93.6,
+    "education_score": 86.0,
+    "other_score": 65.0,
+    "mandatory_status": "PASS",
+    "mandatory_failures": [],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 31.33,
+        "base_points": 31.33,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 89.51
+      },
+      "experience": {
+        "earned_points": 28.08,
+        "base_points": 28.08,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 93.6
+      },
+      "education": {
+        "earned_points": 12.9,
+        "base_points": 12.9,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 86.0
+      },
+      "other": {
+        "earned_points": 13.0,
+        "base_points": 13.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 65.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 31.33,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Có tư duy và kỹ năng chuyển giao tốt (Transferable Skills) giữa các phân khúc nghiệp vụ liên quan.",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.3 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 28.08,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Có sự khác biệt nhất định về phân khúc mô hình kinh doanh so với vị trí tuyển dụng."
+        ],
+        "summary": "Đạt 28.1 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 12.9,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Business Administration) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 12.9 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Business Administration)."
+      },
+      "other": {
+        "earned_points": 13.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 13.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Có tư duy và kỹ năng chuyển giao tốt (Transferable Skills) giữa các phân khúc nghiệp vụ liên quan.",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Business Administration) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Có sự khác biệt nhất định về phân khúc mô hình kinh doanh so với vị trí tuyển dụng."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Digital Marketing Specialist Manage Google and Meta campaigns. GA4 analytics reports. Lead generation. ",
+        "source": "Kinh nghiệm: Digital Marketing Specialist",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Digital Marketing Specialist Manage Google and Meta campaigns. GA4 analytics reports. Lead generation. ",
+        "source": "Kinh nghiệm: Digital Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.75,
+    "mandatory_ratio": 1.0,
+    "base_score": 85.31,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (85.3/100 - CẤP ĐỘ HIGH) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (B2B SaaS & Tiếp thị Khách hàng Doanh nghiệp khớp với Bán lẻ E-commerce & Tăng trưởng D2C) với điểm kỹ năng chuyên môn đạt 89.5/100 và kinh nghiệm đạt 93.6/100. Điểm nổi bật: Có tư duy và kỹ năng chuyển giao tốt (Transferable Skills) giữa các phân khúc nghiệp vụ liên quan.; Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.71,
+      "duration_score": 100.0,
+      "relevance_score": 87.21,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Digital Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV10": {
+    "overall_score": 87.94,
+    "match_level": "HIGH",
+    "skills_score": 90.86,
+    "experience_score": 90.13,
+    "education_score": 94.0,
+    "other_score": 75.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "EXPERIENCE",
+        "requirement": ">= 3.0 năm kinh nghiệm",
+        "candidateValue": "2.7 năm",
+        "status": "FAIL",
+        "reason": "Yêu cầu tối thiểu 3.0 năm kinh nghiệm, ứng viên có 2.7 năm."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 31.8,
+        "base_points": 31.8,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 90.86
+      },
+      "experience": {
+        "earned_points": 27.04,
+        "base_points": 27.04,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 90.13
+      },
+      "education": {
+        "earned_points": 14.1,
+        "base_points": 14.1,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 94.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 31.8,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.8 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 27.04,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Tổng thâm niên tích lũy (2.7 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 0.3 năm) -> Bị trừ điểm thâm niên tương ứng."
+        ],
+        "summary": "Đạt 27.0 / 30.0 điểm: Đánh giá dựa trên 2.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 14.1,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Digital Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Digital Marketing)."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Specialist (Chuyển giao).",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Digital Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Tổng thâm niên tích lũy (2.7 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 0.3 năm) -> Bị trừ điểm thâm niên tương ứng."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Digital Marketing Specialist Run Google and Meta campaigns. GA4 acquisition metrics. Audience testing. ",
+        "source": "Kinh nghiệm: Digital Marketing Specialist",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Digital Marketing Specialist Run Google and Meta campaigns. GA4 acquisition metrics. Audience testing. ",
+        "source": "Kinh nghiệm: Digital Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 87.94,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC (87.9/100 - CẤP ĐỘ HIGH - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên có điểm kỹ năng chuyên môn (90.9/100) và kinh nghiệm (90.1/100) tương đồng tốt với yêu cầu thực tế (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C). Cảnh báo vi phạm điều kiện tiên quyết: [EXPERIENCE: >= 3.0 năm kinh nghiệm - Yêu cầu tối thiểu 3.0 năm kinh nghiệm, ứng viên có 2.7 năm.]. Khuyến nghị HR: Cân nhắc phỏng vấn nếu chấp nhận linh hoạt điều chỉnh tiêu chuẩn tiên quyết (Ngoại ngữ/Kinh nghiệm), hoặc xem xét cho vị trí cấp bậc tương đương (Middle thay vì Senior).",
+    "experience_assessment": {
+      "candidate_level": "MIDDLE",
+      "required_level": "SENIOR",
+      "total_experience_years": 2.71,
+      "duration_score": 90.26,
+      "relevance_score": 90.01,
+      "level_fit_score": 70.0,
+      "level_gap": 1,
+      "level_eligible": false,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "NOT_ELIGIBLE_LEVEL",
+      "evidence": [
+        "2.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Digital Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV11": {
+    "overall_score": 89.37,
+    "match_level": "HIGH",
+    "skills_score": 91.26,
+    "experience_score": 91.45,
+    "education_score": 100.0,
+    "other_score": 75.0,
+    "mandatory_status": "PASS",
+    "mandatory_failures": [],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 31.94,
+        "base_points": 31.94,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 91.26
+      },
+      "experience": {
+        "earned_points": 27.43,
+        "base_points": 27.43,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 91.45
+      },
+      "education": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 100.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 31.94,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Executive (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Executive (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.9 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 27.43,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (3.0 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Executive) -> Cộng điểm tương quan cấp bậc.",
+          "Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 27.4 / 30.0 điểm: Đánh giá dựa trên 3.0 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 15.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Executive (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Executive (Chuyển giao).",
+      "Tổng thâm niên tích lũy (3.0 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Executive) -> Cộng điểm tương quan cấp bậc.",
+      "Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Executive (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Executive (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Digital Marketing Executive Google Ads, Meta Ads, GA4, Performance optimization, A/B testing. ",
+        "source": "Kinh nghiệm: Digital Marketing Executive",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Digital Marketing Executive Google Ads, Meta Ads, GA4, Performance optimization, A/B testing. ",
+        "source": "Kinh nghiệm: Digital Marketing Executive",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.88,
+    "mandatory_ratio": 1.0,
+    "base_score": 89.37,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (89.4/100 - CẤP ĐỘ HIGH) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Digital Agency & Quản lý Chiến dịch Đa nhãn hàng khớp với Bán lẻ E-commerce & Tăng trưởng D2C) với điểm kỹ năng chuyên môn đạt 91.3/100 và kinh nghiệm đạt 91.5/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).; Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "experience_assessment": {
+      "candidate_level": "MIDDLE",
+      "required_level": "SENIOR",
+      "total_experience_years": 3.0,
+      "duration_score": 100.0,
+      "relevance_score": 89.18,
+      "level_fit_score": 70.0,
+      "level_gap": 1,
+      "level_eligible": false,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "NOT_ELIGIBLE_LEVEL",
+      "evidence": [
+        "3.00 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Digital Marketing Executive"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV12": {
+    "overall_score": 83.67,
+    "match_level": "HIGH",
+    "skills_score": 88.45,
+    "experience_score": 75.7,
+    "education_score": 100.0,
+    "other_score": 75.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "EXPERIENCE",
+        "requirement": ">= 3.0 năm kinh nghiệm",
+        "candidateValue": "0.0 năm",
+        "status": "FAIL",
+        "reason": "Yêu cầu tối thiểu 3.0 năm kinh nghiệm, ứng viên có 0.0 năm."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 30.96,
+        "base_points": 30.96,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 88.45
+      },
+      "experience": {
+        "earned_points": 22.71,
+        "base_points": 22.71,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 75.7
+      },
+      "education": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 100.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 30.96,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Dự án: E-commerce Performance Marketing Project (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Dự án: E-commerce Performance Marketing Project (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.0 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 22.71,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 3.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+        ],
+        "summary": "Đạt 22.7 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 15.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Dự án: E-commerce Performance Marketing Project (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Dự án: E-commerce Performance Marketing Project (Chuyển giao).",
+      "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 3.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Dự án: E-commerce Performance Marketing Project (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Dự án: E-commerce Performance Marketing Project (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "E-commerce Performance Marketing Project Built simulated acquisition environment with Google Ads, Meta Ads, GA4, A/B testing. Google Ads Meta Ads GA4",
+        "source": "Dự án: E-commerce Performance Marketing Project",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "E-commerce Performance Marketing Project Built simulated acquisition environment with Google Ads, Meta Ads, GA4, A/B testing. Google Ads Meta Ads GA4",
+        "source": "Dự án: E-commerce Performance Marketing Project",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 83.67,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC (83.7/100 - CẤP ĐỘ HIGH - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên có điểm kỹ năng chuyên môn (88.5/100) và kinh nghiệm (75.7/100) tương đồng tốt với yêu cầu thực tế (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C). Cảnh báo vi phạm điều kiện tiên quyết: [EXPERIENCE: >= 3.0 năm kinh nghiệm - Yêu cầu tối thiểu 3.0 năm kinh nghiệm, ứng viên có 0.0 năm.]. Khuyến nghị HR: Cân nhắc phỏng vấn nếu chấp nhận linh hoạt điều chỉnh tiêu chuẩn tiên quyết (Ngoại ngữ/Kinh nghiệm), hoặc xem xét cho vị trí cấp bậc tương đương (Middle thay vì Senior).",
+    "experience_assessment": {
+      "candidate_level": null,
+      "required_level": "SENIOR",
+      "total_experience_years": 0.0,
+      "duration_score": 10.0,
+      "relevance_score": 35.8,
+      "level_fit_score": null,
+      "level_gap": null,
+      "level_eligible": null,
+      "level_confidence": 0.3,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "NEEDS_REVIEW",
+      "evidence": [
+        "Không có kinh nghiệm làm việc để xác định level"
+      ],
+      "reason_codes": [
+        "INSUFFICIENT_DATA"
+      ]
+    }
+  },
+  "CV13": {
+    "overall_score": 66.65,
+    "match_level": "MEDIUM",
+    "skills_score": 85.19,
+    "experience_score": 42.78,
+    "education_score": 60.0,
+    "other_score": 75.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "SKILL",
+        "requirement": "Google Ads",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Google Ads' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "Performance Marketing",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu."
+      },
+      {
+        "type": "EXPERIENCE",
+        "requirement": ">= 3.0 năm kinh nghiệm",
+        "candidateValue": "0.2 năm",
+        "status": "FAIL",
+        "reason": "Yêu cầu tối thiểu 3.0 năm kinh nghiệm, ứng viên có 0.2 năm."
+      },
+      {
+        "type": "EDUCATION",
+        "requirement": "Trình độ học vấn tối thiểu: bậc 3",
+        "candidateValue": "Bậc 0",
+        "status": "FAIL",
+        "reason": "Bằng cấp của ứng viên (bậc 0) chưa đạt mức tối thiểu của công việc (bậc 3)."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 29.82,
+        "base_points": 29.82,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 85.19
+      },
+      "experience": {
+        "earned_points": 12.83,
+        "base_points": 12.83,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 42.78
+      },
+      "education": {
+        "earned_points": 9.0,
+        "base_points": 9.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 60.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 29.82,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Google Ads'.",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Performance Marketing'.",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Intern (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Intern (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 29.8 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 12.83,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Tổng thâm niên tích lũy (0.2 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 2.8 năm) -> Bị trừ điểm thâm niên tương ứng.",
+          "Vị trí công việc gần nhất (Digital Marketing Intern) ở cấp độ sơ cấp, chưa đạt cấp bậc theo yêu cầu của vị trí tuyển dụng -> Bị trừ điểm cấp bậc."
+        ],
+        "summary": "Đạt 12.8 / 30.0 điểm: Đánh giá dựa trên 0.2 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 9.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đạt yêu cầu về trình độ học vấn."
+        ],
+        "minus_reasons": [
+          "Chưa tìm thấy thông tin văn bằng / học vấn chính thức trong hồ sơ khai báo -> Bị trừ điểm tiêu chí học vấn."
+        ],
+        "summary": "Đạt 9.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Google Ads'.",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Performance Marketing'.",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Digital Marketing Intern (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Digital Marketing Intern (Chuyển giao).",
+      "Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án."
+    ],
+    "gaps": [
+      "Tổng thâm niên tích lũy (0.2 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 2.8 năm) -> Bị trừ điểm thâm niên tương ứng.",
+      "Vị trí công việc gần nhất (Digital Marketing Intern) ở cấp độ sơ cấp, chưa đạt cấp bậc theo yêu cầu của vị trí tuyển dụng -> Bị trừ điểm cấp bậc.",
+      "Chưa tìm thấy thông tin văn bằng / học vấn chính thức trong hồ sơ khai báo -> Bị trừ điểm tiêu chí học vấn."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "Kỹ năng chuyển giao: Meta Ads",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "Kỹ năng chuyển giao: Meta Ads",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Intern (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Digital Marketing Intern (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [
+      "Google Ads",
+      "Performance Marketing"
+    ],
+    "evidence": [
+      {
+        "skillName": "Google Ads",
+        "evidenceText": "Kỹ năng 'Meta Ads' có thể chuyển giao sang 'Google Ads' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Performance Marketing",
+        "evidenceText": "Kỹ năng 'Meta Ads' có thể chuyển giao sang 'Performance Marketing' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Digital Marketing Intern Assisted with Meta campaigns, weekly reports, GA4 dashboards. ",
+        "source": "Kinh nghiệm: Digital Marketing Intern",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Digital Marketing Intern Assisted with Meta campaigns, weekly reports, GA4 dashboards. ",
+        "source": "Kinh nghiệm: Digital Marketing Intern",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.6,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 0.925,
+    "base_score": 66.65,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN KHÔNG PHÙ HỢP (66.7/100 - CẤP ĐỘ MEDIUM - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Lý do cốt lõi: Vi phạm tiêu chí tiên quyết ([SKILL: Google Ads - Kỹ năng bắt buộc 'Google Ads' chưa đạt yêu cầu.]; [SKILL: Performance Marketing - Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu.]; [EXPERIENCE: >= 3.0 năm kinh nghiệm - Yêu cầu tối thiểu 3.0 năm kinh nghiệm, ứng viên có 0.2 năm.]; [EDUCATION: Trình độ học vấn tối thiểu: bậc 3 - Bằng cấp của ứng viên (bậc 0) chưa đạt mức tối thiểu của công việc (bậc 3).]). Khuyến nghị: Từ chối hồ sơ (Auto-Reject).",
+    "experience_assessment": {
+      "candidate_level": "INTERN",
+      "required_level": "SENIOR",
+      "total_experience_years": 0.25,
+      "duration_score": 10.0,
+      "relevance_score": 63.14,
+      "level_fit_score": 0.0,
+      "level_gap": 4,
+      "level_eligible": false,
+      "level_confidence": 0.72,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "NOT_ELIGIBLE_LEVEL",
+      "evidence": [
+        "0.25 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Digital Marketing Intern"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE",
+        "RECENT_TITLE_SIGNAL"
+      ]
+    }
+  },
+  "CV14": {
+    "overall_score": 73.61,
+    "match_level": "MEDIUM",
+    "skills_score": 66.68,
+    "experience_score": 91.22,
+    "education_score": 86.0,
+    "other_score": 50.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "SKILL",
+        "requirement": "Google Ads",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Google Ads' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "Meta Ads",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Meta Ads' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "GA4",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'GA4' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "Performance Marketing",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 23.34,
+        "base_points": 23.34,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 66.68
+      },
+      "experience": {
+        "earned_points": 27.37,
+        "base_points": 27.37,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 91.22
+      },
+      "education": {
+        "earned_points": 12.9,
+        "base_points": 12.9,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 86.0
+      },
+      "other": {
+        "earned_points": 10.0,
+        "base_points": 10.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 50.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 23.34,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Google Ads'.",
+          "Kỹ năng 'Meta Ads' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao).",
+          "Kỹ năng 'GA4' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao).",
+          "Kỹ năng 'Performance Marketing' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 23.3 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 27.37,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Sales Director) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 27.4 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 12.9,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Business Administration) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 12.9 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Business Administration)."
+      },
+      "other": {
+        "earned_points": 10.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 10.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Google Ads'.",
+      "Kỹ năng 'Meta Ads' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao).",
+      "Kỹ năng 'GA4' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao).",
+      "Kỹ năng 'Performance Marketing' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Sales Director (Chuyển giao).",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Sales Director) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Business Administration) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "Kỹ năng chuyển giao: Negotiation",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "Kinh nghiệm: Sales Director (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "Kinh nghiệm: Sales Director (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "Kinh nghiệm: Sales Director (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Sales Director (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Sales Director (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [
+      "Google Ads",
+      "Meta Ads",
+      "GA4",
+      "Performance Marketing"
+    ],
+    "evidence": [
+      {
+        "skillName": "Google Ads",
+        "evidenceText": "Kỹ năng 'Negotiation' có thể chuyển giao sang 'Google Ads' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Meta Ads",
+        "evidenceText": "Sales Director Revenue planning, customer acquisition, CRM, sales funnel management. ",
+        "source": "Kinh nghiệm: Sales Director",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "GA4",
+        "evidenceText": "Sales Director Revenue planning, customer acquisition, CRM, sales funnel management. ",
+        "source": "Kinh nghiệm: Sales Director",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Performance Marketing",
+        "evidenceText": "Sales Director Revenue planning, customer acquisition, CRM, sales funnel management. ",
+        "source": "Kinh nghiệm: Sales Director",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Sales Director Revenue planning, customer acquisition, CRM, sales funnel management. ",
+        "source": "Kinh nghiệm: Sales Director",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Sales Director Revenue planning, customer acquisition, CRM, sales funnel management. ",
+        "source": "Kinh nghiệm: Sales Director",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 0.487,
+    "base_score": 73.61,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.05,
+      "promotion_count": 1,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Quỹ đạo phát triển thăng tiến đều đặn qua các vị trí công việc."
+    },
+    "summary": "ỨNG VIÊN KHÔNG PHÙ HỢP (73.6/100 - CẤP ĐỘ MEDIUM - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Lý do cốt lõi: Vi phạm tiêu chí tiên quyết ([SKILL: Google Ads - Kỹ năng bắt buộc 'Google Ads' chưa đạt yêu cầu.]; [SKILL: Meta Ads - Kỹ năng bắt buộc 'Meta Ads' chưa đạt yêu cầu.]; [SKILL: GA4 - Kỹ năng bắt buộc 'GA4' chưa đạt yêu cầu.]; [SKILL: Performance Marketing - Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu.]). Khuyến nghị: Từ chối hồ sơ (Auto-Reject).",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.71,
+      "duration_score": 100.0,
+      "relevance_score": 82.44,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.72,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Sales Director",
+        "Chưa đủ bằng chứng trách nhiệm quản lý trong mô tả"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE",
+        "RECENT_TITLE_SIGNAL",
+        "INSUFFICIENT_MANAGEMENT_EVIDENCE"
+      ]
+    }
+  },
+  "CV15": {
+    "overall_score": 88.09,
+    "match_level": "HIGH",
+    "skills_score": 82.06,
+    "experience_score": 97.9,
+    "education_score": 100.0,
+    "other_score": 75.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "SKILL",
+        "requirement": "GA4",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'GA4' chưa đạt yêu cầu."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 28.72,
+        "base_points": 28.72,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 82.06
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "base_points": 29.37,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 97.9
+      },
+      "education": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 100.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 28.72,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'GA4' ghi nhận qua ngữ cảnh gián tiếp (Ngữ cảnh gián tiếp: Performance Marketing Specialist (Cần phỏng vấn xác minh) (Chuyển giao)).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Lưu ý phỏng vấn: Kỹ năng 'GA4' ghi nhận qua ngữ cảnh gián tiếp/bên thứ ba (Ngữ cảnh gián tiếp: Performance Marketing Specialist (Cần phỏng vấn xác minh) (Chuyển giao)) -> Cần phỏng vấn xác minh năng lực thực chiến độc lập."
+        ],
+        "summary": "Đạt 28.7 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.4 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 15.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'GA4' ghi nhận qua ngữ cảnh gián tiếp (Ngữ cảnh gián tiếp: Performance Marketing Specialist (Cần phỏng vấn xác minh) (Chuyển giao)).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Lưu ý phỏng vấn: Kỹ năng 'GA4' ghi nhận qua ngữ cảnh gián tiếp/bên thứ ba (Ngữ cảnh gián tiếp: Performance Marketing Specialist (Cần phỏng vấn xác minh) (Chuyển giao)) -> Cần phỏng vấn xác minh năng lực thực chiến độc lập."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "Ngữ cảnh gián tiếp: Performance Marketing Specialist (Cần phỏng vấn xác minh) (Chuyển giao)",
+        "requires_interview_verification": true
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [
+      "GA4"
+    ],
+    "evidence": [
+      {
+        "skillName": "GA4",
+        "evidenceText": "[Cần phỏng vấn xác minh] Performance Marketing Specialist Manage Google Ads, Meta Ads, monitor conversion rates, review GA4 traffic reports. ",
+        "source": "Ngữ cảnh gián tiếp: Performance Marketing Specialist (Cần phỏng vấn xác minh)",
+        "requires_interview_verification": true
+      },
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Performance Marketing Specialist Manage Google Ads, Meta Ads, monitor conversion rates, review GA4 traffic reports. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Performance Marketing Specialist Manage Google Ads, Meta Ads, monitor conversion rates, review GA4 traffic reports. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 0.829,
+    "base_score": 88.09,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC (88.1/100 - CẤP ĐỘ HIGH - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên có điểm kỹ năng chuyên môn (82.1/100) và kinh nghiệm (97.9/100) tương đồng tốt với yêu cầu thực tế (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C). Cảnh báo vi phạm điều kiện tiên quyết: [SKILL: GA4 - Kỹ năng bắt buộc 'GA4' chưa đạt yêu cầu.]. Khuyến nghị HR: Cân nhắc loại hồ sơ (Reject) do không thỏa mãn tiêu chuẩn bắt buộc của vị trí tuyển dụng. Lưu ý phỏng vấn: Kỹ năng 'GA4' được ghi nhận qua ngữ cảnh gián tiếp/theo dõi từ bên thứ ba -> Cần đặt câu hỏi phỏng vấn để xác thực năng lực thực hành độc lập.",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.71,
+      "duration_score": 100.0,
+      "relevance_score": 95.8,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Performance Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV16": {
+    "overall_score": 76.12,
+    "match_level": "HIGH",
+    "skills_score": 90.71,
+    "experience_score": 97.9,
+    "education_score": 100.0,
+    "other_score": 0.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "LANGUAGE",
+        "requirement": "English IELTS 6.5",
+        "candidateValue": "Không có / Chưa đạt",
+        "status": "FAIL",
+        "reason": "Yêu cầu ngoại ngữ bắt buộc 'English IELTS 6.5' chưa được thỏa mãn (Giá trị ứng viên: Thiếu)."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 31.75,
+        "base_points": 31.75,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 90.71
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "base_points": 29.37,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 97.9
+      },
+      "education": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 100.0
+      },
+      "other": {
+        "earned_points": 0.0,
+        "base_points": 0.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 0.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 31.75,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 31.8 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.4 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 15.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 0.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 0.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Performance Marketing Specialist Google Ads, Meta Ads, GA4, paid acquisition, performance reporting. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Performance Marketing Specialist Google Ads, Meta Ads, GA4, paid acquisition, performance reporting. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 76.12,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC (76.1/100 - CẤP ĐỘ HIGH - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên có điểm kỹ năng chuyên môn (90.7/100) và kinh nghiệm (97.9/100) tương đồng tốt với yêu cầu thực tế (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C). Cảnh báo vi phạm điều kiện tiên quyết: [LANGUAGE: English IELTS 6.5 - Yêu cầu ngoại ngữ bắt buộc 'English IELTS 6.5' chưa được thỏa mãn (Giá trị ứng viên: Thiếu).]. Khuyến nghị HR: Cân nhắc loại hồ sơ (Reject) do không thỏa mãn tiêu chuẩn bắt buộc của vị trí tuyển dụng.",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.71,
+      "duration_score": 100.0,
+      "relevance_score": 95.8,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Performance Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV17": {
+    "overall_score": 79.65,
+    "match_level": "HIGH",
+    "skills_score": 88.08,
+    "experience_score": 62.74,
+    "education_score": 100.0,
+    "other_score": 75.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "SKILL",
+        "requirement": "Performance Marketing",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu."
+      },
+      {
+        "type": "EXPERIENCE",
+        "requirement": ">= 3.0 năm kinh nghiệm",
+        "candidateValue": "1.6 năm",
+        "status": "FAIL",
+        "reason": "Yêu cầu tối thiểu 3.0 năm kinh nghiệm, ứng viên có 1.6 năm."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 30.83,
+        "base_points": 30.83,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 88.08
+      },
+      "experience": {
+        "earned_points": 18.82,
+        "base_points": 18.82,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 62.74
+      },
+      "education": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 100.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 30.83,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Performance Marketing'.",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Junior Digital Marketer (Chuyển giao).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Junior Digital Marketer (Chuyển giao)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 30.8 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 18.82,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Intern) -> Cộng điểm tương quan cấp bậc."
+        ],
+        "minus_reasons": [
+          "Tổng thâm niên tích lũy (1.6 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 1.4 năm) -> Bị trừ điểm thâm niên tương ứng."
+        ],
+        "summary": "Đạt 18.8 / 30.0 điểm: Đánh giá dựa trên 1.6 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 15.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Performance Marketing'.",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Junior Digital Marketer (Chuyển giao).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Junior Digital Marketer (Chuyển giao).",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital Marketing Intern) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Tổng thâm niên tích lũy (1.6 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 1.4 năm) -> Bị trừ điểm thâm niên tương ứng."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "Kỹ năng chuyển giao: Google Ads",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Junior Digital Marketer (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Junior Digital Marketer (Chuyển giao)",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [
+      "Performance Marketing"
+    ],
+    "evidence": [
+      {
+        "skillName": "Performance Marketing",
+        "evidenceText": "Kỹ năng 'Google Ads' có thể chuyển giao sang 'Performance Marketing' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Junior Digital Marketer Google Ads, Meta Ads, GA4, creative testing. ",
+        "source": "Kinh nghiệm: Junior Digital Marketer",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Junior Digital Marketer Google Ads, Meta Ads, GA4, creative testing. ",
+        "source": "Kinh nghiệm: Junior Digital Marketer",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 0.963,
+    "base_score": 79.65,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "EXPERIENCED_STABLE",
+      "trajectory_evidence": "Quỹ đạo làm việc ổn định tại các vị trí chuyên môn tương đương."
+    },
+    "summary": "ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC (79.7/100 - CẤP ĐỘ HIGH - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên có điểm kỹ năng chuyên môn (88.1/100) và kinh nghiệm (62.7/100) tương đồng tốt với yêu cầu thực tế (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C). Cảnh báo vi phạm điều kiện tiên quyết: [SKILL: Performance Marketing - Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu.]; [EXPERIENCE: >= 3.0 năm kinh nghiệm - Yêu cầu tối thiểu 3.0 năm kinh nghiệm, ứng viên có 1.6 năm.]. Khuyến nghị HR: Cân nhắc loại hồ sơ (Reject) do không thỏa mãn tiêu chuẩn bắt buộc của vị trí tuyển dụng.",
+    "experience_assessment": {
+      "candidate_level": "JUNIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 1.58,
+      "duration_score": 43.44,
+      "relevance_score": 82.04,
+      "level_fit_score": 35.0,
+      "level_gap": 2,
+      "level_eligible": false,
+      "level_confidence": 0.95,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "NOT_ELIGIBLE_LEVEL",
+      "evidence": [
+        "1.58 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Junior Digital Marketer"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE",
+        "RECENT_TITLE_SIGNAL"
+      ]
+    }
+  },
+  "CV18": {
+    "overall_score": 84.67,
+    "match_level": "HIGH",
+    "skills_score": 92.87,
+    "experience_score": 97.9,
+    "education_score": 52.0,
+    "other_score": 75.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "EDUCATION",
+        "requirement": "Chuyên ngành đào tạo phù hợp: Senior Performance Marketing Specialist",
+        "candidateValue": "Khoa học máy tính (Computer Science)",
+        "status": "FAIL",
+        "reason": "Chuyên ngành đào tạo (Khoa học máy tính (Computer Science)) không phù hợp với yêu cầu chuyên môn của công việc (Senior Performance Marketing Specialist)."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 32.5,
+        "base_points": 32.5,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 92.87
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "base_points": 29.37,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 97.9
+      },
+      "education": {
+        "earned_points": 7.8,
+        "base_points": 7.8,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 52.0
+      },
+      "other": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 75.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 32.5,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+          "AI nhận diện kỹ năng 'Conversion Analysis' qua Kỹ năng tương đương: ROAS Analysis (Đạt chuẩn chuyên môn)."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 32.5 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 29.37,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.4 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 7.8,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Đạt yêu cầu về trình độ học vấn."
+        ],
+        "minus_reasons": [
+          "Chuyên ngành tốt nghiệp (Khoa học máy tính (Computer Science)) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn."
+        ],
+        "summary": "Đạt 7.8 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Khoa học máy tính (Computer Science))."
+      },
+      "other": {
+        "earned_points": 15.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 15.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "Kỹ năng 'Campaign Optimization' được chứng minh qua Kinh nghiệm: Performance Marketing Specialist (Chuyển giao).",
+      "AI nhận diện kỹ năng 'Conversion Analysis' qua Kỹ năng tương đương: ROAS Analysis (Đạt chuẩn chuyên môn).",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc."
+    ],
+    "gaps": [
+      "Chuyên ngành tốt nghiệp (Khoa học máy tính (Computer Science)) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Specialist (Chuyển giao)",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kỹ năng tương đương: ROAS Analysis",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "Performance Marketing Specialist Google Ads, Meta Ads, GA4, Performance Marketing, A/B testing, ROAS analysis. ",
+        "source": "Kinh nghiệm: Performance Marketing Specialist",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "AI nhận diện kỹ năng 'ROAS Analysis' tương đương 'Conversion Analysis' (Độ khớp: 80.0%)",
+        "source": "semantic_embedding",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.85,
+    "mandatory_ratio": 1.0,
+    "base_score": 84.67,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC (84.7/100 - CẤP ĐỘ HIGH - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên có điểm kỹ năng chuyên môn (92.9/100) và kinh nghiệm (97.9/100) tương đồng tốt với yêu cầu thực tế (Nghiệp vụ Chuyên môn Chung khớp với Bán lẻ E-commerce & Tăng trưởng D2C). Cảnh báo vi phạm điều kiện tiên quyết: [EDUCATION: Chuyên ngành đào tạo phù hợp: Senior Performance Marketing Specialist - Chuyên ngành đào tạo (Khoa học máy tính (Computer Science)) không phù hợp với yêu cầu chuyên môn của công việc (Senior Performance Marketing Specialist).]. Khuyến nghị HR: Cân nhắc loại hồ sơ (Reject) do không thỏa mãn tiêu chuẩn bắt buộc của vị trí tuyển dụng.",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.71,
+      "duration_score": 100.0,
+      "relevance_score": 95.8,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Performance Marketing Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV19": {
+    "overall_score": 61.59,
+    "match_level": "MEDIUM",
+    "skills_score": 31.87,
+    "experience_score": 84.77,
+    "education_score": 100.0,
+    "other_score": 50.0,
+    "mandatory_status": "FAIL",
+    "mandatory_failures": [
+      {
+        "type": "SKILL",
+        "requirement": "Google Ads",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Google Ads' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "Meta Ads",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Meta Ads' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "GA4",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'GA4' chưa đạt yêu cầu."
+      },
+      {
+        "type": "SKILL",
+        "requirement": "Performance Marketing",
+        "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+        "status": "FAIL",
+        "reason": "Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu."
+      }
+    ],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 11.16,
+        "base_points": 11.16,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 31.87
+      },
+      "experience": {
+        "earned_points": 25.43,
+        "base_points": 25.43,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 84.77
+      },
+      "education": {
+        "earned_points": 15.0,
+        "base_points": 15.0,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 100.0
+      },
+      "other": {
+        "earned_points": 10.0,
+        "base_points": 10.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 50.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 11.16,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Google Ads'.",
+          "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'GA4'."
+        ],
+        "minus_reasons": [
+          "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Meta Ads' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+          "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Performance Marketing' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+          "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Campaign Optimization' trong hồ sơ khai báo.",
+          "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Conversion Analysis' trong hồ sơ khai báo."
+        ],
+        "summary": "Đạt 11.2 / 35.0 điểm: Đã đáp ứng 2/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 25.43,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Marketing Analytics Specialist) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+        ],
+        "summary": "Đạt 25.4 / 30.0 điểm: Đánh giá dựa trên 5.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 15.0,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing)."
+      },
+      "other": {
+        "earned_points": 10.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 10.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'Google Ads'.",
+      "Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: 'GA4'.",
+      "Tổng thâm niên tích lũy (5.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Marketing Analytics Specialist) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [
+      "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.",
+      "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Meta Ads' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+      "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Performance Marketing' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+      "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Campaign Optimization' trong hồ sơ khai báo.",
+      "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Conversion Analysis' trong hồ sơ khai báo."
+    ],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "Kỹ năng chuyển giao: Google Analytics",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "Kỹ năng chuyển giao: Google Analytics",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": null,
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": null,
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": null,
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": null,
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_required_skills": [
+      "Google Ads",
+      "Meta Ads",
+      "GA4",
+      "Performance Marketing"
+    ],
+    "evidence": [
+      {
+        "skillName": "Google Ads",
+        "evidenceText": "Kỹ năng 'Google Analytics' có thể chuyển giao sang 'Google Ads' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "GA4",
+        "evidenceText": "Kỹ năng 'Google Analytics' có thể chuyển giao sang 'GA4' (Cùng phân khúc công nghệ)",
+        "source": "transferable_skill",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 0.15,
+    "mandatory_ratio": 0.425,
+    "base_score": 61.59,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.0,
+      "promotion_count": 0,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+    },
+    "summary": "ỨNG VIÊN KHÔNG PHÙ HỢP (61.6/100 - CẤP ĐỘ MEDIUM - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí 'Senior Performance Marketing Specialist'. Lý do cốt lõi: Vi phạm tiêu chí tiên quyết ([SKILL: Google Ads - Kỹ năng bắt buộc 'Google Ads' chưa đạt yêu cầu.]; [SKILL: Meta Ads - Kỹ năng bắt buộc 'Meta Ads' chưa đạt yêu cầu.]; [SKILL: GA4 - Kỹ năng bắt buộc 'GA4' chưa đạt yêu cầu.]; [SKILL: Performance Marketing - Kỹ năng bắt buộc 'Performance Marketing' chưa đạt yêu cầu.]). Khuyến nghị: Từ chối hồ sơ (Auto-Reject).",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 5.71,
+      "duration_score": 100.0,
+      "relevance_score": 69.54,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.6,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "5.71 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Marketing Analytics Specialist"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE"
+      ]
+    }
+  },
+  "CV20": {
+    "overall_score": 88.84,
+    "match_level": "HIGH",
+    "skills_score": 96.16,
+    "experience_score": 97.1,
+    "education_score": 87.0,
+    "other_score": 65.0,
+    "mandatory_status": "PASS",
+    "mandatory_failures": [],
+    "score_breakdown": {
+      "skills": {
+        "earned_points": 33.66,
+        "base_points": 33.66,
+        "adjustment_points": 0.0,
+        "max_points": 35.0,
+        "weight_pct": 35.0,
+        "normalized_score": 96.16
+      },
+      "experience": {
+        "earned_points": 29.13,
+        "base_points": 29.13,
+        "adjustment_points": 0.0,
+        "max_points": 30.0,
+        "weight_pct": 30.0,
+        "normalized_score": 97.1
+      },
+      "education": {
+        "earned_points": 13.05,
+        "base_points": 13.05,
+        "adjustment_points": 0.0,
+        "max_points": 15.0,
+        "weight_pct": 15.0,
+        "normalized_score": 87.0
+      },
+      "other": {
+        "earned_points": 13.0,
+        "base_points": 13.0,
+        "adjustment_points": 0.0,
+        "max_points": 20.0,
+        "weight_pct": 20.0,
+        "normalized_score": 65.0
+      }
+    },
+    "pillar_explanations": {
+      "skills": {
+        "earned_points": 33.66,
+        "max_points": 35.0,
+        "plus_reasons": [
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+          "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+          "AI nhận diện kỹ năng 'Campaign Optimization' qua Kỹ năng tương đương: ROAS Optimization (Đạt chuẩn chuyên môn).",
+          "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Manager."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kỹ năng."
+        ],
+        "summary": "Đạt 33.7 / 35.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn."
+      },
+      "experience": {
+        "earned_points": 29.13,
+        "max_points": 30.0,
+        "plus_reasons": [
+          "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+          "Tổng thâm niên tích lũy (6.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+          "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Manager) -> Cộng điểm tương quan cấp bậc.",
+          "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ đáng kể về kinh nghiệm."
+        ],
+        "summary": "Đạt 29.1 / 30.0 điểm: Đánh giá dựa trên 6.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến."
+      },
+      "education": {
+        "earned_points": 13.05,
+        "max_points": 15.0,
+        "plus_reasons": [
+          "Trình độ văn bằng (Đại học) và chuyên ngành (Master of Business Administration (MBA)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về học vấn."
+        ],
+        "summary": "Đạt 13.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Master of Business Administration (MBA))."
+      },
+      "other": {
+        "earned_points": 13.0,
+        "max_points": 20.0,
+        "plus_reasons": [
+          "Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung."
+        ],
+        "minus_reasons": [
+          "Không có điểm trừ về chứng chỉ."
+        ],
+        "summary": "Đạt 13.0 / 20.0 điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+      }
+    },
+    "strengths": [
+      "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Meta Ads' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'GA4' (Khai báo đạt chuẩn năng lực).",
+      "Thành thạo kỹ năng bắt buộc cốt lõi: 'Performance Marketing' (Khai báo đạt chuẩn năng lực).",
+      "AI nhận diện kỹ năng 'Campaign Optimization' qua Kỹ năng tương đương: ROAS Optimization (Đạt chuẩn chuyên môn).",
+      "Kỹ năng 'Conversion Analysis' được chứng minh qua Kinh nghiệm: Performance Marketing Manager.",
+      "Tổng thâm niên tích lũy (6.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+      "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Performance Marketing Manager) -> Cộng điểm tương quan cấp bậc.",
+      "Trình độ văn bằng (Đại học) và chuyên ngành (Master of Business Administration (MBA)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+    ],
+    "gaps": [],
+    "matched_skills": [
+      {
+        "name": "Google Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Meta Ads",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "GA4",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Performance Marketing",
+        "isMandatory": true,
+        "source": "skills_list",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Campaign Optimization",
+        "isMandatory": false,
+        "source": "Kỹ năng tương đương: ROAS Optimization",
+        "requires_interview_verification": false
+      },
+      {
+        "name": "Conversion Analysis",
+        "isMandatory": false,
+        "source": "Kinh nghiệm: Performance Marketing Manager",
+        "requires_interview_verification": false
+      }
+    ],
+    "missing_skills": [],
+    "missing_required_skills": [],
+    "evidence": [
+      {
+        "skillName": "Campaign Optimization",
+        "evidenceText": "AI nhận diện kỹ năng 'ROAS Optimization' tương đương 'Campaign Optimization' (Độ khớp: 84.7%)",
+        "source": "semantic_embedding",
+        "requires_interview_verification": false
+      },
+      {
+        "skillName": "Conversion Analysis",
+        "evidenceText": "Performance Marketing Manager Manage Google and Meta campaigns. Set budgets, monitor ROAS, GA4 funnels, A/B testing. ",
+        "source": "Kinh nghiệm: Performance Marketing Manager",
+        "requires_interview_verification": false
+      }
+    ],
+    "confidence_score": 0.85,
+    "evidence_confidence": 1.0,
+    "domain_compatibility": 1.0,
+    "mandatory_ratio": 1.0,
+    "base_score": 88.84,
+    "mandatory_score_cap": null,
+    "score_adjustment": 0.0,
+    "temporal_recency_score": 1.0,
+    "inflation_flags": [],
+    "career_velocity": {
+      "velocity_score": 1.05,
+      "promotion_count": 1,
+      "velocity_label": "STEADY_GROWTH",
+      "trajectory_evidence": "Quỹ đạo phát triển thăng tiến đều đặn qua các vị trí công việc."
+    },
+    "summary": "ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU (88.8/100 - CẤP ĐỘ HIGH) cho vị trí 'Senior Performance Marketing Specialist'. Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn (Bán lẻ E-commerce & Tăng trưởng D2C khớp với Bán lẻ E-commerce & Tăng trưởng D2C) với điểm kỹ năng chuyên môn đạt 96.2/100 và kinh nghiệm đạt 97.1/100. Điểm nổi bật: Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Performance Marketing Specialist).; Thành thạo kỹ năng bắt buộc cốt lõi: 'Google Ads' (Khai báo đạt chuẩn năng lực).. Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.",
+    "experience_assessment": {
+      "candidate_level": "SENIOR",
+      "required_level": "SENIOR",
+      "total_experience_years": 6.7,
+      "duration_score": 100.0,
+      "relevance_score": 94.21,
+      "level_fit_score": 100.0,
+      "level_gap": 0,
+      "level_eligible": true,
+      "level_confidence": 0.72,
+      "level_requirement_mode": "REQUIRED",
+      "recommendation": "ELIGIBLE",
+      "evidence": [
+        "6.70 năm kinh nghiệm không trùng thời gian",
+        "Chức danh gần nhất: Performance Marketing Manager",
+        "Chưa đủ bằng chứng trách nhiệm quản lý trong mô tả"
+      ],
+      "reason_codes": [
+        "YEARS_BASELINE",
+        "RECENT_TITLE_SIGNAL",
+        "INSUFFICIENT_MANAGEMENT_EVIDENCE"
+      ]
+    }
+  }
+}

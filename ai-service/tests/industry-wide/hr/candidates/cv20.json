@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Internal Communications Specialist",
+    "professional_summary": "Internal Communications Specialist with 5.5 years designing corporate newsletters, town hall slide decks, and employee engagement videos."
+  },
+  "candidate_name": "Nguyễn Ngọc Mai",
+  "desired_title": "Internal Communications Specialist",
+  "professional_summary": "Internal Communications Specialist with 5.5 years designing corporate newsletters, town hall slide decks, and employee engagement videos.",
+  "work_experiences": [
+    {
+      "company_name": "Vinfast Group",
+      "position_title": "Senior Internal Communications Executive",
+      "start_date": "2018-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Write CEO emails, edit internal monthly magazines, host year-end company party. Never executed candidate sourcing, labor dispute mediation, or performance PIPs.",
+      "achievements": "Achieved 80% readership on internal employee portal."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Academy of Journalism and Communication",
+      "major": "Public Relations",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Internal Communications"
+    },
+    {
+      "skill_name": "Employee Engagement"
+    },
+    {
+      "skill_name": "Newsletter Writing"
+    },
+    {
+      "skill_name": "Event Emcee"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

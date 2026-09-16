@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Junior Logistics Officer",
+    "professional_summary": "Junior Logistics Officer with 1.8 years experience in inventory cycle counts and inbound receiving."
+  },
+  "candidate_name": "Đặng Tuấn Minh",
+  "desired_title": "Junior Logistics Officer",
+  "professional_summary": "Junior Logistics Officer with 1.8 years experience in inventory cycle counts and inbound receiving.",
+  "work_experiences": [
+    {
+      "company_name": "YCH Group Logistics",
+      "position_title": "Junior Warehouse Officer",
+      "start_date": "2022-09-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Assist in Warehouse Management, record counts in Inventory Management, learn WMS system, support Incoterms tracking and Supply Chain Planning.",
+      "achievements": "Assisted in annual physical stocktake of 15,000 SKUs."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "Logistics",
+      "degree": "Bachelor",
+      "start_date": "2018-09-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Warehouse Management"
+    },
+    {
+      "skill_name": "Inventory Management"
+    },
+    {
+      "skill_name": "Supply Chain Planning"
+    },
+    {
+      "skill_name": "WMS"
+    },
+    {
+      "skill_name": "Incoterms"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 720"
+    }
+  ]
+}

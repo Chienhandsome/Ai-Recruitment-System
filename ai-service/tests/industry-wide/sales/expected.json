@@ -1,0 +1,193 @@
+{
+  "CV01": {
+    "pattern_name": "Near Perfect Match",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 90.0,
+    "max_score": 100.0,
+    "rationale": "Meets all mandatory skills, 6.5 yrs enterprise B2B sales experience, CSP cert, IELTS 7.5."
+  },
+  "CV02": {
+    "pattern_name": "Strong Match",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 84.0,
+    "max_score": 92.0,
+    "rationale": "Meets all mandatory criteria, missing optional CSP certificate."
+  },
+  "CV03": {
+    "pattern_name": "Mandatory Threshold Failure",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 65.0,
+    "max_score": 80.0,
+    "rationale": "Missing mandatory Contract Negotiation skill."
+  },
+  "CV04": {
+    "pattern_name": "Similar Skill Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 30.0,
+    "max_score": 55.0,
+    "rationale": "Retail B2C counter sales is not enterprise B2B corporate software sales."
+  },
+  "CV05": {
+    "pattern_name": "Education Major Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EDUCATION"
+    ],
+    "min_score": 70.0,
+    "max_score": 85.0,
+    "rationale": "Degree in Veterinary Medicine fails Business/Economics major requirement."
+  },
+  "CV06": {
+    "pattern_name": "Higher Degree Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EDUCATION"
+    ],
+    "min_score": 70.0,
+    "max_score": 85.0,
+    "rationale": "Master of Fine Arts fails Business/Economics field requirement."
+  },
+  "CV07": {
+    "pattern_name": "Experience Threshold Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EXPERIENCE"
+    ],
+    "min_score": 60.0,
+    "max_score": 75.0,
+    "rationale": "Has 2.0 years experience vs required 5.0 years."
+  },
+  "CV08": {
+    "pattern_name": "Experience Domain Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 30.0,
+    "max_score": 55.0,
+    "rationale": "Residential property telesales lacks B2B enterprise technology solution selling."
+  },
+  "CV09": {
+    "pattern_name": "Project vs Professional Experience",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EXPERIENCE"
+    ],
+    "min_score": 35.0,
+    "max_score": 60.0,
+    "rationale": "Student competition case studies cannot replace 5.0 years professional enterprise quota."
+  },
+  "CV10": {
+    "pattern_name": "Internship Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EXPERIENCE"
+    ],
+    "min_score": 45.0,
+    "max_score": 70.0,
+    "rationale": "Sales assistant internships do not satisfy Senior Enterprise Sales Manager level."
+  },
+  "CV11": {
+    "pattern_name": "Freelance Trap",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 75.0,
+    "max_score": 90.0,
+    "rationale": "Verified independent enterprise corporate broker meets tenure and deal requirements."
+  },
+  "CV12": {
+    "pattern_name": "Overlapping Dates",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EXPERIENCE"
+    ],
+    "min_score": 60.0,
+    "max_score": 75.0,
+    "rationale": "Non-overlapping employment span is 2.5 years < 5.0 years required."
+  },
+  "CV13": {
+    "pattern_name": "Certification Equivalent Trap",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 80.0,
+    "max_score": 90.0,
+    "rationale": "Optional cert missing does not fail mandatory, but doesn't get CSP cert credit."
+  },
+  "CV14": {
+    "pattern_name": "Certification Unrelated",
+    "expected_mandatory_status": "PASS",
+    "expected_failures": [],
+    "min_score": 80.0,
+    "max_score": 90.0,
+    "rationale": "Scrum Master cert does not grant enterprise sales bonus."
+  },
+  "CV15": {
+    "pattern_name": "Language Threshold Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "LANGUAGE"
+    ],
+    "min_score": 70.0,
+    "max_score": 85.0,
+    "rationale": "IELTS 5.0 is below mandatory threshold IELTS 6.5."
+  },
+  "CV16": {
+    "pattern_name": "Wrong Language Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "LANGUAGE"
+    ],
+    "min_score": 70.0,
+    "max_score": 85.0,
+    "rationale": "German TestDaF B2 does not substitute for required English IELTS 6.5."
+  },
+  "CV17": {
+    "pattern_name": "Semantic Similarity Trap",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 30.0,
+    "max_score": 55.0,
+    "rationale": "Networking buzzwords lack enterprise B2B sales quota evidence."
+  },
+  "CV18": {
+    "pattern_name": "Missing Information",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "EDUCATION",
+      "EXPERIENCE"
+    ],
+    "min_score": 10.0,
+    "max_score": 40.0,
+    "rationale": "Missing dates and education fails multiple mandatory gates."
+  },
+  "CV19": {
+    "pattern_name": "Strong Resume / Wrong Role",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 30.0,
+    "max_score": 55.0,
+    "rationale": "Customer Service Call Center director lacks B2B outbound sales competencies."
+  },
+  "CV20": {
+    "pattern_name": "Cross-Domain Near Match",
+    "expected_mandatory_status": "FAIL",
+    "expected_failures": [
+      "SKILL"
+    ],
+    "min_score": 40.0,
+    "max_score": 65.0,
+    "rationale": "Purchasing/Procurement is buyer-side, lacking enterprise selling & revenue generation."
+  }
+}

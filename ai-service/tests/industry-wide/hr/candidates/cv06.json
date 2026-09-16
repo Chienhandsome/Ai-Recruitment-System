@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "HR Manager",
+    "professional_summary": "HR specialist with 5.2 years in HRBP and Talent Acquisition, holding a PhD in Theoretical Astrophysics."
+  },
+  "candidate_name": "Bùi Phương Thúy",
+  "desired_title": "HR Manager",
+  "professional_summary": "HR specialist with 5.2 years in HRBP and Talent Acquisition, holding a PhD in Theoretical Astrophysics.",
+  "work_experiences": [
+    {
+      "company_name": "TMA Solutions",
+      "position_title": "HRBP Lead",
+      "start_date": "2019-04-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead Talent Acquisition, HRBP advisory, Labor Law compliance, Performance Management, and Employee Relations.",
+      "achievements": "Standardized employee handbook."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Vietnam Academy of Science and Technology",
+      "major": "Theoretical Astrophysics",
+      "degree": "Doctorate",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

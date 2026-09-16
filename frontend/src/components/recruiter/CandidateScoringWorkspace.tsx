@@ -98,10 +98,10 @@ export function CandidateScoringWorkspace({
   const activeAppId = currentAppListItem?.id || null;
 
   // Weights configuration from Job
-  const sWeight = Number(job.skillWeight) || 40;
-  const eWeight = Number(job.experienceWeight) || 30;
-  const edWeight = Number(job.educationWeight) || 15;
-  const oWeight = Number(job.otherWeight) || 15;
+  const sWeight = job.skillWeight != null && !isNaN(Number(job.skillWeight)) ? Number(job.skillWeight) : 40;
+  const eWeight = job.experienceWeight != null && !isNaN(Number(job.experienceWeight)) ? Number(job.experienceWeight) : 30;
+  const edWeight = job.educationWeight != null && !isNaN(Number(job.educationWeight)) ? Number(job.educationWeight) : 15;
+  const oWeight = job.otherWeight != null && !isNaN(Number(job.otherWeight)) ? Number(job.otherWeight) : 15;
 
   // Active candidate details
   const detail = selectedApplicationDetail && selectedApplicationDetail.id === activeAppId
@@ -231,15 +231,23 @@ export function CandidateScoringWorkspace({
 
   const displayedBreakdownTotal = +(sPts + ePts + edPts + oPts).toFixed(1);
   const mandatoryRatio = Number(scoringDetails.mandatory_ratio ?? 1);
+  const mandatoryStatus = scoringDetails.mandatory_status || "PASS";
+  const mandatoryFailures: Array<{
+    type?: string;
+    requirement?: string;
+    candidateValue?: string;
+    status?: string;
+    reason?: string;
+  }> = Array.isArray(scoringDetails.mandatory_failures) ? scoringDetails.mandatory_failures : [];
   const mandatoryScoreCap = scoringDetails.mandatory_score_cap == null
     ? null
     : Number(scoringDetails.mandatory_score_cap);
 
-  // Effective percentages (score achieved relative to pillar weight)
-  const sPercent = Math.min(100, Math.round((sPts / sWeight) * 100));
-  const ePercent = Math.min(100, Math.round((ePts / eWeight) * 100));
-  const edPercent = Math.min(100, Math.round((edPts / edWeight) * 100));
-  const oPercent = Math.min(100, Math.round((oPts / oWeight) * 100));
+  // Effective percentages (score achieved relative to pillar weight, safe from division by zero)
+  const sPercent = sWeight > 0 ? Math.min(100, Math.round((sPts / sWeight) * 100)) : 100;
+  const ePercent = eWeight > 0 ? Math.min(100, Math.round((ePts / eWeight) * 100)) : 100;
+  const edPercent = edWeight > 0 ? Math.min(100, Math.round((edPts / edWeight) * 100)) : 100;
+  const oPercent = oWeight > 0 ? Math.min(100, Math.round((oPts / oWeight) * 100)) : 100;
 
   const hasCapAdjustment = mandatoryScoreCap != null && rawTotalPts > overallScore;
 
@@ -571,17 +579,34 @@ export function CandidateScoringWorkspace({
                     </div>
 
                     <div className="flex flex-col items-end gap-1">
-                      <span
-                        className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
-                          matchLevel === "HIGH"
-                            ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                            : matchLevel === "MEDIUM"
-                            ? "bg-amber-100 text-amber-800 border-amber-300"
-                            : "bg-rose-100 text-rose-800 border-rose-300"
-                        }`}
-                      >
-                        {matchLevel} MATCH
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                        <span
+                          className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
+                            matchLevel === "HIGH"
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                              : matchLevel === "MEDIUM"
+                              ? "bg-amber-100 text-amber-800 border-amber-300"
+                              : "bg-rose-100 text-rose-800 border-rose-300"
+                          }`}
+                        >
+                          {matchLevel} MATCH
+                        </span>
+                        {mandatoryStatus === "FAIL" ? (
+                          <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full border bg-rose-100 text-rose-800 border-rose-300 flex items-center gap-1">
+                            <XCircle className="w-3 h-3 text-rose-600" />
+                            MANDATORY: CHƯA ĐẠT
+                          </span>
+                        ) : mandatoryStatus === "PASS" ? (
+                          <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full border bg-emerald-100 text-emerald-800 border-emerald-300 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            MANDATORY: ĐẠT
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full border bg-slate-100 text-slate-700 border-slate-300">
+                            MANDATORY: N/A
+                          </span>
+                        )}
+                      </div>
                       {aiResult?.confidenceScore !== undefined && (
                         <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
                           <ShieldCheck className="w-3 h-3 text-emerald-600" />
@@ -636,6 +661,26 @@ export function CandidateScoringWorkspace({
                     {sPts} + {ePts} + {edPts} + {oPts} = {overallScore} đ
                   </span>
                 </div>
+
+                {/* Mandatory Failure Alert Banner (if any) */}
+                {mandatoryStatus === "FAIL" && mandatoryFailures.length > 0 && (
+                  <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-rose-800 font-bold text-xs uppercase tracking-wide">
+                      <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                      Điều Kiện Bắt Buộc Chưa Thỏa Mãn ({mandatoryFailures.length} điều kiện)
+                    </div>
+                    <div className="space-y-1.5 pl-6">
+                      {mandatoryFailures.map((failure, idx) => (
+                        <div key={idx} className="text-xs text-rose-900 flex items-start gap-2">
+                          <span className="font-bold shrink-0">[{failure.type || "YÊU CẦU"}]:</span>
+                          <span>
+                            {failure.requirement} — {failure.reason || `Ứng viên: ${failure.candidateValue || "Chưa đạt"}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* 4 Cards Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3" role="tablist" aria-label="Tiêu chí chấm điểm AI">

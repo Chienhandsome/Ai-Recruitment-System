@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Field Survey Fieldwork Supervisor",
+    "professional_summary": "Field Survey Lead with 5 years stopping pedestrians at street corners to ask paper survey questionnaires."
+  },
+  "candidate_name": "Nguyễn Văn Thắng",
+  "desired_title": "Field Survey Fieldwork Supervisor",
+  "professional_summary": "Field Survey Lead with 5 years stopping pedestrians at street corners to ask paper survey questionnaires.",
+  "work_experiences": [
+    {
+      "company_name": "Nielsen Field Research Vietnam",
+      "position_title": "Senior Fieldwork Intercept Poller",
+      "start_date": "2019-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Hold paper clipboard, stop citizens in public markets, ask verbal questions about laundry detergent brands, tick checkbox on paper. No SQL database querying, Python scripting, or Power BI modeling.",
+      "achievements": "Conducted 4,000 face-to-face consumer interviews."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University",
+      "major": "Sociology",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Field Surveying"
+    },
+    {
+      "skill_name": "Face-to-Face Intercepts"
+    },
+    {
+      "skill_name": "Questionnaire Ticking"
+    },
+    {
+      "skill_name": "Market Polling"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

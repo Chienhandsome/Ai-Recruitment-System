@@ -1,0 +1,61 @@
+{
+  "profile": {
+    "desired_title": "Senior Backend Engineer",
+    "professional_summary": "Backend engineer with 4.5 years developing enterprise distributed systems using C# .NET Core and Microsoft SQL Server."
+  },
+  "candidate_name": "Vũ Đức Thắng",
+  "desired_title": "Senior Backend Engineer",
+  "professional_summary": "Backend engineer with 4.5 years developing enterprise distributed systems using C# .NET Core and Microsoft SQL Server.",
+  "work_experiences": [
+    {
+      "company_name": "NashTech Vietnam",
+      "position_title": "Senior Backend Developer (.NET)",
+      "start_date": "2020-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Architect .NET Core microservices with Microsoft SQL Server, Azure Service Bus, and Docker containerization.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "HUST",
+      "major": "Computer Science",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "C#"
+    },
+    {
+      "skill_name": ".NET Core"
+    },
+    {
+      "skill_name": "SQL Server"
+    },
+    {
+      "skill_name": "Docker"
+    },
+    {
+      "skill_name": "Microservices"
+    },
+    {
+      "skill_name": "Azure"
+    },
+    {
+      "skill_name": "Entity Framework"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

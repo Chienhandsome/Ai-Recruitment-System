@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Accounts Payable Specialist",
+    "professional_summary": "Accounts Payable Specialist with 5.5 years processing vendor invoices and 3-way matching purchase orders."
+  },
+  "candidate_name": "Đặng Thảo Vy",
+  "desired_title": "Accounts Payable Specialist",
+  "professional_summary": "Accounts Payable Specialist with 5.5 years processing vendor invoices and 3-way matching purchase orders.",
+  "work_experiences": [
+    {
+      "company_name": "Shopee Vietnam",
+      "position_title": "Senior AP Specialist",
+      "start_date": "2018-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Review incoming supplier invoices against purchase orders, disburse wire payments. Never performed general ledger reconciliations, balance sheet preparation, or tax finalization.",
+      "achievements": "Processed 3,000 vendor payments monthly with 99.8% on-time rate."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Banking Academy",
+      "major": "Accounting",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Accounts Payable"
+    },
+    {
+      "skill_name": "Invoice Processing"
+    },
+    {
+      "skill_name": "3-Way Matching"
+    },
+    {
+      "skill_name": "Vendor Disbursements"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 720"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "profile": {
+    "desired_title": "Senior Performance Marketing Manager",
+    "professional_summary": "Performance Marketing Lead with 5 years driving user acquisition across Google Ads, Meta Ads, and GA4 with proven ROAS > 4.5x."
+  },
+  "candidate_name": "Nguyễn Thảo My",
+  "desired_title": "Senior Performance Marketing Manager",
+  "professional_summary": "Performance Marketing Lead with 5 years driving user acquisition across Google Ads, Meta Ads, and GA4 with proven ROAS > 4.5x.",
+  "work_experiences": [
+    {
+      "company_name": "Tiki E-commerce Group",
+      "position_title": "Senior Performance Marketing Lead",
+      "start_date": "2022-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage $180K/month budget across Google Ads (Search, PMax) and Meta Ads. Implement custom events in GA4 and run weekly Conversion Rate Optimization A/B tests.",
+      "achievements": "Scaled new customer acquisition by 45% while decreasing blended CAC by 22%."
+    },
+    {
+      "company_name": "Dentsu Redder Vietnam",
+      "position_title": "Performance Marketing Specialist",
+      "start_date": "2019-06-01T00:00:00Z",
+      "end_date": "2021-12-31T00:00:00Z",
+      "is_current": false,
+      "description": "Executed Google Ads and Meta Ads campaigns for tier-1 retail brands. Built attribution dashboards in GA4.",
+      "achievements": "Delivered 120% target fulfillment for seasonal mega-sale campaigns."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Marketing Management",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-30T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Google Ads"
+    },
+    {
+      "skill_name": "Meta Ads"
+    },
+    {
+      "skill_name": "GA4"
+    },
+    {
+      "skill_name": "Performance Marketing"
+    },
+    {
+      "skill_name": "Conversion Rate Optimization"
+    },
+    {
+      "skill_name": "TikTok Ads"
+    },
+    {
+      "skill_name": "SEO"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Google Ads Certification",
+      "issuing_organization": "Google"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

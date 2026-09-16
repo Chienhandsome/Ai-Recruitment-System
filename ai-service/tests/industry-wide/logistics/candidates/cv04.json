@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Delivery Courier",
+    "professional_summary": "Motorbike Delivery Driver with 6 years picking up food orders and delivering packages to residential households."
+  },
+  "candidate_name": "Phạm Văn Toàn",
+  "desired_title": "Delivery Courier",
+  "professional_summary": "Motorbike Delivery Driver with 6 years picking up food orders and delivering packages to residential households.",
+  "work_experiences": [
+    {
+      "company_name": "Shopee Express Rider Network",
+      "position_title": "Last-mile Motorbike Courier",
+      "start_date": "2018-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Ride motorbike around Hanoi streets, deliver shoe boxes and bubble tea to individual shoppers, collect cash on delivery (COD). No warehouse management or supply chain planning.",
+      "achievements": "Maintained 5-star delivery rating over 10,000 completed motorbike deliveries."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Vocational College",
+      "major": "Automotive Repair",
+      "degree": "Associate",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Motorbike Riding"
+    },
+    {
+      "skill_name": "Cash on Delivery"
+    },
+    {
+      "skill_name": "Route Navigation"
+    },
+    {
+      "skill_name": "Parcel Dropoff"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 710"
+    }
+  ]
+}

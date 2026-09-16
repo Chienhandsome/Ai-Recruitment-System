@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Equity Research Analyst",
+    "professional_summary": "Stock Market Analyst with 6 years evaluating ticker trends, candlestick patterns, and financial statement ratios."
+  },
+  "candidate_name": "Trịnh Quốc Huy",
+  "desired_title": "Equity Research Analyst",
+  "professional_summary": "Stock Market Analyst with 6 years evaluating ticker trends, candlestick patterns, and financial statement ratios.",
+  "work_experiences": [
+    {
+      "company_name": "VNDIRECT Securities",
+      "position_title": "Senior Equity Analyst",
+      "start_date": "2018-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Analyze stock valuation multiples (P/E, P/B), issue stock buy/sell recommendations to retail investors. No bookkeeping, GL entries, or tax declarations.",
+      "achievements": "Recommended top 5 performing stocks on VN30 index in 2022."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Banking Academy",
+      "major": "Finance and Banking",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Equity Research"
+    },
+    {
+      "skill_name": "Technical Analysis"
+    },
+    {
+      "skill_name": "Valuation Modeling"
+    },
+    {
+      "skill_name": "Stock Picking"
+    },
+    {
+      "skill_name": "Portfolio Advisory"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 800"
+    }
+  ]
+}

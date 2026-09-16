@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Enterprise Sales Specialist",
+    "professional_summary": "Enterprise sales specialist with 5.2 years closing enterprise SaaS contracts, holding a Master of Fine Arts."
+  },
+  "candidate_name": "Đoàn Kim Oanh",
+  "desired_title": "Enterprise Sales Specialist",
+  "professional_summary": "Enterprise sales specialist with 5.2 years closing enterprise SaaS contracts, holding a Master of Fine Arts.",
+  "work_experiences": [
+    {
+      "company_name": "FastWork Software",
+      "position_title": "Senior Enterprise Account Manager",
+      "start_date": "2019-04-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Pitch enterprise SaaS packages, handle Contract Negotiation, B2B Sales, Solution Selling, and Key Account Management.",
+      "achievements": "Managed $1.2M annual enterprise sales quota."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Vietnam University of Fine Arts",
+      "major": "Oil Painting and Visual Arts",
+      "degree": "Master",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "B2B Sales"
+    },
+    {
+      "skill_name": "Enterprise Sales"
+    },
+    {
+      "skill_name": "Contract Negotiation"
+    },
+    {
+      "skill_name": "Key Account Management"
+    },
+    {
+      "skill_name": "Solution Selling"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

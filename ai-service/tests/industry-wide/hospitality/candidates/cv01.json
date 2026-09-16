@@ -1,0 +1,75 @@
+{
+  "profile": {
+    "desired_title": "Hotel Front Office & Guest Experience Manager",
+    "professional_summary": "Luxury Hotel Front Office Manager with 6.5 years directing 5-star resort operations, Opera PMS master user, and VIP guest satisfaction leader."
+  },
+  "candidate_name": "Nguyễn Thúy Hằng",
+  "desired_title": "Hotel Front Office & Guest Experience Manager",
+  "professional_summary": "Luxury Hotel Front Office Manager with 6.5 years directing 5-star resort operations, Opera PMS master user, and VIP guest satisfaction leader.",
+  "work_experiences": [
+    {
+      "company_name": "JW Marriott Hotel Hanoi",
+      "position_title": "Assistant Front Office Manager",
+      "start_date": "2021-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead 35 front desk and concierge staff. Direct Front Office operations, Guest Relations, Opera PMS room assignment, Customer Service excellence, and multi-channel Reservation Systems.",
+      "achievements": "Achieved 96% Guest Satisfaction Score (GSS), ranking top 3 in Marriott Asia-Pacific region."
+    },
+    {
+      "company_name": "Sofitel Legend Metropole Hanoi",
+      "position_title": "Duty Manager & Guest Relations Supervisor",
+      "start_date": "2017-09-01T00:00:00Z",
+      "end_date": "2021-01-31T00:00:00Z",
+      "is_current": false,
+      "description": "Managed high-profile diplomatic delegation arrivals, VIP protocols, and Opera PMS night audits.",
+      "achievements": "Managed presidential delegation logistics during international summit."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Open University",
+      "major": "Tourism and Hospitality Management",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    },
+    {
+      "skill_name": "Revenue Management"
+    },
+    {
+      "skill_name": "Housekeeping Operations"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Certified Hospitality Supervisor (CHS)",
+      "issuing_organization": "AHLEI"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

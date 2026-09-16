@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Mechatronics Graduate",
+    "professional_summary": "Recent graduate who built university autonomous student contest robots for national Robocon competitions."
+  },
+  "candidate_name": "Bùi Tuấn Kiệt",
+  "desired_title": "Mechatronics Graduate",
+  "professional_summary": "Recent graduate who built university autonomous student contest robots for national Robocon competitions.",
+  "work_experiences": [],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Science and Technology",
+      "major": "Mechatronics",
+      "degree": "Bachelor",
+      "start_date": "2020-09-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [
+    {
+      "project_name": "National Robocon Contest Robot",
+      "project_role": "Programming Lead",
+      "description": "Built battery-powered mobile robot with Arduino and basic PLC logic to pick up balls in student arena.",
+      "technologies": [
+        "PLC",
+        "SCADA",
+        "Lean Manufacturing",
+        "Six Sigma",
+        "Preventive Maintenance"
+      ],
+      "start_date": "2023-08-01T00:00:00Z",
+      "end_date": "2023-12-01T00:00:00Z"
+    }
+  ],
+  "skills": [
+    {
+      "skill_name": "PLC"
+    },
+    {
+      "skill_name": "SCADA"
+    },
+    {
+      "skill_name": "Lean Manufacturing"
+    },
+    {
+      "skill_name": "Six Sigma"
+    },
+    {
+      "skill_name": "Preventive Maintenance"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

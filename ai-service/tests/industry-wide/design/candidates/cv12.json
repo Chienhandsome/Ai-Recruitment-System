@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "UI Designer",
+    "professional_summary": "Designer holding concurrent agency positions."
+  },
+  "candidate_name": "Phan Gia Huy",
+  "desired_title": "UI Designer",
+  "professional_summary": "Designer holding concurrent agency positions.",
+  "work_experiences": [
+    {
+      "company_name": "Studio Alpha",
+      "position_title": "UI Designer",
+      "start_date": "2022-01-01T00:00:00Z",
+      "end_date": "2024-01-01T00:00:00Z",
+      "is_current": false,
+      "description": "Design screens in Figma.",
+      "achievements": ""
+    },
+    {
+      "company_name": "Studio Beta (Concurrent)",
+      "position_title": "Visual Designer",
+      "start_date": "2022-03-01T00:00:00Z",
+      "end_date": "2023-12-31T00:00:00Z",
+      "is_current": false,
+      "description": "Concurrent screen designer.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Arena Multimedia",
+      "major": "Design",
+      "degree": "Bachelor",
+      "start_date": "2017-09-01T00:00:00Z",
+      "end_date": "2021-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Figma"
+    },
+    {
+      "skill_name": "UI Design"
+    },
+    {
+      "skill_name": "UX Research"
+    },
+    {
+      "skill_name": "Design System"
+    },
+    {
+      "skill_name": "Prototyping"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

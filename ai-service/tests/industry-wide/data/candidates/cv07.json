@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Junior Data Analyst",
+    "professional_summary": "Junior analyst with 1.5 years writing SQL queries and building simple Power BI dashboards."
+  },
+  "candidate_name": "Đặng Tuấn Kiệt",
+  "desired_title": "Junior Data Analyst",
+  "professional_summary": "Junior analyst with 1.5 years writing SQL queries and building simple Power BI dashboards.",
+  "work_experiences": [
+    {
+      "company_name": "One Mount Group",
+      "position_title": "Junior Data Analyst",
+      "start_date": "2023-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Assist senior analysts in writing SQL queries, building Power BI charts, learning Python ETL scripts, and Data Visualization.",
+      "achievements": "Maintained 5 weekly sales reports."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Data Science",
+      "degree": "Bachelor",
+      "start_date": "2018-09-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

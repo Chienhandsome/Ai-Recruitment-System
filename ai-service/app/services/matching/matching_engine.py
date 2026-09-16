@@ -64,6 +64,8 @@ class MatchingEngine:
             experience_score=final_scores["experience_score"],
             education_score=final_scores["education_score"],
             other_score=final_scores["other_score"],
+            mandatory_status=final_scores.get("mandatory_status", "PASS"),
+            mandatory_failures=final_scores.get("mandatory_failures", []),
             score_breakdown=final_scores.get("score_breakdown"),
             pillar_explanations=explanations.get("pillar_explanations"),
             strengths=explanations["strengths"],

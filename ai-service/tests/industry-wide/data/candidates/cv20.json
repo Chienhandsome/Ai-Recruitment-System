@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Senior Statutory Financial Auditor",
+    "professional_summary": "Statutory Auditor with 4.5 years reviewing balance sheet vouchers, ledger debit/credit postings, and bank reconciliation statements in Excel."
+  },
+  "candidate_name": "Lê Thị Bích Vân",
+  "desired_title": "Senior Statutory Financial Auditor",
+  "professional_summary": "Statutory Auditor with 4.5 years reviewing balance sheet vouchers, ledger debit/credit postings, and bank reconciliation statements in Excel.",
+  "work_experiences": [
+    {
+      "company_name": "PwC Vietnam",
+      "position_title": "Senior Audit Associate",
+      "start_date": "2019-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Sample physical invoices, verify trial balance totals, cross-reference bank confirmations. No SQL relational querying, Python data transformations, or automated BI dashboard engineering.",
+      "achievements": "Led statutory financial audit for 8 manufacturing clients."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Academy of Finance",
+      "major": "Auditing",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Statutory Auditing"
+    },
+    {
+      "skill_name": "Voucher Inspection"
+    },
+    {
+      "skill_name": "Trial Balance"
+    },
+    {
+      "skill_name": "Excel Financials"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

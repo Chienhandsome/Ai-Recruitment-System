@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Automation Manager",
+    "professional_summary": "Industrial automation engineer with 5.5 years in PLC ladder programming, SCADA monitoring, Lean Manufacturing, and Preventive Maintenance."
+  },
+  "candidate_name": "Trần Hùng Cường",
+  "desired_title": "Automation Manager",
+  "professional_summary": "Industrial automation engineer with 5.5 years in PLC ladder programming, SCADA monitoring, Lean Manufacturing, and Preventive Maintenance.",
+  "work_experiences": [
+    {
+      "company_name": "Canon Vietnam",
+      "position_title": "Senior Maintenance & Automation Engineer",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage Omron PLC automation lines, SCADA real-time alerts, apply Lean Manufacturing 5S/Kaizen, conduct Six Sigma quality studies, and enforce Preventive Maintenance.",
+      "achievements": "Led factory Kaizen initiative saving $150K annually in scrap reduction."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Ho Chi Minh City University of Technology (HCMUT)",
+      "major": "Mechatronics Engineering",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "PLC"
+    },
+    {
+      "skill_name": "SCADA"
+    },
+    {
+      "skill_name": "Lean Manufacturing"
+    },
+    {
+      "skill_name": "Six Sigma"
+    },
+    {
+      "skill_name": "Preventive Maintenance"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

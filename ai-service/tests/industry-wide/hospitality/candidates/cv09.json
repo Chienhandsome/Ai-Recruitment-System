@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Hospitality Graduate",
+    "professional_summary": "Recent graduate who performed mock check-in simulations and hotel roleplay tournaments."
+  },
+  "candidate_name": "Bùi Thu Trang",
+  "desired_title": "Hospitality Graduate",
+  "professional_summary": "Recent graduate who performed mock check-in simulations and hotel roleplay tournaments.",
+  "work_experiences": [],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Hotel Administration",
+      "degree": "Bachelor",
+      "start_date": "2020-09-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [
+    {
+      "project_name": "National Hospitality Student Tournament",
+      "project_role": "Mock Front Desk Lead",
+      "description": "Roleplayed handling an angry hotel guest scenario and simulating room check-in.",
+      "technologies": [
+        "Front Office",
+        "Guest Relations",
+        "Opera PMS",
+        "Customer Service",
+        "Reservation Systems"
+      ],
+      "start_date": "2023-08-01T00:00:00Z",
+      "end_date": "2023-11-01T00:00:00Z"
+    }
+  ],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

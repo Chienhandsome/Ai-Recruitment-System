@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Front Office Specialist",
+    "professional_summary": "Front office specialist with 5.5 years experience, fluent in Russian."
+  },
+  "candidate_name": "Đoàn Thu Thảo",
+  "desired_title": "Front Office Specialist",
+  "professional_summary": "Front office specialist with 5.5 years experience, fluent in Russian.",
+  "work_experiences": [
+    {
+      "company_name": "Cam Ranh Riviera Beach Resort",
+      "position_title": "Guest Relations Lead",
+      "start_date": "2018-12-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Coordinate Front Office, Guest Relations, Opera PMS, Customer Service, and Reservation Systems for Russian charter tourist groups.",
+      "achievements": "Managed 1,000 Russian tourist arrivals weekly."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Languages and International Studies",
+      "major": "Russian Linguistics & Tourism",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "Russian",
+      "proficiency": "TRKI-2"
+    }
+  ]
+}

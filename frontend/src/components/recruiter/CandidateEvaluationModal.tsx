@@ -650,18 +650,41 @@ export function CandidateEvaluationModal({
   const projects = cand?.projects || [];
   const evaluationPending = !aiResult && !["FAILED", "MATCHED"].includes(activeApp.processingStatus || "");
 
-  const sWeight = Number(job.skillWeight) || 40;
-  const eWeight = Number(job.experienceWeight) || 30;
-  const edWeight = Number(job.educationWeight) || 15;
-  const oWeight = Number(job.otherWeight) || 15;
+  const sWeight = job.skillWeight != null && !isNaN(Number(job.skillWeight)) ? Number(job.skillWeight) : 40;
+  const eWeight = job.experienceWeight != null && !isNaN(Number(job.experienceWeight)) ? Number(job.experienceWeight) : 30;
+  const edWeight = job.educationWeight != null && !isNaN(Number(job.educationWeight)) ? Number(job.educationWeight) : 15;
+  const oWeight = job.otherWeight != null && !isNaN(Number(job.otherWeight)) ? Number(job.otherWeight) : 15;
   const sScore = Number(aiResult?.skillScore) || 0;
   const eScore = Number(aiResult?.experienceScore) || 0;
   const edScore = Number(aiResult?.educationScore) || 0;
   const oScore = Number(aiResult?.projectScore) || 0;
-  const sPts = +(sScore * (sWeight / 100)).toFixed(1);
-  const ePts = +(eScore * (eWeight / 100)).toFixed(1);
-  const edPts = +(edScore * (edWeight / 100)).toFixed(1);
-  const oPts = +(oScore * (oWeight / 100)).toFixed(1);
+
+  const scoringDetails = (aiResult?.inputSnapshot as any) || {};
+  const scoreBreakdown = scoringDetails.score_breakdown || (aiResult?.scoreBreakdown as any);
+  const mandatoryStatus = scoringDetails.mandatory_status || (aiResult?.mandatoryStatus as any) || "PASS";
+  const mandatoryFailures: Array<{
+    type?: string;
+    requirement?: string;
+    candidateValue?: string;
+    status?: string;
+    reason?: string;
+  }> = Array.isArray(scoringDetails.mandatory_failures)
+    ? scoringDetails.mandatory_failures
+    : (Array.isArray(aiResult?.mandatoryFailures) ? (aiResult.mandatoryFailures as any) : []);
+
+  const sPts = scoreBreakdown?.skills?.earned_points != null
+    ? Number(Number(scoreBreakdown.skills.earned_points).toFixed(1))
+    : +(sScore * (sWeight / 100)).toFixed(1);
+  const ePts = scoreBreakdown?.experience?.earned_points != null
+    ? Number(Number(scoreBreakdown.experience.earned_points).toFixed(1))
+    : +(eScore * (eWeight / 100)).toFixed(1);
+  const edPts = scoreBreakdown?.education?.earned_points != null
+    ? Number(Number(scoreBreakdown.education.earned_points).toFixed(1))
+    : +(edScore * (edWeight / 100)).toFixed(1);
+  const oPts = scoreBreakdown?.other?.earned_points != null
+    ? Number(Number(scoreBreakdown.other.earned_points).toFixed(1))
+    : +(oScore * (oWeight / 100)).toFixed(1);
+
   const pillarsData = [
     { ...PILLAR_CONFIG[0], pts: sPts, max: sWeight, score: sScore },
     { ...PILLAR_CONFIG[1], pts: ePts, max: eWeight, score: eScore },
@@ -889,20 +912,48 @@ export function CandidateEvaluationModal({
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <span className={`text-xs font-extrabold px-3 py-1 rounded-full border ${getMatchLevelColor(aiResult.matchLevel)}`}>
-                    {aiResult.matchLevel === "HIGH" ? "✓ Phù hợp cao" : aiResult.matchLevel === "MEDIUM" ? "~ Phù hợp trung bình" : "✗ Ít phù hợp"}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                    <span className={`text-xs font-extrabold px-3 py-1 rounded-full border ${getMatchLevelColor(aiResult.matchLevel)}`}>
+                      {aiResult.matchLevel === "HIGH" ? "✓ Phù hợp cao" : aiResult.matchLevel === "MEDIUM" ? "~ Phù hợp trung bình" : "✗ Ít phù hợp"}
+                    </span>
+                    {mandatoryStatus === "FAIL" ? (
+                      <span className="text-xs font-black px-2.5 py-1 rounded-full border bg-rose-100 text-rose-800 border-rose-300 flex items-center gap-1">
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                        MANDATORY: CHƯA ĐẠT
+                      </span>
+                    ) : mandatoryStatus === "PASS" ? (
+                      <span className="text-xs font-black px-2.5 py-1 rounded-full border bg-emerald-100 text-emerald-800 border-emerald-300 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        MANDATORY: ĐẠT
+                      </span>
+                    ) : null}
+                  </div>
                   {aiResult.confidenceScore !== undefined && (
                     <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white text-emerald-700 border border-emerald-200 flex items-center gap-1">
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                       Độ phủ dữ liệu: {Math.round(Number(aiResult.confidenceScore) * 100)}%
                     </span>
                   )}
-                  {aiResult.levelEligible === false && (
-                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-800 text-white flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> Không đạt điều kiện bắt buộc
-                    </span>
-                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Mandatory Failure Alert Banner (if any) */}
+            {mandatoryStatus === "FAIL" && mandatoryFailures.length > 0 && (
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-3.5 space-y-2">
+                <div className="flex items-center gap-2 text-rose-800 font-bold text-xs uppercase tracking-wide">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                  Điều Kiện Bắt Buộc Chưa Thỏa Mãn ({mandatoryFailures.length} điều kiện)
+                </div>
+                <div className="space-y-1.5 pl-6">
+                  {mandatoryFailures.map((failure, idx) => (
+                    <div key={idx} className="text-xs text-rose-900 flex items-start gap-1.5">
+                      <span className="font-bold shrink-0">[{failure.type || "YÊU CẦU"}]:</span>
+                      <span>
+                        {failure.requirement} — {failure.reason || `Ứng viên: ${failure.candidateValue || "Chưa đạt"}`}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Growth Marketer",
+    "professional_summary": "Growth marketing practitioner with 4.2 years in Google Ads and Meta Ads funnels, holding a PhD in Literature."
+  },
+  "candidate_name": "Phạm Bích Ngọc",
+  "desired_title": "Growth Marketer",
+  "professional_summary": "Growth marketing practitioner with 4.2 years in Google Ads and Meta Ads funnels, holding a PhD in Literature.",
+  "work_experiences": [
+    {
+      "company_name": "AdAsia Holdings",
+      "position_title": "Senior Performance Executive",
+      "start_date": "2020-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead programmatic Google Ads, Meta Ads, GA4 analytics, and Conversion Rate Optimization experiments.",
+      "achievements": "Managed $120K monthly spend with continuous positive margin."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Vietnam National University",
+      "major": "Classical Vietnamese Literature",
+      "degree": "Doctorate",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-12-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Google Ads"
+    },
+    {
+      "skill_name": "Meta Ads"
+    },
+    {
+      "skill_name": "GA4"
+    },
+    {
+      "skill_name": "Performance Marketing"
+    },
+    {
+      "skill_name": "Conversion Rate Optimization"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

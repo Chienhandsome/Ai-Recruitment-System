@@ -1,0 +1,32 @@
+{
+  "profile": {
+    "desired_title": "Senior Backend Developer",
+    "professional_summary": "Experienced Java Backend developer."
+  },
+  "candidate_name": "Lưu Đình Trọng",
+  "desired_title": "Senior Backend Developer",
+  "professional_summary": "Experienced Java Backend developer.",
+  "work_experiences": [
+    {
+      "company_name": "Confidential IT Firm",
+      "position_title": "Backend Developer",
+      "start_date": null,
+      "end_date": null,
+      "is_current": true,
+      "description": "Develop backend APIs with Java and PostgreSQL.",
+      "achievements": ""
+    }
+  ],
+  "educations": [],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Java"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    }
+  ],
+  "certificates": [],
+  "languages": []
+}

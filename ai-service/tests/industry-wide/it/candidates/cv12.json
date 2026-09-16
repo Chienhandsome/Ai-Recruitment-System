@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "Backend Engineer",
+    "professional_summary": "Software engineer managing multiple concurrent backend engagements simultaneously."
+  },
+  "candidate_name": "Đỗ Nhật Minh",
+  "desired_title": "Backend Engineer",
+  "professional_summary": "Software engineer managing multiple concurrent backend engagements simultaneously.",
+  "work_experiences": [
+    {
+      "company_name": "Alpha Tech Corp",
+      "position_title": "Backend Engineer",
+      "start_date": "2022-01-01T00:00:00Z",
+      "end_date": "2024-06-30T00:00:00Z",
+      "is_current": false,
+      "description": "Java Spring Boot development on PostgreSQL.",
+      "achievements": ""
+    },
+    {
+      "company_name": "Beta Solutions Ltd",
+      "position_title": "Backend Consultant",
+      "start_date": "2022-06-01T00:00:00Z",
+      "end_date": "2024-06-30T00:00:00Z",
+      "is_current": false,
+      "description": "Part-time backend development with Java and Docker.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "HUST",
+      "major": "Computer Science",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Java"
+    },
+    {
+      "skill_name": "Spring Boot"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    },
+    {
+      "skill_name": "Docker"
+    },
+    {
+      "skill_name": "Microservices"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

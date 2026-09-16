@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Senior Freelance Chief Accountant",
+    "professional_summary": "Independent Chief Accountant with 5.5 years managing complete General Ledger, VAS financial statements, and Corporate Income Tax for 20+ corporate clients."
+  },
+  "candidate_name": "Trần Thị Lan Anh",
+  "desired_title": "Senior Freelance Chief Accountant",
+  "professional_summary": "Independent Chief Accountant with 5.5 years managing complete General Ledger, VAS financial statements, and Corporate Income Tax for 20+ corporate clients.",
+  "work_experiences": [
+    {
+      "company_name": "Lan Anh Accounting Advisory Services",
+      "position_title": "Chief Accounting Contractor",
+      "start_date": "2018-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Provide full-cycle General Ledger bookkeeping, quarterly Financial Reporting, Tax Accounting, and Corporate Income Tax finalization under VAS for corporate clients.",
+      "achievements": "Closed over 80 annual financial statements with zero tax discrepancies."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Academy of Finance",
+      "major": "Corporate Accounting",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "General Ledger"
+    },
+    {
+      "skill_name": "Financial Reporting"
+    },
+    {
+      "skill_name": "Tax Accounting"
+    },
+    {
+      "skill_name": "VAS"
+    },
+    {
+      "skill_name": "Corporate Income Tax"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "CPA",
+      "issuing_organization": "Ministry of Finance"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

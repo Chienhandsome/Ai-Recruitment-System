@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Software Architect",
+    "professional_summary": "Strategic IT technologist driving computational paradigms, cloud synergy, and advanced architectural concepts."
+  },
+  "candidate_name": "Đoàn Trọng Khang",
+  "desired_title": "Software Architect",
+  "professional_summary": "Strategic IT technologist driving computational paradigms, cloud synergy, and advanced architectural concepts.",
+  "work_experiences": [
+    {
+      "company_name": "Tech Innovation Consultancy",
+      "position_title": "Software Solutions Advisor",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Provided high-level advice on system architecture, cloud adoption, digital transformation, and database modernization.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "HUST",
+      "major": "Computer Science",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Software Architecture"
+    },
+    {
+      "skill_name": "System Design"
+    },
+    {
+      "skill_name": "Cloud Computing"
+    },
+    {
+      "skill_name": "Digital Transformation"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

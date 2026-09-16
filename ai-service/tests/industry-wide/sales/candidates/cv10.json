@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "Sales Trainee",
+    "professional_summary": "Candidate with consecutive 3-month sales internships totaling 3.5 years across various distributors."
+  },
+  "candidate_name": "Đinh Hoàng Nam",
+  "desired_title": "Sales Trainee",
+  "professional_summary": "Candidate with consecutive 3-month sales internships totaling 3.5 years across various distributors.",
+  "work_experiences": [
+    {
+      "company_name": "Techdata Vietnam",
+      "position_title": "Inside Sales Intern",
+      "start_date": "2021-01-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Shadow senior sales account managers, print quote sheets, send standardized email introductions.",
+      "achievements": ""
+    },
+    {
+      "company_name": "Synnex FPT",
+      "position_title": "Distribution Sales Intern",
+      "start_date": "2022-07-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Help senior reps verify delivery invoices and input sales orders into billing system.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Business Administration",
+      "degree": "Bachelor",
+      "start_date": "2019-09-01T00:00:00Z",
+      "end_date": "2023-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "B2B Sales"
+    },
+    {
+      "skill_name": "Enterprise Sales"
+    },
+    {
+      "skill_name": "Contract Negotiation"
+    },
+    {
+      "skill_name": "Key Account Management"
+    },
+    {
+      "skill_name": "Solution Selling"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

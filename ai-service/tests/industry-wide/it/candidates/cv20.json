@@ -1,0 +1,58 @@
+{
+  "profile": {
+    "desired_title": "Data & Backend Engineer",
+    "professional_summary": "Senior Data Analyst with 5 years experience querying PostgreSQL and writing Python ETL pipelines, seeking transition to backend."
+  },
+  "candidate_name": "Bùi Ngọc Trâm",
+  "desired_title": "Data & Backend Engineer",
+  "professional_summary": "Senior Data Analyst with 5 years experience querying PostgreSQL and writing Python ETL pipelines, seeking transition to backend.",
+  "work_experiences": [
+    {
+      "company_name": "Shopee Analytics",
+      "position_title": "Senior Data Analyst",
+      "start_date": "2019-06-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Built high-performance SQL analytical queries on PostgreSQL and data automation scripts in Python.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "NEU",
+      "major": "Information Systems",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    },
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Tableau"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Pipelines"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

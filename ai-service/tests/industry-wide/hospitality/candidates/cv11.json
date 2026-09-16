@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Senior Freelance Hospitality Consultant",
+    "professional_summary": "Independent Resort Consultant with 5.5 years training Front Office teams, configuring Opera PMS, and establishing 5-star Guest Relations standards."
+  },
+  "candidate_name": "Đoàn Quỳnh Nga",
+  "desired_title": "Senior Freelance Hospitality Consultant",
+  "professional_summary": "Independent Resort Consultant with 5.5 years training Front Office teams, configuring Opera PMS, and establishing 5-star Guest Relations standards.",
+  "work_experiences": [
+    {
+      "company_name": "Nga Hospitality Operations Consultancy",
+      "position_title": "Principal Hospitality Consultant",
+      "start_date": "2018-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Contracted by luxury resorts to restructure Front Office procedures, implement Opera PMS, train staff in Guest Relations, deliver Customer Service excellence, and streamline Reservation Systems.",
+      "achievements": "Overhauled front office operations for 12 boutique resorts across Phu Quoc and Da Nang."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Hospitality and Tourism",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Certified Hospitality Supervisor (CHS)",
+      "issuing_organization": "AHLEI"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

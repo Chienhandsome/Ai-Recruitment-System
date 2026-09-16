@@ -1,0 +1,83 @@
+{
+  "profile": {
+    "desired_title": "Backend Engineer",
+    "professional_summary": "Fresh graduate with 8 extensive pet projects building Java Spring Boot microservices on GitHub."
+  },
+  "candidate_name": "Hồ Minh Triết",
+  "desired_title": "Backend Engineer",
+  "professional_summary": "Fresh graduate with 8 extensive pet projects building Java Spring Boot microservices on GitHub.",
+  "work_experiences": [
+    {
+      "company_name": "Local Freelance Client",
+      "position_title": "Junior Web Assistant",
+      "start_date": "2024-01-01T00:00:00Z",
+      "end_date": "2024-05-31T00:00:00Z",
+      "is_current": false,
+      "description": "Assisted in maintaining basic websites for 5 months.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "UIT - VNU HCM",
+      "major": "Software Engineering",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [
+    {
+      "project_name": "E-Commerce Microservices",
+      "project_role": "Creator",
+      "description": "Built 6 microservices with Spring Cloud and PostgreSQL.",
+      "technologies": [
+        "Java",
+        "Spring Boot",
+        "PostgreSQL",
+        "Docker"
+      ],
+      "start_date": null,
+      "end_date": null
+    },
+    {
+      "project_name": "Chat Server",
+      "project_role": "Creator",
+      "description": "Built WebSocket chat in Java.",
+      "technologies": [
+        "Java",
+        "Docker"
+      ],
+      "start_date": null,
+      "end_date": null
+    }
+  ],
+  "skills": [
+    {
+      "skill_name": "Java"
+    },
+    {
+      "skill_name": "Spring Boot"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    },
+    {
+      "skill_name": "Docker"
+    },
+    {
+      "skill_name": "Microservices"
+    },
+    {
+      "skill_name": "Kafka"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

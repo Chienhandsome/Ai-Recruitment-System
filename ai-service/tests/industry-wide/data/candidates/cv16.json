@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Data Analyst",
+    "professional_summary": "Data analyst with 4.5 years experience, fluent in Italian."
+  },
+  "candidate_name": "Đoàn Thị Mai",
+  "desired_title": "Data Analyst",
+  "professional_summary": "Data analyst with 4.5 years experience, fluent in Italian.",
+  "work_experiences": [
+    {
+      "company_name": "Piaggio Vietnam",
+      "position_title": "Operations Data Analyst",
+      "start_date": "2019-08-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage SQL queries, develop Power BI reports, maintain Python ETL scripts, and create Data Visualization boards.",
+      "achievements": "Reported monthly factory assembly KPIs."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University",
+      "major": "Italian Studies & Informatics",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "Italian",
+      "proficiency": "CILS B2"
+    }
+  ]
+}

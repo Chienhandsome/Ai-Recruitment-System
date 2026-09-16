@@ -61,6 +61,7 @@ class ExplainabilityEngine:
         matched_skills = sm.get("matched", [])
         missing_skills = sm.get("missing", [])
         skill_shortage_count = 0
+        requires_verification_skills = []
 
         for m in matched_skills:
             src = m.get("source", "")
@@ -82,6 +83,14 @@ class ExplainabilityEngine:
                 bonus_msg = years_gap["bonus_msg"]
                 strengths.append(bonus_msg)
                 skills_plus.append(bonus_msg)
+            elif m.get("requires_interview_verification") or "Ngữ cảnh gián tiếp" in src:
+                requires_verification_skills.append(name)
+                pos_msg = f"Kỹ năng '{name}' ghi nhận qua ngữ cảnh gián tiếp ({src})."
+                strengths.append(pos_msg)
+                skills_plus.append(pos_msg)
+                verif_note = f"Lưu ý phỏng vấn: Kỹ năng '{name}' ghi nhận qua ngữ cảnh gián tiếp/bên thứ ba ({src}) -> Cần phỏng vấn xác minh năng lực thực chiến độc lập."
+                gaps.append(verif_note)
+                skills_minus.append(verif_note)
             elif "Kỹ năng tương đương" in src:
                 msg = f"AI nhận diện kỹ năng '{name}' qua {src} (Đạt chuẩn chuyên môn)."
                 strengths.append(msg)
@@ -171,18 +180,33 @@ class ExplainabilityEngine:
         # -------------------------------------------------------------------------
         edm = metrics.get("education", {})
         if edm.get("has_degree"):
-            if edm.get("best_sim", 0.0) > 0.7 and edm.get("best_major"):
-                msg = f"Trình độ văn bằng ({edm.get('best_degree', 'Đại học')}) và chuyên ngành ({edm['best_major']}) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+            degree_name = edm.get("best_degree") or "Đại học"
+            major_name = edm.get("best_major") or "Chuyên ngành"
+            if not edm.get("degree_passed", True):
+                msg = f"Cấp bậc văn bằng ({degree_name}) chưa đạt yêu cầu tối thiểu của vị trí tuyển dụng -> Bị trừ điểm cấp bậc học vấn."
+                gaps.append(msg)
+                edu_minus.append(msg)
+            elif not edm.get("major_passed", True):
+                msg = f"Chuyên ngành tốt nghiệp ({major_name}) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn."
+                gaps.append(msg)
+                edu_minus.append(msg)
+            elif edm.get("best_sim", 0.0) >= 0.7:
+                msg = f"Trình độ văn bằng ({degree_name}) và chuyên ngành ({major_name}) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
                 strengths.append(msg)
                 edu_plus.append(msg)
-            elif edm.get("best_major"):
-                msg = f"Chuyên ngành tốt nghiệp ({edm['best_major']}) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành."
+            else:
+                msg = f"Chuyên ngành tốt nghiệp ({major_name}) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành."
                 gaps.append(msg)
                 edu_minus.append(msg)
         else:
-            msg = "Chưa tìm thấy thông tin văn bằng / học vấn chính thức trong hồ sơ khai báo -> Bị trừ điểm tiêu chí học vấn."
-            gaps.append(msg)
-            edu_minus.append(msg)
+            if edm.get("req_degree_level", 0) == 0 and edm.get("score", 0.0) >= 0.99:
+                msg = "Vị trí tuyển dụng không bắt buộc trình độ văn bằng chuyên ngành đặc thù -> Đạt chuẩn tiêu chí học vấn."
+                strengths.append(msg)
+                edu_plus.append(msg)
+            else:
+                msg = "Chưa tìm thấy thông tin văn bằng / học vấn chính thức trong hồ sơ khai báo -> Bị trừ điểm tiêu chí học vấn."
+                gaps.append(msg)
+                edu_minus.append(msg)
 
         # -------------------------------------------------------------------------
         # 5. Giải Trình Chứng Chỉ (Certificates)
@@ -266,6 +290,9 @@ class ExplainabilityEngine:
         # -------------------------------------------------------------------------
         # 7. Tổng Hợp Báo Cáo Chẩn Đoán (Executive Diagnostic Summary)
         # -------------------------------------------------------------------------
+        mandatory_status = scores.get("mandatory_status", "PASS")
+        mandatory_failures = scores.get("mandatory_failures", [])
+
         summary = SummaryGenerator.generate_summary(
             candidate_name=candidate_name,
             job_title=job_title,
@@ -281,6 +308,9 @@ class ExplainabilityEngine:
             missing_required_skills=sm.get("missing_mandatory", []),
             strengths=strengths,
             gaps=gaps,
+            mandatory_status=mandatory_status,
+            mandatory_failures=mandatory_failures,
+            requires_verification_skills=requires_verification_skills,
         )
 
         return {

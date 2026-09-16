@@ -1,0 +1,32 @@
+{
+  "profile": {
+    "desired_title": "Automation Engineer",
+    "professional_summary": "Automation engineer."
+  },
+  "candidate_name": "Trần Văn Nam",
+  "desired_title": "Automation Engineer",
+  "professional_summary": "Automation engineer.",
+  "work_experiences": [
+    {
+      "company_name": "Factory",
+      "position_title": "Automation Engineer",
+      "start_date": "",
+      "end_date": null,
+      "is_current": false,
+      "description": "Maintain PLC.",
+      "achievements": ""
+    }
+  ],
+  "educations": [],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "PLC"
+    },
+    {
+      "skill_name": "SCADA"
+    }
+  ],
+  "certificates": [],
+  "languages": []
+}

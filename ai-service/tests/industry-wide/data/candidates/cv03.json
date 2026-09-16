@@ -1,0 +1,57 @@
+{
+  "profile": {
+    "desired_title": "BI Dashboard Developer",
+    "professional_summary": "BI Developer with 4.5 years in SQL and Power BI dashboarding, with no programming or Python scripting experience."
+  },
+  "candidate_name": "Lê Quốc Bảo",
+  "desired_title": "BI Dashboard Developer",
+  "professional_summary": "BI Developer with 4.5 years in SQL and Power BI dashboarding, with no programming or Python scripting experience.",
+  "work_experiences": [
+    {
+      "company_name": "Vingroup Corporate",
+      "position_title": "BI Reporting Developer",
+      "start_date": "2020-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Write SQL views in SQL Server, design Power BI charts, build basic SSIS ETL packages, and deliver Data Visualization. Completely non-technical in Python scripting.",
+      "achievements": "Constructed 25 internal reporting dashboards."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Banking Academy",
+      "major": "Management Information Systems",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Microsoft Certified: Power BI Data Analyst Associate",
+      "issuing_organization": "Microsoft"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

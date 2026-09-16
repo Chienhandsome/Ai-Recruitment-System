@@ -1,0 +1,65 @@
+{
+  "id": "jd-it-backend-01",
+  "title": "Senior Backend Engineer",
+  "description": "VNG Tech Solutions is expanding our core fintech and distributed payments platform. We are seeking an experienced Senior Backend Engineer to architect, build, and optimize mission-critical backend microservices handling millions of daily transactions. You will collaborate closely with DevOps, Frontend, and Data Platform teams to ensure fault tolerance, sub-100ms latency, and high system availability.",
+  "requirements": "Required Qualifications:\n- Professional experience: Minimum 4+ years of professional backend engineering experience.\n- Core Technical Skills: Strong hands-on proficiency in Java, Spring Boot, PostgreSQL, Docker, Microservices.\n- Preferred Skills: Apache Kafka, Kubernetes, AWS Cloud infrastructure.\n- Education: Bachelor's degree or above in Computer Science, Software Engineering, IT, or closely related technical field.\n- Language: Professional English proficiency (IELTS 6.5 or equivalent) for international technical collaboration.\n- Certifications: AWS Certified Solutions Architect is an advantage (preferred, not mandatory).",
+  "required_experience_years": 4.0,
+  "experience_level": "SENIOR",
+  "level_requirement_mode": "REQUIRED",
+  "required_skills": [
+    {
+      "skill_name": "Java",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Spring Boot",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "PostgreSQL",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "Docker",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "Microservices",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "Kafka",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    },
+    {
+      "skill_name": "Kubernetes",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    }
+  ],
+  "required_certificates": [
+    {
+      "certificate_name": "AWS Certified Solutions Architect",
+      "is_mandatory": false
+    }
+  ],
+  "required_languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5",
+      "is_mandatory": true
+    }
+  ],
+  "ai_weights_config": {
+    "skills": 40.0,
+    "experience": 30.0,
+    "education": 15.0,
+    "other": 15.0
+  }
+}

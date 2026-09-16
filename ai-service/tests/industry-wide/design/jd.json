@@ -1,0 +1,65 @@
+{
+  "id": "jd-design-uiux-07",
+  "title": "Senior UI/UX Product Designer",
+  "description": "KiteFintech is looking for a passionate Senior UI/UX Product Designer to craft intuitive, user-centric mobile and web experiences. You will drive the product discovery lifecycle from UX research and customer journey mapping to high-fidelity UI design in Figma, build and maintain scalable Design Systems, and test interactive prototypes with real end-users.",
+  "requirements": "Required Qualifications:\n- Professional Experience: Minimum 4+ years of digital product UI/UX design experience for web and mobile.\n- Core Technical Skills: Figma, UI Design, UX Research, Design System, Prototyping.\n- Preferred Skills: Wireframing, Adobe Photoshop, Micro-interactions, Usability Testing.\n- Education: Bachelor's degree or above in Graphic Design, Multimedia, Human-Computer Interaction, Industrial Design, Fine Arts, or related field.\n- Language: Working English proficiency (IELTS 6.5 or equivalent) for multinational product syncs.\n- Certifications: Nielsen Norman UX Certification or Google UX Certificate preferred.",
+  "required_experience_years": 4.0,
+  "experience_level": "SENIOR",
+  "level_requirement_mode": "REQUIRED",
+  "required_skills": [
+    {
+      "skill_name": "Figma",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "UI Design",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "UX Research",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "Design System",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "Prototyping",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "Wireframing",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    },
+    {
+      "skill_name": "Adobe Photoshop",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    }
+  ],
+  "required_certificates": [
+    {
+      "certificate_name": "Nielsen Norman UX Certification",
+      "is_mandatory": false
+    }
+  ],
+  "required_languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5",
+      "is_mandatory": true
+    }
+  ],
+  "ai_weights_config": {
+    "skills": 40.0,
+    "experience": 30.0,
+    "education": 15.0,
+    "other": 15.0
+  }
+}

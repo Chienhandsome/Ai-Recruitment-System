@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "Hospitality Intern",
+    "professional_summary": "Candidate with multiple luggage handling and door opening bellboy internships totaling 3.5 years part-time."
+  },
+  "candidate_name": "Lâm Quốc Đạt",
+  "desired_title": "Hospitality Intern",
+  "professional_summary": "Candidate with multiple luggage handling and door opening bellboy internships totaling 3.5 years part-time.",
+  "work_experiences": [
+    {
+      "company_name": "Melia Hanoi Hotel",
+      "position_title": "Bellboy Intern",
+      "start_date": "2021-01-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Push luggage carts to guest elevators, open taxi doors.",
+      "achievements": ""
+    },
+    {
+      "company_name": "Pan Pacific Hanoi",
+      "position_title": "Door Attendant Intern",
+      "start_date": "2022-07-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Hold umbrellas during rainy arrivals and tag luggage bags.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Open University",
+      "major": "Hospitality Management",
+      "degree": "Bachelor",
+      "start_date": "2019-09-01T00:00:00Z",
+      "end_date": "2023-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

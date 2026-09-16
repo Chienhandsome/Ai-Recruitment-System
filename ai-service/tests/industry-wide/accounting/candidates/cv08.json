@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Senior Bank Teller",
+    "professional_summary": "Bank Branch Teller with 5.5 years processing over-the-counter cash deposits and retail remittances."
+  },
+  "candidate_name": "Đoàn Thúy Ngân",
+  "desired_title": "Senior Bank Teller",
+  "professional_summary": "Bank Branch Teller with 5.5 years processing over-the-counter cash deposits and retail remittances.",
+  "work_experiences": [
+    {
+      "company_name": "Vietcombank Branch",
+      "position_title": "Senior Bank Teller",
+      "start_date": "2018-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Count physical cash deposits, verify citizen ID cards, disburse cash withdrawals, balance cash drawer at end of day. No corporate tax filings, GL closures, or VAS statutory financial statements.",
+      "achievements": "Maintained 100% accurate daily cash balance drawer."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Banking Academy",
+      "major": "Banking",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Cash Counting"
+    },
+    {
+      "skill_name": "Teller Operations"
+    },
+    {
+      "skill_name": "Remittance Processing"
+    },
+    {
+      "skill_name": "Customer ID Verification"
+    },
+    {
+      "skill_name": "Vault Balancing"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 720"
+    }
+  ]
+}

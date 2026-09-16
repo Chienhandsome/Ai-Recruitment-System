@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Fashion Patternmaker",
+    "professional_summary": "Clothing Pattern Designer with 5 years cutting fabric, draping mannequins, and stitching garment samples."
+  },
+  "candidate_name": "Lâm Văn Quyền",
+  "desired_title": "Fashion Patternmaker",
+  "professional_summary": "Clothing Pattern Designer with 5 years cutting fabric, draping mannequins, and stitching garment samples.",
+  "work_experiences": [
+    {
+      "company_name": "NEM Fashion Atelier",
+      "position_title": "Senior Garment Patternmaker",
+      "start_date": "2019-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Cut cardboard clothing patterns, drape silk on dress forms, measure fabric yardage for dresses and suits. No digital software interfaces, mobile screens, or UX prototyping.",
+      "achievements": "Patterned 150 fashion runway dresses."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Industrial Textile and Garment",
+      "major": "Fashion Design",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Garment Tailoring"
+    },
+    {
+      "skill_name": "Fabric Draping"
+    },
+    {
+      "skill_name": "Sewing"
+    },
+    {
+      "skill_name": "Fashion Sketching"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

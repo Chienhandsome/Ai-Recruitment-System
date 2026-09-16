@@ -1,0 +1,75 @@
+{
+  "profile": {
+    "desired_title": "Enterprise B2B Sales Manager",
+    "professional_summary": "Senior Enterprise B2B Sales Manager with 6.5 years closing large-scale cloud solutions and ERP software contracts up to $1.5M ARR."
+  },
+  "candidate_name": "Nguyễn Tuấn Dũng",
+  "desired_title": "Enterprise B2B Sales Manager",
+  "professional_summary": "Senior Enterprise B2B Sales Manager with 6.5 years closing large-scale cloud solutions and ERP software contracts up to $1.5M ARR.",
+  "work_experiences": [
+    {
+      "company_name": "Oracle Vietnam",
+      "position_title": "Senior Enterprise Account Executive",
+      "start_date": "2021-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead consultative B2B Sales and Enterprise Sales for Tier-1 commercial banks. Drive complex Contract Negotiation, Solution Selling, and Key Account Management in Salesforce.",
+      "achievements": "Achieved 135% quota in 2023 with total contracted value of $3.2M."
+    },
+    {
+      "company_name": "FPT IS (Information System)",
+      "position_title": "B2B Technology Sales Specialist",
+      "start_date": "2018-01-01T00:00:00Z",
+      "end_date": "2021-02-28T00:00:00Z",
+      "is_current": false,
+      "description": "Managed enterprise B2B accounts, conducted bid presentations, closed system integration contracts.",
+      "achievements": "Closed landmark $800K government digitization contract."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "International Business Administration",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "B2B Sales"
+    },
+    {
+      "skill_name": "Enterprise Sales"
+    },
+    {
+      "skill_name": "Contract Negotiation"
+    },
+    {
+      "skill_name": "Key Account Management"
+    },
+    {
+      "skill_name": "Solution Selling"
+    },
+    {
+      "skill_name": "CRM"
+    },
+    {
+      "skill_name": "Salesforce"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Certified Sales Professional (CSP)",
+      "issuing_organization": "Sales Association"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

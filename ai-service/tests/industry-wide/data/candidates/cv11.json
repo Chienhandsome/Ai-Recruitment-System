@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Senior Freelance BI Consultant",
+    "professional_summary": "Independent BI Consultant with 4.5 years developing production SQL models, Python ETL pipelines, and Power BI dashboards for SMEs."
+  },
+  "candidate_name": "Vũ Đức Thắng",
+  "desired_title": "Senior Freelance BI Consultant",
+  "professional_summary": "Independent BI Consultant with 4.5 years developing production SQL models, Python ETL pipelines, and Power BI dashboards for SMEs.",
+  "work_experiences": [
+    {
+      "company_name": "Thang Analytics Freelance Services",
+      "position_title": "Principal BI Consultant",
+      "start_date": "2019-09-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Contracted by corporate clients to design data warehouses, write complex SQL queries, build automated Python ETL data pipelines, create interactive Power BI reports, and deliver Data Visualization.",
+      "achievements": "Delivered 35 end-to-end BI dashboard implementations with 100% client satisfaction."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Management Information Systems",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Microsoft Certified: Power BI Data Analyst Associate",
+      "issuing_organization": "Microsoft"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

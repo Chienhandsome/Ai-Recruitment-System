@@ -1,0 +1,32 @@
+{
+  "profile": {
+    "desired_title": "Senior Accountant",
+    "professional_summary": "Experienced accountant in tax and general ledger."
+  },
+  "candidate_name": "Lê Văn Hùng",
+  "desired_title": "Senior Accountant",
+  "professional_summary": "Experienced accountant in tax and general ledger.",
+  "work_experiences": [
+    {
+      "company_name": "Accounting Firm",
+      "position_title": "Accountant",
+      "start_date": "",
+      "end_date": null,
+      "is_current": false,
+      "description": "General Ledger and Tax work.",
+      "achievements": ""
+    }
+  ],
+  "educations": [],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "General Ledger"
+    },
+    {
+      "skill_name": "Financial Reporting"
+    }
+  ],
+  "certificates": [],
+  "languages": []
+}

@@ -99,6 +99,8 @@ export class ApplicationsConsumer implements OnModuleInit {
                   validatedResult.pillar_explanations ?? null,
                 domain_compatibility: validatedResult.domain_compatibility ?? 1,
                 mandatory_ratio: validatedResult.mandatory_ratio ?? 1,
+                mandatory_status: validatedResult.mandatory_status ?? 'PASS',
+                mandatory_failures: validatedResult.mandatory_failures ?? [],
                 base_score: validatedResult.base_score ?? 0,
                 mandatory_score_cap:
                   validatedResult.mandatory_score_cap ?? null,

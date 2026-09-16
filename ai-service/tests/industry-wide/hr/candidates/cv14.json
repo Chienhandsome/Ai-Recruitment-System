@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "HRBP Manager",
+    "professional_summary": "HRBP manager with 5.5 years experience holding CISSP cybersecurity certification."
+  },
+  "candidate_name": "Đặng Tuấn Kiệt",
+  "desired_title": "HRBP Manager",
+  "professional_summary": "HRBP manager with 5.5 years experience holding CISSP cybersecurity certification.",
+  "work_experiences": [
+    {
+      "company_name": "VNG Corporation",
+      "position_title": "Senior HRBP Lead",
+      "start_date": "2018-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Deliver Talent Acquisition, HRBP leadership, Labor Law compliance, Performance Management, and Employee Relations.",
+      "achievements": "Managed retention program across 300 developers."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Social Sciences and Humanities",
+      "major": "Psychology",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "CISSP Certified Information Systems Security Professional",
+      "issuing_organization": "ISC2"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

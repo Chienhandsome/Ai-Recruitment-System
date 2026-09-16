@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Enterprise Sales Specialist",
+    "professional_summary": "B2B sales specialist with 5.2 years experience, fluent in German."
+  },
+  "candidate_name": "Hà Thị Phương",
+  "desired_title": "Enterprise Sales Specialist",
+  "professional_summary": "B2B sales specialist with 5.2 years experience, fluent in German.",
+  "work_experiences": [
+    {
+      "company_name": "Siemens Vietnam",
+      "position_title": "B2B Account Manager",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead B2B Sales, Enterprise Sales, Contract Negotiation, Key Account Management, and Solution Selling for industrial clients.",
+      "achievements": "Achieved 120% sales target."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Languages and International Studies",
+      "major": "German Studies & Business",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "B2B Sales"
+    },
+    {
+      "skill_name": "Enterprise Sales"
+    },
+    {
+      "skill_name": "Contract Negotiation"
+    },
+    {
+      "skill_name": "Key Account Management"
+    },
+    {
+      "skill_name": "Solution Selling"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "German",
+      "proficiency": "TestDaF B2"
+    }
+  ]
+}

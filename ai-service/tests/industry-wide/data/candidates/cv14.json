@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Data Analyst",
+    "professional_summary": "Data analyst with 4.5 years experience holding commercial food safety handling certificate."
+  },
+  "candidate_name": "Trần Văn Minh",
+  "desired_title": "Data Analyst",
+  "professional_summary": "Data analyst with 4.5 years experience holding commercial food safety handling certificate.",
+  "work_experiences": [
+    {
+      "company_name": "Golden Gate Group",
+      "position_title": "BI Analyst",
+      "start_date": "2019-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Extract SQL sales data, build restaurant Power BI dashboards, run Python ETL data models, and format Data Visualization reports.",
+      "achievements": "Managed 400 restaurant store analytics."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Information Systems",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "ServSafe Food Safety Manager",
+      "issuing_organization": "National Restaurant Association"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

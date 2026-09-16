@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Executive French Pastry Chef",
+    "professional_summary": "Master Pastry Chef with 8 years crafting delicate French macarons, chocolate sculptures, and Michelin-star multi-tiered wedding cakes."
+  },
+  "candidate_name": "Nguyễn Văn Bảo",
+  "desired_title": "Executive French Pastry Chef",
+  "professional_summary": "Master Pastry Chef with 8 years crafting delicate French macarons, chocolate sculptures, and Michelin-star multi-tiered wedding cakes.",
+  "work_experiences": [
+    {
+      "company_name": "La Table du Metropole",
+      "position_title": "Executive Pastry Chef",
+      "start_date": "2016-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Temper Belgian chocolate, bake 500 croissants daily, supervise 10 pastry cooks in hot kitchen ovens. No lobby operations, Opera PMS check-in, or hotel room allocations.",
+      "achievements": "Won Best Pastry Chef Vietnam in International Culinary Cup."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Le Cordon Bleu Paris",
+      "major": "French Pastry & Baking Arts",
+      "degree": "Associate",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2015-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Pastry Baking"
+    },
+    {
+      "skill_name": "Chocolate Sculpting"
+    },
+    {
+      "skill_name": "Croissant Lamination"
+    },
+    {
+      "skill_name": "Kitchen Food Safety"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

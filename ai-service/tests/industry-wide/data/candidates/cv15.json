@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Data Analyst",
+    "professional_summary": "Data analyst with 4.5 years experience, IELTS 5.0 English score."
+  },
+  "candidate_name": "Lê Minh Đạt",
+  "desired_title": "Data Analyst",
+  "professional_summary": "Data analyst with 4.5 years experience, IELTS 5.0 English score.",
+  "work_experiences": [
+    {
+      "company_name": "Sacombank",
+      "position_title": "BI Analyst",
+      "start_date": "2019-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Build SQL data views, design Power BI dashboards, script Python ETL jobs, and present Data Visualization slides.",
+      "achievements": "Maintained credit card analytics data."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Banking Academy",
+      "major": "Information Systems",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 5.0"
+    }
+  ]
+}

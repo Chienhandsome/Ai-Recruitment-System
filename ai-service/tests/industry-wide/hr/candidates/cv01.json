@@ -1,0 +1,75 @@
+{
+  "profile": {
+    "desired_title": "Senior Talent Acquisition & HRBP Manager",
+    "professional_summary": "Senior HRBP with 6 years leading tech recruiting, Vietnamese Labor Law compliance, and annual performance appraisals."
+  },
+  "candidate_name": "Vũ Hoàng Yến",
+  "desired_title": "Senior Talent Acquisition & HRBP Manager",
+  "professional_summary": "Senior HRBP with 6 years leading tech recruiting, Vietnamese Labor Law compliance, and annual performance appraisals.",
+  "work_experiences": [
+    {
+      "company_name": "Grab Vietnam",
+      "position_title": "Senior HRBP Lead",
+      "start_date": "2021-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead Talent Acquisition and HRBP for 400+ engineering staff. Ensure strict adherence to Labor Law, oversee semi-annual Performance Management reviews and resolve Employee Relations grievances.",
+      "achievements": "Reduced company-wide voluntary employee turnover from 18% to 9%."
+    },
+    {
+      "company_name": "Shopee Vietnam",
+      "position_title": "Talent Acquisition Specialist",
+      "start_date": "2018-01-01T00:00:00Z",
+      "end_date": "2021-02-28T00:00:00Z",
+      "is_current": false,
+      "description": "Managed high-volume hiring pipelines, salary benchmarking, and employee onboarding.",
+      "achievements": "Hired over 120 software engineers per year."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Human Resource Management",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    },
+    {
+      "skill_name": "HRIS"
+    },
+    {
+      "skill_name": "Compensation and Benefits"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "SHRM-CP",
+      "issuing_organization": "SHRM"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

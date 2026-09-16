@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "HR Manager",
+    "professional_summary": "HR specialist claiming overlapping concurrent HR positions."
+  },
+  "candidate_name": "Lê Đình Long",
+  "desired_title": "HR Manager",
+  "professional_summary": "HR specialist claiming overlapping concurrent HR positions.",
+  "work_experiences": [
+    {
+      "company_name": "Tan Viet Securities",
+      "position_title": "HR Specialist",
+      "start_date": "2021-08-01T00:00:00Z",
+      "end_date": "2024-01-01T00:00:00Z",
+      "is_current": false,
+      "description": "Manage Talent Acquisition and Labor Law.",
+      "achievements": ""
+    },
+    {
+      "company_name": "An Binh Commercial Bank (Concurrent)",
+      "position_title": "HRBP Officer",
+      "start_date": "2021-10-01T00:00:00Z",
+      "end_date": "2023-12-31T00:00:00Z",
+      "is_current": false,
+      "description": "Concurrent HRBP assignment.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Human Resource Management",
+      "degree": "Bachelor",
+      "start_date": "2017-09-01T00:00:00Z",
+      "end_date": "2021-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

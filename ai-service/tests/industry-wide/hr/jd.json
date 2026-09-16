@@ -1,0 +1,65 @@
+{
+  "id": "jd-hr-manager-05",
+  "title": "Senior Talent Acquisition & HRBP Manager",
+  "description": "NexTech Corporation is seeking a dynamic Senior Talent Acquisition & HRBP Manager to drive organizational growth. You will lead end-to-end tech and business talent acquisition, partner directly with executive leadership as an HRBP, manage performance review cycles, maintain strict compliance with Vietnamese Labor Law, and resolve complex employee relations matters.",
+  "requirements": "Required Qualifications:\n- Professional Experience: Minimum 5+ years of strategic talent acquisition and HR business partnering experience.\n- Core Technical Skills: Talent Acquisition, HRBP, Labor Law, Performance Management, Employee Relations.\n- Preferred Skills: HRIS implementation, Compensation and Benefits (C&B), OKR/KPI frameworks.\n- Education: Bachelor's degree or above in Human Resource Management, Business Administration, Psychology, Law, or related field.\n- Language: Fluent English (IELTS 6.5 or equivalent) for international leadership collaboration.\n- Certifications: SHRM-CP or PHR certification preferred.",
+  "required_experience_years": 5.0,
+  "experience_level": "SENIOR",
+  "level_requirement_mode": "REQUIRED",
+  "required_skills": [
+    {
+      "skill_name": "Talent Acquisition",
+      "is_mandatory": true,
+      "minimum_years": 4.0
+    },
+    {
+      "skill_name": "HRBP",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Labor Law",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Performance Management",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Employee Relations",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "HRIS",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    },
+    {
+      "skill_name": "Compensation and Benefits",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    }
+  ],
+  "required_certificates": [
+    {
+      "certificate_name": "SHRM-CP",
+      "is_mandatory": false
+    }
+  ],
+  "required_languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5",
+      "is_mandatory": true
+    }
+  ],
+  "ai_weights_config": {
+    "skills": 35.0,
+    "experience": 35.0,
+    "education": 15.0,
+    "other": 15.0
+  }
+}

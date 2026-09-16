@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Airline GDS Ticketing Agent",
+    "professional_summary": "Airline Ticketing Specialist with 5.5 years issuing international flight tickets and booking seat assignments on Amadeus GDS."
+  },
+  "candidate_name": "Phạm Bích Ngọc",
+  "desired_title": "Airline GDS Ticketing Agent",
+  "professional_summary": "Airline Ticketing Specialist with 5.5 years issuing international flight tickets and booking seat assignments on Amadeus GDS.",
+  "work_experiences": [
+    {
+      "company_name": "Vietnam Airlines Booking Office",
+      "position_title": "Senior GDS Ticketing Officer",
+      "start_date": "2018-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Issue electronic flight tickets, calculate airfare taxes, process passenger ticket refunds on Amadeus GDS. Never operated hotel Opera PMS, welcomed guests to hotel lobby, or managed hotel rooms.",
+      "achievements": "Issued $3M in international air tickets."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Vietnam Aviation Academy",
+      "major": "Aviation Commercial Operations",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Amadeus GDS"
+    },
+    {
+      "skill_name": "Flight Ticketing"
+    },
+    {
+      "skill_name": "Fare Calculation"
+    },
+    {
+      "skill_name": "Airline Rebooking"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

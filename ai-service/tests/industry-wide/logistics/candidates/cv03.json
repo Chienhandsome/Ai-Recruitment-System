@@ -1,0 +1,57 @@
+{
+  "profile": {
+    "desired_title": "Warehouse Operations Lead",
+    "professional_summary": "Domestic Warehouse Manager with 5.5 years managing local stock distribution, lacking international trade and Incoterms experience."
+  },
+  "candidate_name": "Lê Đình Bách",
+  "desired_title": "Warehouse Operations Lead",
+  "professional_summary": "Domestic Warehouse Manager with 5.5 years managing local stock distribution, lacking international trade and Incoterms experience.",
+  "work_experiences": [
+    {
+      "company_name": "Giaohangtietkiem (GHTK)",
+      "position_title": "Hub Operations Supervisor",
+      "start_date": "2019-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Supervise domestic parcel sorting, Warehouse Management, Inventory Management, WMS tracking, and local Supply Chain Planning. Purely domestic operations with no Incoterms knowledge.",
+      "achievements": "Managed sorting line processing 100K parcels per day."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Thuongmai University",
+      "major": "Logistics Management",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Warehouse Management"
+    },
+    {
+      "skill_name": "Inventory Management"
+    },
+    {
+      "skill_name": "Supply Chain Planning"
+    },
+    {
+      "skill_name": "WMS"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "CSCP",
+      "issuing_organization": "APICS"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

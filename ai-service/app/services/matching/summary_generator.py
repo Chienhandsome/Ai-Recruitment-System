@@ -25,10 +25,15 @@ class SummaryGenerator:
         strengths: List[str] | None = None,
         gaps: List[str] | None = None,
         project_score: float | None = None,
+        mandatory_status: str = "PASS",
+        mandatory_failures: List[Dict[str, Any]] | None = None,
+        requires_verification_skills: List[str] | None = None,
     ) -> str:
         missing_required_skills = missing_required_skills or []
         strengths = strengths or []
         gaps = gaps or []
+        mandatory_failures = mandatory_failures or []
+        requires_verification_skills = requires_verification_skills or []
 
         domain_labels = {
             # 1. Design & Creative
@@ -116,59 +121,119 @@ class SummaryGenerator:
 
         parts = []
 
-        # 1. Định vị tổng quan và cấp độ phù hợp
-        if match_level == "HIGH":
-            parts.append(
-                f"ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU ({overall_score:.1f}/100 - CẤP ĐỘ {match_level}) cho vị trí '{job_title}'."
-            )
-            parts.append(
-                f"Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn ({cand_dom_label} khớp với {job_dom_label}) "
-                f"với điểm kỹ năng chuyên môn đạt {skills_score:.1f}/100 và kinh nghiệm đạt {experience_score:.1f}/100."
-            )
-            if strengths:
-                top_str = "; ".join(strengths[:2])
-                parts.append(f"Điểm nổi bật: {top_str}.")
-            parts.append("Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.")
+        # =========================================================================
+        # 1. TRƯỜNG HỢP: KHÔNG ĐẠT TIÊU CHÍ TIÊN QUYẾT (MANDATORY GATING FAIL)
+        # =========================================================================
+        if mandatory_status == "FAIL":
+            failure_items = []
+            for f in mandatory_failures:
+                t = f.get("type", "YÊU CẦU")
+                req = f.get("requirement", "")
+                reason = f.get("reason") or f.get("candidateValue") or "Chưa đạt yêu cầu"
+                failure_items.append(f"[{t}: {req} - {reason}]")
+            failures_text = "; ".join(failure_items)
 
-        elif match_level == "MEDIUM":
-            parts.append(
-                f"ỨNG VIÊN TIỀM NĂNG CHUYỂN GIAO ({overall_score:.1f}/100 - CẤP ĐỘ {match_level}) cho vị trí '{job_title}'."
+            has_hard_fail = any(f.get("type") in ["SKILL", "EDUCATION"] for f in mandatory_failures)
+            is_minor_gap = (
+                not has_hard_fail
+                and len(mandatory_failures) <= 2
+                and overall_score >= 80.0
             )
-            if domain_compatibility < 0.75:
-                parts.append(
-                    f"Ứng viên có chuyên môn từ mảng '{cand_dom_label}', có thể chuyển giao kỹ năng sang '{job_dom_label}' "
-                    f"nhưng có sự khác biệt nhất định về phân khúc mô hình hoạt động và yêu cầu nghiệp vụ đặc thù."
-                )
-            if missing_required_skills:
-                parts.append(
-                    f"Cần lưu ý ứng viên chưa đáp ứng kỹ năng bắt buộc: {', '.join(missing_required_skills)}."
-                )
-            if gaps:
-                top_gaps = "; ".join(gaps[:2])
-                parts.append(f"Hạn chế cần đào tạo thêm: {top_gaps}.")
-            parts.append("Khuyến nghị: Phỏng vấn đánh giá khả năng thích ứng và tư duy nghiệp vụ.")
 
-        else: # LOW
-            parts.append(
-                f"ỨNG VIÊN CHƯA PHÙ HỢP ({overall_score:.1f}/100 - CẤP ĐỘ {match_level}) cho vị trí '{job_title}'."
-            )
-            if domain_compatibility < 0.30:
+            if overall_score >= 75.0:
                 parts.append(
-                    f"Lý do cốt lõi: Sai lệch bản chất mô hình hoạt động. Ứng viên thuộc mảng '{cand_dom_label}' "
-                    f"(vận hành khác biệt hoàn toàn với mô hình '{job_dom_label}' của vị trí tuyển dụng). "
-                    f"Các từ khóa kỹ thuật tương đồng (nếu có) chỉ mang tính chất trùng lặp công cụ bề mặt."
+                    f"ỨNG VIÊN CÓ NĂNG LỰC TỐT NHƯNG CHƯA ĐẠT TIÊU CHÍ BẮT BUỘC ({overall_score:.1f}/100 - CẤP ĐỘ {match_level} - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí '{job_title}'."
                 )
-            elif missing_required_skills:
                 parts.append(
-                    f"Lý do cốt lõi: Hồ sơ thiếu hụt hầu hết các kỹ năng bắt buộc tiên quyết: {', '.join(missing_required_skills)}."
+                    f"Hồ sơ ứng viên có điểm kỹ năng chuyên môn ({skills_score:.1f}/100) và kinh nghiệm ({experience_score:.1f}/100) tương đồng tốt với yêu cầu thực tế ({cand_dom_label} khớp với {job_dom_label})."
                 )
+                if failures_text:
+                    parts.append(f"Cảnh báo vi phạm điều kiện tiên quyết: {failures_text}.")
+                if is_minor_gap:
+                    parts.append(
+                        "Khuyến nghị HR: Cân nhắc phỏng vấn nếu chấp nhận linh hoạt điều chỉnh tiêu chuẩn tiên quyết (Ngoại ngữ/Kinh nghiệm), hoặc xem xét cho vị trí cấp bậc tương đương (Middle thay vì Senior)."
+                    )
+                else:
+                    parts.append(
+                        "Khuyến nghị HR: Cân nhắc loại hồ sơ (Reject) do không thỏa mãn tiêu chuẩn bắt buộc của vị trí tuyển dụng."
+                    )
             else:
                 parts.append(
-                    f"Hồ sơ ứng viên có khoảng cách năng lực và kinh nghiệm quá lớn (Kỹ năng: {skills_score:.1f}, Kinh nghiệm: {experience_score:.1f})."
+                    f"ỨNG VIÊN KHÔNG PHÙ HỢP ({overall_score:.1f}/100 - CẤP ĐỘ {match_level} - TRẠNG THÁI: KHÔNG ĐẠT TIÊN QUYẾT) cho vị trí '{job_title}'."
                 )
-            if gaps:
-                parts.append(f"Điểm thiếu sót chính: {gaps[0]}.")
-            parts.append("Khuyến nghị: Từ chối hồ sơ hoặc lưu trữ cho các vị trí khác đúng phân khúc.")
+                if failures_text:
+                    parts.append(f"Lý do cốt lõi: Vi phạm tiêu chí tiên quyết ({failures_text}).")
+                else:
+                    parts.append(
+                        f"Hồ sơ ứng viên có khoảng cách năng lực và kinh nghiệm quá lớn (Kỹ năng: {skills_score:.1f}, Kinh nghiệm: {experience_score:.1f})."
+                    )
+                parts.append("Khuyến nghị: Từ chối hồ sơ (Auto-Reject).")
+
+        # =========================================================================
+        # 2. TRƯỜNG HỢP: ĐẠT TIÊU CHÍ TIÊN QUYẾT (MANDATORY PASS HOẶC N/A)
+        # =========================================================================
+        else:
+            if match_level == "HIGH":
+                parts.append(
+                    f"ỨNG VIÊN PHÙ HỢP HÀNG ĐẦU ({overall_score:.1f}/100 - CẤP ĐỘ {match_level}) cho vị trí '{job_title}'."
+                )
+                parts.append(
+                    f"Hồ sơ ứng viên thể hiện sự đồng điệu xuất sắc về mô hình chuyên môn ({cand_dom_label} khớp với {job_dom_label}) "
+                    f"với điểm kỹ năng chuyên môn đạt {skills_score:.1f}/100 và kinh nghiệm đạt {experience_score:.1f}/100."
+                )
+                if strengths:
+                    top_str = "; ".join(strengths[:2])
+                    parts.append(f"Điểm nổi bật: {top_str}.")
+                parts.append("Khuyến nghị: Mời phỏng vấn chuyên sâu ngay.")
+
+            elif match_level == "MEDIUM":
+                parts.append(
+                    f"ỨNG VIÊN TIỀM NĂNG CHUYỂN GIAO ({overall_score:.1f}/100 - CẤP ĐỘ {match_level}) cho vị trí '{job_title}'."
+                )
+                if domain_compatibility < 0.75:
+                    parts.append(
+                        f"Ứng viên có chuyên môn từ mảng '{cand_dom_label}', có thể chuyển giao kỹ năng sang '{job_dom_label}' "
+                        f"nhưng có sự khác biệt nhất định về phân khúc mô hình hoạt động và yêu cầu nghiệp vụ đặc thù."
+                    )
+                if missing_required_skills:
+                    parts.append(
+                        f"Cần lưu ý ứng viên chưa đáp ứng kỹ năng bắt buộc: {', '.join(missing_required_skills)}."
+                    )
+                if gaps:
+                    top_gaps = "; ".join(gaps[:2])
+                    parts.append(f"Hạn chế cần đào tạo thêm: {top_gaps}.")
+                parts.append("Khuyến nghị: Phỏng vấn đánh giá khả năng thích ứng và tư duy nghiệp vụ.")
+
+            else: # LOW
+                parts.append(
+                    f"ỨNG VIÊN CHƯA PHÙ HỢP ({overall_score:.1f}/100 - CẤP ĐỘ {match_level}) cho vị trí '{job_title}'."
+                )
+                if domain_compatibility < 0.30:
+                    parts.append(
+                        f"Lý do cốt lõi: Sai lệch bản chất mô hình hoạt động. Ứng viên thuộc mảng '{cand_dom_label}' "
+                        f"(vận hành khác biệt hoàn toàn với mô hình '{job_dom_label}' của vị trí tuyển dụng). "
+                        f"Các từ khóa kỹ thuật tương đồng (nếu có) chỉ mang tính chất trùng lặp công cụ bề mặt."
+                    )
+                elif missing_required_skills:
+                    parts.append(
+                        f"Lý do cốt lõi: Hồ sơ thiếu hụt hầu hết các kỹ năng bắt buộc tiên quyết: {', '.join(missing_required_skills)}."
+                    )
+                else:
+                    parts.append(
+                        f"Hồ sơ ứng viên có khoảng cách năng lực và kinh nghiệm quá lớn (Kỹ năng: {skills_score:.1f}, Kinh nghiệm: {experience_score:.1f})."
+                    )
+                if gaps:
+                    parts.append(f"Điểm thiếu sót chính: {gaps[0]}.")
+                parts.append("Khuyến nghị: Từ chối hồ sơ hoặc lưu trữ cho các vị trí khác đúng phân khúc.")
+
+        # =========================================================================
+        # 3. LƯU Ý PHỎNG VẤN NẾU CÓ KỸ NĂNG TIẾP XÚC GIÁN TIẾP (THIRD-PARTY/PASSIVE)
+        # =========================================================================
+        if requires_verification_skills:
+            sk_names = ", ".join(f"'{s}'" for s in requires_verification_skills)
+            parts.append(
+                f"Lưu ý phỏng vấn: Kỹ năng {sk_names} được ghi nhận qua ngữ cảnh gián tiếp/theo dõi từ bên thứ ba -> Cần đặt câu hỏi phỏng vấn để xác thực năng lực thực hành độc lập."
+            )
 
         return " ".join(parts)
 

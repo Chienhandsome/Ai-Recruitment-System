@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Junior Front Desk Officer",
+    "professional_summary": "Junior Front Desk Agent with 1.8 years welcoming guests and issuing room keycards."
+  },
+  "candidate_name": "Đặng Tuấn Tú",
+  "desired_title": "Junior Front Desk Officer",
+  "professional_summary": "Junior Front Desk Agent with 1.8 years welcoming guests and issuing room keycards.",
+  "work_experiences": [
+    {
+      "company_name": "Pullman Hanoi Hotel",
+      "position_title": "Front Desk Agent",
+      "start_date": "2022-09-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Check in guests, assist in Front Office, support Guest Relations, learn Opera PMS, provide Customer Service, and handle Reservation Systems.",
+      "achievements": "Checked in 5,000 hotel guests."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Open University",
+      "major": "Hospitality Management",
+      "degree": "Bachelor",
+      "start_date": "2018-09-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

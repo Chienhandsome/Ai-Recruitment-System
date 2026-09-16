@@ -1,0 +1,75 @@
+{
+  "profile": {
+    "desired_title": "Senior Logistics & Supply Chain Operations Manager",
+    "professional_summary": "Logistics Operations Lead with 6.5 years directing 20,000 sqm fulfillment centers, WMS rollouts, and Incoterms freight compliance."
+  },
+  "candidate_name": "Nguyễn Hữu Đạt",
+  "desired_title": "Senior Logistics & Supply Chain Operations Manager",
+  "professional_summary": "Logistics Operations Lead with 6.5 years directing 20,000 sqm fulfillment centers, WMS rollouts, and Incoterms freight compliance.",
+  "work_experiences": [
+    {
+      "company_name": "DHL Supply Chain Vietnam",
+      "position_title": "Senior Warehouse Operations Manager",
+      "start_date": "2021-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Direct Warehouse Management across 3 regional DCs. Lead Inventory Management, Supply Chain Planning, Manhattan WMS optimization, and import/export Incoterms compliance.",
+      "achievements": "Improved warehouse order picking throughput by 32% while reducing inventory shrinkage below 0.05%."
+    },
+    {
+      "company_name": "Kuehne + Nagel Vietnam",
+      "position_title": "Supply Chain Specialist",
+      "start_date": "2017-09-01T00:00:00Z",
+      "end_date": "2021-01-31T00:00:00Z",
+      "is_current": false,
+      "description": "Managed international freight routing, cargo manifests, and warehouse dispatching.",
+      "achievements": "Managed $4M annual ocean freight lane volume."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Vietnam Maritime University",
+      "major": "Logistics and Supply Chain Management",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Warehouse Management"
+    },
+    {
+      "skill_name": "Inventory Management"
+    },
+    {
+      "skill_name": "Supply Chain Planning"
+    },
+    {
+      "skill_name": "WMS"
+    },
+    {
+      "skill_name": "Incoterms"
+    },
+    {
+      "skill_name": "Procurement"
+    },
+    {
+      "skill_name": "Customs"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "CSCP",
+      "issuing_organization": "APICS"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 850"
+    }
+  ]
+}

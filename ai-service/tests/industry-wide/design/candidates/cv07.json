@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Junior UI/UX Designer",
+    "professional_summary": "Junior UI/UX designer with 1.5 years experience designing landing pages and mobile app wireframes in Figma."
+  },
+  "candidate_name": "Bùi Phương Thảo",
+  "desired_title": "Junior UI/UX Designer",
+  "professional_summary": "Junior UI/UX designer with 1.5 years experience designing landing pages and mobile app wireframes in Figma.",
+  "work_experiences": [
+    {
+      "company_name": "Pixel Studio Vietnam",
+      "position_title": "Junior UI Designer",
+      "start_date": "2023-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Assist senior designer in Figma, UI Design, UX Research surveys, Design System updates, and Prototyping.",
+      "achievements": "Designed 10 marketing landing pages."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "FPT Arena Multimedia",
+      "major": "Multimedia Design",
+      "degree": "Bachelor",
+      "start_date": "2018-09-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Figma"
+    },
+    {
+      "skill_name": "UI Design"
+    },
+    {
+      "skill_name": "UX Research"
+    },
+    {
+      "skill_name": "Design System"
+    },
+    {
+      "skill_name": "Prototyping"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

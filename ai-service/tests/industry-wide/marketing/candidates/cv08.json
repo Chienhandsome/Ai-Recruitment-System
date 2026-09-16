@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Senior Trade Marketing Specialist",
+    "professional_summary": "Senior Trade Marketer with 5 years managing offline POSM, distributor trade promotions, and retail activation."
+  },
+  "candidate_name": "Lương Đình Trọng",
+  "desired_title": "Senior Trade Marketing Specialist",
+  "professional_summary": "Senior Trade Marketer with 5 years managing offline POSM, distributor trade promotions, and retail activation.",
+  "work_experiences": [
+    {
+      "company_name": "Masan Consumer",
+      "position_title": "Senior Trade Marketing Executive",
+      "start_date": "2019-04-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Coordinate POSM displays in 500+ supermarkets. Negotiate shelf share with modern trade channels. No paid search or GA4 tracking.",
+      "achievements": "Expanded offline distribution footprint by 30%."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Thuongmai University",
+      "major": "Commerce and Marketing",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Trade Marketing"
+    },
+    {
+      "skill_name": "POSM"
+    },
+    {
+      "skill_name": "Retail Activation"
+    },
+    {
+      "skill_name": "Key Account Management"
+    },
+    {
+      "skill_name": "Event Coordination"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

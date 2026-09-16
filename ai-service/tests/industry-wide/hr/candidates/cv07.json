@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "HR Executive",
+    "professional_summary": "Junior HR specialist with 1.8 years assisting in onboarding and recruitment coordination."
+  },
+  "candidate_name": "Đỗ Gia Hân",
+  "desired_title": "HR Executive",
+  "professional_summary": "Junior HR specialist with 1.8 years assisting in onboarding and recruitment coordination.",
+  "work_experiences": [
+    {
+      "company_name": "FPT Telecom",
+      "position_title": "Talent Acquisition Executive",
+      "start_date": "2022-09-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Assist in Talent Acquisition, support HRBP, draft basic Labor Law letters, help with Performance Management and Employee Relations.",
+      "achievements": "Scheduled 200+ technical interviews."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Human Resource Management",
+      "degree": "Bachelor",
+      "start_date": "2018-09-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

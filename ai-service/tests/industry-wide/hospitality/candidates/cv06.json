@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Guest Relations Lead",
+    "professional_summary": "Hospitality specialist with 5.2 years experience holding a PhD in Metallurgical Material Science."
+  },
+  "candidate_name": "Võ Bích Phương",
+  "desired_title": "Guest Relations Lead",
+  "professional_summary": "Hospitality specialist with 5.2 years experience holding a PhD in Metallurgical Material Science.",
+  "work_experiences": [
+    {
+      "company_name": "InterContinental Danang",
+      "position_title": "Guest Relations Manager",
+      "start_date": "2019-04-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Oversee Front Office, Guest Relations, Opera PMS reservations, Customer Service, and Reservation Systems.",
+      "achievements": "Managed VIP club lounge services."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Science and Technology",
+      "major": "Metallurgical Material Science",
+      "degree": "Doctorate",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

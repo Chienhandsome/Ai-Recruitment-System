@@ -1,0 +1,32 @@
+{
+  "profile": {
+    "desired_title": "Performance Marketer",
+    "professional_summary": "Marketer with paid ads experience."
+  },
+  "candidate_name": "Nguyễn Đăng Khoa",
+  "desired_title": "Performance Marketer",
+  "professional_summary": "Marketer with paid ads experience.",
+  "work_experiences": [
+    {
+      "company_name": "Freelance Projects",
+      "position_title": "Digital Marketer",
+      "start_date": "",
+      "end_date": null,
+      "is_current": false,
+      "description": "Run ads occasionally.",
+      "achievements": ""
+    }
+  ],
+  "educations": [],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Google Ads"
+    },
+    {
+      "skill_name": "Meta Ads"
+    }
+  ],
+  "certificates": [],
+  "languages": []
+}

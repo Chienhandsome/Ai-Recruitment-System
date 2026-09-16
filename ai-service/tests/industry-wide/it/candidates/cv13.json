@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Senior Backend Engineer",
+    "professional_summary": "Senior Java Engineer with 5 years hands-on microservices development and certified Java language proficiency."
+  },
+  "candidate_name": "Mai Thanh Tùng",
+  "desired_title": "Senior Backend Engineer",
+  "professional_summary": "Senior Java Engineer with 5 years hands-on microservices development and certified Java language proficiency.",
+  "work_experiences": [
+    {
+      "company_name": "Viettel Digital",
+      "position_title": "Senior Backend Engineer",
+      "start_date": "2019-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Engineered core backend services using Java, Spring Boot, PostgreSQL, Docker, and Microservices.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "HUST",
+      "major": "Software Engineering",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Java"
+    },
+    {
+      "skill_name": "Spring Boot"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    },
+    {
+      "skill_name": "Docker"
+    },
+    {
+      "skill_name": "Microservices"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Oracle Certified Associate, Java SE 8 Programmer",
+      "issuing_organization": "Oracle"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

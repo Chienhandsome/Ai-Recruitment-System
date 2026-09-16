@@ -1,0 +1,65 @@
+{
+  "id": "jd-logistics-manager-06",
+  "title": "Senior Logistics & Supply Chain Operations Manager",
+  "description": "TransGlobal Logistics is seeking an experienced Senior Logistics & Supply Chain Operations Manager to direct our centralized fulfillment hub and cross-border distribution network. You will oversee multi-site warehouse operations, implement advanced WMS inventory tracking, plan freight demand cycles, ensure trade compliance under Incoterms 2020, and manage 3PL carrier contracts to reduce freight costs while maintaining 99.5% on-time order fulfillment.",
+  "requirements": "Required Qualifications:\n- Professional Experience: Minimum 5+ years of end-to-end warehousing, distribution, and supply chain management experience.\n- Core Technical Skills: Warehouse Management, Inventory Management, Supply Chain Planning, WMS (Warehouse Management System), Incoterms.\n- Preferred Skills: Procurement, Customs clearance, 3PL Vendor Management, Cold Chain logistics.\n- Education: Bachelor's degree or above in Logistics, Supply Chain Management, International Trade, Industrial Engineering, Economics, or related field.\n- Language: Working English proficiency (TOEIC 700 or equivalent) for international shipping correspondence.\n- Certifications: CSCP (Certified Supply Chain Professional) or CLTD preferred.",
+  "required_experience_years": 5.0,
+  "experience_level": "SENIOR",
+  "level_requirement_mode": "REQUIRED",
+  "required_skills": [
+    {
+      "skill_name": "Warehouse Management",
+      "is_mandatory": true,
+      "minimum_years": 4.0
+    },
+    {
+      "skill_name": "Inventory Management",
+      "is_mandatory": true,
+      "minimum_years": 4.0
+    },
+    {
+      "skill_name": "Supply Chain Planning",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "WMS",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Incoterms",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Procurement",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    },
+    {
+      "skill_name": "Customs",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    }
+  ],
+  "required_certificates": [
+    {
+      "certificate_name": "CSCP",
+      "is_mandatory": false
+    }
+  ],
+  "required_languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 700",
+      "is_mandatory": true
+    }
+  ],
+  "ai_weights_config": {
+    "skills": 35.0,
+    "experience": 35.0,
+    "education": 15.0,
+    "other": 15.0
+  }
+}

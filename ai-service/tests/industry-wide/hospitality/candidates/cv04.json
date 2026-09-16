@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Fast Food Counter Staff",
+    "professional_summary": "Fast Food Cashier with 6 years taking burger orders, operating deep fryers, and mopping linoleum dining floors."
+  },
+  "candidate_name": "Phạm Quốc Anh",
+  "desired_title": "Fast Food Counter Staff",
+  "professional_summary": "Fast Food Cashier with 6 years taking burger orders, operating deep fryers, and mopping linoleum dining floors.",
+  "work_experiences": [
+    {
+      "company_name": "Lotteria Vietnam Fast Food",
+      "position_title": "Shift Crew Leader",
+      "start_date": "2018-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Punch order numbers into touchscreen register, scoop french fries into cardboard cartons, wipe grease off plastic trays. No hotel room inventory, Opera PMS, concierge service, or luxury guest relations.",
+      "achievements": "Maintained 90-second drive-thru order completion time."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Vocational College",
+      "major": "Food Processing",
+      "degree": "Associate",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "POS Register"
+    },
+    {
+      "skill_name": "Deep Frying"
+    },
+    {
+      "skill_name": "Burger Assembly"
+    },
+    {
+      "skill_name": "Tray Cleaning"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

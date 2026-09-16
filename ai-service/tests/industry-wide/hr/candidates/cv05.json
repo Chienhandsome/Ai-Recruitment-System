@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "HRBP Manager",
+    "professional_summary": "HR professional with 5.5 years in Talent Acquisition and Labor Law, holding an engineering degree."
+  },
+  "candidate_name": "Ngô Văn Nam",
+  "desired_title": "HRBP Manager",
+  "professional_summary": "HR professional with 5.5 years in Talent Acquisition and Labor Law, holding an engineering degree.",
+  "work_experiences": [
+    {
+      "company_name": "Coteccons Construction",
+      "position_title": "Senior HRBP",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage Talent Acquisition, HRBP functions, Labor Law contracts, Performance Management appraisals, and Employee Relations.",
+      "achievements": "Managed HR operations for 500 site workers."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National University of Civil Engineering",
+      "major": "Civil Bridge & Road Engineering",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "SHRM-CP",
+      "issuing_organization": "SHRM"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

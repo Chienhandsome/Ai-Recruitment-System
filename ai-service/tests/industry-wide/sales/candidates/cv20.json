@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Senior Procurement Manager",
+    "professional_summary": "Corporate Purchasing Manager with 6 years evaluating vendor proposals, negotiating vendor discounts, and issuing purchase orders."
+  },
+  "candidate_name": "Võ Thị Bích Thủy",
+  "desired_title": "Senior Procurement Manager",
+  "professional_summary": "Corporate Purchasing Manager with 6 years evaluating vendor proposals, negotiating vendor discounts, and issuing purchase orders.",
+  "work_experiences": [
+    {
+      "company_name": "VinFast Manufacturing",
+      "position_title": "Senior Purchasing Manager",
+      "start_date": "2018-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage procurement RFPs, negotiate contracts with suppliers to reduce procurement costs, audit supplier quality. Acts strictly as buyer, not seller.",
+      "achievements": "Saved company $3M in annual vendor supply contracts."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "International Trade",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Procurement"
+    },
+    {
+      "skill_name": "Purchasing"
+    },
+    {
+      "skill_name": "Contract Negotiation"
+    },
+    {
+      "skill_name": "Vendor Management"
+    },
+    {
+      "skill_name": "Cost Reduction"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

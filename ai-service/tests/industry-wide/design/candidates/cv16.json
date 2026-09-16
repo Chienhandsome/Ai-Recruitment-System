@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "UI/UX Designer",
+    "professional_summary": "UI/UX designer with 4.5 years experience, fluent in Spanish."
+  },
+  "candidate_name": "Đỗ Quỳnh Mai",
+  "desired_title": "UI/UX Designer",
+  "professional_summary": "UI/UX designer with 4.5 years experience, fluent in Spanish.",
+  "work_experiences": [
+    {
+      "company_name": "Glovo Tech Hub",
+      "position_title": "Senior Product Designer",
+      "start_date": "2019-08-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead UI Design, UX Research, Design System, Prototyping, and Figma workflows.",
+      "achievements": "Shipped multi-lingual consumer app."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Languages and International Studies",
+      "major": "Hispanic Studies & Design",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Figma"
+    },
+    {
+      "skill_name": "UI Design"
+    },
+    {
+      "skill_name": "UX Research"
+    },
+    {
+      "skill_name": "Design System"
+    },
+    {
+      "skill_name": "Prototyping"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "Spanish",
+      "proficiency": "DELE B2"
+    }
+  ]
+}

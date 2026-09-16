@@ -1,0 +1,49 @@
+{
+  "profile": {
+    "desired_title": "Financial Energy Alchemist",
+    "professional_summary": "Philosophical financial orchestrator harmonizing monetary vibes, fiscal spirituality, and metaphysical wealth manifestation."
+  },
+  "candidate_name": "Tô Đình Vũ",
+  "desired_title": "Financial Energy Alchemist",
+  "professional_summary": "Philosophical financial orchestrator harmonizing monetary vibes, fiscal spirituality, and metaphysical wealth manifestation.",
+  "work_experiences": [
+    {
+      "company_name": "Wealth Mindset Academy",
+      "position_title": "Fiscal Chakra Harmonizer",
+      "start_date": "2018-06-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Host spiritual webinars on wealth mindset and attracting money flow. Never performed double-entry bookkeeping or VAT filings.",
+      "achievements": "Attracted 5,000 attendees to fiscal awakening talks."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Dong Do University",
+      "major": "Business Administration",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Financial Mindfulness"
+    },
+    {
+      "skill_name": "Public Speaking"
+    },
+    {
+      "skill_name": "Wealth Coaching"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

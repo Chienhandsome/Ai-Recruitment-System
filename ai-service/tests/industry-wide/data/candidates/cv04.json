@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Data Entry Clerk",
+    "professional_summary": "Data Entry Staff with 5 years typing paper records and customer addresses into Excel spreadsheets."
+  },
+  "candidate_name": "Phạm Bích Ngọc",
+  "desired_title": "Data Entry Clerk",
+  "professional_summary": "Data Entry Staff with 5 years typing paper records and customer addresses into Excel spreadsheets.",
+  "work_experiences": [
+    {
+      "company_name": "An Binh Archives Co",
+      "position_title": "Senior Data Input Clerk",
+      "start_date": "2019-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Type paper survey forms into Excel rows, use basic SUM and AVERAGE formulas, highlight cells in yellow. No SQL queries, Python coding, ETL pipelines, or Power BI models.",
+      "achievements": "Maintained 70 words-per-minute numerical typing speed."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Vocational College",
+      "major": "Office Informatics",
+      "degree": "Associate",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Excel"
+    },
+    {
+      "skill_name": "Data Entry"
+    },
+    {
+      "skill_name": "Typing"
+    },
+    {
+      "skill_name": "Form Scanning"
+    },
+    {
+      "skill_name": "Filing"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "profile": {
+    "desired_title": "Talent Acquisition Lead",
+    "professional_summary": "Technical Recruiter with 5.5 years in sourcing and recruitment agency headhunting, lacking legal labor compliance experience."
+  },
+  "candidate_name": "Lê Quốc Tuấn",
+  "desired_title": "Talent Acquisition Lead",
+  "professional_summary": "Technical Recruiter with 5.5 years in sourcing and recruitment agency headhunting, lacking legal labor compliance experience.",
+  "work_experiences": [
+    {
+      "company_name": "Adecco Vietnam",
+      "position_title": "Senior Recruitment Consultant",
+      "start_date": "2019-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Source candidates, conduct candidate screenings, act as external HRBP, track Performance Management KPIs. Employment contracts and Labor Law handled exclusively by client legal depts.",
+      "achievements": "Billed $150K in headhunting placement fees."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "Business Administration",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "SHRM-CP",
+      "issuing_organization": "SHRM"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

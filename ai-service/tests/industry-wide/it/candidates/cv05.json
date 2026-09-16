@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Senior Backend Engineer",
+    "professional_summary": "Self-taught backend engineer with 5 years working in fintech software development with Java and Spring Boot."
+  },
+  "candidate_name": "Phạm Thu Hà",
+  "desired_title": "Senior Backend Engineer",
+  "professional_summary": "Self-taught backend engineer with 5 years working in fintech software development with Java and Spring Boot.",
+  "work_experiences": [
+    {
+      "company_name": "Fintech V-Cash",
+      "position_title": "Senior Java Developer",
+      "start_date": "2019-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Built Java Spring Boot backend microservices with PostgreSQL and Docker deployment.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Kế toán (Accounting)",
+      "degree": "Bachelor",
+      "start_date": null,
+      "end_date": null,
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Java"
+    },
+    {
+      "skill_name": "Spring Boot"
+    },
+    {
+      "skill_name": "PostgreSQL"
+    },
+    {
+      "skill_name": "Docker"
+    },
+    {
+      "skill_name": "Microservices"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

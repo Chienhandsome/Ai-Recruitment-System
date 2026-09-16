@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Agricultural Grain Quality Inspector",
+    "professional_summary": "Grain Quality Inspector with 5.5 years testing rice moisture levels and pest infestation in bulk agricultural grain silos."
+  },
+  "candidate_name": "Phạm Thu Hà",
+  "desired_title": "Agricultural Grain Quality Inspector",
+  "professional_summary": "Grain Quality Inspector with 5.5 years testing rice moisture levels and pest infestation in bulk agricultural grain silos.",
+  "work_experiences": [
+    {
+      "company_name": "Vinafood 2 Corporation",
+      "position_title": "Grain Quality Testing Specialist",
+      "start_date": "2018-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Insert grain sampling spears into rice silos, perform laboratory chemical moisture analysis, issue grain grade certificates. Never operated WMS, scheduled truck deliveries, or drafted Incoterms contracts.",
+      "achievements": "Tested 200,000 metric tons of exported rice."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Can Tho University",
+      "major": "Agronomy & Food Technology",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Grain Sampling"
+    },
+    {
+      "skill_name": "Chemical Moisture Testing"
+    },
+    {
+      "skill_name": "Infestation Inspection"
+    },
+    {
+      "skill_name": "Lab Titration"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 710"
+    }
+  ]
+}

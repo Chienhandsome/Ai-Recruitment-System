@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Senior Freelance Supply Chain Consultant",
+    "professional_summary": "Independent Logistics Consultant with 5.5 years designing Warehouse Management, WMS rollouts, Inventory Management, and Incoterms compliance for manufacturing clients."
+  },
+  "candidate_name": "Đoàn Quốc Tuấn",
+  "desired_title": "Senior Freelance Supply Chain Consultant",
+  "professional_summary": "Independent Logistics Consultant with 5.5 years designing Warehouse Management, WMS rollouts, Inventory Management, and Incoterms compliance for manufacturing clients.",
+  "work_experiences": [
+    {
+      "company_name": "Tuan Logistics Advisory",
+      "position_title": "Principal Logistics Consultant",
+      "start_date": "2018-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Contracted by multinational factories to configure WMS systems, structure Warehouse Management processes, audit Inventory Management, optimize Supply Chain Planning, and enforce Incoterms.",
+      "achievements": "Designed and commissioned 4 greenfield distribution centers."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Vietnam Maritime University",
+      "major": "Logistics and Supply Chain",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Warehouse Management"
+    },
+    {
+      "skill_name": "Inventory Management"
+    },
+    {
+      "skill_name": "Supply Chain Planning"
+    },
+    {
+      "skill_name": "WMS"
+    },
+    {
+      "skill_name": "Incoterms"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "CSCP",
+      "issuing_organization": "APICS"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 780"
+    }
+  ]
+}

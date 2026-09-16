@@ -1,0 +1,65 @@
+{
+  "id": "jd-sales-enterprise-03",
+  "title": "Enterprise B2B Sales Manager",
+  "description": "CloudX Technologies is seeking a seasoned Enterprise B2B Sales Manager to drive multi-million dollar SaaS and cloud infrastructure deals. You will target C-level executives in Banking, Financial Services, and Large Conglomerates across Southeast Asia. The ideal candidate possesses a proven track record of consultative solution selling, complex contract negotiations, and enterprise quota overachievement.",
+  "requirements": "Required Qualifications:\n- Professional Experience: Minimum 5+ years of enterprise B2B corporate technology sales experience.\n- Core Technical Skills: B2B Sales, Enterprise Sales, Contract Negotiation, Key Account Management, Solution Selling.\n- Preferred Skills: CRM proficiency, Salesforce, Pipeline Forecasting, Strategic Account Planning.\n- Education: Bachelor's degree or above in Business Administration, International Business, Commerce, Economics, or related field.\n- Language: Fluent English (IELTS 6.5 or equivalent) for multinational executive board presentations.\n- Certifications: Certified Sales Professional (CSP) or Miller Heiman certification preferred.",
+  "required_experience_years": 5.0,
+  "experience_level": "SENIOR",
+  "level_requirement_mode": "REQUIRED",
+  "required_skills": [
+    {
+      "skill_name": "B2B Sales",
+      "is_mandatory": true,
+      "minimum_years": 4.0
+    },
+    {
+      "skill_name": "Enterprise Sales",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Contract Negotiation",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Key Account Management",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Solution Selling",
+      "is_mandatory": true,
+      "minimum_years": 2.0
+    },
+    {
+      "skill_name": "CRM",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    },
+    {
+      "skill_name": "Salesforce",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    }
+  ],
+  "required_certificates": [
+    {
+      "certificate_name": "Certified Sales Professional (CSP)",
+      "is_mandatory": false
+    }
+  ],
+  "required_languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5",
+      "is_mandatory": true
+    }
+  ],
+  "ai_weights_config": {
+    "skills": 35.0,
+    "experience": 40.0,
+    "education": 15.0,
+    "other": 10.0
+  }
+}

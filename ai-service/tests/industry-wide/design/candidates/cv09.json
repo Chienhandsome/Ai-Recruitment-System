@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Aspiring UI/UX Designer",
+    "professional_summary": "Self-taught designer with conceptual Dribbble shots and hypothetical Behance redesign cases."
+  },
+  "candidate_name": "Nguyễn Tuấn Kiệt",
+  "desired_title": "Aspiring UI/UX Designer",
+  "professional_summary": "Self-taught designer with conceptual Dribbble shots and hypothetical Behance redesign cases.",
+  "work_experiences": [],
+  "educations": [
+    {
+      "school_name": "University of Science HCMC",
+      "major": "Information Technology",
+      "degree": "Bachelor",
+      "start_date": "2020-09-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [
+    {
+      "project_name": "Hypothetical Spotify Mobile Redesign",
+      "project_role": "Sole Designer",
+      "description": "Created visual mockups and micro-interactions for a music app concept.",
+      "technologies": [
+        "Figma",
+        "UI Design",
+        "UX Research",
+        "Design System",
+        "Prototyping"
+      ],
+      "start_date": "2023-06-01T00:00:00Z",
+      "end_date": "2023-09-01T00:00:00Z"
+    }
+  ],
+  "skills": [
+    {
+      "skill_name": "Figma"
+    },
+    {
+      "skill_name": "UI Design"
+    },
+    {
+      "skill_name": "UX Research"
+    },
+    {
+      "skill_name": "Design System"
+    },
+    {
+      "skill_name": "Prototyping"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

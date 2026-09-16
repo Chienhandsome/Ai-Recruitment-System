@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Performance Marketer",
+    "professional_summary": "Performance Marketer with 4.5 years experience in Google Ads and Meta Ads, fluent in Mandarin Chinese."
+  },
+  "candidate_name": "Dương Ánh Tuyết",
+  "desired_title": "Performance Marketer",
+  "professional_summary": "Performance Marketer with 4.5 years experience in Google Ads and Meta Ads, fluent in Mandarin Chinese.",
+  "work_experiences": [
+    {
+      "company_name": "Chicilon Media",
+      "position_title": "Senior Digital Specialist",
+      "start_date": "2019-08-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage cross-border Google Ads and Meta Ads campaigns with GA4 and Conversion Rate Optimization.",
+      "achievements": "Achieved 140% quarterly ROI target."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Languages and International Studies",
+      "major": "Chinese Linguistics & Commerce",
+      "degree": "Bachelor",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2019-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Google Ads"
+    },
+    {
+      "skill_name": "Meta Ads"
+    },
+    {
+      "skill_name": "GA4"
+    },
+    {
+      "skill_name": "Performance Marketing"
+    },
+    {
+      "skill_name": "Conversion Rate Optimization"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "Chinese",
+      "proficiency": "HSK 6"
+    }
+  ]
+}

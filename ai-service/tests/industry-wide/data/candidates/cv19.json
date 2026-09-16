@@ -1,0 +1,58 @@
+{
+  "profile": {
+    "desired_title": "Senior Linux Systems Engineer",
+    "professional_summary": "Infrastructure Systems Engineer with 8 years managing Bare-metal Linux servers, BIND DNS, Ansible playbooks, and iptables firewalls."
+  },
+  "candidate_name": "Trần Thế Hưng",
+  "desired_title": "Senior Linux Systems Engineer",
+  "professional_summary": "Infrastructure Systems Engineer with 8 years managing Bare-metal Linux servers, BIND DNS, Ansible playbooks, and iptables firewalls.",
+  "work_experiences": [
+    {
+      "company_name": "Viettel IDC Data Center",
+      "position_title": "Senior Linux Sysadmin",
+      "start_date": "2016-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage 500 CentOS physical servers, configure RAID controllers, write Bash scripts, patch Linux kernels, and troubleshoot network routing. No SQL data warehousing, business KPIs, or Power BI dashboarding.",
+      "achievements": "Maintained 99.999% server uptime across hosting infrastructure."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Science and Technology",
+      "major": "Computer Engineering",
+      "degree": "Bachelor",
+      "start_date": "2011-09-01T00:00:00Z",
+      "end_date": "2015-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Linux Sysadmin"
+    },
+    {
+      "skill_name": "Ansible"
+    },
+    {
+      "skill_name": "Bash Scripting"
+    },
+    {
+      "skill_name": "DNS"
+    },
+    {
+      "skill_name": "Firewall iptables"
+    },
+    {
+      "skill_name": "Server Hardware"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.5"
+    }
+  ]
+}

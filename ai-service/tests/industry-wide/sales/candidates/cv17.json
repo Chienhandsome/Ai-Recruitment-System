@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Chief Synergy Evangelist",
+    "professional_summary": "Charismatic high-vibe relationship architect championing executive rapport, spiritual client bonding, and cosmic synergy."
+  },
+  "candidate_name": "Lê Trí Đức",
+  "desired_title": "Chief Synergy Evangelist",
+  "professional_summary": "Charismatic high-vibe relationship architect championing executive rapport, spiritual client bonding, and cosmic synergy.",
+  "work_experiences": [
+    {
+      "company_name": "Synergy Consulting Group",
+      "position_title": "Executive Networking Evangelist",
+      "start_date": "2018-05-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Attend business gala dinners, exchange business cards, introduce founders at coffee meetups. Never handled pricing models, contract drafting, or quota responsibilities.",
+      "achievements": "Connected over 1,000 LinkedIn followers."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Open University",
+      "major": "Business Administration",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Networking"
+    },
+    {
+      "skill_name": "Public Speaking"
+    },
+    {
+      "skill_name": "Relationship Building"
+    },
+    {
+      "skill_name": "Socializing"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

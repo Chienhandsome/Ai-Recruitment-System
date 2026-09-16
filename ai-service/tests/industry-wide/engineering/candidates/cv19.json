@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Chief Structural Civil Engineer",
+    "professional_summary": "Civil Structural Engineer with 8 years calculating reinforced concrete shear walls, foundation deep pilings, and earthquake resistance for 60-story skyscrapers."
+  },
+  "candidate_name": "Nguyễn Văn Lâm",
+  "desired_title": "Chief Structural Civil Engineer",
+  "professional_summary": "Civil Structural Engineer with 8 years calculating reinforced concrete shear walls, foundation deep pilings, and earthquake resistance for 60-story skyscrapers.",
+  "work_experiences": [
+    {
+      "company_name": "Hoa Binh Construction Group",
+      "position_title": "Senior Structural Engineer",
+      "start_date": "2016-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Model structural concrete loads in ETABS, inspect steel reinforcement cages in muddy foundation pits, certify building safety. No industrial factory robotics, PLC programming, or SCADA telemetry.",
+      "achievements": "Completed structural engineering for Landmark 81 annex tower."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National University of Civil Engineering",
+      "major": "Civil & Industrial Construction",
+      "degree": "Bachelor",
+      "start_date": "2011-09-01T00:00:00Z",
+      "end_date": "2015-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "ETABS"
+    },
+    {
+      "skill_name": "Structural Concrete"
+    },
+    {
+      "skill_name": "Foundation Piles"
+    },
+    {
+      "skill_name": "Earthquake Resistance"
+    },
+    {
+      "skill_name": "Construction Safety"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 850"
+    }
+  ]
+}

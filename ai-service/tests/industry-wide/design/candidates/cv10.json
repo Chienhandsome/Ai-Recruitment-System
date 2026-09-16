@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "Design Intern",
+    "professional_summary": "Candidate with multiple banner resizing and asset cropping internships totaling 3 years part-time."
+  },
+  "candidate_name": "Đoàn Thu Trang",
+  "desired_title": "Design Intern",
+  "professional_summary": "Candidate with multiple banner resizing and asset cropping internships totaling 3 years part-time.",
+  "work_experiences": [
+    {
+      "company_name": "VCCorp Digital",
+      "position_title": "Graphic Asset Intern",
+      "start_date": "2021-06-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Resize digital banners into multiple display dimensions.",
+      "achievements": ""
+    },
+    {
+      "company_name": "Golden Ad Agency",
+      "position_title": "Production Intern",
+      "start_date": "2022-07-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Crop product photos and export PNG assets for web developers.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Industrial Fine Arts",
+      "major": "Graphic Design",
+      "degree": "Bachelor",
+      "start_date": "2019-09-01T00:00:00Z",
+      "end_date": "2023-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Figma"
+    },
+    {
+      "skill_name": "UI Design"
+    },
+    {
+      "skill_name": "UX Research"
+    },
+    {
+      "skill_name": "Design System"
+    },
+    {
+      "skill_name": "Prototyping"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

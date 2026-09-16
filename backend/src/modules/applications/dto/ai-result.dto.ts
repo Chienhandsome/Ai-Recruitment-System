@@ -74,6 +74,14 @@ export const PillarExplanationsSchema = z.object({
   other: PillarExplanationItemSchema,
 });
 
+export const MandatoryFailureSchema = z.object({
+  type: z.string(),
+  requirement: z.string(),
+  candidateValue: z.string().nullable().optional(),
+  status: z.string().default('FAIL'),
+  reason: z.string().optional(),
+});
+
 export const AiResultSchema = z.object({
   overall_score: z.number().default(0),
   match_level: z
@@ -95,6 +103,11 @@ export const AiResultSchema = z.object({
   evidence_confidence: z.number().default(1.0).optional(),
   domain_compatibility: z.number().min(0).max(1).default(1.0).optional(),
   mandatory_ratio: z.number().min(0).max(1).default(1.0).optional(),
+  mandatory_status: z
+    .enum(['PASS', 'FAIL', 'NOT_APPLICABLE'])
+    .default('PASS')
+    .optional(),
+  mandatory_failures: z.array(MandatoryFailureSchema).default([]).optional(),
   base_score: z.number().min(0).max(100).default(0).optional(),
   mandatory_score_cap: z.number().min(0).max(100).nullable().optional(),
   score_adjustment: z.number().default(0).optional(),

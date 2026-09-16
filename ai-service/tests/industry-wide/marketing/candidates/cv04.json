@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Digital Marketing Specialist",
+    "professional_summary": "Digital Marketer with 5 years focusing on SEO, Content Strategy, PR articles, and Organic Social Media."
+  },
+  "candidate_name": "Vũ Thu Thảo",
+  "desired_title": "Digital Marketing Specialist",
+  "professional_summary": "Digital Marketer with 5 years focusing on SEO, Content Strategy, PR articles, and Organic Social Media.",
+  "work_experiences": [
+    {
+      "company_name": "Zing News Digital",
+      "position_title": "Content Marketing Lead",
+      "start_date": "2019-05-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Produce editorial content, manage on-page SEO, publish sponsored PR articles. Do not handle paid media budgets.",
+      "achievements": "Increased organic website traffic by 200% over 2 years."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Social Sciences and Humanities",
+      "major": "Journalism and Communications",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SEO"
+    },
+    {
+      "skill_name": "Content Marketing"
+    },
+    {
+      "skill_name": "Copywriting"
+    },
+    {
+      "skill_name": "Public Relations"
+    },
+    {
+      "skill_name": "Social Media"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

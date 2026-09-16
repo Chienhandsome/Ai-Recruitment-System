@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Logistics Manager",
+    "professional_summary": "Logistics operations manager with 5.5 years experience holding CEH ethical hacker cert."
+  },
+  "candidate_name": "Trần Văn Tài",
+  "desired_title": "Logistics Manager",
+  "professional_summary": "Logistics operations manager with 5.5 years experience holding CEH ethical hacker cert.",
+  "work_experiences": [
+    {
+      "company_name": "Gemadept Corporation",
+      "position_title": "Warehouse Manager",
+      "start_date": "2018-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead Warehouse Management, Inventory Management, Supply Chain Planning, WMS, and Incoterms operations.",
+      "achievements": "Reduced turnaround time by 20%."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Foreign Trade University",
+      "major": "International Business",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Warehouse Management"
+    },
+    {
+      "skill_name": "Inventory Management"
+    },
+    {
+      "skill_name": "Supply Chain Planning"
+    },
+    {
+      "skill_name": "WMS"
+    },
+    {
+      "skill_name": "Incoterms"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "CEH Certified Ethical Hacker",
+      "issuing_organization": "EC-Council"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 740"
+    }
+  ]
+}

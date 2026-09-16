@@ -1,0 +1,32 @@
+{
+  "profile": {
+    "desired_title": "HR Manager",
+    "professional_summary": "HR professional in recruitment."
+  },
+  "candidate_name": "Nguyễn Văn Hải",
+  "desired_title": "HR Manager",
+  "professional_summary": "HR professional in recruitment.",
+  "work_experiences": [
+    {
+      "company_name": "Recruitment Firm",
+      "position_title": "HR Officer",
+      "start_date": "",
+      "end_date": null,
+      "is_current": false,
+      "description": "Recruit staff.",
+      "achievements": ""
+    }
+  ],
+  "educations": [],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    }
+  ],
+  "certificates": [],
+  "languages": []
+}

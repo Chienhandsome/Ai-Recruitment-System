@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Financial Accountant",
+    "professional_summary": "Accountant with 5.2 years in General Ledger and Tax Accounting, holding a Master of Philosophy."
+  },
+  "candidate_name": "Bùi Thu Cúc",
+  "desired_title": "Financial Accountant",
+  "professional_summary": "Accountant with 5.2 years in General Ledger and Tax Accounting, holding a Master of Philosophy.",
+  "work_experiences": [
+    {
+      "company_name": "Bao Viet Holdings",
+      "position_title": "General Accountant",
+      "start_date": "2019-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Execute General Ledger entries, VAS Financial Reporting, Tax Accounting, and Corporate Income Tax calculations.",
+      "achievements": "Streamlined quarterly tax reconciliation."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Vietnam National University",
+      "major": "Dialectical Philosophy",
+      "degree": "Master",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "General Ledger"
+    },
+    {
+      "skill_name": "Financial Reporting"
+    },
+    {
+      "skill_name": "Tax Accounting"
+    },
+    {
+      "skill_name": "VAS"
+    },
+    {
+      "skill_name": "Corporate Income Tax"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

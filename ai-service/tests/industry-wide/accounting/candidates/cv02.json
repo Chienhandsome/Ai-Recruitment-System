@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Senior Accountant",
+    "professional_summary": "Financial accountant with 5.5 years in General Ledger, VAS reporting, and Corporate Income Tax finalization."
+  },
+  "candidate_name": "Lê Minh Trí",
+  "desired_title": "Senior Accountant",
+  "professional_summary": "Financial accountant with 5.5 years in General Ledger, VAS reporting, and Corporate Income Tax finalization.",
+  "work_experiences": [
+    {
+      "company_name": "Hoa Phat Steel Group",
+      "position_title": "Senior General Ledger Accountant",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage General Ledger accounts, prepare monthly VAS Financial Reporting, reconcile balance sheets, execute Tax Accounting and Corporate Income Tax settlements.",
+      "achievements": "Automated month-end book closure reducing cycle from 10 to 4 days."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Academy of Finance",
+      "major": "Corporate Accounting",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "General Ledger"
+    },
+    {
+      "skill_name": "Financial Reporting"
+    },
+    {
+      "skill_name": "Tax Accounting"
+    },
+    {
+      "skill_name": "VAS"
+    },
+    {
+      "skill_name": "Corporate Income Tax"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 750"
+    }
+  ]
+}

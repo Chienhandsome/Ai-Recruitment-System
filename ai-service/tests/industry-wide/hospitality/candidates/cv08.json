@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Funeral Home Attendant",
+    "professional_summary": "Funeral Parlor Attendant with 5.5 years embalming bodies, arranging casket flowers, and directing grieving mourners."
+  },
+  "candidate_name": "Nguyễn Văn Hùng",
+  "desired_title": "Funeral Home Attendant",
+  "professional_summary": "Funeral Parlor Attendant with 5.5 years embalming bodies, arranging casket flowers, and directing grieving mourners.",
+  "work_experiences": [
+    {
+      "company_name": "Phung Hung Funeral Home",
+      "position_title": "Senior Mortuary Attendant",
+      "start_date": "2018-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Apply formaldehyde embalming chemicals to deceased corpses, place floral wreaths around glass caskets, burn incense. No luxury hotel operations, Opera PMS check-in, or hotel guest relations.",
+      "achievements": "Directed 1,000 funeral ceremonies with solemn decorum."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Medical College",
+      "major": "Mortuary & Anatomy Sanitation",
+      "degree": "Associate",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Embalming"
+    },
+    {
+      "skill_name": "Casket Dressing"
+    },
+    {
+      "skill_name": "Funeral Coordination"
+    },
+    {
+      "skill_name": "Mourning Protocol"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

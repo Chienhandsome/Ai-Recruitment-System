@@ -1,0 +1,52 @@
+{
+  "profile": {
+    "desired_title": "Garment Production Seamstress",
+    "professional_summary": "Garment Factory Sewing Operator with 5.5 years operating single-needle electric sewing machines to stitch shirt collars."
+  },
+  "candidate_name": "Nguyễn Thị Nụ",
+  "desired_title": "Garment Production Seamstress",
+  "professional_summary": "Garment Factory Sewing Operator with 5.5 years operating single-needle electric sewing machines to stitch shirt collars.",
+  "work_experiences": [
+    {
+      "company_name": "May 10 Garment Corporation",
+      "position_title": "Assembly Line Seamstress",
+      "start_date": "2018-10-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Depress foot pedal to stitch cloth seams on cotton shirts, trim loose threads with scissors, place shirts in plastic baskets. No PLC programming, SCADA telemetry, or engineering maintenance.",
+      "achievements": "Sewed 400 shirt collars per shift with consistent stitch line."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi Industrial Textile Vocational School",
+      "major": "Garment Sewing",
+      "degree": "Vocational",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Sewing Machine Operation"
+    },
+    {
+      "skill_name": "Stitching"
+    },
+    {
+      "skill_name": "Thread Trimming"
+    },
+    {
+      "skill_name": "Garment Assembly"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 710"
+    }
+  ]
+}

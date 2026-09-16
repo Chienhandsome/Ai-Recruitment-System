@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "Data Intern",
+    "professional_summary": "Candidate with multiple short spreadsheet formatting internships totaling 3 years part-time."
+  },
+  "candidate_name": "Đỗ Quỳnh Trang",
+  "desired_title": "Data Intern",
+  "professional_summary": "Candidate with multiple short spreadsheet formatting internships totaling 3 years part-time.",
+  "work_experiences": [
+    {
+      "company_name": "Sendo E-commerce",
+      "position_title": "Data Cleaning Intern",
+      "start_date": "2021-06-01T00:00:00Z",
+      "end_date": "2022-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Manually delete blank rows in Excel spreadsheets.",
+      "achievements": ""
+    },
+    {
+      "company_name": "VCCorp Media",
+      "position_title": "Reporting Intern",
+      "start_date": "2022-07-01T00:00:00Z",
+      "end_date": "2024-06-01T00:00:00Z",
+      "is_current": false,
+      "description": "Copy numbers from Google Sheets into PowerPoint slides.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Information Systems",
+      "degree": "Bachelor",
+      "start_date": "2019-09-01T00:00:00Z",
+      "end_date": "2023-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "SQL"
+    },
+    {
+      "skill_name": "Power BI"
+    },
+    {
+      "skill_name": "Python"
+    },
+    {
+      "skill_name": "ETL"
+    },
+    {
+      "skill_name": "Data Visualization"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

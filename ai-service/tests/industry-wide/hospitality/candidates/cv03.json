@@ -1,0 +1,57 @@
+{
+  "profile": {
+    "desired_title": "Guest Relations Manager",
+    "professional_summary": "Boutique Hotel Manager with 5.5 years in guest service and customer care, but only used basic Excel and Smile PMS, lacking Opera PMS experience."
+  },
+  "candidate_name": "Lê Thu Trang",
+  "desired_title": "Guest Relations Manager",
+  "professional_summary": "Boutique Hotel Manager with 5.5 years in guest service and customer care, but only used basic Excel and Smile PMS, lacking Opera PMS experience.",
+  "work_experiences": [
+    {
+      "company_name": "Hanoi La Siesta Boutique Hotel",
+      "position_title": "Senior Guest Experience Manager",
+      "start_date": "2019-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Coordinate Front Office welcoming, maintain high Guest Relations ratings, deliver personalized Customer Service, and manage domestic Reservation Systems. Entire property runs on local Smile PMS, zero exposure to Oracle Opera PMS.",
+      "achievements": "Won TripAdvisor Travelers' Choice Award for top boutique service."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Tourism Management",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Certified Hospitality Supervisor (CHS)",
+      "issuing_organization": "AHLEI"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "profile": {
+    "desired_title": "Senior Automation & Quality Engineering Manager",
+    "professional_summary": "Senior Automation Engineer with 6.5 years designing Siemens S7-1500 PLC systems, SCADA architectures, and implementing Lean Six Sigma production frameworks."
+  },
+  "candidate_name": "Nguyễn Văn Đức",
+  "desired_title": "Senior Automation & Quality Engineering Manager",
+  "professional_summary": "Senior Automation Engineer with 6.5 years designing Siemens S7-1500 PLC systems, SCADA architectures, and implementing Lean Six Sigma production frameworks.",
+  "work_experiences": [
+    {
+      "company_name": "Schneider Electric Vietnam",
+      "position_title": "Senior Automation & Quality Lead",
+      "start_date": "2021-02-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Lead factory automation via Siemens PLC programming and WinCC SCADA systems. Drive Lean Manufacturing and Six Sigma DMAIC projects. Supervise plant-wide Preventive Maintenance schedules.",
+      "achievements": "Reduced unplanned machine downtime by 42% and achieved Six Sigma quality yield of 99.7%."
+    },
+    {
+      "company_name": "Foxconn Precision Industry",
+      "position_title": "Process Automation Engineer",
+      "start_date": "2017-09-01T00:00:00Z",
+      "end_date": "2021-01-31T00:00:00Z",
+      "is_current": false,
+      "description": "Programmed Mitsubishi PLCs, integrated SCADA telemetry, executed daily line preventive maintenance.",
+      "achievements": "Automated 3 manual stamping cells reducing labor costs by 30%."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi University of Science and Technology",
+      "major": "Automation and Control Engineering",
+      "degree": "Bachelor",
+      "start_date": "2012-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "PLC"
+    },
+    {
+      "skill_name": "SCADA"
+    },
+    {
+      "skill_name": "Lean Manufacturing"
+    },
+    {
+      "skill_name": "Six Sigma"
+    },
+    {
+      "skill_name": "Preventive Maintenance"
+    },
+    {
+      "skill_name": "AutoCAD"
+    },
+    {
+      "skill_name": "FMEA"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Six Sigma Black Belt",
+      "issuing_organization": "ASQ"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 850"
+    }
+  ]
+}

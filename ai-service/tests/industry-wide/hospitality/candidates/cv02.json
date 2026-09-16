@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Front Office Manager",
+    "professional_summary": "Hotelier with 5.5 years in 5-star hotel Front Office, Opera PMS, Guest Relations, and front-desk team leadership."
+  },
+  "candidate_name": "Trần Văn Minh",
+  "desired_title": "Front Office Manager",
+  "professional_summary": "Hotelier with 5.5 years in 5-star hotel Front Office, Opera PMS, Guest Relations, and front-desk team leadership.",
+  "work_experiences": [
+    {
+      "company_name": "Sheraton Saigon Hotel",
+      "position_title": "Front Desk Manager",
+      "start_date": "2019-01-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Manage Front Office check-in/out, resolve Guest Relations disputes, oversee Opera PMS room inventory, deliver exceptional Customer Service, and maintain Reservation Systems.",
+      "achievements": "Boosted front desk upsell room revenue by 25%."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "University of Economics HCMC",
+      "major": "Hospitality and Tourism Management",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Front Office"
+    },
+    {
+      "skill_name": "Guest Relations"
+    },
+    {
+      "skill_name": "Opera PMS"
+    },
+    {
+      "skill_name": "Customer Service"
+    },
+    {
+      "skill_name": "Reservation Systems"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

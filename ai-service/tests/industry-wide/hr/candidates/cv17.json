@@ -1,0 +1,49 @@
+{
+  "profile": {
+    "desired_title": "Workplace Happiness Alchemist",
+    "professional_summary": "Corporate aura curator radiating unconditional empathy, cosmic motivational vibes, and holistic happiness vibrations."
+  },
+  "candidate_name": "Lê Hoài Nam",
+  "desired_title": "Workplace Happiness Alchemist",
+  "professional_summary": "Corporate aura curator radiating unconditional empathy, cosmic motivational vibes, and holistic happiness vibrations.",
+  "work_experiences": [
+    {
+      "company_name": "Mindful Workspace Hub",
+      "position_title": "Happiness Champion",
+      "start_date": "2018-05-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Set up indoor potted plants, run morning yoga mindfulness circles, lead laughter therapy sessions. Never drafted employment contracts or resolved labor union disputes.",
+      "achievements": "Hosted 100 positive energy workshops."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Van Lang University",
+      "major": "Public Relations",
+      "degree": "Bachelor",
+      "start_date": "2013-09-01T00:00:00Z",
+      "end_date": "2017-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Workplace Happiness"
+    },
+    {
+      "skill_name": "Yoga Mindfulness"
+    },
+    {
+      "skill_name": "Public Speaking"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Senior Freelance Growth Consultant",
+    "professional_summary": "Freelance Performance Marketer with 4.5 years optimizing Google Ads, Meta Ads, and GA4 for over 30 e-commerce brands."
+  },
+  "candidate_name": "Trịnh Duy Khánh",
+  "desired_title": "Senior Freelance Growth Consultant",
+  "professional_summary": "Freelance Performance Marketer with 4.5 years optimizing Google Ads, Meta Ads, and GA4 for over 30 e-commerce brands.",
+  "work_experiences": [
+    {
+      "company_name": "Independent Freelance Consultant",
+      "position_title": "Senior Performance Marketing Consultant",
+      "start_date": "2019-09-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Contracted by multiple SMEs to build end-to-end Google Ads Search/Shopping campaigns, Meta Ads scaling, GA4 event tracking, and Conversion Rate Optimization.",
+      "achievements": "Managed cumulative ad spend over $800K with average ROAS of 4.2x across client portfolio."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Business Administration",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Google Ads"
+    },
+    {
+      "skill_name": "Meta Ads"
+    },
+    {
+      "skill_name": "GA4"
+    },
+    {
+      "skill_name": "Performance Marketing"
+    },
+    {
+      "skill_name": "Conversion Rate Optimization"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "Google Ads Certification",
+      "issuing_organization": "Google"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

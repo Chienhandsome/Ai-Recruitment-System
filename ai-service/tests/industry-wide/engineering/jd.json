@@ -1,0 +1,65 @@
+{
+  "id": "jd-engineering-automation-09",
+  "title": "Senior Automation & Quality Engineering Manager",
+  "description": "VinFast Advanced Manufacturing is seeking a Senior Automation & Quality Engineering Manager to drive factory automation, robotic assembly line optimization, and operational excellence. You will program and maintain PLC/SCADA industrial architectures, lead Lean Manufacturing and Six Sigma yield improvement initiatives, formulate Preventive Maintenance protocols, and eliminate factory downtime across high-throughput production lines.",
+  "requirements": "Required Qualifications:\n- Professional Experience: Minimum 5+ years in industrial manufacturing automation and process quality engineering.\n- Core Technical Skills: PLC (Siemens/Rockwell), SCADA, Lean Manufacturing, Six Sigma, Preventive Maintenance.\n- Preferred Skills: AutoCAD, FMEA, Robotics, Root Cause Analysis.\n- Education: Bachelor's degree or above in Electrical Engineering, Mechanical Engineering, Mechatronics, Automation Engineering, Industrial Engineering, or related field.\n- Language: Working English proficiency (TOEIC 700 or equivalent) for vendor technical manuals and equipment commissioning.\n- Certifications: Six Sigma Green Belt / Black Belt preferred.",
+  "required_experience_years": 5.0,
+  "experience_level": "SENIOR",
+  "level_requirement_mode": "REQUIRED",
+  "required_skills": [
+    {
+      "skill_name": "PLC",
+      "is_mandatory": true,
+      "minimum_years": 4.0
+    },
+    {
+      "skill_name": "SCADA",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Lean Manufacturing",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Six Sigma",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "Preventive Maintenance",
+      "is_mandatory": true,
+      "minimum_years": 3.0
+    },
+    {
+      "skill_name": "AutoCAD",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    },
+    {
+      "skill_name": "FMEA",
+      "is_mandatory": false,
+      "minimum_years": 0.0
+    }
+  ],
+  "required_certificates": [
+    {
+      "certificate_name": "Six Sigma Black Belt",
+      "is_mandatory": false
+    }
+  ],
+  "required_languages": [
+    {
+      "language": "English",
+      "proficiency": "TOEIC 700",
+      "is_mandatory": true
+    }
+  ],
+  "ai_weights_config": {
+    "skills": 40.0,
+    "experience": 30.0,
+    "education": 15.0,
+    "other": 15.0
+  }
+}

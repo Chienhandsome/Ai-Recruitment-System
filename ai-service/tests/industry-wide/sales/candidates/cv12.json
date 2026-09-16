@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "desired_title": "Sales Manager",
+    "professional_summary": "Sales executive with overlapping concurrent employment roles."
+  },
+  "candidate_name": "Lê Quốc Thịnh",
+  "desired_title": "Sales Manager",
+  "professional_summary": "Sales executive with overlapping concurrent employment roles.",
+  "work_experiences": [
+    {
+      "company_name": "VNTT Solutions",
+      "position_title": "Corporate Sales Lead",
+      "start_date": "2021-06-01T00:00:00Z",
+      "end_date": "2024-01-01T00:00:00Z",
+      "is_current": false,
+      "description": "Conduct B2B Sales and Contract Negotiation.",
+      "achievements": ""
+    },
+    {
+      "company_name": "NetNam Telecom (Concurrent)",
+      "position_title": "Enterprise Account Executive",
+      "start_date": "2021-08-01T00:00:00Z",
+      "end_date": "2023-12-31T00:00:00Z",
+      "is_current": false,
+      "description": "Simultaneous enterprise sales position.",
+      "achievements": ""
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Banking Academy",
+      "major": "Finance",
+      "degree": "Bachelor",
+      "start_date": "2017-09-01T00:00:00Z",
+      "end_date": "2021-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "B2B Sales"
+    },
+    {
+      "skill_name": "Enterprise Sales"
+    },
+    {
+      "skill_name": "Contract Negotiation"
+    },
+    {
+      "skill_name": "Key Account Management"
+    },
+    {
+      "skill_name": "Solution Selling"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

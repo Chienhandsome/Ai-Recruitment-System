@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "desired_title": "Print Graphic Designer",
+    "professional_summary": "Print Designer with 5 years setting up offset CMYK files, vinyl street banners, and paper business cards."
+  },
+  "candidate_name": "Hoàng Thị Thơm",
+  "desired_title": "Print Graphic Designer",
+  "professional_summary": "Print Designer with 5 years setting up offset CMYK files, vinyl street banners, and paper business cards.",
+  "work_experiences": [
+    {
+      "company_name": "Phuc An Printing House",
+      "position_title": "Prepress Graphic Staff",
+      "start_date": "2019-03-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Check bleeds and crop marks on CorelDRAW and Illustrator files, operate wide-format vinyl banner inkjet printers. No Figma, responsive screens, or interactive prototypes.",
+      "achievements": "Printed over 50,000 square meters of outdoor advertising banners."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "Hanoi College of Printing Technology",
+      "major": "Printing and Graphic Prepress",
+      "degree": "Associate",
+      "start_date": "2015-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "CorelDRAW"
+    },
+    {
+      "skill_name": "Offset Printing"
+    },
+    {
+      "skill_name": "Prepress"
+    },
+    {
+      "skill_name": "Vinyl Plotting"
+    },
+    {
+      "skill_name": "CMYK Separation"
+    }
+  ],
+  "certificates": [],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 6.5"
+    }
+  ]
+}

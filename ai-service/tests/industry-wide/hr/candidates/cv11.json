@@ -1,0 +1,60 @@
+{
+  "profile": {
+    "desired_title": "Senior Freelance HR Consultant",
+    "professional_summary": "Independent HR Consultant with 5.5 years establishing Talent Acquisition funnels, Labor Law compliant contracts, and HRBP strategies for SMEs."
+  },
+  "candidate_name": "Trần Thị Bích Ngọc",
+  "desired_title": "Senior Freelance HR Consultant",
+  "professional_summary": "Independent HR Consultant with 5.5 years establishing Talent Acquisition funnels, Labor Law compliant contracts, and HRBP strategies for SMEs.",
+  "work_experiences": [
+    {
+      "company_name": "Bich Ngoc HR Advisory Services",
+      "position_title": "Principal HR Consultant",
+      "start_date": "2018-11-01T00:00:00Z",
+      "end_date": null,
+      "is_current": true,
+      "description": "Provide end-to-end Talent Acquisition, fractional HRBP support, Labor Law compliant contracts, Performance Management KPI systems, and Employee Relations resolution for 15 corporate clients.",
+      "achievements": "Successfully built core teams for 8 tech startups."
+    }
+  ],
+  "educations": [
+    {
+      "school_name": "National Economics University",
+      "major": "Human Resource Management",
+      "degree": "Bachelor",
+      "start_date": "2014-09-01T00:00:00Z",
+      "end_date": "2018-06-01T00:00:00Z",
+      "description": ""
+    }
+  ],
+  "projects": [],
+  "skills": [
+    {
+      "skill_name": "Talent Acquisition"
+    },
+    {
+      "skill_name": "HRBP"
+    },
+    {
+      "skill_name": "Labor Law"
+    },
+    {
+      "skill_name": "Performance Management"
+    },
+    {
+      "skill_name": "Employee Relations"
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_name": "SHRM-CP",
+      "issuing_organization": "SHRM"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "IELTS 7.0"
+    }
+  ]
+}

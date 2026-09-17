@@ -312,4 +312,83 @@ describe('ApplicationsService', () => {
     expect(result.evaluationStatus).toBe('RETRY_SCHEDULED');
     expect(result.message).toContain('thử lại');
   });
+
+  it('permanently deletes a recruiter-scoped application and its notifications', async () => {
+    const scope = { job: { recruiterId: 'recruiter-1' } };
+    const transactionClient = {
+      application: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'application-1' }),
+        delete: jest.fn().mockResolvedValue({ id: 'application-1' }),
+      },
+      notification: {
+        deleteMany: jest.fn().mockResolvedValue({ count: 2 }),
+      },
+    };
+    const prisma = {
+      $transaction: jest.fn(
+        async (
+          callback: (client: typeof transactionClient) => Promise<unknown>,
+        ) => callback(transactionClient),
+      ),
+    };
+    const accessService = {
+      recruiterApplicationWhere: jest.fn().mockResolvedValue(scope),
+    };
+    const service = new ApplicationsService(
+      prisma as never,
+      {} as never,
+      accessService as never,
+    );
+
+    await expect(
+      service.removeForRecruiter('recruiter-user-1', 'application-1'),
+    ).resolves.toEqual({
+      message: 'Application and related data permanently deleted.',
+      applicationId: 'application-1',
+      deleted: true,
+    });
+    expect(transactionClient.application.findFirst).toHaveBeenCalledWith({
+      where: { AND: [scope, { id: 'application-1' }] },
+      select: { id: true },
+    });
+    expect(transactionClient.notification.deleteMany).toHaveBeenCalledWith({
+      where: { applicationId: 'application-1' },
+    });
+    expect(transactionClient.application.delete).toHaveBeenCalledWith({
+      where: { id: 'application-1' },
+    });
+  });
+
+  it('does not delete related data when the application is outside recruiter scope', async () => {
+    const transactionClient = {
+      application: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        delete: jest.fn(),
+      },
+      notification: { deleteMany: jest.fn() },
+    };
+    const prisma = {
+      $transaction: jest.fn(
+        async (
+          callback: (client: typeof transactionClient) => Promise<unknown>,
+        ) => callback(transactionClient),
+      ),
+    };
+    const accessService = {
+      recruiterApplicationWhere: jest
+        .fn()
+        .mockResolvedValue({ job: { recruiterId: 'recruiter-1' } }),
+    };
+    const service = new ApplicationsService(
+      prisma as never,
+      {} as never,
+      accessService as never,
+    );
+
+    await expect(
+      service.removeForRecruiter('recruiter-user-1', 'application-2'),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(transactionClient.notification.deleteMany).not.toHaveBeenCalled();
+    expect(transactionClient.application.delete).not.toHaveBeenCalled();
+  });
 });

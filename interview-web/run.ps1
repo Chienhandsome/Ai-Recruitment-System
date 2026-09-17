@@ -1,3 +1,19 @@
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$pythonExe = Join-Path $projectRoot "ai-service\.venv\Scripts\python.exe"
-& $pythonExe -m http.server 4174
+$pythonCandidates = @(
+    (Join-Path $projectRoot "ai-service\.venv-local\Scripts\python.exe"),
+    (Join-Path $projectRoot "ai-service\.venv\Scripts\python.exe")
+)
+$pythonExe = $pythonCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+
+if (-not $pythonExe) {
+    Write-Error "Không tìm thấy Python của dự án. Hãy tạo ai-service\.venv-local hoặc ai-service\.venv trước."
+    exit 1
+}
+
+Push-Location $PSScriptRoot
+try {
+    & $pythonExe -m http.server 4174 --bind 127.0.0.1
+}
+finally {
+    Pop-Location
+}

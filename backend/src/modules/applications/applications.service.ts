@@ -687,6 +687,32 @@ export class ApplicationsService {
     return result;
   }
 
+  async removeForRecruiter(userId: string, applicationId: string) {
+    const scope = await this.accessService.recruiterApplicationWhere(userId);
+
+    await this.prisma.$transaction(async (prisma) => {
+      const application = await prisma.application.findFirst({
+        where: { AND: [scope, { id: applicationId }] },
+        select: { id: true },
+      });
+      if (!application) {
+        throw new NotFoundException('Application not found.');
+      }
+
+      // Notifications do not currently use a cascading foreign key, so remove
+      // them explicitly before deleting the application. All other dependent
+      // application records are configured with onDelete: Cascade.
+      await prisma.notification.deleteMany({ where: { applicationId } });
+      await prisma.application.delete({ where: { id: application.id } });
+    });
+
+    return {
+      message: 'Application and related data permanently deleted.',
+      applicationId,
+      deleted: true,
+    };
+  }
+
   async findMine(userId: string, query: QueryMyApplicationsDto) {
     const candidateId = await this.accessService.candidateProfileId(userId);
     const where: Prisma.ApplicationWhereInput = {

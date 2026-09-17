@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Post,
   Get,
   Patch,
@@ -107,5 +108,21 @@ export class ApplicationsController {
     @Body() dto: UpdateApplicationStageDto,
   ) {
     return this.applicationsService.updateStage(user.id, id, dto);
+  }
+
+  @Delete(':id')
+  @Roles('RECRUITER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Permanently delete an application and its related data for testing',
+  })
+  @ApiResponse({ status: 200, description: 'Application permanently deleted.' })
+  @ApiResponse({ status: 404, description: 'Application not found.' })
+  removeForRecruiter(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.applicationsService.removeForRecruiter(user.id, id);
   }
 }

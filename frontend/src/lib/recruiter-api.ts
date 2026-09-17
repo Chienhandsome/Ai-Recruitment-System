@@ -5,7 +5,7 @@ export interface JobSkillData {
   skill: {
     id: string;
     name: string;
-  }
+  };
 }
 
 export interface JobPostingData {
@@ -20,7 +20,7 @@ export interface JobPostingData {
   description: string;
   employmentType: string;
   experienceLevel?: string;
-  levelRequirementMode?: "ADVISORY" | "REQUIRED";
+  levelRequirementMode?: 'ADVISORY' | 'REQUIRED';
   status: string;
   requiredExperienceYears?: number;
   autoShortlistThreshold?: number;
@@ -79,27 +79,27 @@ export interface JobsResponse {
 }
 
 export type ApplicationStage =
-  | "RECEIVED"
-  | "SCREENING"
-  | "SHORTLISTED"
-  | "INTERVIEW_SCHEDULED"
-  | "INTERVIEWED"
-  | "OFFERED"
-  | "HIRED"
-  | "REJECTED"
-  | "WITHDRAWN";
+  | 'RECEIVED'
+  | 'SCREENING'
+  | 'SHORTLISTED'
+  | 'INTERVIEW_SCHEDULED'
+  | 'INTERVIEWED'
+  | 'OFFERED'
+  | 'HIRED'
+  | 'REJECTED'
+  | 'WITHDRAWN';
 
 export type ApplicationProcessingStatus =
-  | "UPLOADED"
-  | "QUEUED"
-  | "PARSING"
-  | "NORMALIZING"
-  | "MATCHING"
-  | "SCORING"
-  | "COMPLETED"
-  | "FAILED";
+  | 'UPLOADED'
+  | 'QUEUED'
+  | 'PARSING'
+  | 'NORMALIZING'
+  | 'MATCHING'
+  | 'SCORING'
+  | 'COMPLETED'
+  | 'FAILED';
 
-export type HrDecision = "PENDING" | "ACCEPTED" | "REJECTED" | "CONSIDER";
+export type HrDecision = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CONSIDER';
 
 export interface RecruiterApplicationListItem {
   id: string;
@@ -116,7 +116,7 @@ export interface RecruiterApplicationListItem {
   processingStatus: ApplicationProcessingStatus;
   latestAiResult: {
     overallScore: number;
-    matchLevel: "LOW" | "MEDIUM" | "HIGH";
+    matchLevel: 'LOW' | 'MEDIUM' | 'HIGH';
     confidenceScore: number | null;
     version: number;
   } | null;
@@ -178,16 +178,16 @@ export class RecruiterApiError extends Error {
     readonly status: number,
   ) {
     super(message);
-    this.name = "RecruiterApiError";
+    this.name = 'RecruiterApiError';
   }
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 async function readRecruiterApiError(response: Response, fallback: string) {
   try {
     const payload = (await response.json()) as { message?: string | string[] };
-    if (Array.isArray(payload.message)) return payload.message.join(", ");
+    if (Array.isArray(payload.message)) return payload.message.join(', ');
     return payload.message || fallback;
   } catch {
     return fallback;
@@ -229,13 +229,13 @@ export async function getRecruiterProfile(token: string): Promise<RecruiterProfi
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    cache: "no-store",
+    cache: 'no-store',
   });
 
   if (!res.ok) {
     const text = await res.text();
     console.error(`Failed to fetch recruiter profile. Status: ${res.status}. Body: ${text}`);
-    throw new Error("Failed to fetch recruiter profile");
+    throw new Error('Failed to fetch recruiter profile');
   }
 
   return res.json();
@@ -250,7 +250,7 @@ export async function getRecruiterDashboardStats(token: string): Promise<Recruit
   });
 
   if (!res.ok) {
-    throw new Error("Failed to fetch recruiter dashboard stats");
+    throw new Error('Failed to fetch recruiter dashboard stats');
   }
 
   return res.json();
@@ -258,19 +258,25 @@ export async function getRecruiterDashboardStats(token: string): Promise<Recruit
 
 export async function updateRecruiterProfile(
   token: string,
-  data: { title?: string; fullName?: string; phone?: string; birthDay?: string; avatarUrl?: string }
+  data: {
+    title?: string;
+    fullName?: string;
+    phone?: string;
+    birthDay?: string;
+    avatarUrl?: string;
+  },
 ): Promise<RecruiterProfileData> {
   const res = await fetch(`${API_URL}/recruiters/profile`, {
-    method: "PATCH",
+    method: 'PATCH',
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
   });
 
   if (!res.ok) {
-    throw new Error("Failed to update recruiter profile");
+    throw new Error('Failed to update recruiter profile');
   }
 
   return res.json();
@@ -278,7 +284,7 @@ export async function updateRecruiterProfile(
 
 export async function getRecruiterJobs(
   token: string,
-  params?: { page?: number; limit?: number; status?: string; search?: string }
+  params?: { page?: number; limit?: number; status?: string; search?: string },
 ): Promise<JobsResponse> {
   const fallback: JobsResponse = {
     data: [],
@@ -290,10 +296,10 @@ export async function getRecruiterJobs(
   }
 
   const query = new URLSearchParams();
-  if (params?.page) query.append("page", params.page.toString());
-  if (params?.limit) query.append("limit", params.limit.toString());
-  if (params?.status) query.append("status", params.status);
-  if (params?.search) query.append("search", params.search);
+  if (params?.page) query.append('page', params.page.toString());
+  if (params?.limit) query.append('limit', params.limit.toString());
+  if (params?.status) query.append('status', params.status);
+  if (params?.search) query.append('search', params.search);
 
   try {
     const res = await fetch(`${API_URL}/jobs?${query.toString()}`, {
@@ -308,26 +314,26 @@ export async function getRecruiterJobs(
     }
 
     if (!res.ok) {
-      const errDetail = await res.text().catch(() => "");
+      const errDetail = await res.text().catch(() => '');
       throw new Error(`Failed to fetch recruiter jobs (${res.status}): ${errDetail}`);
     }
 
     return await res.json();
   } catch (error) {
-    console.warn("Failed to fetch recruiter jobs:", error);
+    console.warn('Failed to fetch recruiter jobs:', error);
     return fallback;
   }
 }
 
 export async function createRecruiterJob(
   token: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<JobPostingData> {
   const res = await fetch(`${API_URL}/jobs`, {
-    method: "POST",
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
   });
@@ -343,13 +349,13 @@ export async function createRecruiterJob(
 export async function updateRecruiterJob(
   token: string,
   jobId: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<JobPostingData> {
   const res = await fetch(`${API_URL}/jobs/${jobId}`, {
-    method: "PATCH",
+    method: 'PATCH',
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
   });
@@ -362,10 +368,7 @@ export async function updateRecruiterJob(
   return res.json();
 }
 
-export async function getRecruiterJobDetail(
-  token: string,
-  jobId: string
-): Promise<JobPostingData> {
+export async function getRecruiterJobDetail(token: string, jobId: string): Promise<JobPostingData> {
   const res = await fetch(`${API_URL}/jobs/${jobId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -374,7 +377,7 @@ export async function getRecruiterJobDetail(
   });
 
   if (!res.ok) {
-    throw new Error("Failed to fetch job detail");
+    throw new Error('Failed to fetch job detail');
   }
 
   return res.json();
@@ -389,23 +392,23 @@ export async function getRecruiterApplications(
     minScore?: number;
     maxScore?: number;
     search?: string;
-    sortBy?: "AI_SCORE" | "APPLIED_AT" | "UPDATED_AT";
-    sortOrder?: "ASC" | "DESC";
+    sortBy?: 'AI_SCORE' | 'APPLIED_AT' | 'UPDATED_AT';
+    sortOrder?: 'ASC' | 'DESC';
     page?: number;
     limit?: number;
   } = {},
 ): Promise<RecruiterApplicationsResponse> {
   const params = new URLSearchParams();
   Object.entries(query).forEach(([key, value]) => {
-    if (value !== undefined && value !== "") params.set(key, String(value));
+    if (value !== undefined && value !== '') params.set(key, String(value));
   });
   const response = await fetch(`${API_URL}/applications?${params.toString()}`, {
     headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
+    cache: 'no-store',
   });
   if (!response.ok) {
     throw new RecruiterApiError(
-      await readRecruiterApiError(response, "Không thể tải danh sách ứng viên"),
+      await readRecruiterApiError(response, 'Không thể tải danh sách ứng viên'),
       response.status,
     );
   }
@@ -418,11 +421,11 @@ export async function getRecruiterApplicationDetail(
 ): Promise<RecruiterApplicationDetail> {
   const response = await fetch(`${API_URL}/applications/${applicationId}`, {
     headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
+    cache: 'no-store',
   });
   if (!response.ok) {
     throw new RecruiterApiError(
-      await readRecruiterApiError(response, "Không thể tải hồ sơ ứng viên"),
+      await readRecruiterApiError(response, 'Không thể tải hồ sơ ứng viên'),
       response.status,
     );
   }
@@ -440,28 +443,41 @@ export async function updateApplicationStage(
   },
 ): Promise<UpdateApplicationStageResponse> {
   const response = await fetch(`${API_URL}/applications/${applicationId}/stage`, {
-    method: "PATCH",
+    method: 'PATCH',
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(input),
   });
   if (!response.ok) {
     throw new RecruiterApiError(
-      await readRecruiterApiError(response, "Không thể cập nhật trạng thái hồ sơ"),
+      await readRecruiterApiError(response, 'Không thể cập nhật trạng thái hồ sơ'),
       response.status,
     );
   }
   return response.json();
 }
 
-export async function deleteRecruiterJob(
+export async function deleteRecruiterApplication(
   token: string,
-  jobId: string
+  applicationId: string,
 ): Promise<void> {
+  const response = await fetch(`${API_URL}/applications/${applicationId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    throw new RecruiterApiError(
+      await readRecruiterApiError(response, 'Không thể xóa hồ sơ ứng tuyển'),
+      response.status,
+    );
+  }
+}
+
+export async function deleteRecruiterJob(token: string, jobId: string): Promise<void> {
   const res = await fetch(`${API_URL}/jobs/${jobId}`, {
-    method: "DELETE",
+    method: 'DELETE',
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -475,19 +491,22 @@ export async function deleteRecruiterJob(
 
 export async function getJobCategories(): Promise<JobCategoryData[]> {
   const res = await fetch(`${API_URL}/job-categories`, {
-    cache: "no-store",
+    cache: 'no-store',
   });
   if (!res.ok) return [];
   return res.json();
 }
 
-export async function getSkillsByCategory(categoryId?: string, search?: string): Promise<SkillItemData[]> {
+export async function getSkillsByCategory(
+  categoryId?: string,
+  search?: string,
+): Promise<SkillItemData[]> {
   const query = new URLSearchParams();
-  if (categoryId) query.append("categoryId", categoryId);
-  if (search) query.append("search", search);
+  if (categoryId) query.append('categoryId', categoryId);
+  if (search) query.append('search', search);
 
   const res = await fetch(`${API_URL}/skills?${query.toString()}`, {
-    cache: "no-store",
+    cache: 'no-store',
   });
   if (!res.ok) return [];
   return res.json();
@@ -495,19 +514,19 @@ export async function getSkillsByCategory(categoryId?: string, search?: string):
 
 export async function createCustomSkill(
   token: string,
-  data: { name: string; categoryId: string }
+  data: { name: string; categoryId: string },
 ): Promise<SkillItemData> {
   const res = await fetch(`${API_URL}/skills`, {
-    method: "POST",
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
   });
 
   if (!res.ok) {
-    throw new Error("Failed to create custom skill");
+    throw new Error('Failed to create custom skill');
   }
 
   return res.json();
@@ -598,18 +617,18 @@ export interface RecruiterActionHubData {
 
 export async function getRecruiterActionHub(
   token: string,
-  jobId?: string
+  jobId?: string,
 ): Promise<RecruiterActionHubData> {
   const query = new URLSearchParams();
-  if (jobId) query.set("jobId", jobId);
+  if (jobId) query.set('jobId', jobId);
 
   const res = await fetch(`${API_URL}/recruiters/dashboard/action-hub?${query.toString()}`, {
     headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
+    cache: 'no-store',
   });
 
   if (!res.ok) {
-    throw new Error("Failed to load recruiter action hub data");
+    throw new Error('Failed to load recruiter action hub data');
   }
 
   return res.json();
@@ -617,20 +636,19 @@ export async function getRecruiterActionHub(
 
 export async function getRecruiterAnalytics(
   token: string,
-  jobId?: string
+  jobId?: string,
 ): Promise<RecruiterAnalyticsData> {
   const query = new URLSearchParams();
-  if (jobId) query.set("jobId", jobId);
+  if (jobId) query.set('jobId', jobId);
 
   const res = await fetch(`${API_URL}/recruiters/dashboard/analytics?${query.toString()}`, {
     headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
+    cache: 'no-store',
   });
 
   if (!res.ok) {
-    throw new Error("Failed to load recruiter analytics");
+    throw new Error('Failed to load recruiter analytics');
   }
 
   return res.json();
 }
-

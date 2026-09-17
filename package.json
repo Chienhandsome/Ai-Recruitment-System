@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev:all": "concurrently -n \"BACKEND,FRONTEND,AI-API,AI-WORKERS\" -c \"blue,green,magenta,yellow\" \"npm --prefix backend run start:dev\" \"npm --prefix frontend run dev\" \"cd ai-service && .\\venv\\Scripts\\uvicorn app.main:app --host 127.0.0.1 --port 8000\" \"cd ai-service && .\\venv\\Scripts\\python worker_main.py\"",
-    "dev:with-docker": "concurrently -n \"RABBITMQ,BACKEND,FRONTEND,AI-API,AI-WORKERS\" -c \"red,blue,green,magenta,yellow\" \"powershell -ExecutionPolicy Bypass -File ./scripts/start-rabbitmq.ps1\" \"npm --prefix backend run start:dev\" \"npm --prefix frontend run dev\" \"cd ai-service && .\\venv\\Scripts\\uvicorn app.main:app --host 127.0.0.1 --port 8000\" \"cd ai-service && .\\venv\\Scripts\\python worker_main.py\"",
+    "dev:all": "concurrently -n \"BACKEND,FRONTEND,AI-API,AI-WORKERS,INTERVIEW-API,INTERVIEW-WEB\" -c \"blue,green,magenta,yellow,cyan,white\" \"npm --prefix backend run start:dev\" \"npm --prefix frontend run dev\" \"cd ai-service && .\\venv\\Scripts\\uvicorn app.main:app --host 127.0.0.1 --port 8000\" \"cd ai-service && .\\venv\\Scripts\\python worker_main.py\" \"npm run dev:interview-service\" \"npm run dev:interview-web\"",
+    "dev:with-docker": "concurrently -n \"RABBITMQ,BACKEND,FRONTEND,AI-API,AI-WORKERS,INTERVIEW-API,INTERVIEW-WEB\" -c \"red,blue,green,magenta,yellow,cyan,white\" \"powershell -ExecutionPolicy Bypass -File ./scripts/start-rabbitmq.ps1\" \"npm --prefix backend run start:dev\" \"npm --prefix frontend run dev\" \"cd ai-service && .\\venv\\Scripts\\uvicorn app.main:app --host 127.0.0.1 --port 8000\" \"cd ai-service && .\\venv\\Scripts\\python worker_main.py\" \"npm run dev:interview-service\" \"npm run dev:interview-web\"",
     "start:dev": "npm run dev:all",
-    "dev:interview-service": "cd interview-service && python -m uvicorn app:app --reload --host 127.0.0.1 --port 8010",
+    "dev:interview-service": "powershell -ExecutionPolicy Bypass -File ./interview-service/run.ps1",
     "dev:interview-demo": "cd interview-demo && python -m http.server 4173",
-    "dev:interview-web": "cd interview-web && python -m http.server 4174"
+    "dev:interview-web": "powershell -ExecutionPolicy Bypass -File ./interview-web/run.ps1"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

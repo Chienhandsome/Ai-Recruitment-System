@@ -25,7 +25,7 @@ export default async function CandidateLayout({
   }
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
+    <div className="flex min-h-[100dvh] flex-col bg-[#F8FAFC] font-[family-name:var(--font-geist-sans)]">
       <CandidateHeader
         fullName={profile?.fullName ?? null}
         avatarUrl={profile?.avatarUrl ?? null}

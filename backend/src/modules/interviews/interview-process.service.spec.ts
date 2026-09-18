@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/require-await */
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import {
   ApplicationStage,
   InterviewConductedBy,
@@ -153,7 +153,7 @@ describe('InterviewProcessService', () => {
       where: { id: 'app-1' },
       data: {
         currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
-        hrDecision: 'ACCEPTED',
+        hrDecision: 'CONSIDER',
       },
     });
   });
@@ -237,8 +237,163 @@ describe('InterviewProcessService', () => {
       where: { id: 'app-1' },
       data: {
         currentStage: ApplicationStage.INTERVIEWED,
-        hrDecision: 'ACCEPTED',
+        hrDecision: 'CONSIDER',
       },
+    });
+  });
+
+  it('rejects the application and cancels the remaining process after a failed round', async () => {
+    prisma.interviewRound.findFirst.mockResolvedValue({
+      id: 'round-1',
+      processId: 'process-1',
+      order: 1,
+      title: 'Vòng AI',
+      status: InterviewRoundStatus.AWAITING_REVIEW,
+      process: {
+        id: 'process-1',
+        status: InterviewProcessStatus.ACTIVE,
+        applicationId: 'app-1',
+        application: {
+          id: 'app-1',
+          currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
+        },
+      },
+    });
+    prisma.interviewProcess.findFirst.mockResolvedValue({
+      id: 'process-1',
+      applicationId: 'app-1',
+      status: InterviewProcessStatus.CANCELLED,
+      currentRoundOrder: null,
+      rounds: [],
+    });
+
+    await service.decide('user-1', 'round-1', {
+      decision: 'FAILED' as any,
+      score: 42,
+      note: 'Chưa đáp ứng yêu cầu chuyên môn.',
+    });
+
+    expect(prisma.interviewProcess.update).toHaveBeenCalledWith({
+      where: { id: 'process-1' },
+      data: expect.objectContaining({
+        status: InterviewProcessStatus.CANCELLED,
+        currentRoundOrder: null,
+      }),
+    });
+    expect(prisma.interviewRound.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { status: InterviewRoundStatus.CANCELLED },
+      }),
+    );
+    expect(prisma.application.update).toHaveBeenCalledWith({
+      where: { id: 'app-1' },
+      data: {
+        currentStage: ApplicationStage.REJECTED,
+        hrDecision: 'REJECTED',
+        hrNotes: 'Chưa đáp ứng yêu cầu chuyên môn.',
+      },
+    });
+  });
+
+  it('requires a reason before rejecting an application', async () => {
+    prisma.interviewRound.findFirst.mockResolvedValue({
+      id: 'round-1',
+      processId: 'process-1',
+      order: 1,
+      title: 'Vòng AI',
+      status: InterviewRoundStatus.AWAITING_REVIEW,
+      process: {
+        id: 'process-1',
+        status: InterviewProcessStatus.ACTIVE,
+        applicationId: 'app-1',
+        application: {
+          id: 'app-1',
+          currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
+        },
+      },
+    });
+
+    await expect(
+      service.decide('user-1', 'round-1', {
+        decision: 'FAILED' as any,
+      }),
+    ).rejects.toThrow(BadRequestException);
+    expect(prisma.interviewRound.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects a stale decision when another recruiter already handled the round', async () => {
+    prisma.interviewRound.findFirst
+      .mockResolvedValueOnce({
+        id: 'round-1',
+        processId: 'process-1',
+        order: 1,
+        title: 'Vòng AI',
+        status: InterviewRoundStatus.AWAITING_REVIEW,
+        process: {
+          id: 'process-1',
+          status: InterviewProcessStatus.ACTIVE,
+          applicationId: 'app-1',
+          application: {
+            id: 'app-1',
+            currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
+          },
+        },
+      })
+      .mockResolvedValueOnce(null);
+    prisma.interviewRound.updateMany.mockResolvedValueOnce({ count: 0 });
+
+    await expect(
+      service.decide('user-2', 'round-1', {
+        decision: 'PASSED' as any,
+        score: 80,
+      }),
+    ).rejects.toThrow(ConflictException);
+    expect(prisma.interviewProcess.update).not.toHaveBeenCalled();
+    expect(prisma.application.update).not.toHaveBeenCalled();
+  });
+
+  it('reopens an awaiting-review round without rejecting the application', async () => {
+    prisma.interviewRound.findFirst.mockResolvedValue({
+      id: 'round-1',
+      processId: 'process-1',
+      order: 1,
+      title: 'Vòng AI',
+      status: InterviewRoundStatus.AWAITING_REVIEW,
+      process: {
+        id: 'process-1',
+        status: InterviewProcessStatus.ACTIVE,
+        applicationId: 'app-1',
+        application: {
+          id: 'app-1',
+          currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
+        },
+      },
+    });
+    prisma.interviewProcess.findFirst.mockResolvedValue({
+      id: 'process-1',
+      applicationId: 'app-1',
+      status: InterviewProcessStatus.ACTIVE,
+      rounds: [],
+    });
+
+    await service.retry('user-1', 'round-1');
+
+    expect(prisma.interviewRound.update).toHaveBeenCalledWith({
+      where: { id: 'round-1' },
+      data: {
+        status: InterviewRoundStatus.READY,
+        resultScore: null,
+        decisionNote: null,
+        decidedByUserId: null,
+        decidedAt: null,
+      },
+    });
+    expect(prisma.application.update).not.toHaveBeenCalled();
+    expect(prisma.applicationStatusHistory.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        applicationId: 'app-1',
+        note: 'HR yêu cầu thực hiện lại Vòng AI.',
+      }),
     });
   });
 });

@@ -15,6 +15,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import secrets
 import smtplib
 import sqlite3
@@ -209,7 +210,7 @@ class Question(BaseModel):
 
 
 class LlmQuestion(BaseModel):
-    text: str = Field(min_length=10, max_length=700)
+    text: str = Field(min_length=10, max_length=320)
     competency: str = Field(min_length=1, max_length=100)
 
 
@@ -326,6 +327,10 @@ class MediaStorage:
     def download(self, object_key: str) -> bytes | None:
         raise NotImplementedError
 
+    def create_playback_url(self, object_key: str, expires_in: int) -> str | None:
+        """Return a short-lived URL when the storage provider supports streaming."""
+        return None
+
 
 class LocalMediaStorage(MediaStorage):
     async def upload(self, interview_id: str, question_number: int, extension: str, content_type: str, request: Request) -> tuple[str, int]:
@@ -378,6 +383,18 @@ class SupabaseMediaStorage(MediaStorage):
         except Exception as exc:  # noqa: BLE001
             logger.warning("Supabase video download failed: %s", exc)
             return None
+
+    def create_playback_url(self, object_key: str, expires_in: int) -> str | None:
+        try:
+            result = self.bucket.create_signed_url(object_key, expires_in)
+            if isinstance(result, dict):
+                value = result.get("signedURL") or result.get("signedUrl") or result.get("signed_url")
+            else:
+                value = getattr(result, "signed_url", None) or getattr(result, "signedURL", None)
+            return str(value) if value else None
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("Supabase playback URL creation failed")
+            raise HTTPException(status_code=502, detail="Không thể tạo đường dẫn phát video.") from exc
 
 
 media_storage: MediaStorage = SupabaseMediaStorage() if supabase_is_configured() else LocalMediaStorage()
@@ -693,22 +710,127 @@ def question_is_duplicate(text: str, interview: OnlineInterview) -> bool:
     return False
 
 
+UUID_PATTERN = re.compile(
+    r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b",
+    re.IGNORECASE,
+)
+OPAQUE_TOKEN_PATTERN = re.compile(
+    r"\b(?=[a-z0-9]{24,}\b)(?=[a-z0-9]*[a-z])(?=[a-z0-9]*\d)[a-z0-9]+\b",
+    re.IGNORECASE,
+)
+ISO_DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}(?:[T ][^\s]+)?$")
+IGNORED_EVIDENCE_KEYS = {
+    "id",
+    "email",
+    "phone",
+    "phonenumber",
+    "createdat",
+    "updatedat",
+    "deletedat",
+    "rawtexthash",
+    "code",
+    "jobcode",
+    "projecturl",
+    "credentialurl",
+    "avatarurl",
+    "resumefileurl",
+}
+
+
+def normalized_evidence_key(key: str) -> str:
+    return "".join(character for character in key.casefold() if character.isalnum())
+
+
+def is_metadata_key(key: str) -> bool:
+    normalized = normalized_evidence_key(key)
+    return normalized in IGNORED_EVIDENCE_KEYS or normalized.endswith("id") or normalized.endswith("url")
+
+
+def is_usable_evidence(text: str, key: str) -> bool:
+    if not 8 <= len(text) <= 500 or is_metadata_key(key):
+        return False
+    if (
+        UUID_PATTERN.search(text)
+        or OPAQUE_TOKEN_PATTERN.search(text)
+        or ISO_DATE_PATTERN.fullmatch(text)
+    ):
+        return False
+    lowered = text.casefold()
+    if lowered.startswith(("http://", "https://", "www.")) or ("@" in text and " " not in text):
+        return False
+    return True
+
+
+def evidence_priority(path: tuple[str, ...]) -> int:
+    """Prefer project and work evidence over profile metadata and generic strings."""
+    normalized_path = tuple(normalized_evidence_key(item) for item in path)
+    key = normalized_path[-1] if normalized_path else ""
+    if "projects" in normalized_path or "projectdata" in normalized_path:
+        return {
+            "projectname": 0,
+            "description": 1,
+            "projectrole": 2,
+            "technologies": 3,
+            "sourcetext": 4,
+        }.get(key, 8)
+    if "workexperiences" in normalized_path or "experiencedata" in normalized_path:
+        return {
+            "description": 10,
+            "achievements": 11,
+            "positiontitle": 12,
+            "companyname": 13,
+            "sourcetext": 14,
+        }.get(key, 18)
+    return {
+        "professionalsummary": 20,
+        "summary": 21,
+        "positiontitle": 24,
+        "sourcetext": 26,
+        "name": 30,
+        "desiredtitle": 32,
+        "description": 36,
+        "requirements": 38,
+    }.get(key, 60)
+
+
 def nested_evidence(value: Any) -> list[str]:
-    """Collect usable CV evidence even when Recruitment System sends nested JSON."""
-    if isinstance(value, str):
-        cleaned = " ".join(value.split())
-        return [cleaned] if 15 <= len(cleaned) <= 500 else []
-    if isinstance(value, dict):
-        return [item for child in value.values() for item in nested_evidence(child)]
-    if isinstance(value, list):
-        return [item for child in value for item in nested_evidence(child)]
-    return []
+    """Collect meaningful CV evidence while excluding IDs, URLs and metadata."""
+    collected: list[tuple[int, int, str]] = []
+    insertion_order = 0
+
+    def visit(child: Any, path: tuple[str, ...] = ()) -> None:
+        nonlocal insertion_order
+        if isinstance(child, str):
+            cleaned = " ".join(child.split())
+            key = path[-1] if path else ""
+            if is_usable_evidence(cleaned, key):
+                collected.append((evidence_priority(path), insertion_order, cleaned))
+                insertion_order += 1
+            return
+        if isinstance(child, dict):
+            for key, nested in child.items():
+                if not is_metadata_key(str(key)):
+                    visit(nested, (*path, str(key)))
+            return
+        if isinstance(child, list):
+            for nested in child:
+                visit(nested, path)
+
+    visit(value)
+    seen: set[str] = set()
+    result: list[str] = []
+    for _, _, text in sorted(collected):
+        fingerprint = text.casefold()
+        if fingerprint not in seen:
+            seen.add(fingerprint)
+            result.append(text)
+    return result
 
 
 def fallback_question(interview: OnlineInterview) -> Question:
     number = len(interview.turns) + 1
     competency = interview.config.competencies[(number - 1) % len(interview.config.competencies)]
-    evidence = next(iter(nested_evidence(interview.cv)), "một dự án liên quan nhất trong CV")[:160]
+    evidence = next(iter(nested_evidence(interview.cv)), "một dự án liên quan nhất trong CV")[:100]
     candidates = [
         f"Hãy chọn một dự án liên quan đến {evidence} và mô tả rõ vai trò, cách thực hiện cùng kết quả của bạn.",
         "Trong một quyết định kỹ thuật gần đây, bạn đã cân nhắc những phương án nào và vì sao chọn phương án cuối cùng?",
@@ -742,13 +864,16 @@ def llm_question(interview: OnlineInterview) -> Question | None:
             for turn in interview.turns[-4:]
         ]
         previous_questions = [turn.question.text for turn in interview.turns]
-        prompt = f"""Generate exactly one concise Vietnamese follow-up job interview question.
-CV JSON: {json.dumps(interview.cv, ensure_ascii=False)[:5000]}
-JD JSON: {json.dumps(interview.jd, ensure_ascii=False)[:3500]}
+        cv_evidence = nested_evidence(interview.cv)[:30]
+        job_evidence = nested_evidence(interview.jd)[:20]
+        prompt = f"""Generate exactly one concise Vietnamese follow-up job interview question under 260 characters.
+Candidate CV evidence JSON: {json.dumps(cv_evidence, ensure_ascii=False)[:5000]}
+Job description evidence JSON: {json.dumps(job_evidence, ensure_ascii=False)[:3500]}
 Required competencies: {interview.config.competencies}
 Recent transcript JSON: {json.dumps(transcript, ensure_ascii=False)[:5000]}
 Questions already asked and strictly forbidden: {json.dumps(previous_questions, ensure_ascii=False)}
 Use the candidate's most recent answer to choose a new angle and request concrete evidence that is still missing.
+Never mention database IDs, UUIDs, URLs, hashes or internal metadata in the question.
 Ask about work-relevant evidence only. Do not ask about sensitive personal traits and do not make hiring decisions."""
         client = genai.Client(api_key=api_key)
         model = os.getenv("INTERVIEW_LLM_MODEL", "gemini-2.5-flash-lite")
@@ -770,8 +895,12 @@ Ask about work-relevant evidence only. Do not ask about sensitive personal trait
             if not response.text:
                 continue
             generated = LlmQuestion.model_validate_json(response.text)
-            if question_is_duplicate(generated.text, interview):
-                logger.warning("Gemini returned a duplicate interview question on attempt %s", attempt + 1)
+            if (
+                question_is_duplicate(generated.text, interview)
+                or UUID_PATTERN.search(generated.text)
+                or OPAQUE_TOKEN_PATTERN.search(generated.text)
+            ):
+                logger.warning("Gemini returned an invalid or duplicate interview question on attempt %s", attempt + 1)
                 continue
             competency = generated.competency
             if competency not in interview.config.competencies:
@@ -970,6 +1099,17 @@ def download_video(interview_id: str, video_id: str, _: None = Depends(require_s
     return Response(content=content, media_type=asset.content_type, headers={"Content-Disposition": f'attachment; filename="{filename}"'})
 
 
+@router.get("/v1/internal/interviews/{interview_id}/videos/{video_id}/playback")
+def get_video_playback_url(interview_id: str, video_id: str, _: None = Depends(require_system_key)) -> dict[str, Any]:
+    interview = store.get(interview_id)
+    asset = next((video for video in interview.videos if video.id == video_id), None)
+    if not asset:
+        raise HTTPException(status_code=404, detail="Không tìm thấy video")
+    expires_in = 15 * 60
+    url = media_storage.create_playback_url(asset.path, expires_in)
+    return {"url": url, "expires_in": expires_in if url else 0}
+
+
 @router.get("/v1/public/launch/{launch_token}")
 def inspect_launch(launch_token: str) -> dict[str, Any]:
     interview = store.find_by_launch_token(launch_token); expire_if_needed(interview)
@@ -977,7 +1117,12 @@ def inspect_launch(launch_token: str) -> dict[str, Any]:
         raise HTTPException(status_code=410, detail="Link phỏng vấn đã được sử dụng")
     if interview.status == "EXPIRED":
         raise HTTPException(status_code=410, detail="Link phỏng vấn đã hết hạn")
-    return {"candidate_name": interview.candidate.display_name, "job_title": str(interview.jd.get("title", "vị trí đã ứng tuyển")), "expires_at": interview.expires_at}
+    return {
+        "candidate_name": interview.candidate.display_name,
+        "job_title": str(interview.jd.get("title", "vị trí đã ứng tuyển")),
+        "max_questions": interview.config.max_questions,
+        "expires_at": interview.expires_at,
+    }
 
 
 @router.post("/v1/public/launch/{launch_token}/otp")

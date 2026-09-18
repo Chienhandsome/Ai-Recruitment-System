@@ -55,12 +55,18 @@ describe('application stage machine', () => {
       HrDecision.CONSIDER,
     );
     expect(hrDecisionForStage(ApplicationStage.SHORTLISTED)).toBe(
-      HrDecision.ACCEPTED,
+      HrDecision.CONSIDER,
     );
     expect(hrDecisionForStage(ApplicationStage.INTERVIEW_SCHEDULED)).toBe(
-      HrDecision.ACCEPTED,
+      HrDecision.CONSIDER,
     );
     expect(hrDecisionForStage(ApplicationStage.INTERVIEWED)).toBe(
+      HrDecision.CONSIDER,
+    );
+    expect(hrDecisionForStage(ApplicationStage.OFFERED)).toBe(
+      HrDecision.ACCEPTED,
+    );
+    expect(hrDecisionForStage(ApplicationStage.HIRED)).toBe(
       HrDecision.ACCEPTED,
     );
     expect(hrDecisionForStage(ApplicationStage.REJECTED)).toBe(

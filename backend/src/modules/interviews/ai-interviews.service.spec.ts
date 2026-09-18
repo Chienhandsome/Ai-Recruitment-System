@@ -15,6 +15,7 @@ const APPLICATION_ID = '11111111-1111-4111-8111-111111111111';
 const SESSION_ID = '22222222-2222-4222-8222-222222222222';
 const REMOTE_ID = '33333333-3333-4333-8333-333333333333';
 const EVENT_ID = '44444444-4444-4444-8444-444444444444';
+const VIDEO_ID = '55555555-5555-4555-8555-555555555555';
 
 describe('AiInterviewsService', () => {
   let prisma: any;
@@ -115,19 +116,24 @@ describe('AiInterviewsService', () => {
       expiresAt: new Date(remoteResponse.expires_at),
     });
 
-    const result = await service.create('99999999-9999-4999-8999-999999999999', {
-      applicationId: APPLICATION_ID,
-      openingQuestions: ['Giới thiệu bản thân'],
-      competencies: ['technical_experience'],
-      maxQuestions: 6,
-      expiresInHours: 72,
-    });
+    const result = await service.create(
+      '99999999-9999-4999-8999-999999999999',
+      {
+        applicationId: APPLICATION_ID,
+        openingQuestions: ['Giới thiệu bản thân'],
+        competencies: ['technical_experience'],
+        maxQuestions: 6,
+        expiresInHours: 72,
+      },
+    );
 
     expect(result.interviewServiceId).toBe(REMOTE_ID);
     const request = (global.fetch as jest.Mock).mock.calls[0];
     const sent = JSON.parse(request[1].body as string);
     expect(sent.recruitment_application_id).toBe(APPLICATION_ID);
-    expect(sent.cv.candidate_profile.professional_summary).toBe('Java developer');
+    expect(sent.cv.candidate_profile.professional_summary).toBe(
+      'Java developer',
+    );
     expect(sent.jd.title).toBe('Backend Engineer');
     expect(sent.callback_url).toContain('/interviews/ai/callback');
     expect(notifications.createNotification).toHaveBeenCalledWith(
@@ -138,7 +144,7 @@ describe('AiInterviewsService', () => {
     );
   });
 
-  it('verifies HMAC, stores the callback once and advances the application', async () => {
+  it('verifies HMAC, stores the callback once and keeps the application awaiting HR review', async () => {
     const payload = {
       event_id: EVENT_ID,
       event_type: 'interview.completed',
@@ -189,9 +195,14 @@ describe('AiInterviewsService', () => {
         data: expect.objectContaining({ status: AiInterviewStatus.COMPLETED }),
       }),
     );
-    expect(prisma.application.update).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: APPLICATION_ID } }),
-    );
+    expect(prisma.application.update).not.toHaveBeenCalled();
+    expect(prisma.applicationStatusHistory.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        applicationId: APPLICATION_ID,
+        previousStage: ApplicationStage.INTERVIEW_SCHEDULED,
+        newStage: ApplicationStage.INTERVIEW_SCHEDULED,
+      }),
+    });
     expect(notifications.createNotification).toHaveBeenCalled();
   });
 
@@ -207,6 +218,39 @@ describe('AiInterviewsService', () => {
         {},
       ),
     ).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('returns a short-lived signed URL for recruiter video playback', async () => {
+    prisma.aiInterviewSession.findFirst.mockResolvedValue({
+      id: SESSION_ID,
+      interviewServiceId: REMOTE_ID,
+      videos: [{ id: VIDEO_ID, question_number: 1 }],
+    });
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          url: 'https://storage.example.test/signed/video',
+          expires_in: 900,
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+
+    await expect(
+      service.getVideoPlayback('recruiter-1', SESSION_ID, VIDEO_ID),
+    ).resolves.toEqual({
+      url: 'https://storage.example.test/signed/video',
+      expiresIn: 900,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining(`/videos/${VIDEO_ID}/playback`),
+      expect.objectContaining({
+        headers: {
+          'X-Interview-System-Key':
+            process.env.INTERVIEW_SYSTEM_API_KEY ?? 'dev-interview-system-key',
+        },
+      }),
+    );
   });
 
   it('moves a managed AI round to review without completing the application', async () => {
@@ -283,10 +327,37 @@ describe('AiInterviewsService', () => {
       where: { id: APPLICATION_ID },
       data: {
         currentStage: ApplicationStage.INTERVIEWED,
-        hrDecision: 'ACCEPTED',
+        hrDecision: 'CONSIDER',
         hrNotes: 'Ứng viên trả lời rất lưu loát các câu hỏi tình huống.',
       },
     });
     expect(prisma.applicationStatusHistory.create).toHaveBeenCalled();
+  });
+
+  it('rejects a legacy AI interview application when HR marks it as failed', async () => {
+    prisma.aiInterviewSession.findFirst.mockResolvedValue({
+      id: SESSION_ID,
+      applicationId: APPLICATION_ID,
+      roundId: null,
+      status: AiInterviewStatus.COMPLETED,
+    });
+    prisma.application.findUnique = jest.fn().mockResolvedValue({
+      currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
+    });
+
+    await service.decideSession('recruiter-1', SESSION_ID, {
+      decision: InterviewRoundDecision.FAILED,
+      score: 45,
+      note: 'Chưa đáp ứng yêu cầu của vị trí.',
+    });
+
+    expect(prisma.application.update).toHaveBeenCalledWith({
+      where: { id: APPLICATION_ID },
+      data: {
+        currentStage: ApplicationStage.REJECTED,
+        hrDecision: 'REJECTED',
+        hrNotes: 'Chưa đáp ứng yêu cầu của vị trí.',
+      },
+    });
   });
 });

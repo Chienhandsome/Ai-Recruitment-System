@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   BadGatewayException,
   ConflictException,
   Injectable,
@@ -417,6 +418,69 @@ export class AiInterviewsService {
     };
   }
 
+  async getVideoPlayback(userId: string, id: string, videoId: string) {
+    const session = await this.findAuthorizedSession(userId, id);
+    const videos = Array.isArray(session.videos) ? session.videos : [];
+    const video = videos.find(
+      (item) =>
+        typeof item === 'object' &&
+        item !== null &&
+        !Array.isArray(item) &&
+        item.id === videoId,
+    );
+    if (!video) {
+      throw new NotFoundException(
+        'Không tìm thấy video trong kết quả phỏng vấn.',
+      );
+    }
+
+    const serviceUrl = (
+      process.env.INTERVIEW_SERVICE_URL ?? 'http://127.0.0.1:8010'
+    ).replace(/\/$/, '');
+    const systemKey =
+      process.env.INTERVIEW_SYSTEM_API_KEY ?? 'dev-interview-system-key';
+    let response: Response;
+    try {
+      response = await fetch(
+        `${serviceUrl}/v1/internal/interviews/${session.interviewServiceId}/videos/${videoId}/playback`,
+        {
+          headers: { 'X-Interview-System-Key': systemKey },
+          signal: AbortSignal.timeout(15_000),
+        },
+      );
+    } catch (error) {
+      this.logger.error(`Video playback URL request failed: ${String(error)}`);
+      throw new ServiceUnavailableException(
+        'Không thể kết nối Interview Service.',
+      );
+    }
+    if (!response.ok) {
+      throw new BadGatewayException('Không thể tạo đường dẫn phát video.');
+    }
+
+    const payload = (await response.json()) as {
+      url?: unknown;
+      expires_in?: unknown;
+    };
+    const url = typeof payload.url === 'string' ? payload.url : null;
+    if (url) {
+      let parsed: URL;
+      try {
+        parsed = new URL(url);
+      } catch {
+        throw new BadGatewayException('Đường dẫn phát video không hợp lệ.');
+      }
+      if (!['http:', 'https:'].includes(parsed.protocol)) {
+        throw new BadGatewayException('Đường dẫn phát video không hợp lệ.');
+      }
+    }
+    const expiresIn =
+      typeof payload.expires_in === 'number' && payload.expires_in > 0
+        ? Math.min(payload.expires_in, 3600)
+        : 0;
+    return { url, expiresIn };
+  }
+
   async decideSession(
     userId: string,
     id: string,
@@ -428,6 +492,12 @@ export class AiInterviewsService {
     }
 
     const passed = dto.decision === InterviewRoundDecision.PASSED;
+    const decisionNote = dto.note?.trim();
+    if (!passed && !decisionNote) {
+      throw new BadRequestException(
+        'Vui lòng nhập lý do trước khi từ chối ứng viên.',
+      );
+    }
     await this.prisma.$transaction(async (prisma) => {
       const app = await prisma.application.findUnique({
         where: { id: session.applicationId },
@@ -436,13 +506,21 @@ export class AiInterviewsService {
       if (app) {
         const newStage = passed
           ? ApplicationStage.INTERVIEWED
-          : app.currentStage;
+          : ApplicationStage.REJECTED;
+        if (
+          app.currentStage !== newStage &&
+          !canTransitionApplication(app.currentStage, newStage)
+        ) {
+          throw new ConflictException(
+            `Không thể chuyển hồ sơ từ ${app.currentStage} sang ${newStage}.`,
+          );
+        }
         await prisma.application.update({
           where: { id: session.applicationId },
           data: {
             currentStage: newStage,
-            hrDecision: passed ? 'ACCEPTED' : 'REJECTED',
-            hrNotes: dto.note?.trim() || undefined,
+            hrDecision: hrDecisionForStage(newStage),
+            hrNotes: decisionNote || undefined,
           },
         });
         await prisma.applicationStatusHistory.create({
@@ -471,7 +549,10 @@ export class AiInterviewsService {
     this.verifySignature(rawBody, headers);
 
     let rawInput = input;
-    if (!rawInput || (typeof rawInput === 'object' && Object.keys(rawInput as object).length === 0)) {
+    if (
+      !rawInput ||
+      (typeof rawInput === 'object' && Object.keys(rawInput).length === 0)
+    ) {
       try {
         rawInput = JSON.parse(rawBody.toString('utf-8'));
       } catch {
@@ -568,28 +649,14 @@ export class AiInterviewsService {
           });
         }
 
-        if (
-          !session.roundId &&
-          status === AiInterviewStatus.COMPLETED &&
-          canTransitionApplication(
-            session.application.currentStage,
-            ApplicationStage.INTERVIEWED,
-          )
-        ) {
-          await prisma.application.update({
-            where: { id: session.applicationId },
-            data: {
-              currentStage: ApplicationStage.INTERVIEWED,
-              hrDecision: hrDecisionForStage(ApplicationStage.INTERVIEWED),
-            },
-          });
+        if (!session.roundId && status === AiInterviewStatus.COMPLETED) {
           await prisma.applicationStatusHistory.create({
             data: {
               applicationId: session.applicationId,
               previousStage: session.application.currentStage,
-              newStage: ApplicationStage.INTERVIEWED,
+              newStage: session.application.currentStage,
               changedByUserId: null,
-              note: 'Ứng viên đã hoàn thành phỏng vấn online với AI.',
+              note: 'Ứng viên đã hoàn thành phỏng vấn online với AI và đang chờ HR đánh giá.',
             },
           });
         }

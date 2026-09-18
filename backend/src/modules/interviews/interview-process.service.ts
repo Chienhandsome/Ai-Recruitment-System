@@ -319,6 +319,24 @@ export class InterviewProcessService {
       );
     }
     const passed = dto.decision === InterviewRoundDecision.PASSED;
+    const decisionNote = dto.note?.trim();
+    if (!passed && !decisionNote) {
+      throw new BadRequestException(
+        'Vui lòng nhập lý do trước khi từ chối ứng viên.',
+      );
+    }
+    if (
+      !passed &&
+      round.process.application.currentStage !== ApplicationStage.REJECTED &&
+      !canTransitionApplication(
+        round.process.application.currentStage,
+        ApplicationStage.REJECTED,
+      )
+    ) {
+      throw new BadRequestException(
+        `Không thể từ chối ứng viên từ trạng thái ${round.process.application.currentStage}.`,
+      );
+    }
     const nextRound = passed
       ? await this.prisma.interviewRound.findFirst({
           where: {
@@ -329,6 +347,17 @@ export class InterviewProcessService {
           orderBy: { order: 'asc' },
         })
       : null;
+    const finalPassStage =
+      passed &&
+      !nextRound &&
+      (round.process.application.currentStage ===
+        ApplicationStage.INTERVIEWED ||
+        canTransitionApplication(
+          round.process.application.currentStage,
+          ApplicationStage.INTERVIEWED,
+        ))
+        ? ApplicationStage.INTERVIEWED
+        : round.process.application.currentStage;
 
     await this.prisma.$transaction(async (prisma) => {
       const decided = await prisma.interviewRound.updateMany({
@@ -338,7 +367,7 @@ export class InterviewProcessService {
             ? InterviewRoundStatus.PASSED
             : InterviewRoundStatus.FAILED,
           resultScore: dto.score,
-          decisionNote: dto.note?.trim(),
+          decisionNote,
           decidedByUserId: userId,
           decidedAt: new Date(),
         },
@@ -383,18 +412,56 @@ export class InterviewProcessService {
             },
           });
         }
+      } else {
+        await prisma.interviewProcess.update({
+          where: { id: round.processId },
+          data: {
+            status: InterviewProcessStatus.CANCELLED,
+            currentRoundOrder: null,
+            completedAt: new Date(),
+          },
+        });
+        await prisma.interviewRound.updateMany({
+          where: {
+            processId: round.processId,
+            id: { not: roundId },
+            status: {
+              in: [
+                InterviewRoundStatus.DRAFT,
+                InterviewRoundStatus.READY,
+                InterviewRoundStatus.SCHEDULED,
+                InterviewRoundStatus.IN_PROGRESS,
+                InterviewRoundStatus.AWAITING_REVIEW,
+              ],
+            },
+          },
+          data: { status: InterviewRoundStatus.CANCELLED },
+        });
+        if (
+          round.process.application.currentStage !== ApplicationStage.REJECTED
+        ) {
+          await prisma.application.update({
+            where: { id: round.process.applicationId },
+            data: {
+              currentStage: ApplicationStage.REJECTED,
+              hrDecision: hrDecisionForStage(ApplicationStage.REJECTED),
+              hrNotes: decisionNote,
+            },
+          });
+        }
       }
 
       await prisma.applicationStatusHistory.create({
         data: {
           applicationId: round.process.applicationId,
           previousStage: round.process.application.currentStage,
-          newStage:
-            passed && !nextRound
-              ? ApplicationStage.INTERVIEWED
+          newStage: !passed
+            ? ApplicationStage.REJECTED
+            : !nextRound
+              ? finalPassStage
               : round.process.application.currentStage,
           changedByUserId: userId,
-          note: `${passed ? 'Đạt' : 'Không đạt'} ${round.title}.${dto.note ? ` ${dto.note}` : ''}`,
+          note: `${passed ? 'Đạt' : 'Từ chối ứng viên tại'} ${round.title}.${decisionNote ? ` ${decisionNote}` : ''}`,
         },
       });
     });
@@ -404,13 +471,21 @@ export class InterviewProcessService {
   async retry(userId: string, roundId: string) {
     const round = await this.findOwnedRound(userId, roundId);
     if (
+      round.status !== InterviewRoundStatus.AWAITING_REVIEW &&
       round.status !== InterviewRoundStatus.FAILED &&
       round.status !== InterviewRoundStatus.EXPIRED &&
-      round.status !== InterviewRoundStatus.NO_SHOW &&
-      round.status !== InterviewRoundStatus.CANCELLED
+      round.status !== InterviewRoundStatus.NO_SHOW
     ) {
       throw new ConflictException(
-        'Chỉ có thể thực hiện lại vòng đã thất bại hoặc bị gián đoạn.',
+        'Chỉ có thể thực hiện lại vòng đang chờ đánh giá hoặc bị gián đoạn.',
+      );
+    }
+    if (
+      round.process.application.currentStage === ApplicationStage.REJECTED ||
+      round.process.status === InterviewProcessStatus.CANCELLED
+    ) {
+      throw new ConflictException(
+        'Hồ sơ đã bị từ chối. Hãy mở lại hồ sơ trước khi tạo vòng phỏng vấn mới.',
       );
     }
     await this.prisma.$transaction(async (prisma) => {
@@ -430,6 +505,15 @@ export class InterviewProcessService {
           status: InterviewProcessStatus.ACTIVE,
           currentRoundOrder: round.order,
           completedAt: null,
+        },
+      });
+      await prisma.applicationStatusHistory.create({
+        data: {
+          applicationId: round.process.applicationId,
+          previousStage: round.process.application.currentStage,
+          newStage: round.process.application.currentStage,
+          changedByUserId: userId,
+          note: `HR yêu cầu thực hiện lại ${round.title}.`,
         },
       });
     });

@@ -1,6 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { ApplicationStage, InterviewStatus, InterviewType } from '@prisma/client';
+import {
+  ApplicationStage,
+  InterviewRoundStatus,
+  InterviewStatus,
+  InterviewType,
+} from '@prisma/client';
 import { InterviewsService } from './interviews.service';
 import { PrismaService } from '../../database/prisma.service';
 import { ApplicationAccessService } from '../applications/application-access.service';
@@ -24,6 +29,9 @@ describe('InterviewsService', () => {
         findUnique: jest.fn(),
         update: jest.fn(),
         count: jest.fn(),
+      },
+      interviewRound: {
+        update: jest.fn(),
       },
       applicationStatusHistory: {
         create: jest.fn(),
@@ -60,10 +68,19 @@ describe('InterviewsService', () => {
       const mockApp = {
         id: 'app-1',
         currentStage: ApplicationStage.SHORTLISTED,
-        job: { id: 'job-1', title: 'Senior Frontend Engineer', jobCode: 'JOB-001' },
+        job: {
+          id: 'job-1',
+          title: 'Senior Frontend Engineer',
+          jobCode: 'JOB-001',
+        },
         candidate: {
           id: 'cand-1',
-          user: { id: 'user-1', fullName: 'Nguyen Van A', email: 'a@example.com', phone: '0901234567' },
+          user: {
+            id: 'user-1',
+            fullName: 'Nguyen Van A',
+            email: 'a@example.com',
+            phone: '0901234567',
+          },
         },
       };
 
@@ -99,7 +116,7 @@ describe('InterviewsService', () => {
             where: { id: 'app-1' },
             data: {
               currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
-              hrDecision: 'ACCEPTED',
+              hrDecision: 'CONSIDER',
             },
           });
           expect(prisma.applicationStatusHistory.create).toHaveBeenCalled();
@@ -151,10 +168,46 @@ describe('InterviewsService', () => {
             where: { id: 'app-1' },
             data: {
               currentStage: ApplicationStage.INTERVIEWED,
-              hrDecision: 'ACCEPTED',
+              hrDecision: 'CONSIDER',
             },
           });
         });
+    });
+
+    it('stores managed-round feedback without changing the application stage', async () => {
+      prisma.interview.findFirst.mockResolvedValue({
+        id: 'int-2',
+        applicationId: 'app-1',
+        roundId: 'round-1',
+        application: {
+          id: 'app-1',
+          currentStage: ApplicationStage.INTERVIEW_SCHEDULED,
+        },
+      });
+      prisma.interview.update.mockResolvedValue({
+        id: 'int-2',
+        score: 76,
+        interviewerNotes: 'Đã lưu đánh giá để HR ra quyết định vòng.',
+        status: InterviewStatus.COMPLETED,
+      });
+
+      const result = await service.submitFeedback('recruiter-user-1', 'int-2', {
+        score: 76,
+        interviewerNotes: 'Đã lưu đánh giá để HR ra quyết định vòng.',
+        nextStage: ApplicationStage.OFFERED,
+      });
+
+      expect(result.applicationStage).toBe(
+        ApplicationStage.INTERVIEW_SCHEDULED,
+      );
+      expect(prisma.interviewRound.update).toHaveBeenCalledWith({
+        where: { id: 'round-1' },
+        data: {
+          status: InterviewRoundStatus.AWAITING_REVIEW,
+          resultScore: 76,
+        },
+      });
+      expect(prisma.application.update).not.toHaveBeenCalled();
     });
   });
 

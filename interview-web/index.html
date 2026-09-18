@@ -1,4 +1,144 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI Interview</title><link rel="stylesheet" href="style.css"></head><body>
-<main id="gate"><p class="brand">SMARTRECRUIT · AI INTERVIEW</p><h1 id="title">Đang kiểm tra link…</h1><p id="description">Vui lòng chờ.</p><label>Email ứng viên<input id="email" type="email" autocomplete="email"></label><button id="sendOtp">Gửi mã OTP</button><div id="otpBlock" hidden><label>Mã OTP (6 hoặc 8 số)<input id="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="8"></label><button id="verifyOtp">Xác thực và bắt đầu</button></div><p id="error" role="alert"></p></main>
-<main id="room" hidden><header><span class="brand">AI INTERVIEW</span><span id="timer" aria-label="Thời gian còn lại">--</span></header><section class="question"><p>AI INTERVIEWER</p><h1 id="question">Đang chuẩn bị…</h1><p id="status" aria-live="polite">Đang khởi tạo camera và microphone…</p></section><section class="answer"><video id="preview" autoplay muted playsinline></video><textarea id="transcript" readonly placeholder="Nội dung nhận diện giọng nói sẽ xuất hiện tại đây…"></textarea><div class="actions"><button id="answerNow" hidden>Trả lời ngay</button><button id="endAnswer" disabled>Kết thúc câu trả lời</button></div></section></main>
-<main id="ended" hidden aria-live="polite"><p class="brand">AI INTERVIEW</p><h1>Phiên phỏng vấn đã kết thúc</h1><p id="endMessage"></p></main><script src="config.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Hướng dẫn chuẩn bị và thực hiện phỏng vấn AI cùng SmartRecruit.">
+  <title>Phỏng vấn AI | SmartRecruit</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="gate" class="gate-shell">
+    <header class="gate-header">
+      <a class="brand-lockup" href="#" aria-label="SmartRecruit AI">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span>SmartRecruit <strong>AI</strong></span>
+      </a>
+      <span class="secure-label"><span aria-hidden="true">●</span> Phiên phỏng vấn bảo mật</span>
+    </header>
+
+    <section id="guideStep" class="guide-step" aria-labelledby="guideTitle">
+      <div class="step-label">Bước 1 / 2 · Chuẩn bị trước phỏng vấn</div>
+      <div class="guide-intro">
+        <div>
+          <h1 id="guideTitle">Sẵn sàng cho buổi phỏng vấn AI</h1>
+          <p id="description">Đang kiểm tra thông tin buổi phỏng vấn. Vui lòng chờ.</p>
+        </div>
+        <div class="interview-meta" aria-label="Thông tin buổi phỏng vấn">
+          <span id="questionCount">Tối đa 6 câu hỏi</span>
+          <span id="estimatedTime">Khoảng 10 phút</span>
+        </div>
+      </div>
+
+      <div class="guide-layout">
+        <div class="guide-main">
+          <section class="content-section" aria-labelledby="flowTitle">
+            <div class="section-heading">
+              <span class="section-number" aria-hidden="true">01</span>
+              <div>
+                <h2 id="flowTitle">Buổi phỏng vấn diễn ra thế nào?</h2>
+                <p>Quy trình ngắn gọn để bạn chủ động trong từng câu trả lời.</p>
+              </div>
+            </div>
+            <ol class="interview-flow">
+              <li><strong>AI đọc câu hỏi</strong><span>Câu hỏi đồng thời hiển thị trên màn hình.</span></li>
+              <li><strong>Bạn chuẩn bị trong 5 giây</strong><span>Có thể chọn “Trả lời ngay” nếu đã sẵn sàng.</span></li>
+              <li><strong>Trả lời tối đa 60 giây</strong><span>Video và âm thanh được ghi lại trong thời gian này.</span></li>
+              <li><strong>Hệ thống chuyển câu tiếp theo</strong><span>Bản ghi lời nói có thể cần vài giây để xử lý.</span></li>
+            </ol>
+          </section>
+
+          <section class="content-section" aria-labelledby="tipsTitle">
+            <div class="section-heading">
+              <span class="section-number" aria-hidden="true">02</span>
+              <div>
+                <h2 id="tipsTitle">Để câu trả lời rõ ràng hơn</h2>
+                <p>Một vài chuẩn bị nhỏ giúp AI ghi nhận câu trả lời chính xác.</p>
+              </div>
+            </div>
+            <ul class="tips-grid">
+              <li><span aria-hidden="true">✓</span><div><strong>Không gian yên tĩnh</strong><small>Tắt thông báo và hạn chế tiếng ồn xung quanh.</small></div></li>
+              <li><span aria-hidden="true">✓</span><div><strong>Ánh sáng từ phía trước</strong><small>Đặt khuôn mặt ở giữa khung hình, tránh ngược sáng.</small></div></li>
+              <li><span aria-hidden="true">✓</span><div><strong>Kết nối ổn định</strong><small>Ưu tiên Wi-Fi ổn định và cắm sạc thiết bị.</small></div></li>
+              <li><span aria-hidden="true">✓</span><div><strong>Nói tự nhiên, đủ ý</strong><small>Nhìn vào camera và trình bày bằng ví dụ cụ thể.</small></div></li>
+            </ul>
+          </section>
+
+          <aside class="important-note" aria-labelledby="importantTitle">
+            <span class="note-icon" aria-hidden="true">!</span>
+            <div>
+              <h2 id="importantTitle">Lưu ý quan trọng</h2>
+              <p>Khi phỏng vấn bắt đầu, không chuyển tab hoặc thoát chế độ toàn màn hình. Hệ thống sẽ kết thúc phiên để bảo đảm tính trung thực. Bạn không thể quay lại câu trước sau khi đã gửi.</p>
+            </div>
+          </aside>
+        </div>
+
+        <aside class="device-card" aria-labelledby="deviceTitle">
+          <div class="device-card-heading">
+            <div>
+              <span class="eyebrow">Kiểm tra bắt buộc</span>
+              <h2 id="deviceTitle">Camera và microphone</h2>
+            </div>
+            <span id="deviceBadge" class="status-badge">Chưa kiểm tra</span>
+          </div>
+
+          <div class="preview-frame">
+            <video id="devicePreview" autoplay muted playsinline></video>
+            <div id="previewPlaceholder" class="preview-placeholder">
+              <span class="camera-symbol" aria-hidden="true"></span>
+              <span>Hình ảnh xem trước sẽ xuất hiện tại đây</span>
+            </div>
+          </div>
+
+          <ul class="device-status" aria-live="polite">
+            <li id="browserStatus"><span class="status-dot" aria-hidden="true"></span><span>Trình duyệt hỗ trợ ghi hình</span></li>
+            <li id="cameraStatus"><span class="status-dot" aria-hidden="true"></span><span>Camera hoạt động</span></li>
+            <li id="microphoneStatus"><span class="status-dot" aria-hidden="true"></span><span>Microphone hoạt động</span></li>
+          </ul>
+
+          <button id="checkDevices" class="secondary-button" type="button">Kiểm tra thiết bị</button>
+          <p id="deviceError" class="inline-error" role="alert"></p>
+
+          <label class="consent-row" for="acknowledge">
+            <input id="acknowledge" type="checkbox">
+            <span>Tôi hiểu rằng video, âm thanh và nội dung trả lời sẽ được ghi lại để nhà tuyển dụng đánh giá.</span>
+          </label>
+          <button id="continueToAuth" type="button" disabled>Tiếp tục xác thực</button>
+          <p class="privacy-copy">Chỉ bắt đầu khi thiết bị đã kiểm tra thành công và bạn đồng ý với nội dung trên.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="authStep" class="auth-step" aria-labelledby="authTitle" hidden>
+      <button id="backToGuide" class="text-button" type="button">← Quay lại hướng dẫn</button>
+      <div class="auth-card">
+        <div class="step-label">Bước 2 / 2 · Xác thực danh tính</div>
+        <h1 id="authTitle">Xác thực email để bắt đầu</h1>
+        <p id="authDescription">Chúng tôi sẽ gửi mã xác thực đến email dùng để ứng tuyển.</p>
+        <label for="email">Email ứng viên
+          <input id="email" type="email" autocomplete="email" placeholder="ban@example.com">
+        </label>
+        <button id="sendOtp" type="button">Gửi mã OTP</button>
+        <div id="otpBlock" hidden>
+          <label for="otp">Mã OTP
+            <input id="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="8" placeholder="Nhập 6 hoặc 8 số">
+          </label>
+          <button id="verifyOtp" type="button">Xác thực và bắt đầu phỏng vấn</button>
+        </div>
+        <p id="error" class="inline-error" role="alert"></p>
+      </div>
+      <p class="auth-reminder">Sau khi xác thực, trình duyệt sẽ chuyển sang toàn màn hình và câu hỏi đầu tiên sẽ bắt đầu.</p>
+    </section>
+  </main>
+
+  <main id="room" hidden>
+    <header><span class="brand">AI INTERVIEW</span><span id="timer" aria-label="Thời gian còn lại">--</span></header>
+    <section class="question"><p>AI INTERVIEWER</p><h1 id="question">Đang chuẩn bị…</h1><p id="status" aria-live="polite">Đang khởi tạo camera và microphone…</p></section>
+    <section class="answer"><video id="preview" autoplay muted playsinline></video><textarea id="transcript" readonly placeholder="Nội dung nhận diện giọng nói sẽ xuất hiện tại đây…"></textarea><div class="actions"><button id="answerNow" hidden>Trả lời ngay</button><button id="endAnswer" disabled>Kết thúc câu trả lời</button></div></section>
+  </main>
+
+  <main id="ended" hidden aria-live="polite"><p class="brand">AI INTERVIEW</p><h1>Phiên phỏng vấn đã kết thúc</h1><p id="endMessage"></p></main>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

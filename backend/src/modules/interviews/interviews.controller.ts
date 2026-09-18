@@ -200,6 +200,21 @@ export class InterviewsController {
     return this.aiInterviewsService.findOne(user.id, id);
   }
 
+  @Get('ai/:id/videos/:videoId/playback')
+  @Roles('RECRUITER')
+  @ApiOperation({ summary: 'Lấy URL phát video phỏng vấn có thời hạn' })
+  async getAiInterviewVideoPlayback(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('videoId', ParseUUIDPipe) videoId: string,
+  ) {
+    return this.aiInterviewsService.getVideoPlayback(
+      user.id,
+      id,
+      videoId,
+    );
+  }
+
   @Get('ai/:id/videos/:videoId')
   @Roles('RECRUITER')
   @ApiOperation({ summary: 'Tải hoặc phát video phỏng vấn AI qua proxy bảo mật' })

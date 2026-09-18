@@ -2,6 +2,7 @@ import asyncio
 import hashlib
 import hmac
 import json
+import os
 from urllib.parse import parse_qs, urlparse
 
 import httpx
@@ -11,7 +12,12 @@ import online_interviews
 from app import app
 
 client = TestClient(app)
-SYSTEM_HEADERS = {"X-Interview-System-Key": "dev-interview-system-key"}
+SYSTEM_HEADERS = {
+    "X-Interview-System-Key": os.getenv(
+        "INTERVIEW_SYSTEM_API_KEY",
+        "dev-interview-system-key",
+    )
+}
 
 
 def create_payload() -> dict:
@@ -56,6 +62,44 @@ def test_fallback_questions_are_unique_with_nested_recruitment_cv() -> None:
     assert "Flutter developer" in questions[0]
 
 
+def test_fallback_question_ignores_ids_urls_and_prefers_project_evidence() -> None:
+    opaque_id = "a60bf078-c16c-450a-a437-507c4adec2c0"
+    interview = online_interviews.OnlineInterview(
+        id="interview-clean-evidence",
+        recruitment_application_id="application-clean-evidence",
+        candidate={"id": "candidate-clean", "email": "candidate@example.com", "display_name": "Candidate"},
+        cv={
+            "profile_snapshot": {
+                "id": opaque_id,
+                "candidate_profile_id": "a920a99f-a4cf-4b20-857c-d37ec9c91eb0",
+            },
+            "candidate_profile": {
+                "professional_summary": "Backend developer with three years of product experience.",
+                "projects": [{
+                    "id": "e304b198-d45e-4cd6-9327-2ce7d86c8ab7",
+                    "project_name": "SmartRecruit AI",
+                    "project_url": "https://example.com/internal-project",
+                    "description": "Built an AI recruitment platform with asynchronous interview processing.",
+                }],
+            },
+        },
+        jd={"title": "Backend Developer"},
+        config={"opening_questions": ["Giới thiệu bản thân"], "competencies": ["technical"], "max_questions": 3},
+        callback_url=None,
+        launch_token_hash="hash",
+        expires_at=online_interviews.now(),
+    )
+
+    question = online_interviews.fallback_question(interview)
+    evidence = online_interviews.nested_evidence(interview.cv)
+
+    assert evidence[0] == "SmartRecruit AI"
+    assert opaque_id not in " ".join(evidence)
+    assert "example.com" not in " ".join(evidence)
+    assert "SmartRecruit AI" in question.text
+    assert opaque_id not in question.text
+
+
 def test_duplicate_question_detection_ignores_case_and_punctuation() -> None:
     interview = online_interviews.OnlineInterview(
         id="interview-duplicate",
@@ -76,6 +120,22 @@ def test_duplicate_question_detection_ignores_case_and_punctuation() -> None:
 
     assert online_interviews.question_is_duplicate("BẠN HÃY MÔ TẢ DỰ ÁN GẦN ĐÂY!", interview)
     assert not online_interviews.question_is_duplicate("Bạn xử lý bất đồng trong nhóm như thế nào?", interview)
+
+
+def test_supabase_media_storage_creates_signed_playback_url() -> None:
+    class FakeBucket:
+        def create_signed_url(self, path: str, expires_in: int) -> dict[str, str]:
+            assert path == "interviews/session/answers/question-1.webm"
+            assert expires_in == 900
+            return {"signedURL": "https://storage.example.test/signed/video"}
+
+    storage = object.__new__(online_interviews.SupabaseMediaStorage)
+    storage.bucket = FakeBucket()
+
+    assert storage.create_playback_url(
+        "interviews/session/answers/question-1.webm",
+        900,
+    ) == "https://storage.example.test/signed/video"
 
 
 def test_one_time_link_otp_and_candidate_flow(monkeypatch, tmp_path) -> None:
@@ -105,6 +165,9 @@ def test_one_time_link_otp_and_candidate_flow(monkeypatch, tmp_path) -> None:
     interview_id = created.json()["interview_id"]
     launch_token = parse_qs(urlparse(created.json()["launch_url"]).query)["launch"][0]
 
+    launch_details = client.get(f"/v1/public/launch/{launch_token}")
+    assert launch_details.status_code == 200
+    assert launch_details.json()["max_questions"] == 1
     assert client.post(f"/v1/public/launch/{launch_token}/otp", json={"email": "candidate@example.com"}).status_code == 200
     verified = client.post(f"/v1/public/launch/{launch_token}/verify", json={"email": "candidate@example.com", "code": "123456"})
     assert verified.status_code == 200

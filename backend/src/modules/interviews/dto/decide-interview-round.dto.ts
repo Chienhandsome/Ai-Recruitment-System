@@ -26,7 +26,9 @@ export class DecideInterviewRoundDto {
   @Max(100)
   score?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Nhận xét tổng kết của HR. Bắt buộc khi từ chối ứng viên.',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(5000)

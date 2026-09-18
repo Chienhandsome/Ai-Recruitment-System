@@ -10,13 +10,9 @@ import {
   AlertCircle,
   XCircle,
   Sparkles,
-  ArrowRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  type InterviewData,
-  submitInterviewFeedback,
-} from '@/lib/interview-api';
+import { type InterviewData, submitInterviewFeedback } from '@/lib/interview-api';
 
 interface InterviewFeedbackModalProps {
   isOpen: boolean;
@@ -36,15 +32,12 @@ export function InterviewFeedbackModal({
   onSuccess,
 }: InterviewFeedbackModalProps) {
   const [score, setScore] = useState<number>(
-    interview.score !== undefined && interview.score !== null
-      ? Number(interview.score)
-      : 80,
+    interview.score !== undefined && interview.score !== null ? Number(interview.score) : 80,
   );
-  const [interviewerNotes, setInterviewerNotes] = useState(
-    interview.interviewerNotes || '',
-  );
-  const [nextStage, setNextStage] = useState<string>('OFFERED');
+  const [interviewerNotes, setInterviewerNotes] = useState(interview.interviewerNotes || '');
+  const [nextStage, setNextStage] = useState<string>('INTERVIEWED');
   const [submitting, setSubmitting] = useState(false);
+  const isManagedRound = Boolean(interview.roundId);
 
   if (!isOpen) return null;
 
@@ -60,16 +53,18 @@ export function InterviewFeedbackModal({
       await submitInterviewFeedback(token, interview.id, {
         score,
         interviewerNotes: interviewerNotes.trim(),
-        nextStage,
+        nextStage: isManagedRound ? undefined : nextStage,
       });
 
-      toast.success('Đã lưu kết quả phỏng vấn và cập nhật trạng thái hồ sơ!');
+      toast.success(
+        isManagedRound
+          ? 'Đã lưu đánh giá. Vòng phỏng vấn đang chờ HR ra quyết định.'
+          : 'Đã lưu kết quả phỏng vấn và cập nhật trạng thái hồ sơ.',
+      );
       await onSuccess();
       onClose();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Không thể lưu kết quả phỏng vấn',
-      );
+      toast.error(error instanceof Error ? error.message : 'Không thể lưu kết quả phỏng vấn');
     } finally {
       setSubmitting(false);
     }
@@ -105,7 +100,8 @@ export function InterviewFeedbackModal({
                 Đánh Giá &amp; Chấm Điểm Phỏng Vấn
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Ứng viên: <strong className="text-[#2563EB]">{candidateName}</strong> • {interview.title}
+                Ứng viên: <strong className="text-[#2563EB]">{candidateName}</strong> •{' '}
+                {interview.title}
               </p>
             </div>
           </div>
@@ -128,11 +124,14 @@ export function InterviewFeedbackModal({
                 Điểm số đánh giá (Thang 100)
               </label>
               <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${currentCategory.color}`}>
+                <span
+                  className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${currentCategory.color}`}
+                >
                   {currentCategory.label}
                 </span>
                 <span className="text-2xl font-black text-[#2563EB] font-mono">
-                  {score}<span className="text-sm font-semibold text-slate-400">/100</span>
+                  {score}
+                  <span className="text-sm font-semibold text-slate-400">/100</span>
                 </span>
               </div>
             </div>
@@ -157,7 +156,9 @@ export function InterviewFeedbackModal({
           {/* Nhận xét đánh giá */}
           <div>
             <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-1.5 flex items-center justify-between">
-              <span>Nhận xét chi tiết sau phỏng vấn <span className="text-rose-500">*</span></span>
+              <span>
+                Nhận xét chi tiết sau phỏng vấn <span className="text-rose-500">*</span>
+              </span>
               <FileText className="size-3.5 text-slate-400" />
             </label>
             <textarea
@@ -171,60 +172,97 @@ export function InterviewFeedbackModal({
           </div>
 
           {/* Quyết định bước tiếp theo */}
-          <div>
-            <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-2">
-              Quyết định chuyển bước tiếp theo
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <button
-                type="button"
-                onClick={() => setNextStage('OFFERED')}
-                className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                  nextStage === 'OFFERED'
-                    ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500 shadow-sm'
-                    : 'border-slate-200 bg-white hover:border-emerald-300'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs">
-                  <CheckCircle2 className="size-4" />
-                  Đạt $\rightarrow$ Gửi Offer
-                </div>
-                <span className="text-[10px] text-slate-500 mt-1">Chuyển sang bước Đề nghị nhận việc</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setNextStage('INTERVIEW_SCHEDULED')}
-                className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                  nextStage === 'INTERVIEW_SCHEDULED'
-                    ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 shadow-sm'
-                    : 'border-slate-200 bg-white hover:border-blue-300'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 text-[#2563EB] font-bold text-xs">
-                  <Sparkles className="size-4" />
-                  Phỏng vấn Vòng 2
-                </div>
-                <span className="text-[10px] text-slate-500 mt-1">Lên lịch thêm 1 vòng đánh giá tiếp theo</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setNextStage('REJECTED')}
-                className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                  nextStage === 'REJECTED'
-                    ? 'border-rose-500 bg-rose-50 ring-1 ring-rose-500 shadow-sm'
-                    : 'border-slate-200 bg-white hover:border-rose-300'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 text-rose-700 font-bold text-xs">
-                  <XCircle className="size-4" />
-                  Chưa phù hợp
-                </div>
-                <span className="text-[10px] text-slate-500 mt-1">Từ chối hồ sơ ứng viên</span>
-              </button>
+          {isManagedRound ? (
+            <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3.5">
+              <AlertCircle className="mt-0.5 size-4 shrink-0 text-blue-700" />
+              <div>
+                <p className="text-xs font-black text-blue-950">
+                  Đánh giá thuộc quy trình nhiều vòng
+                </p>
+                <p className="mt-1 text-xs leading-5 text-blue-800">
+                  Thao tác này chỉ lưu điểm và nhận xét. Quyết định cho qua vòng, thực hiện lại hoặc
+                  từ chối ứng viên được thực hiện trong Quy trình phỏng vấn.
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-2">
+                Quyết định chuyển bước tiếp theo
+              </label>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setNextStage('INTERVIEWED')}
+                  className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                    nextStage === 'INTERVIEWED'
+                      ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 shadow-sm'
+                      : 'border-slate-200 bg-white hover:border-blue-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 text-blue-700 font-bold text-xs">
+                    <Award className="size-4" />
+                    Hoàn tất phỏng vấn
+                  </div>
+                  <span className="text-[10px] text-slate-500 mt-1">
+                    Chuyển hồ sơ sang Đã phỏng vấn để tiếp tục cân nhắc
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setNextStage('OFFERED')}
+                  className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                    nextStage === 'OFFERED'
+                      ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500 shadow-sm'
+                      : 'border-slate-200 bg-white hover:border-emerald-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs">
+                    <CheckCircle2 className="size-4" />
+                    Gửi Offer
+                  </div>
+                  <span className="text-[10px] text-slate-500 mt-1">
+                    Chuyển sang bước Đề nghị nhận việc
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setNextStage('INTERVIEW_SCHEDULED')}
+                  className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                    nextStage === 'INTERVIEW_SCHEDULED'
+                      ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 shadow-sm'
+                      : 'border-slate-200 bg-white hover:border-blue-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 text-[#2563EB] font-bold text-xs">
+                    <Sparkles className="size-4" />
+                    Phỏng vấn Vòng 2
+                  </div>
+                  <span className="text-[10px] text-slate-500 mt-1">
+                    Lên lịch thêm 1 vòng đánh giá tiếp theo
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setNextStage('REJECTED')}
+                  className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                    nextStage === 'REJECTED'
+                      ? 'border-rose-500 bg-rose-50 ring-1 ring-rose-500 shadow-sm'
+                      : 'border-slate-200 bg-white hover:border-rose-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 text-rose-700 font-bold text-xs">
+                    <XCircle className="size-4" />
+                    Chưa phù hợp
+                  </div>
+                  <span className="text-[10px] text-slate-500 mt-1">Từ chối hồ sơ ứng viên</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Footer Action Buttons */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">

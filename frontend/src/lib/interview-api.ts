@@ -402,6 +402,56 @@ export async function getAiInterviewVideoBlobUrl(
   return URL.createObjectURL(blob);
 }
 
+export interface AiInterviewVideoPlaybackSource {
+  url: string;
+  kind: 'signed' | 'blob';
+  expiresAt: number | null;
+}
+
+export async function getAiInterviewVideoPlaybackSource(
+  token: string,
+  sessionId: string,
+  videoId: string,
+): Promise<AiInterviewVideoPlaybackSource> {
+  const response = await fetch(
+    `${API_URL}/interviews/ai/${sessionId}/videos/${videoId}/playback`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    },
+  );
+  if (!response.ok) {
+    if ([404, 502, 503].includes(response.status)) {
+      return {
+        url: await getAiInterviewVideoBlobUrl(token, sessionId, videoId),
+        kind: 'blob',
+        expiresAt: null,
+      };
+    }
+    throw new InterviewApiError(
+      await readInterviewApiError(response, 'Không thể chuẩn bị video câu trả lời'),
+      response.status,
+    );
+  }
+  const payload = (await response.json()) as {
+    url: string | null;
+    expiresIn: number;
+  };
+  if (payload.url) {
+    return {
+      url: payload.url,
+      kind: 'signed',
+      expiresAt: Date.now() + payload.expiresIn * 1000,
+    };
+  }
+
+  return {
+    url: await getAiInterviewVideoBlobUrl(token, sessionId, videoId),
+    kind: 'blob',
+    expiresAt: null,
+  };
+}
+
 export function decideAiInterview(
   token: string,
   sessionId: string,

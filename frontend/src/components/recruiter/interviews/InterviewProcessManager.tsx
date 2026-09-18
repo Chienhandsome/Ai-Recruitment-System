@@ -14,6 +14,7 @@ import {
   MapPin,
   Plus,
   RefreshCw,
+  ShieldAlert,
   Trash2,
   UserRound,
   Video,
@@ -41,6 +42,7 @@ import {
   type InterviewRoundData,
 } from '@/lib/interview-api';
 import { AiInterviewReviewModal } from './AiInterviewReviewModal';
+import { InterviewDecisionDialog, type InterviewDecisionAction } from './InterviewDecisionDialog';
 
 interface InterviewProcessManagerProps {
   token: string;
@@ -102,6 +104,7 @@ export function InterviewProcessManager({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [reviewingAiSession, setReviewingAiSession] = useState<AiInterviewSession | null>(null);
+  const [pendingDecision, setPendingDecision] = useState<InterviewDecisionAction | null>(null);
 
   const [title, setTitle] = useState('Sơ tuyển với AI');
   const [description, setDescription] = useState('');
@@ -125,6 +128,33 @@ export function InterviewProcessManager({
   const currentRound = useMemo(
     () => process?.rounds.find((round) => round.order === process.currentRoundOrder),
     [process],
+  );
+  const nextRound = useMemo(
+    () =>
+      currentRound
+        ? process?.rounds.find(
+            (round) => round.order > currentRound.order && round.status !== 'CANCELLED',
+          )
+        : undefined,
+    [currentRound, process],
+  );
+  const reviewingRound = useMemo(
+    () =>
+      reviewingAiSession
+        ? process?.rounds.find((round) =>
+            round.aiInterviewSessions.some((session) => session.id === reviewingAiSession.id),
+          )
+        : undefined,
+    [process, reviewingAiSession],
+  );
+  const reviewingNextRound = useMemo(
+    () =>
+      reviewingRound
+        ? process?.rounds.find(
+            (round) => round.order > reviewingRound.order && round.status !== 'CANCELLED',
+          )
+        : undefined,
+    [process, reviewingRound],
   );
 
   const loadProcess = useCallback(async () => {
@@ -317,15 +347,21 @@ export function InterviewProcessManager({
   async function decide(roundId: string, decision: 'PASSED' | 'FAILED') {
     setSaving(true);
     try {
-      setProcess(
-        await decideInterviewRound(token, roundId, {
-          decision,
-          score,
-          note: note.trim() || undefined,
-        }),
-      );
+      const updatedProcess = await decideInterviewRound(token, roundId, {
+        decision,
+        score,
+        note: note.trim() || undefined,
+      });
+      setProcess(updatedProcess);
       setNote('');
-      toast.success(decision === 'PASSED' ? 'Vòng đã đạt.' : 'Đã ghi nhận vòng không đạt.');
+      setPendingDecision(null);
+      toast.success(
+        decision === 'PASSED'
+          ? updatedProcess.status === 'COMPLETED'
+            ? 'Đã hoàn tất quy trình phỏng vấn.'
+            : 'Đã mở vòng phỏng vấn tiếp theo.'
+          : 'Đã từ chối ứng viên và kết thúc quy trình phỏng vấn.',
+      );
       onCreated?.();
     } catch (requestError) {
       reportError(requestError);
@@ -338,12 +374,36 @@ export function InterviewProcessManager({
     setSaving(true);
     try {
       setProcess(await retryInterviewRound(token, roundId));
+      setPendingDecision(null);
       toast.success('Vòng đã được mở lại để thực hiện.');
+      onCreated?.();
+      return true;
     } catch (requestError) {
       reportError(requestError);
+      return false;
     } finally {
       setSaving(false);
     }
+  }
+
+  function requestDecision(action: InterviewDecisionAction) {
+    if ((action === 'PASS' || action === 'REJECT') && !note.trim()) {
+      const message = 'Vui lòng nhập nhận xét tổng kết trước khi đưa ra quyết định.';
+      setError(message);
+      toast.error(message);
+      return;
+    }
+    setError('');
+    setPendingDecision(action);
+  }
+
+  function confirmDecision() {
+    if (!currentRound || !pendingDecision) return;
+    if (pendingDecision === 'RETRY') {
+      void retry(currentRound.id);
+      return;
+    }
+    void decide(currentRound.id, pendingDecision === 'PASS' ? 'PASSED' : 'FAILED');
   }
 
   return (
@@ -597,16 +657,28 @@ export function InterviewProcessManager({
                       saving={saving}
                       onStart={() => void startReadyRound(currentRound)}
                       onSubmitFeedback={() => void submitHumanFeedback(currentRound)}
-                      onDecide={(decision) => void decide(currentRound.id, decision)}
-                      onRetry={() => void retry(currentRound.id)}
+                      nextRoundTitle={nextRound?.title}
+                      onDecide={(decision) =>
+                        requestDecision(decision === 'PASSED' ? 'PASS' : 'REJECT')
+                      }
+                      onRetry={() => requestDecision('RETRY')}
                       onReviewAiSession={setReviewingAiSession}
                     />
+                  ) : process.status === 'CANCELLED' ? (
+                    <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                      <ShieldAlert className="h-6 w-6 text-rose-700" />
+                      <p className="mt-2 font-black text-rose-950">Quy trình đã kết thúc</p>
+                      <p className="mt-1 text-sm text-rose-800">
+                        Ứng viên đã được chuyển sang trạng thái Chưa phù hợp.
+                      </p>
+                    </div>
                   ) : (
                     <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
                       <Check className="h-6 w-6 text-emerald-700" />
                       <p className="mt-2 font-black text-emerald-900">Tất cả vòng đã hoàn tất</p>
                       <p className="mt-1 text-sm text-emerald-800">
-                        Ứng viên đã chuyển sang trạng thái hoàn thành phỏng vấn.
+                        Hồ sơ đã chuyển sang Đã phỏng vấn. HR có thể cân nhắc gửi Offer ở bước tiếp
+                        theo.
                       </p>
                     </div>
                   )}
@@ -665,6 +737,19 @@ export function InterviewProcessManager({
           token={token}
           candidateName={candidateName}
           jobTitle={jobTitle}
+          roundTitle={reviewingRound?.title}
+          nextRoundTitle={reviewingNextRound?.title}
+          isFinalRound={!reviewingNextRound}
+          canDecide={!reviewingRound || reviewingRound.status === 'AWAITING_REVIEW'}
+          onRequestRetry={
+            reviewingRound?.status === 'AWAITING_REVIEW'
+              ? async () => {
+                  const succeeded = await retry(reviewingRound.id);
+                  if (succeeded) setReviewingAiSession(null);
+                  return succeeded;
+                }
+              : undefined
+          }
           onClose={() => setReviewingAiSession(null)}
           onEvaluated={() => {
             setReviewingAiSession(null);
@@ -673,6 +758,17 @@ export function InterviewProcessManager({
           }}
         />
       )}
+
+      <InterviewDecisionDialog
+        open={!!pendingDecision}
+        action={pendingDecision}
+        roundTitle={currentRound?.title || 'vòng hiện tại'}
+        nextRoundTitle={nextRound?.title}
+        isFinalRound={!nextRound}
+        submitting={saving}
+        onClose={() => setPendingDecision(null)}
+        onConfirm={confirmDecision}
+      />
     </>
   );
 }
@@ -690,6 +786,7 @@ function RoundActionPanel({
   saving,
   onStart,
   onSubmitFeedback,
+  nextRoundTitle,
   onDecide,
   onRetry,
   onReviewAiSession,
@@ -706,12 +803,13 @@ function RoundActionPanel({
   saving: boolean;
   onStart: () => void;
   onSubmitFeedback: () => void;
+  nextRoundTitle?: string;
   onDecide: (decision: 'PASSED' | 'FAILED') => void;
   onRetry: () => void;
   onReviewAiSession?: (session: AiInterviewSession) => void;
 }) {
   const latestInterview = round.interviews[0];
-  const canRetry = ['FAILED', 'EXPIRED', 'NO_SHOW', 'CANCELLED'].includes(round.status);
+  const canRetry = ['FAILED', 'EXPIRED', 'NO_SHOW'].includes(round.status);
   return (
     <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
       <p className="text-xs font-black text-blue-800">Vòng hiện tại</p>
@@ -798,22 +896,30 @@ function RoundActionPanel({
       {round.status === 'AWAITING_REVIEW' && (
         <div className="mt-4 space-y-3 border-t border-blue-200 pt-4">
           <ScoreFields score={score} setScore={setScore} note={note} setNote={setNote} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+            <button
+              type="button"
+              onClick={onRetry}
+              disabled={saving}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-sm font-black text-amber-800 transition hover:bg-amber-50 active:scale-[0.98] disabled:opacity-60"
+            >
+              <RefreshCw className="h-4 w-4" /> Làm lại
+            </button>
             <button
               type="button"
               onClick={() => onDecide('FAILED')}
               disabled={saving}
-              className="rounded-lg border border-rose-300 bg-white px-4 py-2.5 text-sm font-black text-rose-700 hover:bg-rose-50 disabled:opacity-60"
+              className="rounded-xl border border-rose-300 bg-white px-3 py-2.5 text-sm font-black text-rose-700 transition hover:bg-rose-50 active:scale-[0.98] disabled:opacity-60"
             >
-              Không đạt
+              Từ chối
             </button>
             <button
               type="button"
               onClick={() => onDecide('PASSED')}
               disabled={saving}
-              className="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-black text-white hover:bg-blue-800 disabled:opacity-60"
+              className="rounded-xl bg-blue-700 px-3 py-2.5 text-sm font-black text-white transition hover:bg-blue-800 active:scale-[0.98] disabled:opacity-60"
             >
-              Đạt và tiếp tục
+              {nextRoundTitle ? 'Qua vòng' : 'Hoàn tất'}
             </button>
           </div>
         </div>

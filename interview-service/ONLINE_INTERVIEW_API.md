@@ -121,3 +121,13 @@ the browser never gets Supabase credentials.
 GET /v1/internal/interviews/{interviewId}/videos/{videoId}
 X-Interview-System-Key: dev-interview-system-key
 ```
+
+For browser playback, request a short-lived signed URL. This keeps the bucket
+private while allowing the browser to use byte-range streaming and CDN caching.
+Local storage returns `url: null`, allowing the Recruitment System to use its
+authenticated proxy fallback.
+
+```http
+GET /v1/internal/interviews/{interviewId}/videos/{videoId}/playback
+X-Interview-System-Key: dev-interview-system-key
+```

@@ -77,12 +77,12 @@ export function hrDecisionForStage(stage: ApplicationStage): HrDecision {
     case ApplicationStage.RECEIVED:
       return HrDecision.PENDING;
     case ApplicationStage.SCREENING:
-      return HrDecision.CONSIDER;
-    case ApplicationStage.REJECTED:
-      return HrDecision.REJECTED;
     case ApplicationStage.SHORTLISTED:
     case ApplicationStage.INTERVIEW_SCHEDULED:
     case ApplicationStage.INTERVIEWED:
+      return HrDecision.CONSIDER;
+    case ApplicationStage.REJECTED:
+      return HrDecision.REJECTED;
     case ApplicationStage.OFFERED:
     case ApplicationStage.HIRED:
       return HrDecision.ACCEPTED;

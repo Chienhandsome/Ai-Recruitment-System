@@ -24,7 +24,7 @@ function createStageDependencies(stage = ApplicationStage.SCREENING) {
       findUniqueOrThrow: jest.fn().mockResolvedValue({
         id: 'application-1',
         currentStage: ApplicationStage.SHORTLISTED,
-        hrDecision: HrDecision.ACCEPTED,
+        hrDecision: HrDecision.CONSIDER,
         hrNotes: 'Call this week',
         updatedAt: new Date('2026-08-17T10:05:00.000Z'),
       }),
@@ -79,7 +79,7 @@ describe('ApplicationsService decision workflow', () => {
       },
       data: {
         currentStage: ApplicationStage.SHORTLISTED,
-        hrDecision: HrDecision.ACCEPTED,
+        hrDecision: HrDecision.CONSIDER,
         hrNotes: 'Call this week',
       },
     });

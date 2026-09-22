@@ -230,16 +230,36 @@ class LanguageMatcher:
                 is_mandatory=is_mandatory,
             )
 
-        # 8. Qualitative levels
-        for kw, tier in QUALITATIVE_LEVELS.items():
-            if kw in t_lower:
-                return ParsedLanguageSpec(
-                    lang_code=lang_code or "en",
-                    test_type="QUALITATIVE",
-                    tier_level=tier,
-                    raw_text=t,
-                    is_mandatory=is_mandatory,
-                )
+        # 8. Qualitative levels (requires explicit language code or language-related context keywords)
+        has_lang_context = bool(lang_code) or any(
+            re.search(rf"\b{re.escape(k)}\b", t_lower)
+            for k in [
+                "tiếng",
+                "ngoại ngữ",
+                "ngôn ngữ",
+                "language",
+                "giao tiếp",
+                "đọc hiểu",
+                "biên dịch",
+                "phiên dịch",
+                "english",
+                "japanese",
+                "chinese",
+                "korean",
+                "french",
+                "german",
+            ]
+        )
+        if has_lang_context:
+            for kw, tier in QUALITATIVE_LEVELS.items():
+                if re.search(rf"\b{re.escape(kw)}\b", t_lower):
+                    return ParsedLanguageSpec(
+                        lang_code=lang_code or "en",
+                        test_type="QUALITATIVE",
+                        tier_level=tier,
+                        raw_text=t,
+                        is_mandatory=is_mandatory,
+                    )
 
         # If language recognized but no specific test level
         if lang_code:

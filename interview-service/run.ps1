@@ -1,7 +1,8 @@
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $pythonCandidates = @(
     (Join-Path $projectRoot "ai-service\.venv-local\Scripts\python.exe"),
-    (Join-Path $projectRoot "ai-service\.venv\Scripts\python.exe")
+    (Join-Path $projectRoot "ai-service\.venv\Scripts\python.exe"),
+    (Join-Path $projectRoot "ai-service\venv\Scripts\python.exe")
 )
 $pythonExe = $pythonCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 

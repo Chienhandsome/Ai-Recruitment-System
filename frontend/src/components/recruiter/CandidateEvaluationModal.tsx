@@ -921,6 +921,11 @@ export function CandidateEvaluationModal({
                         <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
                         MANDATORY: CHƯA ĐẠT
                       </span>
+                    ) : mandatoryStatus === "CONDITIONAL_PASS" ? (
+                      <span className="text-xs font-black px-2.5 py-1 rounded-full border bg-amber-100 text-amber-900 border-amber-300 flex items-center gap-1 shadow-2xs">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                        MANDATORY: CHUYỂN GIAO (CONDITIONAL PASS)
+                      </span>
                     ) : mandatoryStatus === "PASS" ? (
                       <span className="text-xs font-black px-2.5 py-1 rounded-full border bg-emerald-100 text-emerald-800 border-emerald-300 flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -955,6 +960,22 @@ export function CandidateEvaluationModal({
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Conditional Pass Alert Banner (Transferable Skills) */}
+            {mandatoryStatus === "CONDITIONAL_PASS" && (
+              <div className="bg-amber-50 border border-amber-300 rounded-xl p-3.5 space-y-2 shadow-2xs">
+                <div className="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wide">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  Thông Qua Có Điều Kiện — Kỹ Năng Chuyển Giao Năng Lực (Transferable Skills)
+                </div>
+                <p className="text-xs text-amber-900 leading-relaxed pl-6">
+                  Ứng viên được chấp thuận qua cơ chế Kỹ năng Chuyển giao Năng lực cấp cao. 
+                  <strong className="block mt-1 text-amber-950 font-bold">
+                    Khuyến nghị HR: Mời ứng viên vào vòng phỏng vấn để đánh giá tốc độ thích ứng công nghệ mới (Ramp-up period) thay vì loại hồ sơ.
+                  </strong>
+                </p>
               </div>
             )}
 

@@ -10,6 +10,7 @@ from app.services.matching.temporal_engine import temporal_engine
 from app.services.matching.late_interaction import late_interaction_scorer
 from app.services.matching.fraud_auditor import anti_inflation_auditor
 from app.services.matching.language_matcher import language_matcher
+from app.services.matching.transferable_skills import transferable_skills_engine
 from app.utils.normalizer import normalize_skill_name
 
 
@@ -97,6 +98,10 @@ class GenericMatchingEngine:
                 "score": round(other_score, 4),
                 "certificates": cert_res,
                 "language": lang_res,
+                "has_cert_req": has_cert_req,
+                "has_lang_req": has_lang_req,
+                "cand_cert_count": len(getattr(cand_profile, "certificates", []) or []),
+                "cand_lang_count": len(getattr(cand_profile, "languages", []) or []),
             }
 
             # V4 Late Interaction token alignment
@@ -1096,6 +1101,7 @@ class GenericMatchingEngine:
                 "matched": [],
                 "missing": [],
                 "missing_mandatory": [],
+                "conditional_mandatory": [],
                 "evidence": [],
                 "mandatory_ratio": 1.0,
             }
@@ -1119,6 +1125,7 @@ class GenericMatchingEngine:
         matched = []
         missing = []
         missing_mandatory = []
+        conditional_mandatory = []
         evidence_list = []
 
         job_context = f"[CONTEXT] Domain: {job_subdom} | Environment: {job.work_mode or 'Professional'}"
@@ -1249,44 +1256,108 @@ class GenericMatchingEngine:
                     optional_scores.append(final_skill_score)
                 ai_matched = True
             else:
-                # Kiểm tra năng lực chuyển giao trong cùng nhóm nghiệp vụ (Functional Cluster)
-                for cs in cand_profile.skills:
-                    is_trans, trans_credit = self._is_transferable_skill(
-                        req.skill_name, cs.skill_name
+                # Kiểm tra năng lực chuyển giao có hướng (Directed Transferable Skills & Experience Inheritance)
+                best_trans = transferable_skills_engine.evaluate_best_candidate_skill(
+                    target_skill=req.skill_name,
+                    target_min_years=req_min_years,
+                    target_min_level=req.minimum_level,
+                    candidate_skills=cand_profile.skills,
+                    get_level_val_fn=self._get_level_val,
+                    calc_skill_years_fn=self._calculate_skill_years,
+                    cand_profile=cand_profile,
+                    domain_context=job_subdom,
+                )
+                if best_trans is not None and best_trans.is_transferable:
+                    matching_cs = next(
+                        (cs for cs in cand_profile.skills if cs.skill_name == best_trans.source_skill),
+                        None,
                     )
-                    if is_trans:
-                        level_multiplier = min(
-                            1.0,
-                            self._get_level_val(cs.proficiency_level)
-                            / float(self._get_level_val(req.minimum_level)),
-                        )
-                        final_skill_score = trans_credit * level_multiplier
+                    cs_level = matching_cs.proficiency_level if matching_cs else "BEGINNER"
+                    level_multiplier = min(
+                        1.0,
+                        self._get_level_val(cs_level)
+                        / float(self._get_level_val(req.minimum_level)),
+                    )
+                    final_skill_score = best_trans.credit * level_multiplier
 
-                        matched.append(
-                            {
-                                "name": req.skill_name,
-                                "isMandatory": is_man,
-                                "source": f"Kỹ năng chuyển giao: {cs.skill_name}",
-                                "actual_years": cand_skill_years,
+                    # Experience inheritance & years gap evaluation
+                    years_gap_info = None
+                    if req_min_years > 0:
+                        if best_trans.transferred_years < req_min_years:
+                            ratio = (
+                                best_trans.transferred_years / req_min_years
+                                if req_min_years > 0
+                                else 1.0
+                            )
+                            if ratio < 0.25:
+                                penalty_mult = 0.35 + 0.35 * max(0.0, ratio * 2.0)
+                            else:
+                                penalty_mult = 0.65 + 0.35 * max(0.2, min(1.0, ratio))
+                            final_skill_score *= penalty_mult
+                            years_gap_info = {
                                 "req_years": req_min_years,
-                                "years_gap": None,
+                                "actual_years": best_trans.transferred_years,
+                                "source_years": best_trans.source_years,
+                                "ratio": round(ratio, 2),
+                                "penalty_msg": (
+                                    f"Kỹ năng chuyển giao '{req.skill_name}': Thâm niên kế thừa từ '{best_trans.source_skill}' "
+                                    f"({best_trans.transferred_years:.1f} năm) chưa đủ yêu cầu của JD ({req_min_years:.1f} năm). "
+                                    f"Đã trừ điểm thâm niên kỹ năng tương ứng."
+                                ),
                             }
-                        )
-                        evidence_list.append(
-                            {
-                                "skillName": req.skill_name,
-                                "evidenceText": f"Kỹ năng '{cs.skill_name}' có thể chuyển giao sang '{req.skill_name}' (Cùng phân khúc công nghệ)",
-                                "source": "transferable_skill",
-                            }
-                        )
-                        if is_man:
-                            mandatory_scores.append(final_skill_score)
-                            mandatory_credits.append(trans_credit)
-                            missing_mandatory.append(req.skill_name)
                         else:
-                            optional_scores.append(final_skill_score)
-                        ai_matched = True
-                        break
+                            years_gap_info = {
+                                "req_years": req_min_years,
+                                "actual_years": best_trans.transferred_years,
+                                "source_years": best_trans.source_years,
+                                "bonus_msg": (
+                                    f"Kỹ năng chuyển giao '{req.skill_name}': Thâm niên kế thừa từ '{best_trans.source_skill}' "
+                                    f"({best_trans.transferred_years:.1f} năm) đáp ứng tốt yêu cầu ({req_min_years:.1f} năm)."
+                                ),
+                            }
+
+                    matched.append(
+                        {
+                            "name": req.skill_name,
+                            "isMandatory": is_man,
+                            "source": f"Kỹ năng chuyển giao: {best_trans.source_skill}",
+                            "source_skill": best_trans.source_skill,
+                            "actual_years": best_trans.transferred_years,
+                            "source_years": best_trans.source_years,
+                            "req_years": req_min_years,
+                            "years_gap": years_gap_info,
+                            "transfer_direction": best_trans.direction.value,
+                            "transfer_credit": best_trans.credit,
+                            "transfer_explanation": best_trans.explanation,
+                            "is_conditional_pass": best_trans.is_high_grade if is_man else False,
+                        }
+                    )
+
+                    pct_credit = int(best_trans.credit * 100)
+                    evidence_list.append(
+                        {
+                            "skillName": req.skill_name,
+                            "evidenceText": (
+                                f"Kỹ năng '{best_trans.source_skill}' ({best_trans.source_years:.1f} năm) "
+                                f"có thể chuyển giao sang '{req.skill_name}' "
+                                f"({best_trans.explanation} - Tương thích: {pct_credit}%, Kế thừa: {best_trans.transferred_years:.1f} năm thâm niên)"
+                            ),
+                            "source": "transferable_skill",
+                            "source_skill": best_trans.source_skill,
+                            "transferred_years": best_trans.transferred_years,
+                            "transfer_credit": best_trans.credit,
+                        }
+                    )
+                    if is_man:
+                        mandatory_scores.append(final_skill_score)
+                        mandatory_credits.append(best_trans.credit)
+                        if best_trans.is_high_grade:
+                            conditional_mandatory.append(req.skill_name)
+                        else:
+                            missing_mandatory.append(req.skill_name)
+                    else:
+                        optional_scores.append(final_skill_score)
+                    ai_matched = True
 
             if ai_matched:
                 continue
@@ -1413,6 +1484,7 @@ class GenericMatchingEngine:
             "matched": matched,
             "missing": missing,
             "missing_mandatory": missing_mandatory,
+            "conditional_mandatory": conditional_mandatory,
             "mandatory_ratio": man_ratio,
             "evidence": evidence_list,
             "p_density": p_density,
@@ -1425,192 +1497,11 @@ class GenericMatchingEngine:
 
     def _is_transferable_skill(self, skill_a: str, skill_b: str) -> Tuple[bool, float]:
         """
-        Determines whether skill_a and skill_b belong to the same functional skill cluster
+        Determines whether candidate skill_b can transfer to target skill_a
         and returns (is_transferable, credit_score).
         """
-        s_a = skill_a.lower().strip()
-        s_b = skill_b.lower().strip()
-
-        clusters = [
-            # Frontend Modern Frameworks
-            {
-                "react",
-                "reactjs",
-                "react.js",
-                "next.js",
-                "nextjs",
-                "vue",
-                "vuejs",
-                "vue.js",
-                "nuxt",
-                "nuxtjs",
-                "nuxt.js",
-                "angular",
-                "angularjs",
-                "svelte",
-            },
-            # Backend Runtimes & Frameworks
-            {
-                "node.js",
-                "nodejs",
-                "node",
-                "nestjs",
-                "express",
-                "express.js",
-                "fastapi",
-                "django",
-                "flask",
-                "spring",
-                "spring boot",
-                "golang",
-                "go",
-                ".net",
-                "dotnet",
-                "asp.net",
-                "laravel",
-                "ruby on rails",
-            },
-            # Relational SQL Databases
-            {
-                "postgresql",
-                "postgres",
-                "mysql",
-                "mariadb",
-                "oracle",
-                "sql server",
-                "mssql",
-                "sqlite",
-            },
-            # NoSQL Document & Key-Value Databases
-            {"mongodb", "redis", "dynamodb", "cassandra", "couchdb", "elasticsearch"},
-            # DevOps, Containers & Orchestration
-            {
-                "docker",
-                "kubernetes",
-                "k8s",
-                "podman",
-                "containerd",
-                "helm",
-                "terraform",
-            },
-            # Cloud Service Providers
-            {"aws", "amazon web services", "azure", "gcp", "google cloud"},
-            # Accounting, ERP & Tax Software
-            {
-                "misa",
-                "bravo",
-                "fast",
-                "sap fico",
-                "sap",
-                "báo cáo tài chính",
-                "kế toán thuế",
-                "quyết toán thuế",
-                "vas",
-                "ifrs",
-            },
-            # Digital Marketing Ad Platforms
-            {
-                "facebook ads",
-                "fb ads",
-                "meta ads",
-                "google ads",
-                "tiktok ads",
-                "zalo ads",
-                "performance marketing",
-            },
-            # Design & UI/UX Tools
-            {"figma", "sketch", "adobe xd", "photoshop", "illustrator"},
-            # Embedded Systems, Firmware & Microcontrollers
-            {
-                "stm32",
-                "arm cortex",
-                "arm",
-                "freertos",
-                "rtos",
-                "embedded",
-                "c/c++",
-                "firmware",
-                "microcontroller",
-                "esp32",
-                "nordic",
-                "ble",
-                "iot",
-            },
-            # Digital Marketing Analytics & Tracking
-            {
-                "ga4",
-                "google analytics",
-                "gtm",
-                "google tag manager",
-                "server-side tracking",
-                "meta capi",
-                "conversions api",
-                "tracking",
-                "adjust",
-                "appsflyer",
-                "mixpanel",
-                "amplitude",
-                "hạ tầng tracking",
-                "e-commerce tracking",
-            },
-            # E-commerce Unit Economics, CRO & Funnel Optimization
-            {
-                "tối ưu phễu",
-                "funnel",
-                "roas",
-                "cac",
-                "mer",
-                "cro",
-                "conversion rate",
-                "a/b testing",
-                "a/b test",
-                "kinh tế e-com",
-                "đơn vị kinh tế",
-                "phễu chuyển đổi",
-            },
-            # Sales Management & FMCG Distribution Channels
-            {
-                "quản lý đội ngũ sales",
-                "sales management",
-                "quản lý bán hàng",
-                "giám sát bán hàng",
-                "sales supervisor",
-                "territory management",
-                "giám sát địa bàn",
-                "phát triển mạng lưới",
-                "kênh phân phối",
-                "nhà phân phối",
-                "distributor management",
-                "channel management",
-                "đại lý",
-                "horeca",
-                "foodservice",
-                "dự báo doanh số",
-                "sales target",
-                "revenue forecasting",
-                "đàm phán",
-                "commercial negotiation",
-                "key accounts",
-                "kam",
-                "huấn luyện bán hàng",
-                "sales coaching",
-                "field training",
-                "nghiên cứu đối thủ",
-                "competitor intelligence",
-                "chiến lược kinh doanh",
-                "business planning",
-                "sell-in",
-                "sell-out",
-                "mạng lưới cung ứng",
-                "điểm bán lẻ",
-            },
-        ]
-
-        for cluster in clusters:
-            if any(k in s_a for k in cluster) and any(k in s_b for k in cluster):
-                return True, 0.85
-
-        return False, 0.0
+        is_trans, credit, _, _ = transferable_skills_engine.check_transferable(skill_a, skill_b)
+        return is_trans, credit
 
     def _calculate_skill_years(
         self, skill_name: str, cand_profile: CandidateProfilePayload

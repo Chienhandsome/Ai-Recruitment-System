@@ -70,13 +70,22 @@ class ScoreEngine:
 
         # Determine mandatory_score_cap when mandatory skills are missing
         mandatory_score_cap = None
+        skills_metrics = match_metrics.get("skills", {})
+        missing_mandatory_skills = skills_metrics.get("missing_mandatory", [])
+        conditional_mandatory_skills = skills_metrics.get("conditional_mandatory", [])
+
         if mandatory_ratio is not None and mandatory_ratio < 1.0:
-            if mandatory_ratio < 0.4:
-                mandatory_score_cap = 39.0
-            elif mandatory_ratio < 0.6:
-                mandatory_score_cap = 59.0
-            elif mandatory_ratio < 0.8:
-                mandatory_score_cap = 74.0
+            if missing_mandatory_skills:
+                if mandatory_ratio < 0.4:
+                    mandatory_score_cap = 39.0
+                elif mandatory_ratio < 0.6:
+                    mandatory_score_cap = 59.0
+                elif mandatory_ratio < 0.8:
+                    mandatory_score_cap = 74.0
+                else:
+                    mandatory_score_cap = 84.0
+            elif conditional_mandatory_skills:
+                mandatory_score_cap = 88.0
             else:
                 mandatory_score_cap = 84.0
 
@@ -132,14 +141,64 @@ class ScoreEngine:
 
         # 1. Skills mandatory evaluation
         missing_mandatory_skills = match_metrics["skills"].get("missing_mandatory", [])
+        matched_skills_list = match_metrics["skills"].get("matched", [])
         for skill_name in missing_mandatory_skills:
+            # Check if this missing mandatory skill was evaluated via transferable skills or context
+            matched_item = next(
+                (m for m in matched_skills_list if m.get("name") == skill_name),
+                None,
+            )
+            if matched_item and "Kỹ năng chuyển giao" in matched_item.get("source", ""):
+                source_skill = (
+                    matched_item.get("source_skill")
+                    or matched_item.get("source", "").replace("Kỹ năng chuyển giao:", "").strip()
+                )
+                direction = matched_item.get("transfer_direction", "UNKNOWN")
+                credit = float(matched_item.get("transfer_credit", 0.0))
+                pct = int(credit * 100)
+                expl = matched_item.get("transfer_explanation", "")
+                src_years = float(matched_item.get("source_years", 0.0))
+                trans_years = float(matched_item.get("actual_years", 0.0))
+                req_years = float(matched_item.get("req_years", 0.0))
+                years_gap = matched_item.get("years_gap")
+
+                if direction == "UPWARD":
+                    cand_val = f"Nền tảng '{source_skill}' ({src_years:.1f} năm) - Chuyển giao cơ sở lên chuyên sâu (UPWARD {pct}%)"
+                    reason = (
+                        f"Kỹ năng bắt buộc '{skill_name}' đòi hỏi kiến trúc/năng lực chuyên sâu. "
+                        f"Ứng viên mới có kỹ năng nền tảng cơ sở '{source_skill}'"
+                        + (f" ({expl})" if expl else "")
+                        + f", mức độ tương thích {pct}% không đủ điều kiện thay thế độc lập cho tiêu chuẩn tiên quyết."
+                    )
+                elif credit < 0.70:
+                    cand_val = f"Kỹ năng liên quan '{source_skill}' (Tương thích {pct}%)"
+                    reason = (
+                        f"Mức độ tương thích chuyển giao từ '{source_skill}' sang '{skill_name}' ({pct}%) "
+                        f"chưa đạt ngưỡng an toàn tối thiểu (70%) để thông qua kỹ năng bắt buộc."
+                    )
+                elif years_gap and years_gap.get("penalty_msg"):
+                    cand_val = f"Kế thừa {trans_years:.1f} năm từ '{source_skill}' (Yêu cầu: {req_years:.1f} năm)"
+                    reason = (
+                        f"Kỹ năng bắt buộc '{skill_name}' yêu cầu tối thiểu {req_years:.1f} năm kinh nghiệm, "
+                        f"nhưng thâm niên kế thừa từ '{source_skill}' chỉ đạt {trans_years:.1f} năm."
+                    )
+                else:
+                    cand_val = f"Chuyển giao '{source_skill}' ({pct}%) - Chưa đạt chuẩn bắt buộc"
+                    reason = f"Kỹ năng '{source_skill}' chưa đủ độ chín để thay thế hoàn toàn cho kỹ năng bắt buộc '{skill_name}'."
+            elif matched_item and "(Cần phỏng vấn xác minh)" in matched_item.get("source", ""):
+                cand_val = "Ghi nhận gián tiếp trong dự án / bên thứ ba"
+                reason = f"Kỹ năng bắt buộc '{skill_name}' mới chỉ xuất hiện qua mô tả gián tiếp, chưa có bằng chứng thâm niên thực chiến độc lập."
+            else:
+                cand_val = "Chưa có bằng chứng trong hồ sơ"
+                reason = f"Hồ sơ ứng viên hoàn toàn chưa có thông tin hay kỹ năng tương đương để đáp ứng kỹ năng bắt buộc '{skill_name}'."
+
             mandatory_failures.append(
                 {
                     "type": "SKILL",
                     "requirement": skill_name,
-                    "candidateValue": "Chưa đáp ứng / Thiếu thâm niên yêu cầu",
+                    "candidateValue": cand_val,
                     "status": "FAIL",
-                    "reason": f"Kỹ năng bắt buộc '{skill_name}' chưa đạt yêu cầu.",
+                    "reason": reason,
                 }
             )
 
@@ -207,6 +266,8 @@ class ScoreEngine:
 
         if mandatory_failures:
             mandatory_status = "FAIL"
+        elif conditional_mandatory_skills:
+            mandatory_status = "CONDITIONAL_PASS"
         elif has_any_mandatory:
             mandatory_status = "PASS"
         else:
@@ -260,6 +321,7 @@ class ScoreEngine:
             "mandatory_ratio": round(mandatory_ratio, 3),
             "mandatory_status": mandatory_status,
             "mandatory_failures": mandatory_failures,
+            "conditional_mandatory_skills": conditional_mandatory_skills,
             "base_score": base_overall,
             "mandatory_score_cap": mandatory_score_cap,
             "score_adjustment": score_adjustment,

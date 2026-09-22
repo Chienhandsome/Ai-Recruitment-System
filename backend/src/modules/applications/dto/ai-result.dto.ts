@@ -104,7 +104,7 @@ export const AiResultSchema = z.object({
   domain_compatibility: z.number().min(0).max(1).default(1.0).optional(),
   mandatory_ratio: z.number().min(0).max(1).default(1.0).optional(),
   mandatory_status: z
-    .enum(['PASS', 'FAIL', 'NOT_APPLICABLE'])
+    .enum(['PASS', 'FAIL', 'CONDITIONAL_PASS', 'NOT_APPLICABLE'])
     .default('PASS')
     .optional(),
   mandatory_failures: z.array(MandatoryFailureSchema).default([]).optional(),

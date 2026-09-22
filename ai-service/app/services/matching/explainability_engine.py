@@ -70,8 +70,82 @@ class ExplainabilityEngine:
             req_yrs = m.get("req_years", 0.0)
             years_gap = m.get("years_gap")
 
-            # Check if skill matched but has experience years shortfall
-            if years_gap and isinstance(years_gap, dict) and years_gap.get("penalty_msg"):
+            if "Kỹ năng chuyển giao" in src:
+                src_skill = m.get("source_skill") or src.replace("Kỹ năng chuyển giao:", "").strip()
+                trans_yrs = float(m.get("actual_years", 0.0) or 0.0)
+                src_yrs = float(m.get("source_years", 0.0) or 0.0)
+                is_cond_pass = bool(m.get("is_conditional_pass"))
+                is_mand = bool(m.get("isMandatory"))
+                dir_code = m.get("transfer_direction", "PEER")
+                credit = float(m.get("transfer_credit", 0.0) or 0.0)
+                pct_credit = int(credit * 100)
+                expl = m.get("transfer_explanation") or ""
+
+                dir_map = {
+                    "DOWNWARD": "chuyển giao công nghệ phức tạp hơn sang cơ bản (Downward)",
+                    "PEER": "chuyển giao tương đương ngang hàng (Peer)",
+                    "UPWARD": "chuyển giao từ nền tảng cơ sở lên chuyên sâu (Upward)",
+                }
+                dir_desc = dir_map.get(dir_code, "chuyển giao tương thích")
+
+                if is_cond_pass:
+                    pos_msg = (
+                        f"Kỹ năng bắt buộc '{name}' được thông qua có điều kiện (CONDITIONAL PASS) qua Kỹ năng Chuyển giao Năng lực cấp cao: "
+                        f"Ứng viên có nền tảng '{src_skill}' ({src_yrs:.1f} năm thâm niên, {dir_desc}, "
+                        f"độ tương thích {pct_credit}%, kế thừa {trans_yrs:.1f} năm thâm niên)"
+                        + (f". {expl}." if expl else ".")
+                    )
+                    strengths.append(pos_msg)
+                    skills_plus.append(pos_msg)
+
+                    # Prompt interview ramp-up verification note for HR
+                    ramp_note = (
+                        f"Lưu ý phỏng vấn (Chuyển giao năng lực): Ứng viên đáp ứng tiêu chí bắt buộc '{name}' qua nền tảng '{src_skill}' -> "
+                        f"Cần phỏng vấn kiểm tra tốc độ thích ứng công nghệ mới (Ramp-up period) và các nghiệp vụ/cú pháp đặc thù của '{name}'."
+                    )
+                    gaps.append(ramp_note)
+                    skills_minus.append(ramp_note)
+                elif is_mand:
+                    pos_msg = (
+                        f"Kỹ năng chuyển giao hỗ trợ: Có nền tảng '{src_skill}' ({src_yrs:.1f} năm) hỗ trợ một phần cho '{name}' "
+                        f"({dir_desc}, tương thích {pct_credit}%)"
+                        + (f". {expl}." if expl else ".")
+                    )
+                    strengths.append(pos_msg)
+                    skills_plus.append(pos_msg)
+
+                    fail_note = (
+                        f"Chưa đạt yêu cầu kỹ năng bắt buộc '{name}': Ứng viên mới có kỹ năng nền tảng cơ sở '{src_skill}' "
+                        f"({dir_desc}, tương thích {pct_credit}%), không đủ điều kiện thay thế độc lập cho yêu cầu chuyên sâu của JD"
+                        + (f" ({expl})" if expl else "")
+                        + " -> Đã vi phạm tiêu chí tiên quyết (Mandatory Fail)."
+                    )
+                    gaps.append(fail_note)
+                    skills_minus.append(fail_note)
+                else:
+                    if trans_yrs > 0:
+                        pos_msg = (
+                            f"Sở hữu kỹ năng chuyển giao bổ trợ '{name}': Kế thừa {trans_yrs:.1f} năm thâm niên từ nền tảng '{src_skill}' "
+                            f"({dir_desc}, tương thích {pct_credit}%)"
+                            + (f". {expl}." if expl else ".")
+                        )
+                    else:
+                        pos_msg = (
+                            f"Có kỹ năng chuyển giao năng lực bổ trợ: '{name}' (chuyển giao từ nền tảng '{src_skill}', "
+                            f"{dir_desc}, tương thích {pct_credit}%)"
+                            + (f". {expl}." if expl else ".")
+                        )
+                    strengths.append(pos_msg)
+                    skills_plus.append(pos_msg)
+
+                # Add years gap note for transferable skill if any
+                if years_gap and isinstance(years_gap, dict) and years_gap.get("penalty_msg"):
+                    skill_shortage_count += 1
+                    pen_msg = years_gap["penalty_msg"]
+                    gaps.append(pen_msg)
+                    skills_minus.append(pen_msg)
+
+            elif years_gap and isinstance(years_gap, dict) and years_gap.get("penalty_msg"):
                 skill_shortage_count += 1
                 pen_msg = years_gap["penalty_msg"]
                 gaps.append(pen_msg)
@@ -95,10 +169,6 @@ class ExplainabilityEngine:
                 msg = f"AI nhận diện kỹ năng '{name}' qua {src} (Đạt chuẩn chuyên môn)."
                 strengths.append(msg)
                 skills_plus.append(msg)
-            elif "Kỹ năng chuyển giao" in src:
-                msg = f"Có kỹ năng chuyển giao năng lực có thể đáp ứng tốt yêu cầu: '{name}'."
-                strengths.append(msg)
-                skills_plus.append(msg)
             elif "skills_list" in src:
                 if m.get("isMandatory"):
                     msg = f"Thành thạo kỹ năng bắt buộc cốt lõi: '{name}' (Khai báo đạt chuẩn năng lực)."
@@ -114,8 +184,31 @@ class ExplainabilityEngine:
         for m in missing_skills:
             name = m.get("name", "")
             if m.get("isMandatory"):
-                if m.get("transfer_credit", 0.0) > 0:
-                    msg = f"Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc '{name}' (Mới chỉ ghi nhận năng lực chuyển giao một phần, đã trừ điểm tiêu chí bắt buộc)."
+                # Check if this missing mandatory skill was evaluated via transferable skill in matched
+                matched_trans = next(
+                    (item for item in matched_skills if item.get("name") == name and "Kỹ năng chuyển giao" in item.get("source", "")),
+                    None,
+                )
+                if matched_trans:
+                    src_sk = matched_trans.get("source_skill") or matched_trans.get("source", "").replace("Kỹ năng chuyển giao:", "").strip()
+                    dir_c = matched_trans.get("transfer_direction", "UNKNOWN")
+                    cr = float(matched_trans.get("transfer_credit", 0.0) or 0.0)
+                    pct_cr = int(cr * 100)
+                    expl_t = matched_trans.get("transfer_explanation", "")
+                    if dir_c == "UPWARD":
+                        msg = (
+                            f"Chưa đạt yêu cầu kỹ năng bắt buộc '{name}': Ứng viên mới có kỹ năng nền tảng cơ sở '{src_sk}' "
+                            f"(Chuyển giao bậc thấp UPWARD, tương thích {pct_cr}%), không đủ điều kiện thay thế tiêu chuẩn chuyên sâu của JD"
+                            + (f" ({expl_t})" if expl_t else "")
+                            + ". Cần đào tạo nâng cao."
+                        )
+                    else:
+                        msg = (
+                            f"Chưa đạt yêu cầu kỹ năng bắt buộc '{name}': Kỹ năng chuyển giao từ '{src_sk}' (tương thích {pct_cr}%) "
+                            f"chưa đạt ngưỡng tối thiểu theo tiêu chuẩn tiên quyết của JD. Đã trừ điểm điều kiện bắt buộc."
+                        )
+                elif m.get("transfer_credit", 0.0) > 0:
+                    msg = f"Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc '{name}' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc)."
                 else:
                     msg = f"Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: '{name}' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết)."
                 gaps.append(msg)
@@ -209,23 +302,7 @@ class ExplainabilityEngine:
                 edu_minus.append(msg)
 
         # -------------------------------------------------------------------------
-        # 5. Giải Trình Chứng Chỉ (Certificates)
-        # -------------------------------------------------------------------------
-        om = metrics.get("other", {})
-        for cert in om.get("matched", []):
-            msg = f"Sở hữu chứng chỉ chuyên môn / ngoại ngữ đạt chuẩn: '{cert}' -> Cộng điểm tiêu chí bổ trợ."
-            strengths.append(msg)
-            other_plus.append(msg)
-        for cert in om.get("missing", []):
-            msg = f"Chưa tìm thấy thông tin về chứng chỉ chuyên môn: '{cert}' trong hồ sơ khai báo."
-            gaps.append(msg)
-            other_minus.append(msg)
-
-        if not other_plus and not other_minus:
-            other_plus.append("Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung.")
-
-        # -------------------------------------------------------------------------
-        # 6. Cấu Trúc Bảng Điểm Từng Trụ Cột (Structured Pillar Explanations)
+        # 6. Cấu Trúc Bảng Điểm Từng Trụ Cột (Score Breakdown Extraction)
         # -------------------------------------------------------------------------
         bd = scores.get("score_breakdown", {})
         skills_bd = bd.get("skills", {})
@@ -245,6 +322,98 @@ class ExplainabilityEngine:
         o_earned = other_bd.get("earned_points", round(scores.get("other_score", 0.0) * 0.15, 2))
         o_max = other_bd.get("max_points", 15.0)
 
+        # -------------------------------------------------------------------------
+        # 5. Giải Trình Ngoại Ngữ & Chứng Chỉ (Languages & Certificates - Pillar 4)
+        # -------------------------------------------------------------------------
+        om = metrics.get("other", {})
+        cert_metrics = om.get("certificates", {})
+        lang_metrics = om.get("language", {})
+
+        cert_matched = cert_metrics.get("matched", [])
+        cert_missing = cert_metrics.get("missing", [])
+        cert_failures = cert_metrics.get("failures", [])
+
+        has_cert_req = om.get("has_cert_req", bool(cert_missing or cert_matched))
+        has_lang_req = lang_metrics.get("has_requirements", False)
+        lang_evals = lang_metrics.get("evaluations", [])
+
+        # 5A. Chứng chỉ chuyên môn (Certificates)
+        for cert in cert_matched:
+            msg = f"Sở hữu chứng chỉ chuyên môn đạt chuẩn: '{cert}' -> Cộng điểm tiêu chí bổ trợ."
+            strengths.append(msg)
+            other_plus.append(msg)
+
+        for cert in cert_missing:
+            msg = f"Hồ sơ chưa có chứng chỉ chuyên môn theo yêu cầu của JD: '{cert}' -> Bị trừ điểm tiêu chí chứng chỉ."
+            gaps.append(msg)
+            other_minus.append(msg)
+
+        # 5B. Ngoại ngữ (Languages)
+        for ev in lang_evals:
+            req_text = ev.get("requirement", "Ngoại ngữ")
+            cand_v = ev.get("candidate_value")
+            st = ev.get("status", "FAIL")
+            is_mand = ev.get("is_mandatory", False)
+            mand_tag = " (Yêu cầu bắt buộc)" if is_mand else ""
+
+            if st == "PASS":
+                msg = f"Đáp ứng năng lực ngoại ngữ: '{req_text}'{mand_tag} (Ghi nhận: {cand_v or 'Đạt chuẩn'}) -> Cộng điểm tiêu chí ngoại ngữ."
+                strengths.append(msg)
+                other_plus.append(msg)
+            elif st == "FAIL":
+                msg = f"Trình độ ngoại ngữ chưa đạt yêu cầu của JD: '{req_text}'{mand_tag} (Ghi nhận: {cand_v or 'Chưa đạt chuẩn'}) -> Bị trừ điểm ngoại ngữ."
+                gaps.append(msg)
+                other_minus.append(msg)
+            elif st == "MISSING":
+                msg = f"Hồ sơ chưa có thông tin hoặc chứng chỉ ngoại ngữ đáp ứng yêu cầu: '{req_text}'{mand_tag} -> Bị trừ điểm ngoại ngữ."
+                gaps.append(msg)
+                other_minus.append(msg)
+
+        # 5C. Xử lý trường hợp: Ứng viên không có gì (Không có chứng chỉ & không có ngoại ngữ)
+        cand_cert_cnt = om.get("cand_cert_count", 0)
+        cand_lang_cnt = om.get("cand_lang_count", 0)
+        has_no_cert_or_lang = (cand_cert_cnt == 0 and not cert_matched) and (cand_lang_cnt == 0 and not any(ev.get("status") == "PASS" for ev in lang_evals))
+
+        if has_no_cert_or_lang:
+            if has_cert_req or has_lang_req or o_earned <= 0.05:
+                missing_items = []
+                if cert_missing:
+                    missing_items.append(f"chứng chỉ ({', '.join(cert_missing)})")
+                elif has_cert_req:
+                    missing_items.append("chứng chỉ chuyên môn")
+
+                missing_lang_reqs = [ev.get("requirement") for ev in lang_evals if ev.get("status") in ("FAIL", "MISSING")]
+                if missing_lang_reqs:
+                    missing_items.append(f"ngoại ngữ ({', '.join(missing_lang_reqs)})")
+                elif has_lang_req:
+                    missing_items.append("năng lực ngoại ngữ")
+
+                if missing_items:
+                    not_meet_msg = f"Ứng viên không có gì trong hồ sơ khai báo về {' và '.join(missing_items)} -> Không đủ đáp ứng tiêu chí ngoại ngữ & chứng chỉ theo yêu cầu tuyển dụng."
+                else:
+                    not_meet_msg = "Ứng viên không có chứng chỉ chuyên môn và chưa đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng -> Không đủ đáp ứng tiêu chí ngoại ngữ & chứng chỉ."
+
+                if not any("không đủ đáp ứng" in m.lower() for m in other_minus):
+                    gaps.append(not_meet_msg)
+                    other_minus.append(not_meet_msg)
+
+                if not other_plus:
+                    other_plus.append("Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ.")
+            else:
+                if not other_plus:
+                    other_plus.append("Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung.")
+                if not other_minus:
+                    other_minus.append("Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ.")
+
+        # Fallback an toàn nếu cả 2 danh sách vẫn rỗng
+        if not other_plus and not other_minus:
+            if o_earned >= o_max * 0.7:
+                other_plus.append("Đáp ứng tiêu chuẩn chung về chứng chỉ và kỹ năng bổ sung.")
+                other_minus.append("Không có điểm trừ về chứng chỉ hay ngoại ngữ.")
+            else:
+                other_plus.append("Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ.")
+                other_minus.append("Hồ sơ chưa đáp ứng đầy đủ tiêu chuẩn chứng chỉ hoặc ngoại ngữ theo yêu cầu.")
+
         # Generate custom explanatory summaries per pillar
         skills_summary = f"Đạt {s_earned:.1f} / {s_max:.1f} điểm: Đã đáp ứng {len(matched_skills)}/{len(matched_skills)+len(missing_skills)} kỹ năng chuyên môn"
         if skill_shortage_count > 0:
@@ -252,9 +421,25 @@ class ExplainabilityEngine:
         else:
             skills_summary += "."
 
+        cond_mand = sm.get("conditional_mandatory", [])
+        miss_mand = sm.get("missing_mandatory", [])
+        if cond_mand:
+            skills_summary += f" [THÔNG QUA CÓ ĐIỀU KIỆN]: Kỹ năng bắt buộc ({', '.join(cond_mand)}) được chấp thuận nhờ năng lực chuyển giao tương thích cấp cao."
+        elif miss_mand:
+            skills_summary += f" [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết ({', '.join(miss_mand)})."
+
         exp_summary = f"Đạt {e_earned:.1f} / {e_max:.1f} điểm: Đánh giá dựa trên {total_yrs:.1f} năm thâm niên (Yêu cầu: {req_yrs:.1f} năm), cấp bậc vị trí và dự án thực chiến."
         edu_summary = f"Đạt {ed_earned:.1f} / {ed_max:.1f} điểm: Đánh giá dựa trên cấp bậc văn bằng ({edm.get('best_degree', 'Đại học/Cao đẳng')}) và mức độ phù hợp chuyên ngành ({edm.get('best_major', 'Chuyên ngành')})."
-        other_summary = f"Đạt {o_earned:.1f} / {o_max:.1f} điểm: Đánh giá qua các chứng chỉ chuyên môn, ngoại ngữ và tiêu chí bổ trợ."
+
+        if o_earned <= 0.05 or (o_max > 0 and o_earned / o_max < 0.25):
+            other_summary = f"Đạt {o_earned:.1f} / {o_max:.1f} điểm: Ứng viên không có chứng chỉ chuyên môn và không đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng (Không đủ đáp ứng)."
+        elif o_earned >= o_max * 0.8:
+            if cert_matched or any(ev.get("status") == "PASS" for ev in lang_evals):
+                other_summary = f"Đạt {o_earned:.1f} / {o_max:.1f} điểm: Đáp ứng tốt các tiêu chí chứng chỉ chuyên môn và năng lực ngoại ngữ của vị trí tuyển dụng."
+            else:
+                other_summary = f"Đạt {o_earned:.1f} / {o_max:.1f} điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung."
+        else:
+            other_summary = f"Đạt {o_earned:.1f} / {o_max:.1f} điểm: Đáp ứng một phần tiêu chí ngoại ngữ hoặc chứng chỉ chuyên môn bổ trợ."
 
         pillar_explanations = {
             "skills": {
@@ -281,8 +466,14 @@ class ExplainabilityEngine:
             "other": {
                 "earned_points": o_earned,
                 "max_points": o_max,
-                "plus_reasons": other_plus or ["Đáp ứng chứng chỉ yêu cầu."],
-                "minus_reasons": other_minus or ["Không có điểm trừ về chứng chỉ."],
+                "plus_reasons": other_plus or (
+                    ["Đáp ứng chứng chỉ yêu cầu."] if o_earned >= o_max * 0.7
+                    else ["Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ."]
+                ),
+                "minus_reasons": other_minus or (
+                    ["Hồ sơ chưa đáp ứng tiêu chuẩn ngoại ngữ hoặc chứng chỉ theo yêu cầu."] if o_earned <= 0.05
+                    else ["Không có điểm trừ về chứng chỉ hay ngoại ngữ."]
+                ),
                 "summary": other_summary,
             },
         }
@@ -311,6 +502,7 @@ class ExplainabilityEngine:
             mandatory_status=mandatory_status,
             mandatory_failures=mandatory_failures,
             requires_verification_skills=requires_verification_skills,
+            conditional_mandatory_skills=cond_mand,
         )
 
         return {

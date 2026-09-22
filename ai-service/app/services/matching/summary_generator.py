@@ -28,12 +28,14 @@ class SummaryGenerator:
         mandatory_status: str = "PASS",
         mandatory_failures: List[Dict[str, Any]] | None = None,
         requires_verification_skills: List[str] | None = None,
+        conditional_mandatory_skills: List[str] | None = None,
     ) -> str:
         missing_required_skills = missing_required_skills or []
         strengths = strengths or []
         gaps = gaps or []
         mandatory_failures = mandatory_failures or []
         requires_verification_skills = requires_verification_skills or []
+        conditional_mandatory_skills = conditional_mandatory_skills or []
 
         domain_labels = {
             # 1. Design & Creative
@@ -170,7 +172,28 @@ class SummaryGenerator:
                 parts.append("Khuyến nghị: Từ chối hồ sơ (Auto-Reject).")
 
         # =========================================================================
-        # 2. TRƯỜNG HỢP: ĐẠT TIÊU CHÍ TIÊN QUYẾT (MANDATORY PASS HOẶC N/A)
+        # 2. TRƯỜNG HỢP: THÔNG QUA CÓ ĐIỀU KIỆN (CONDITIONAL PASS QUA KỸ NĂNG CHUYỂN GIAO)
+        # =========================================================================
+        elif mandatory_status == "CONDITIONAL_PASS":
+            cond_list = conditional_mandatory_skills or []
+            cond_text = ", ".join(f"'{s}'" for s in cond_list) if cond_list else "tiêu chí bắt buộc"
+            parts.append(
+                f"ỨNG VIÊN TIỀM NĂNG - THÔNG QUA CÓ ĐIỀU KIỆN ({overall_score:.1f}/100 - CẤP ĐỘ {match_level} - TRẠNG THÁI: CHUYỂN GIAO NĂNG LỰC) cho vị trí '{job_title}'."
+            )
+            parts.append(
+                f"Ứng viên đạt chuẩn qua cơ chế Kỹ năng Chuyển giao Năng lực cấp cao (Transferable Skills) cho kỹ năng bắt buộc: {cond_text}. "
+                f"Nền tảng chuyên môn vững chắc từ {cand_dom_label} liên thông tương thích tốt với {job_dom_label}."
+            )
+            if strengths:
+                top_str = "; ".join(strengths[:2])
+                parts.append(f"Điểm nổi bật: {top_str}.")
+            parts.append(
+                f"Khuyến nghị HR: KHÔNG LOẠI HỒ SƠ. Mời ứng viên vào vòng phỏng vấn để đánh giá chuyên sâu về tốc độ làm quen công nghệ (Ramp-up period) "
+                f"và khả năng chuyển giao thực tế vào {cond_text}."
+            )
+
+        # =========================================================================
+        # 3. TRƯỜNG HỢP: ĐẠT TIÊU CHÍ TIÊN QUYẾT (MANDATORY PASS HOẶC N/A)
         # =========================================================================
         else:
             if match_level == "HIGH":

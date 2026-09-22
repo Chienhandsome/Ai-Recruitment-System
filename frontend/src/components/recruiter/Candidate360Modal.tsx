@@ -107,9 +107,8 @@ export function Candidate360Modal({ isOpen, onClose, candidate, onScheduleInterv
       earned: oEarned,
       max: oMax,
       pct: Math.round((oEarned / (oMax || 1)) * 100),
-      color: "amber",
-      plus: candidate.pillarExplanations?.other?.plus_reasons || ["Đáp ứng các tiêu chí bổ trợ và chứng chỉ liên quan."],
-      minus: candidate.pillarExplanations?.other?.minus_reasons || candidate.cons.filter(c => c.toLowerCase().includes("chứng chỉ")),
+      plus: candidate.pillarExplanations?.other?.plus_reasons || (oEarned === 0 ? ["Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ."] : ["Đáp ứng các tiêu chí bổ trợ và chứng chỉ liên quan."]),
+      minus: candidate.pillarExplanations?.other?.minus_reasons || (oEarned === 0 ? ["Hồ sơ chưa đáp ứng tiêu chuẩn ngoại ngữ hoặc chứng chỉ theo yêu cầu."] : candidate.cons.filter(c => c.toLowerCase().includes("chứng chỉ"))),
     },
   ];
 

@@ -56,4 +56,4 @@ import { AdminModule } from './modules/admin/admin.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

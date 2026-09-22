@@ -157,6 +157,18 @@ def _declare_topology(channel) -> None:
 
 def start_evaluation_worker() -> None:
     logger.info("Starting AI evaluation worker")
+
+    # Pre-warm AI matching models ahead of consuming messages to eliminate 30s cold-start DLL lag
+    try:
+        from app.services.matching.semantic import semantic_matcher
+        logger.info("Pre-warming semantic_matcher in worker process...")
+        t0 = time.perf_counter()
+        semantic_matcher.initialize()
+        semantic_matcher.prefetch(["software engineer", "full stack developer"])
+        logger.info("Semantic matcher warm-up complete in %.2fs", time.perf_counter() - t0)
+    except Exception as exc:
+        logger.warning("Could not pre-warm semantic matcher: %s", exc)
+
     connection = _get_connection()
     channel = connection.channel()
     channel.confirm_delivery()

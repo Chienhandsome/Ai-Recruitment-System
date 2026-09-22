@@ -76,10 +76,29 @@ export function RecruiterNotificationBell({
     }
   }, [token]);
 
+  const loadUnreadCountOnly = useCallback(async () => {
+    if (!token || !token.trim()) return;
+    try {
+      const countRes = await getUnreadNotificationCount(token);
+      setUnreadCount(countRes?.unreadCount || 0);
+    } catch (err) {
+      console.warn('Failed to load unread count:', err);
+    }
+  }, [token]);
+
+  // Load fresh notifications when user clicks to open dropdown
   useEffect(() => {
+    if (isOpen) {
+      loadData();
+    }
+  }, [isOpen, loadData]);
+
+  useEffect(() => {
+    // Initial fetch once on mount
     loadData();
-    // Poll every 30 seconds as fallback
-    const interval = setInterval(loadData, 30000);
+
+    // Poll only unread count every 45s as a lightweight fallback (avoids fetching 50 interviews continuously)
+    const interval = setInterval(loadUnreadCountOnly, 45000);
 
     // Subscribe to realtime changes on notifications & interviews
     const supabase = createClient();
@@ -101,7 +120,7 @@ export function RecruiterNotificationBell({
       clearInterval(interval);
       supabase.removeChannel(channel);
     };
-  }, [loadData]);
+  }, [loadData, loadUnreadCountOnly]);
 
   const handleMarkAllRead = async () => {
     if (!token) return;

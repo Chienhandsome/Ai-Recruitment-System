@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server"
 export const dynamic = "force-dynamic"
 
 export default async function CandidateProfilePage() {
-  const profile = await requireProfile("CANDIDATE")
+  const profile = await requireProfile("CANDIDATE", true)
 
   // Fetch candidate skills server-side
   const supabase = await createClient()

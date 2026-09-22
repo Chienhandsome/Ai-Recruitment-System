@@ -50,7 +50,7 @@ type CandidateJobDetailRecord = Prisma.JobPostingGetPayload<{
 
 @Injectable()
 export class JobsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   private async getRecruiterProfile(userId: string) {
     const profile = await this.prisma.recruiterProfile.findUnique({
@@ -461,6 +461,7 @@ export class JobsService {
       where,
       include: candidateJobListInclude,
       orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+      take: 100,
     });
 
     const scoredJobs = jobs

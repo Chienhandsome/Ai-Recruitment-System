@@ -85,7 +85,7 @@ export async function updateSession(request: NextRequest) {
   try {
     const claimsPromise = supabase.auth.getClaims();
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Supabase auth timeout")), 1500)
+      setTimeout(() => reject(new Error("Supabase auth timeout")), 6000)
     );
     const res: any = await Promise.race([claimsPromise, timeoutPromise]);
     data = res.data;

@@ -353,12 +353,46 @@ export class AiInterviewsService {
       where: { applicationId },
       orderBy: { createdAt: 'desc' },
     });
+
+    const pendingSession = sessions.find(
+      (s) => s.status !== AiInterviewStatus.COMPLETED,
+    );
+    if (pendingSession) {
+      try {
+        await this.reconcileSessionWithService(pendingSession);
+        const refreshed = await this.prisma.aiInterviewSession.findMany({
+          where: { applicationId },
+          orderBy: { createdAt: 'desc' },
+        });
+        return refreshed.map((item) => this.serializeSession(item));
+      } catch (err) {
+        this.logger.debug(
+          `Auto-reconcile on findForApplication ignored: ${String(err)}`,
+        );
+      }
+    }
+
     return sessions.map((item) => this.serializeSession(item));
   }
 
   async findOne(userId: string, id: string) {
     const session = await this.findAuthorizedSession(userId, id);
+    if (session.status !== AiInterviewStatus.COMPLETED) {
+      try {
+        await this.reconcileSessionWithService(session);
+        const refreshed = await this.findAuthorizedSession(userId, id);
+        return this.serializeSession(refreshed);
+      } catch (err) {
+        this.logger.debug(`Auto-reconcile on findOne ignored: ${String(err)}`);
+      }
+    }
     return this.serializeSession(session);
+  }
+
+  async syncSession(userId: string, id: string) {
+    const session = await this.findAuthorizedSession(userId, id);
+    await this.reconcileSessionWithService(session);
+    return this.findOne(userId, id);
   }
 
   async downloadVideo(
@@ -607,31 +641,176 @@ export class AiInterviewsService {
       throw new NotFoundException('Không tìm thấy AI interview tương ứng.');
     }
 
-    const status = this.mapStatus(event.data.status);
+    await this.applySessionData(
+      session,
+      {
+        status: event.data.status,
+        started_at: event.data.started_at,
+        completed_at: event.data.completed_at,
+        occurred_at: event.occurred_at,
+        termination_reason: event.data.termination_reason,
+        transcript: event.data.transcript,
+        videos: event.data.videos,
+        security_events: event.data.security_events,
+      },
+      {
+        eventId: event.event_id,
+        eventType: event.event_type,
+        payload: event,
+      },
+    );
+
+    return { accepted: true, duplicate: false };
+  }
+
+  private async reconcileSessionWithService(session: {
+    id: string;
+    interviewServiceId: string;
+    status: AiInterviewStatus;
+  }) {
+    if (session.status === AiInterviewStatus.COMPLETED) {
+      return;
+    }
+
+    const interviewServiceUrl = (
+      process.env.INTERVIEW_SERVICE_URL ?? 'http://127.0.0.1:8010'
+    ).replace(/\/$/, '');
+    const systemKey =
+      process.env.INTERVIEW_SYSTEM_API_KEY ?? 'dev-interview-system-key';
+
+    let response: Response;
+    try {
+      response = await fetch(
+        `${interviewServiceUrl}/v1/internal/interviews/${session.interviewServiceId}/report`,
+        {
+          headers: { 'X-Interview-System-Key': systemKey },
+          signal: AbortSignal.timeout(15_000),
+        },
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch interview report during sync for session ${session.id}: ${String(error)}`,
+      );
+      return;
+    }
+
+    if (!response.ok) {
+      this.logger.warn(
+        `Interview report returned ${response.status} during sync for session ${session.id}`,
+      );
+      return;
+    }
+
+    const report = (await response.json()) as {
+      status?: string;
+      started_at?: string | null;
+      completed_at?: string | null;
+      termination_reason?: string | null;
+      transcript?: unknown;
+      videos?: unknown;
+      security_events?: unknown;
+    };
+
+    if (
+      report.status &&
+      ['COMPLETED', 'TERMINATED', 'EXPIRED'].includes(report.status)
+    ) {
+      const fullSession = await this.prisma.aiInterviewSession.findUnique({
+        where: { id: session.id },
+        include: {
+          round: { select: { id: true } },
+          application: {
+            select: {
+              id: true,
+              currentStage: true,
+              job: {
+                select: {
+                  title: true,
+                  recruiter: { select: { userId: true } },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (fullSession) {
+        await this.applySessionData(fullSession, {
+          status: report.status as any,
+          started_at: report.started_at,
+          completed_at: report.completed_at,
+          termination_reason: report.termination_reason,
+          transcript: report.transcript,
+          videos: report.videos,
+          security_events: report.security_events,
+        });
+      }
+    }
+  }
+
+  private async applySessionData(
+    session: {
+      id: string;
+      roundId: string | null;
+      applicationId: string;
+      status: AiInterviewStatus;
+      application: {
+        id: string;
+        currentStage: ApplicationStage;
+        job: {
+          title: string;
+          recruiter: { userId: string | null } | null;
+        };
+      };
+    },
+    data: {
+      status: 'COMPLETED' | 'TERMINATED' | 'EXPIRED' | AiInterviewStatus;
+      started_at?: string | null;
+      completed_at?: string | null;
+      occurred_at?: string | null;
+      termination_reason?: string | null;
+      transcript?: unknown;
+      videos?: unknown;
+      security_events?: unknown;
+    },
+    callbackEvent?: {
+      eventId: string;
+      eventType: string;
+      payload: unknown;
+    },
+  ) {
+    const status =
+      this.mapStatus(data.status as any) ?? (data.status as AiInterviewStatus);
+    const wasAlreadyCompleted =
+      session.status === AiInterviewStatus.COMPLETED;
+
     try {
       await this.prisma.$transaction(async (prisma) => {
-        await prisma.aiInterviewCallbackEvent.create({
-          data: {
-            id: event.event_id,
-            aiInterviewSessionId: session.id,
-            eventType: event.event_type,
-            payload: event,
-          },
-        });
+        if (callbackEvent) {
+          await prisma.aiInterviewCallbackEvent.create({
+            data: {
+              id: callbackEvent.eventId,
+              aiInterviewSessionId: session.id,
+              eventType: callbackEvent.eventType,
+              payload: callbackEvent.payload as any,
+            },
+          });
+        }
+
         await prisma.aiInterviewSession.update({
           where: { id: session.id },
           data: {
             status,
-            startedAt: event.data.started_at
-              ? new Date(event.data.started_at)
-              : null,
-            completedAt: event.data.completed_at
-              ? new Date(event.data.completed_at)
-              : new Date(event.occurred_at),
-            terminationReason: event.data.termination_reason,
-            transcript: event.data.transcript,
-            videos: event.data.videos,
-            securityEvents: event.data.security_events,
+            startedAt: data.started_at ? new Date(data.started_at) : undefined,
+            completedAt: data.completed_at
+              ? new Date(data.completed_at)
+              : data.occurred_at
+                ? new Date(data.occurred_at)
+                : new Date(),
+            terminationReason: data.termination_reason,
+            transcript: data.transcript as any,
+            videos: data.videos as any,
+            securityEvents: data.security_events as any,
           },
         });
 
@@ -649,7 +828,11 @@ export class AiInterviewsService {
           });
         }
 
-        if (!session.roundId && status === AiInterviewStatus.COMPLETED) {
+        if (
+          !session.roundId &&
+          status === AiInterviewStatus.COMPLETED &&
+          !wasAlreadyCompleted
+        ) {
           await prisma.applicationStatusHistory.create({
             data: {
               applicationId: session.applicationId,
@@ -666,13 +849,13 @@ export class AiInterviewsService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        return { accepted: true, duplicate: true };
+        return;
       }
       throw error;
     }
 
     const recruiterUserId = session.application.job.recruiter?.userId;
-    if (recruiterUserId) {
+    if (recruiterUserId && !wasAlreadyCompleted) {
       const isCompleted = status === AiInterviewStatus.COMPLETED;
       await this.notificationsService.createNotification({
         recipientUserId: recruiterUserId,
@@ -693,8 +876,6 @@ export class AiInterviewsService {
         },
       });
     }
-
-    return { accepted: true, duplicate: false };
   }
 
   private verifySignature(rawBody: Buffer, headers: CallbackHeaders) {

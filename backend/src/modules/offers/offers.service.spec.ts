@@ -200,7 +200,7 @@ describe('OffersService', () => {
         where: { id: 'offer-1' },
         data: { status: OfferStatus.EXPIRED },
       });
-      expect(result.offer.status).toBe(OfferStatus.EXPIRED);
+      expect(result.offer?.status).toBe(OfferStatus.EXPIRED);
     });
   });
 

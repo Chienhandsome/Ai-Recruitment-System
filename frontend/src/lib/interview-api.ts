@@ -368,6 +368,23 @@ export async function getAiInterviewsForApplication(
   return response.json();
 }
 
+export async function syncAiInterviewSession(
+  token: string,
+  sessionId: string,
+): Promise<AiInterviewSession> {
+  const response = await fetch(`${API_URL}/interviews/ai/${sessionId}/sync`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    throw new InterviewApiError(
+      await readInterviewApiError(response, 'Không thể đồng bộ kết quả phỏng vấn AI'),
+      response.status,
+    );
+  }
+  return response.json();
+}
+
 export async function downloadAiInterviewVideo(
   token: string,
   sessionId: string,

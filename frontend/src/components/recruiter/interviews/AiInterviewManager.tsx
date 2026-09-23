@@ -7,6 +7,7 @@ import {
   Clock,
   Download,
   Loader2,
+  RefreshCw,
   ShieldCheck,
   Video,
   X,
@@ -17,6 +18,7 @@ import {
   createAiInterview,
   downloadAiInterviewVideo,
   getAiInterviewsForApplication,
+  syncAiInterviewSession,
 } from "@/lib/interview-api";
 import { AiInterviewReviewModal } from "./AiInterviewReviewModal";
 
@@ -104,11 +106,35 @@ export function AiInterviewManager({
     }
   }
 
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+
   async function handleDownload(sessionId: string, videoId: string) {
     try {
       await downloadAiInterviewVideo(token, sessionId, videoId);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Không thể tải video");
+    }
+  }
+
+  async function handleSync(sessionId: string) {
+    setSyncingId(sessionId);
+    try {
+      const updated = await syncAiInterviewSession(token, sessionId);
+      setSessions((current) =>
+        current.map((item) => (item.id === sessionId ? updated : item)),
+      );
+      if (updated.status === "COMPLETED") {
+        toast.success("Đã đồng bộ xong kết quả phỏng vấn AI và video!");
+        onCreated?.();
+      } else {
+        toast.info("Đã kiểm tra. Ứng viên vẫn đang thực hiện hoặc chưa bắt đầu.");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Không thể đồng bộ kết quả",
+      );
+    } finally {
+      setSyncingId(null);
     }
   }
 
@@ -246,6 +272,25 @@ export function AiInterviewManager({
                         <p className="mt-2 text-xs font-semibold text-rose-600">
                           Lý do: {session.terminationReason}
                         </p>
+                      )}
+
+                      {session.status !== "COMPLETED" && (
+                        <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-blue-100 bg-[#EFF6FF] p-3">
+                          <p className="text-xs font-semibold text-[#1F2937]">
+                            Ứng viên đã nộp bài nhưng chưa thấy kết quả?
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => void handleSync(session.id)}
+                            disabled={syncingId === session.id}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-bold text-[#2563EB] shadow-xs hover:bg-blue-50 active:scale-95 disabled:opacity-60 cursor-pointer transition"
+                          >
+                            <RefreshCw
+                              className={`h-3.5 w-3.5 ${syncingId === session.id ? "animate-spin text-[#2563EB]" : ""}`}
+                            />
+                            {syncingId === session.id ? "Đang đồng bộ..." : "Đồng bộ kết quả"}
+                          </button>
+                        </div>
                       )}
 
                       {session.status === "COMPLETED" && (

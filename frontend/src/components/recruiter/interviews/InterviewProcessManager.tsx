@@ -37,6 +37,7 @@ import {
   reorderInterviewRounds,
   retryInterviewRound,
   submitInterviewFeedback,
+  syncAiInterviewSession,
   type AiInterviewSession,
   type InterviewConductedBy,
   type InterviewMode,
@@ -44,7 +45,7 @@ import {
   type InterviewPurpose,
   type InterviewRoundData,
 } from '@/lib/interview-api';
-import { updateApplicationStage } from '@/lib/recruiter-api';
+import { updateApplicationStage, type ApplicationStage } from '@/lib/recruiter-api';
 import { AiInterviewReviewModal } from './AiInterviewReviewModal';
 import { InterviewDecisionDialog, type InterviewDecisionAction } from './InterviewDecisionDialog';
 
@@ -53,6 +54,7 @@ interface InterviewProcessManagerProps {
   applicationId: string;
   candidateName: string;
   jobTitle: string;
+  currentStage?: ApplicationStage | string;
   onCreated?: () => void;
 }
 
@@ -100,8 +102,21 @@ export function InterviewProcessManager({
   applicationId,
   candidateName,
   jobTitle,
+  currentStage,
   onCreated,
 }: InterviewProcessManagerProps) {
+  const passedScreeningStages = [
+    'SHORTLISTED',
+    'INTERVIEW_SCHEDULED',
+    'INTERVIEWED',
+    'OFFERED',
+    'HIRED',
+  ];
+
+  if (!currentStage || !passedScreeningStages.includes(currentStage)) {
+    return null;
+  }
+
   const [open, setOpen] = useState(false);
   const [process, setProcess] = useState<InterviewProcessData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -398,6 +413,24 @@ export function InterviewProcessManager({
     }
   }
 
+  async function syncAiRound(sessionId: string) {
+    setSaving(true);
+    try {
+      const res = await syncAiInterviewSession(token, sessionId);
+      await loadProcess();
+      if (res.status === 'COMPLETED') {
+        toast.success('Đã đồng bộ xong kết quả phỏng vấn AI và video!');
+        onCreated?.();
+      } else {
+        toast.info('Đã kiểm tra. Ứng viên vẫn đang làm bài hoặc chưa hoàn thành.');
+      }
+    } catch (err) {
+      reportError(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function submitHumanFeedback(round: InterviewRoundData) {
     const interview = round.interviews[0];
     if (!interview) return;
@@ -491,7 +524,7 @@ export function InterviewProcessManager({
           setOpen(true);
           void loadProcess();
         }}
-        className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-3 py-2 text-xs font-extrabold text-white transition hover:bg-blue-800 active:translate-y-px"
+        className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] hover:bg-blue-700 px-3 py-2 text-xs font-black text-white shadow-xs transition active:scale-95 cursor-pointer"
       >
         <ClipboardCheck className="h-4 w-4" strokeWidth={2} />
         Quy trình phỏng vấn
@@ -837,6 +870,7 @@ export function InterviewProcessManager({
                       }
                       onRetry={() => requestDecision('RETRY')}
                       onReviewAiSession={setReviewingAiSession}
+                      onSyncAiSession={(sessionId) => void syncAiRound(sessionId)}
                     />
                   ) : process.status === 'CANCELLED' ? (
                     <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5">
@@ -994,6 +1028,7 @@ function RoundActionPanel({
   onDecide,
   onRetry,
   onReviewAiSession,
+  onSyncAiSession,
 }: {
   round: InterviewRoundData;
   scheduledAt: string;
@@ -1011,6 +1046,7 @@ function RoundActionPanel({
   onDecide: (decision: 'PASSED' | 'FAILED') => void;
   onRetry: () => void;
   onReviewAiSession?: (session: AiInterviewSession) => void;
+  onSyncAiSession?: (sessionId: string) => void;
 }) {
   const latestInterview = round.interviews[0];
   const canRetry = ['FAILED', 'EXPIRED', 'NO_SHOW'].includes(round.status);
@@ -1092,9 +1128,27 @@ function RoundActionPanel({
       )}
 
       {round.status === 'SCHEDULED' && round.conductedBy === 'AI' && (
-        <p className="mt-4 rounded-lg bg-white p-3 text-sm font-semibold text-slate-700">
-          Đã gửi lời mời. Hệ thống đang chờ ứng viên hoàn thành.
-        </p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-100 bg-white p-3.5 shadow-xs">
+          <div>
+            <p className="text-xs font-bold text-slate-800">
+              Đã gửi lời mời phỏng vấn AI
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Hệ thống đang chờ ứng viên hoàn thành hoặc phản hồi từ AI.
+            </p>
+          </div>
+          {round.aiInterviewSessions?.[0]?.id && (
+            <button
+              type="button"
+              onClick={() => onSyncAiSession?.(round.aiInterviewSessions[0].id)}
+              disabled={saving}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-blue-200 bg-[#EFF6FF] px-3 py-1.5 text-xs font-bold text-[#2563EB] shadow-xs hover:bg-blue-100 active:scale-95 disabled:opacity-60 cursor-pointer transition"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${saving ? 'animate-spin text-[#2563EB]' : ''}`} />
+              {saving ? 'Đang kiểm tra...' : 'Đồng bộ kết quả'}
+            </button>
+          )}
+        </div>
       )}
 
       {round.status === 'AWAITING_REVIEW' && (

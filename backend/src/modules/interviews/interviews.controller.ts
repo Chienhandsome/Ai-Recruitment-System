@@ -200,6 +200,16 @@ export class InterviewsController {
     return this.aiInterviewsService.findOne(user.id, id);
   }
 
+  @Post('ai/:id/sync')
+  @Roles('RECRUITER')
+  @ApiOperation({ summary: 'Đồng bộ kết quả phỏng vấn AI từ Interview Service' })
+  async syncAiInterview(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.aiInterviewsService.syncSession(user.id, id);
+  }
+
   @Get('ai/:id/videos/:videoId/playback')
   @Roles('RECRUITER')
   @ApiOperation({ summary: 'Lấy URL phát video phỏng vấn có thời hạn' })

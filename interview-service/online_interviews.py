@@ -54,7 +54,7 @@ AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "").strip()
 AZURE_SPEECH_LANGUAGE = os.getenv("AZURE_SPEECH_LANGUAGE", "vi-VN").strip()
 AZURE_SPEECH_VOICE = os.getenv("AZURE_SPEECH_VOICE", "vi-VN-HoaiMyNeural").strip()
 CALLBACK_MAX_ATTEMPTS = int(os.getenv("INTERVIEW_CALLBACK_MAX_ATTEMPTS", "8"))
-CALLBACK_TIMEOUT_SECONDS = float(os.getenv("INTERVIEW_CALLBACK_TIMEOUT_SECONDS", "10"))
+CALLBACK_TIMEOUT_SECONDS = float(os.getenv("INTERVIEW_CALLBACK_TIMEOUT_SECONDS", "60"))
 CALLBACK_MEDIA_GRACE_SECONDS = int(os.getenv("INTERVIEW_CALLBACK_MEDIA_GRACE_SECONDS", "60"))
 CALLBACK_RETRY_SECONDS = (0, 10, 30, 120, 300, 900, 3600, 10800)
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
@@ -424,6 +424,29 @@ def report_payload(interview: OnlineInterview) -> dict[str, Any]:
     }
 
 
+def prewarm_callback_host(url: str | None) -> None:
+    if not url:
+        return
+    parsed = urlparse(url)
+    if not parsed.scheme or not parsed.netloc:
+        return
+    ping_url = f"{parsed.scheme}://{parsed.netloc}/api/docs"
+
+    async def _ping() -> None:
+        try:
+            async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+                await client.get(ping_url)
+                logger.info("Pre-warmed callback host %s", ping_url)
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Pre-warm ping to %s ignored: %s", ping_url, exc)
+
+    try:
+        loop = asyncio.get_running_loop()
+        loop.create_task(_ping())
+    except RuntimeError:
+        pass
+
+
 def mark_callback_pending(interview: OnlineInterview) -> None:
     if not interview.callback_url:
         interview.callback_status = "NOT_CONFIGURED"
@@ -434,6 +457,7 @@ def mark_callback_pending(interview: OnlineInterview) -> None:
     interview.callback_event_id = interview.callback_event_id or str(uuid4())
     interview.callback_next_attempt_at = now()
     interview.callback_last_error = None
+    prewarm_callback_host(interview.callback_url)
 
 
 def callback_request(interview: OnlineInterview) -> tuple[bytes, dict[str, str]]:
@@ -487,8 +511,15 @@ async def deliver_callback(interview: OnlineInterview) -> None:
             interview.callback_status = "FAILED"
             interview.callback_next_attempt_at = None
         else:
-            delay_index = min(interview.callback_attempts, len(CALLBACK_RETRY_SECONDS) - 1)
-            interview.callback_next_attempt_at = now() + timedelta(seconds=CALLBACK_RETRY_SECONDS[delay_index])
+            is_transient = (
+                (isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code in {429, 502, 503, 504})
+                or isinstance(exc, (httpx.ConnectTimeout, httpx.ReadTimeout))
+            )
+            if is_transient and interview.callback_attempts < 4:
+                interview.callback_next_attempt_at = now() + timedelta(seconds=15)
+            else:
+                delay_index = min(interview.callback_attempts, len(CALLBACK_RETRY_SECONDS) - 1)
+                interview.callback_next_attempt_at = now() + timedelta(seconds=CALLBACK_RETRY_SECONDS[delay_index])
         logger.warning(
             "Callback %s attempt %s failed: %s",
             interview.callback_event_id,

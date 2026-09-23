@@ -658,6 +658,7 @@ export function CandidateScoringWorkspace({
                         applicationId={detail.id}
                         candidateName={candUser?.fullName || "Ứng viên"}
                         jobTitle={job.title}
+                        currentStage={detail.currentStage}
                         onCreated={onRefresh}
                       />
                       <ApplicationStageActions
@@ -1606,13 +1607,15 @@ export function CandidateScoringWorkspace({
                     <h5 className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-[#2563EB]" /> Lịch phỏng vấn & Đánh giá ({detail?.interviews?.length || 0})
                     </h5>
-                    <button
-                      type="button"
-                      onClick={onScheduleInterview}
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#2563EB] hover:underline"
-                    >
-                      <Plus className="w-3 h-3" /> Lên lịch mới
-                    </button>
+                    {detail?.currentStage && ['SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEWED', 'OFFERED', 'HIRED'].includes(detail.currentStage) && (
+                      <button
+                        type="button"
+                        onClick={onScheduleInterview}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#2563EB] hover:underline"
+                      >
+                        <Plus className="w-3 h-3" /> Lên lịch mới
+                      </button>
+                    )}
                   </div>
 
                   {detail?.interviews && detail.interviews.length > 0 ? (

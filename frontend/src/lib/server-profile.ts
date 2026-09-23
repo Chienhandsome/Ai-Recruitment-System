@@ -10,6 +10,7 @@ import type { AuthProfile, AuthRole } from "@/types/auth";
 
 export async function requireProfile(
   requiredRole: AuthRole,
+  full = false,
 ): Promise<AuthProfile> {
   const supabase = await createClient();
   const {
@@ -24,7 +25,7 @@ export async function requireProfile(
 
   let profile: AuthProfile;
   try {
-    profile = await getCurrentProfile(session.access_token);
+    profile = await getCurrentProfile(session.access_token, full);
   } catch {
     redirect(fallbackRedirect);
   }

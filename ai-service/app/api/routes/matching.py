@@ -1,5 +1,6 @@
 import logging
 from fastapi import APIRouter, HTTPException, status
+from starlette.concurrency import run_in_threadpool
 from app.schemas.matching import EvaluationRequest, EvaluationResponse
 from app.services.matching.matching_engine import matching_engine
 
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/api/v1/matching", tags=["Matching"])
 )
 async def evaluate_candidate(request: EvaluationRequest) -> EvaluationResponse:
     try:
-        response = matching_engine.evaluate(request)
+        response = await run_in_threadpool(matching_engine.evaluate, request)
         return response
     except Exception as exc:
         logger.exception("Evaluation failed with exception:")

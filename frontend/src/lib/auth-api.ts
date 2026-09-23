@@ -98,9 +98,10 @@ export function bootstrapProfile(
   });
 }
 
-export function getCurrentProfile(accessToken: string) {
-  log.debug("getCurrentProfile: fetching /auth/me");
-  return authRequest("/auth/me", accessToken);
+export function getCurrentProfile(accessToken: string, full = false) {
+  const query = full ? "?full=true" : "";
+  log.debug(`getCurrentProfile: fetching /auth/me${query}`);
+  return authRequest(`/auth/me${query}`, accessToken);
 }
 
 export function dashboardPathForRoles(roles: AuthRole[]) {

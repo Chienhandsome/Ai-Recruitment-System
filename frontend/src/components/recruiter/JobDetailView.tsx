@@ -267,7 +267,10 @@ export function JobDetailView({
     if (!hasPendingEvaluations) return;
 
     let cancelled = false;
+    let isFetching = false;
     const intervalId = window.setInterval(async () => {
+      if (isFetching) return;
+      isFetching = true;
       try {
         const applications = await getRecruiterApplications(token, {
           jobId,
@@ -285,8 +288,10 @@ export function JobDetailView({
         }
       } catch (error) {
         console.error("Failed to refresh pending AI evaluations", error);
+      } finally {
+        isFetching = false;
       }
-    }, 5_000);
+    }, 10_000);
 
     return () => {
       cancelled = true;

@@ -3,6 +3,7 @@
 import logging
 import os
 
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,10 +18,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Pre-warm AI embedder on HTTP startup to eliminate first-request delay
+    try:
+        from app.services.matching.semantic import semantic_matcher
+        logger.info("Lifespan: Pre-warming semantic_matcher...")
+        semantic_matcher.initialize()
+    except Exception as exc:
+        logger.warning("Lifespan: Could not pre-warm semantic matcher: %s", exc)
+    yield
+
+
 app = FastAPI(
     title="AI Recruitment Service",
     description="Python FastAPI service for AI-assisted recruitment workflows",
     version="0.2.0",
+    lifespan=lifespan,
 )
 
 # Enable CORS

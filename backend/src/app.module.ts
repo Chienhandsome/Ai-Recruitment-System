@@ -58,4 +58,4 @@ import { OffersModule } from './modules/offers/offers.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

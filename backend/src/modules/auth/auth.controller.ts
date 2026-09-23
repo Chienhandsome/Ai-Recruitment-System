@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -36,8 +36,12 @@ export class AuthController {
 
   @Get('me')
   @ApiOperation({ summary: 'Return the current application user and roles' })
-  getMe(@CurrentUser() user: AuthenticatedUser) {
-    return this.authService.getMe(user.id);
+  getMe(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('full') full?: string,
+  ) {
+    const isFull = full === 'true' || full === '1';
+    return this.authService.getMe(user.id, isFull);
   }
 
   @Post('admins')

@@ -460,6 +460,7 @@ model Skill {
   candidateSkills CandidateSkill[]
 
   @@index([categoryId])
+  @@index([name])
   @@map("skills")
 }
 
@@ -486,6 +487,7 @@ model JobSkill {
   createdAt          DateTime             @default(now()) @map("created_at")
 
   @@unique([jobId, skillId])
+  @@index([skillId])
   @@map("job_skills")
 }
 
@@ -574,6 +576,7 @@ model Resume {
   projects                   Project[]         @relation("ProjectResume")
   certificates               Certificate[]     @relation("CertificateResume")
 
+  @@index([candidateId])
   @@index([parsingStatus])
   @@map("resumes")
 }
@@ -818,6 +821,8 @@ model Interview {
   createdAt         DateTime                @default(now()) @map("created_at")
   updatedAt         DateTime                @updatedAt @map("updated_at")
 
+  @@index([applicationId])
+  @@index([scheduledAt])
   @@index([roundId])
   @@map("interviews")
 }

@@ -43,7 +43,7 @@ export interface ResolvedCandidateProfile {
 export class CandidatesService {
   private readonly logger = new Logger(CandidatesService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Get a candidate profile by ID with deduplicated personal info.

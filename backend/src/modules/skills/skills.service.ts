@@ -12,7 +12,7 @@ import type { Prisma } from '@prisma/client';
 export class SkillsService {
   private readonly logger = new Logger(SkillsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async getCategories() {
     let categories = await this.prisma.skillCategory.findMany({

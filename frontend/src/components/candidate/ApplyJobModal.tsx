@@ -53,6 +53,7 @@ export function ApplyJobModal({
   const [proofUrl, setProofUrl] = useState('');
   const [coverNote, setCoverNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -114,13 +115,14 @@ export function ApplyJobModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) return;
+    if (!token || isSubmittingRef.current || isSubmitting) return;
 
     if (requiresProofOfWork && !proofUrl.trim()) {
       toast.error(`Vị trí này yêu cầu liên kết Bằng chứng năng lực / ${proofOfWorkType || 'Portfolio'}`);
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     try {
       const res = await applyForJob(token, jobId, uploadedResumeId ?? undefined);
@@ -131,6 +133,7 @@ export function ApplyJobModal({
       const msg = err instanceof Error ? err.message : 'Không thể hoàn tất ứng tuyển';
       toast.error(msg);
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };

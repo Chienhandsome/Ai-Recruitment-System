@@ -160,7 +160,7 @@ export class ApplicationsService {
     private readonly evaluationService: ApplicationEvaluationService,
     private readonly accessService: ApplicationAccessService,
     private readonly notificationsService?: NotificationsService,
-  ) {}
+  ) { }
 
   async applyForJob(
     userId: string,
@@ -313,28 +313,60 @@ export class ApplicationsService {
           : {},
         query.search?.trim()
           ? {
-              candidate: {
-                user: {
-                  OR: [
-                    {
-                      fullName: {
-                        contains: query.search.trim(),
-                        mode: 'insensitive',
-                      },
+            candidate: {
+              user: {
+                OR: [
+                  {
+                    fullName: {
+                      contains: query.search.trim(),
+                      mode: 'insensitive',
                     },
-                    {
-                      email: {
-                        contains: query.search.trim(),
-                        mode: 'insensitive',
-                      },
+                  },
+                  {
+                    email: {
+                      contains: query.search.trim(),
+                      mode: 'insensitive',
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            }
+            },
+          }
           : {},
       ],
     };
+
+    const hasScoreFilter = query.minScore !== undefined || query.maxScore !== undefined;
+    const isScoreSort = query.sortBy === ApplicationSortBy.AI_SCORE;
+
+    if (!hasScoreFilter && !isScoreSort) {
+      const sortDirection = query.sortOrder === SortOrder.ASC ? 'asc' : 'desc';
+      const orderBy =
+        query.sortBy === ApplicationSortBy.UPDATED_AT
+          ? { updatedAt: sortDirection as Prisma.SortOrder }
+          : { appliedAt: sortDirection as Prisma.SortOrder };
+
+      const [total, pageRows] = await Promise.all([
+        this.prisma.application.count({ where }),
+        this.prisma.application.findMany({
+          where,
+          select: recruiterApplicationListSelect,
+          orderBy,
+          skip: (query.page - 1) * query.limit,
+          take: query.limit,
+        }),
+      ]);
+
+      return {
+        data: pageRows.map((row) => this.toRecruiterListItem(row)),
+        meta: {
+          total,
+          page: query.page,
+          limit: query.limit,
+          totalPages: Math.ceil(total / query.limit),
+        },
+      };
+    }
 
     const rows = await this.prisma.application.findMany({
       where,
@@ -864,11 +896,11 @@ export class ApplicationsService {
           company: application.job.recruiter.company,
           recruiter: application.job.recruiter
             ? {
-                title: application.job.recruiter.title,
-                fullName: application.job.recruiter.user?.fullName,
-                email: application.job.recruiter.user?.email,
-                phone: application.job.recruiter.user?.phone,
-              }
+              title: application.job.recruiter.title,
+              fullName: application.job.recruiter.user?.fullName,
+              email: application.job.recruiter.user?.email,
+              phone: application.job.recruiter.user?.phone,
+            }
             : null,
         },
         currentStage: application.currentStage,
@@ -932,14 +964,14 @@ export class ApplicationsService {
       processingStatus: row.processingStatus,
       latestAiResult: latest
         ? {
-            overallScore: Number(latest.overallScore),
-            matchLevel: latest.matchLevel,
-            confidenceScore:
-              latest.confidenceScore === null
-                ? null
-                : Number(latest.confidenceScore),
-            version: latest.version,
-          }
+          overallScore: Number(latest.overallScore),
+          matchLevel: latest.matchLevel,
+          confidenceScore:
+            latest.confidenceScore === null
+              ? null
+              : Number(latest.confidenceScore),
+          version: latest.version,
+        }
         : null,
       appliedAt: row.appliedAt,
       updatedAt: row.updatedAt,
@@ -1068,14 +1100,14 @@ export class ApplicationsService {
           })),
           languages: Array.isArray(resume.parsedData?.languageData)
             ? (
-                resume.parsedData.languageData as Array<{
-                  language?: string;
-                  proficiency?: string;
-                }>
-              ).map((l) => ({
-                language: l.language ?? '',
-                proficiency: l.proficiency ?? null,
-              }))
+              resume.parsedData.languageData as Array<{
+                language?: string;
+                proficiency?: string;
+              }>
+            ).map((l) => ({
+              language: l.language ?? '',
+              proficiency: l.proficiency ?? null,
+            }))
             : [],
         },
         job: {

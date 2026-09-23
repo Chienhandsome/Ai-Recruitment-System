@@ -11,6 +11,16 @@ import { ROLE_DETAILS, type AuthRole } from './auth.constants';
 import type { AuthenticatedUser } from './auth.types';
 import type { BootstrapAuthDto } from './dto/bootstrap-auth.dto';
 
+const userAuthBasicInclude = {
+  userRoles: {
+    include: {
+      role: true,
+    },
+  },
+  candidateProfile: true,
+  recruiterProfile: true,
+} satisfies Prisma.UserInclude;
+
 const userProfileInclude = {
   userRoles: {
     include: {
@@ -32,11 +42,15 @@ type UserWithProfile = Prisma.UserGetPayload<{
   include: typeof userProfileInclude;
 }>;
 
+type UserWithBasicProfile = Prisma.UserGetPayload<{
+  include: typeof userAuthBasicInclude;
+}>;
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async bootstrap(
     authUser: AuthenticatedUser,
@@ -177,12 +191,13 @@ export class AuthService {
 
   async getMe(
     userId: string,
+    full = false,
   ): Promise<ReturnType<AuthService['toAuthResponse']>> {
-    this.logger.debug(`getMe: Fetching profile for userId=${userId}`);
+    this.logger.debug(`getMe: Fetching profile for userId=${userId}, full=${full}`);
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: userProfileInclude,
+      include: full ? userProfileInclude : userAuthBasicInclude,
     });
 
     if (!user) {
@@ -194,7 +209,7 @@ export class AuthService {
     }
 
     this.logger.debug(`getMe: Profile found for ${user.email}`);
-    return this.toAuthResponse(user);
+    return this.toAuthResponse(user as any);
   }
 
   async provisionAdmin(
@@ -248,12 +263,30 @@ export class AuthService {
     return this.toAuthResponse(created);
   }
 
-  private toAuthResponse(user: UserWithProfile) {
+  private toAuthResponse(user: UserWithProfile | UserWithBasicProfile) {
     this.assertAccountIsActive(user.status);
 
     const roles = user.userRoles
       .map((userRole) => userRole.role.code as AuthRole)
       .sort();
+
+    const candidateProfile = user.candidateProfile;
+    const workExperiences =
+      candidateProfile && 'workExperiences' in candidateProfile
+        ? (candidateProfile as any).workExperiences
+        : [];
+    const educations =
+      candidateProfile && 'educations' in candidateProfile
+        ? (candidateProfile as any).educations
+        : [];
+    const projects =
+      candidateProfile && 'projects' in candidateProfile
+        ? (candidateProfile as any).projects
+        : [];
+    const certificates =
+      candidateProfile && 'certificates' in candidateProfile
+        ? (candidateProfile as any).certificates
+        : [];
 
     return {
       id: user.id,
@@ -263,40 +296,40 @@ export class AuthService {
       avatarUrl: user.avatarUrl,
       status: user.status,
       roles,
-      candidateProfile: user.candidateProfile
+      candidateProfile: candidateProfile
         ? {
-            id: user.candidateProfile.id,
-            status: user.candidateProfile.status,
-            address: user.candidateProfile.address,
-            desiredTitle: user.candidateProfile.desiredTitle,
-            professionalSummary: user.candidateProfile.professionalSummary,
-            githubUrl: user.candidateProfile.githubUrl,
-            linkedinUrl: user.candidateProfile.linkedinUrl,
-            portfolioUrl: user.candidateProfile.portfolioUrl,
-            workExperiences: this.currentProfileRecords(
-              user.candidateProfile.workExperiences,
-              user.candidateProfile.primaryResumeId,
-            ),
-            educations: this.currentProfileRecords(
-              user.candidateProfile.educations,
-              user.candidateProfile.primaryResumeId,
-            ),
-            projects: this.currentProfileRecords(
-              user.candidateProfile.projects,
-              user.candidateProfile.primaryResumeId,
-            ),
-            certificates: this.currentProfileRecords(
-              user.candidateProfile.certificates,
-              user.candidateProfile.primaryResumeId,
-            ),
-          }
+          id: candidateProfile.id,
+          status: candidateProfile.status,
+          address: candidateProfile.address,
+          desiredTitle: candidateProfile.desiredTitle,
+          professionalSummary: candidateProfile.professionalSummary,
+          githubUrl: candidateProfile.githubUrl,
+          linkedinUrl: candidateProfile.linkedinUrl,
+          portfolioUrl: candidateProfile.portfolioUrl,
+          workExperiences: this.currentProfileRecords(
+            workExperiences,
+            candidateProfile.primaryResumeId,
+          ),
+          educations: this.currentProfileRecords(
+            educations,
+            candidateProfile.primaryResumeId,
+          ),
+          projects: this.currentProfileRecords(
+            projects,
+            candidateProfile.primaryResumeId,
+          ),
+          certificates: this.currentProfileRecords(
+            certificates,
+            candidateProfile.primaryResumeId,
+          ),
+        }
         : null,
       recruiterProfile: user.recruiterProfile
         ? {
-            id: user.recruiterProfile.id,
-            departmentId: user.recruiterProfile.departmentId,
-            title: user.recruiterProfile.title,
-          }
+          id: user.recruiterProfile.id,
+          departmentId: user.recruiterProfile.departmentId,
+          title: user.recruiterProfile.title,
+        }
         : null,
     };
   }

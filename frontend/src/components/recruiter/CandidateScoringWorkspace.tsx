@@ -21,6 +21,7 @@ import {
   interviewTypeLabels,
   interviewStatusLabels,
   candidateResponseLabels,
+  isAllInterviewProcessesCompleted,
 } from "@/lib/interview-api";
 import { format } from "date-fns";
 import { InterviewProcessManager } from "./interviews/InterviewProcessManager";
@@ -671,6 +672,7 @@ export function CandidateScoringWorkspace({
                         onScheduleInterview={onScheduleInterview}
                         onOpenOfferModal={() => setShowWorkspaceOfferModal(true)}
                         managedInterviewProcess
+                        canMakeOffer={isAllInterviewProcessesCompleted(detail)}
                       />
                     </div>
                   </div>

@@ -14,6 +14,7 @@ import {
 } from "@/lib/recruiter-api";
 import { ApplicationStageActions } from "./applications/ApplicationStageActions";
 import { applicationStageLabels, applicationStageStyles } from "@/lib/application-stage";
+import { isAllInterviewProcessesCompleted } from "@/lib/interview-api";
 import { format } from "date-fns";
 
 interface CandidateEvaluationModalProps {
@@ -762,6 +763,7 @@ export function CandidateEvaluationModal({
                   currentHrNotes={selectedApplicationDetail.hrNotes}
                   onUpdated={onRefresh}
                   onScheduleInterview={onScheduleInterview}
+                  canMakeOffer={isAllInterviewProcessesCompleted(selectedApplicationDetail)}
                 />
               </div>
             )}

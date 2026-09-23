@@ -21,6 +21,7 @@ interface ApplicationStageActionsProps {
   onScheduleInterview?: () => void;
   onOpenOfferModal?: () => void;
   managedInterviewProcess?: boolean;
+  canMakeOffer?: boolean;
 }
 
 function noteRequired(current: ApplicationStage, target: ApplicationStage) {
@@ -42,6 +43,7 @@ export function ApplicationStageActions({
   onScheduleInterview,
   onOpenOfferModal,
   managedInterviewProcess = false,
+  canMakeOffer,
 }: ApplicationStageActionsProps) {
   const [target, setTarget] = useState<ApplicationStage | null>(null);
   const [note, setNote] = useState('');
@@ -54,7 +56,15 @@ export function ApplicationStageActions({
     managedInterviewProcess
       ? allowedTransitions.filter((stage) => stage !== 'INTERVIEW_SCHEDULED')
       : allowedTransitions
-  ).filter((stage) => stage !== 'HIRED');
+  )
+    .filter((stage) => stage !== 'HIRED')
+    .filter((stage) => {
+      if (stage === 'OFFERED') {
+        // Chỉ xuất hiện sau khi đã hoàn tất tất cả quy trình phỏng vấn
+        return canMakeOffer ?? (currentStage === 'INTERVIEWED');
+      }
+      return true;
+    });
 
   const close = () => {
     if (submitting) return;

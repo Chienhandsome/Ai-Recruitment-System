@@ -166,6 +166,57 @@ export interface InterviewProcessData {
   rounds: InterviewRoundData[];
 }
 
+/**
+ * Kiểm tra xem ứng viên đã hoàn tất tất cả quy trình phỏng vấn hay chưa.
+ * Nút Soạn Thảo Offer chỉ xuất hiện khi hàm này trả về true:
+ * 1. Nếu có InterviewProcess (quy trình phỏng vấn theo vòng):
+ *    - Trạng thái quy trình phải là 'COMPLETED'
+ *    - Danh sách các vòng (rounds) phải có ít nhất 1 vòng và tất cả các vòng đều có trạng thái 'PASSED'
+ * 2. Nếu không có InterviewProcess (quy trình phỏng vấn đơn lẻ/truyền thống):
+ *    - Ứng viên phải có ít nhất 1 lịch phỏng vấn và tất cả đều 'COMPLETED'
+ *    - Và ứng viên phải đang ở trạng thái 'INTERVIEWED' hoặc 'OFFERED' / 'HIRED'
+ * 3. Nếu ứng viên đã ở giai đoạn 'OFFERED' hoặc 'HIRED' thì trả về true (đã qua phỏng vấn và đã nhận offer)
+ * 4. Tất cả các trường hợp khác (RECEIVED, SCREENING, SHORTLISTED, INTERVIEW_SCHEDULED, chưa phỏng vấn): trả về false
+ */
+export function isAllInterviewProcessesCompleted(application?: {
+  currentStage?: string;
+  interviewProcess?: InterviewProcessData | null;
+  interviews?: InterviewData[] | null;
+} | null): boolean {
+  if (!application) return false;
+
+  // 1. Quy trình phỏng vấn có cấu trúc theo vòng (InterviewProcess)
+  if (application.interviewProcess) {
+    if (application.interviewProcess.status !== 'COMPLETED') {
+      return false;
+    }
+    const rounds = application.interviewProcess.rounds;
+    if (!rounds || rounds.length === 0) {
+      return false;
+    }
+    return rounds.every((round) => round.status === 'PASSED');
+  }
+
+  // 2. Phỏng vấn đơn lẻ truyền thống (Interviews array)
+  if (application.interviews && application.interviews.length > 0) {
+    const allCompleted = application.interviews.every((i) => i.status === 'COMPLETED');
+    return (
+      allCompleted &&
+      (application.currentStage === 'INTERVIEWED' ||
+        application.currentStage === 'OFFERED' ||
+        application.currentStage === 'HIRED')
+    );
+  }
+
+  // 3. Đã có Offer hoặc đã tuyển dụng
+  if (application.currentStage === 'OFFERED' || application.currentStage === 'HIRED') {
+    return true;
+  }
+
+  // 4. Mặc định chưa hoàn tất tất cả vòng phỏng vấn
+  return false;
+}
+
 export interface CreateInterviewRoundInput {
   title: string;
   description?: string;

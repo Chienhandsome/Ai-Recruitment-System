@@ -6,8 +6,10 @@ import {
   ShieldCheck, AlertTriangle, ThumbsUp, ThumbsDown, Mail, Phone,
   DollarSign, FolderGit2, Calendar, CheckCircle2, XCircle, ArrowRight,
   Search, Filter, Clock, ChevronRight, Video, Plus, ExternalLink,
-  HelpCircle, Eye, Info, Check, X, AlertCircle, Globe
+  HelpCircle, Eye, Info, Check, X, AlertCircle, Globe, Gift, Edit3,
+  RotateCcw, Loader2
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   type JobPostingData,
   type RecruiterApplicationDetail,
@@ -22,6 +24,8 @@ import {
 } from "@/lib/interview-api";
 import { format } from "date-fns";
 import { InterviewProcessManager } from "./interviews/InterviewProcessManager";
+import { CreateOrEditOfferModal } from "./offers/CreateOrEditOfferModal";
+import { revokeOffer } from "@/lib/offer-api";
 
 export type PillarDimension = "skills" | "experience" | "education" | "other";
 
@@ -60,6 +64,26 @@ export function CandidateScoringWorkspace({
   const [searchQuery, setSearchQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState<"ALL" | "HIGH" | "MEDIUM" | "LOW">("ALL");
   const [activePillar, setActivePillar] = useState<PillarDimension | null>("skills");
+  const [showWorkspaceOfferModal, setShowWorkspaceOfferModal] = useState(false);
+  const [showRevokeModal, setShowRevokeModal] = useState(false);
+  const [revokeReason, setRevokeReason] = useState("");
+  const [isRevoking, setIsRevoking] = useState(false);
+
+  const handleRevokeOffer = async () => {
+    if (!selectedApplicationDetail?.offer?.id) return;
+    setIsRevoking(true);
+    try {
+      await revokeOffer(token, selectedApplicationDetail.offer.id, revokeReason.trim() || undefined);
+      toast.success("Đã thu hồi thư mời nhận việc thành công. Hồ sơ ứng viên được chuyển về giai đoạn Phỏng vấn (INTERVIEWED).");
+      setShowRevokeModal(false);
+      setRevokeReason("");
+      onRefresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Không thể thu hồi Offer");
+    } finally {
+      setIsRevoking(false);
+    }
+  };
 
   // Reset active explanation dimension or keep skills when changing candidate
   useEffect(() => {
@@ -647,6 +671,104 @@ export function CandidateScoringWorkspace({
                         managedInterviewProcess
                       />
                     </div>
+                  </div>
+                )}
+
+                {/* 1.5. OFFER STATUS / EDIT CARD */}
+                {detail && (detail.offer || detail.currentStage === 'OFFERED') && (
+                  <div className="rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50/80 via-white to-indigo-50/40 p-4 space-y-3 shadow-2xs mt-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex size-9 items-center justify-center rounded-xl bg-[#2563EB] text-white shadow-xs">
+                          <Gift className="size-4" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-slate-900">
+                              Thư Mời Nhận Việc (Offer Letter)
+                            </span>
+                            {detail.offer ? (
+                              <span
+                                className={`rounded-full px-2.5 py-0.5 text-2xs font-extrabold ${
+                                  detail.offer.status === 'ACCEPTED'
+                                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                    : detail.offer.status === 'DECLINED'
+                                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                                      : detail.offer.status === 'CANCELLED'
+                                        ? 'bg-slate-100 text-slate-700 border border-slate-300'
+                                        : detail.offer.status === 'EXPIRED'
+                                          ? 'bg-red-100 text-red-700 border border-red-300'
+                                          : 'bg-amber-100 text-amber-800 border border-amber-300'
+                                }`}
+                              >
+                                {detail.offer.status === 'ACCEPTED'
+                                  ? '✓ Ứng viên đã chấp thuận (HIRED)'
+                                  : detail.offer.status === 'DECLINED'
+                                    ? `✗ Ứng viên đã từ chối (${detail.offer.declineReason || 'Lý do khác'})`
+                                    : detail.offer.status === 'CANCELLED'
+                                      ? '🚫 Đã thu hồi Offer'
+                                      : detail.offer.status === 'EXPIRED'
+                                        ? '⌛ Đã hết hạn phản hồi'
+                                        : '⏳ Chờ ứng viên phản hồi'}
+                              </span>
+                            ) : (
+                              <span className="rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 text-2xs font-bold text-amber-800">
+                                Chưa phát hành thư mời chi tiết
+                              </span>
+                            )}
+                          </div>
+                          {detail.offer && (
+                            <p className="text-2xs text-slate-500 mt-0.5">
+                              Hạn phản hồi: {new Date(detail.offer.expiresAt).toLocaleDateString('vi-VN')} • Ngày onboard: {new Date(detail.offer.startDate).toLocaleDateString('vi-VN')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {detail.offer?.status === 'PENDING' && (
+                          <button
+                            type="button"
+                            onClick={() => setShowRevokeModal(true)}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors shadow-2xs"
+                          >
+                            <RotateCcw className="size-3.5" />
+                            Thu Hồi Offer
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setShowWorkspaceOfferModal(true)}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-blue-300 bg-white px-3 py-1.5 text-xs font-bold text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"
+                        >
+                          <Edit3 className="size-3.5" />
+                          {detail.offer ? 'Chỉnh Sửa / Điều Chỉnh Offer' : 'Soạn Thảo Thư Mời Nhận Việc (Offer)'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {detail.offer && (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div>
+                          <span className="text-2xs font-semibold text-slate-500 block">Lương đề nghị:</span>
+                          <strong className="text-sm font-black text-[#2563EB]">
+                            {Number(detail.offer.salary).toLocaleString('vi-VN')} {detail.offer.currency}
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="text-2xs font-semibold text-slate-500 block">Hình thức:</span>
+                          <span className="font-bold text-slate-800">{detail.offer.workType || 'Hybrid'}</span>
+                        </div>
+                        <div>
+                          <span className="text-2xs font-semibold text-slate-500 block">Người phụ trách:</span>
+                          <span className="font-semibold text-slate-700">{detail.offer.contactName || 'HR Tuyển dụng'}</span>
+                        </div>
+                        <div>
+                          <span className="text-2xs font-semibold text-slate-500 block">Hotline/Zalo:</span>
+                          <span className="font-semibold text-slate-700">{detail.offer.contactPhone || '—'}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1570,6 +1692,80 @@ export function CandidateScoringWorkspace({
         </div>
 
       </div>
+
+      {detail && (
+        <CreateOrEditOfferModal
+          isOpen={showWorkspaceOfferModal}
+          onClose={() => setShowWorkspaceOfferModal(false)}
+          token={token}
+          applicationId={detail.id}
+          candidateName={candUser?.fullName || "Ứng viên"}
+          jobTitle={job.title}
+          existingOffer={detail.offer}
+          onSuccess={async () => {
+            onRefresh();
+            setShowWorkspaceOfferModal(false);
+          }}
+        />
+      )}
+
+      {/* Revoke Offer Modal */}
+      {showRevokeModal && detail?.offer && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-200 font-sans">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex size-11 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
+                <RotateCcw className="size-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900">
+                  Thu Hồi Thư Mời Nhận Việc
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Ứng viên: <strong>{candUser?.fullName || "Ứng viên"}</strong>
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs leading-relaxed text-slate-600">
+              Thao tác này sẽ hủy thư mời nhận việc hiện tại và hoàn trả hồ sơ ứng viên về giai đoạn <strong>Phỏng vấn (INTERVIEWED)</strong> để tiếp tục đánh giá hoặc chuẩn bị đề xuất mới.
+            </p>
+
+            <div className="space-y-1.5 pt-1">
+              <label className="block text-xs font-bold text-slate-700">
+                Lý do thu hồi (sẽ ghi vào lịch sử hồ sơ):
+              </label>
+              <textarea
+                rows={3}
+                placeholder="Ví dụ: Thay đổi kế hoạch ngân sách tuyển dụng, hoặc đàm phán lại mức lương..."
+                value={revokeReason}
+                onChange={(e) => setRevokeReason(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-800 outline-none focus:border-[#2563EB]"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3">
+              <button
+                type="button"
+                disabled={isRevoking}
+                onClick={() => setShowRevokeModal(false)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={isRevoking}
+                onClick={handleRevokeOffer}
+                className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700 disabled:opacity-50"
+              >
+                {isRevoking ? <Loader2 className="size-4 animate-spin" /> : <RotateCcw className="size-4" />}
+                Xác Nhận Thu Hồi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -483,6 +483,7 @@ export class ApplicationsService {
             },
           },
         },
+        offer: true,
         statusHistories: {
           orderBy: { createdAt: 'desc' },
           take: 20,
@@ -539,6 +540,7 @@ export class ApplicationsService {
         score: i.score !== null ? Number(i.score) : null,
       })),
       interviewProcess: application.interviewProcess,
+      offer: application.offer,
       statusHistories: application.statusHistories,
       appliedAt: application.appliedAt,
       updatedAt: application.updatedAt,
@@ -836,6 +838,7 @@ export class ApplicationsService {
               },
             },
           },
+          offer: true,
         },
       }),
     ]);
@@ -862,6 +865,7 @@ export class ApplicationsService {
         hasUnreadUpdate: (application.notifications?.length ?? 0) > 0,
         interviews: application.interviews,
         interviewProcess: application.interviewProcess,
+        offer: application.offer,
         appliedAt: application.appliedAt,
         updatedAt: application.updatedAt,
       })),

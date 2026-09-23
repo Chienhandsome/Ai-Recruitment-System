@@ -149,6 +149,7 @@ export interface RecruiterApplicationDetail {
   profileSnapshot: Record<string, unknown> | null;
   latestAiResult: Record<string, unknown> | null;
   interviews?: import('./interview-api').InterviewData[];
+  offer?: import('./offer-api').OfferData | null;
   statusHistories: Array<{
     id: string;
     previousStage: ApplicationStage | null;

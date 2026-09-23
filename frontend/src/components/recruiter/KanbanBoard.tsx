@@ -34,7 +34,9 @@ const COLUMNS: { id: ApplicationStage; title: string; color: string }[] = [
   { id: "SCREENING", title: "Sàng lọc", color: "bg-blue-50 text-blue-700" },
   { id: "SHORTLISTED", title: "Đạt yêu cầu", color: "bg-indigo-50 text-indigo-700" },
   { id: "INTERVIEW_SCHEDULED", title: "Lịch phỏng vấn", color: "bg-purple-50 text-purple-700" },
-  { id: "OFFERED", title: "Đề nghị", color: "bg-green-50 text-green-700" },
+  { id: "INTERVIEWED", title: "Đã phỏng vấn", color: "bg-amber-50 text-amber-800" },
+  { id: "OFFERED", title: "Đề nghị (Offer)", color: "bg-blue-50 text-[#2563EB]" },
+  { id: "HIRED", title: "Đã tuyển dụng", color: "bg-emerald-50 text-emerald-800" },
 ];
 
 export function KanbanBoard({ candidates, onCandidateClick, onMoveCandidate }: KanbanBoardProps) {

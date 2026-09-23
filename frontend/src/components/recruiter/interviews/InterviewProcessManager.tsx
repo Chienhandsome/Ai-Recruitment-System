@@ -23,6 +23,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { CreateOrEditOfferModal } from '../offers/CreateOrEditOfferModal';
 import {
   activateInterviewProcess,
   addInterviewRound,
@@ -134,6 +135,7 @@ export function InterviewProcessManager({
   const [quickLocationOrLink, setQuickLocationOrLink] = useState('');
   const [quickNotes, setQuickNotes] = useState('');
   const [showCustomBuilder, setShowCustomBuilder] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
 
   const currentRound = useMemo(
     () => process?.rounds.find((round) => round.order === process.currentRoundOrder),
@@ -860,12 +862,12 @@ export function InterviewProcessManager({
                       <div className="pt-2 border-t border-emerald-200/60 flex items-center justify-end">
                         <button
                           type="button"
-                          onClick={handleSendOffer}
+                          onClick={() => setShowOfferModal(true)}
                           disabled={saving}
                           className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-4 py-2.5 text-xs font-black text-white shadow-sm transition active:scale-95 disabled:opacity-50"
                         >
-                          {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
-                          Gửi Đề Nghị (Offer) ngay cho ứng viên
+                          <Sparkles className="size-3.5" />
+                          Phát Hành Thư Mời Nhận Việc (Offer) Ngay
                         </button>
                       </div>
                     </div>
@@ -956,6 +958,20 @@ export function InterviewProcessManager({
         submitting={saving}
         onClose={() => setPendingDecision(null)}
         onConfirm={confirmDecision}
+      />
+
+      <CreateOrEditOfferModal
+        isOpen={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        token={token}
+        applicationId={applicationId}
+        candidateName={candidateName}
+        jobTitle={jobTitle}
+        onSuccess={async () => {
+          onCreated?.();
+          setShowOfferModal(false);
+          setOpen(false);
+        }}
       />
     </>
   );

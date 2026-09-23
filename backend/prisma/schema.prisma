@@ -172,6 +172,14 @@ enum InterviewStatus {
   RESCHEDULED
 }
 
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
 enum AiInterviewStatus {
   CREATED
   IN_PROGRESS
@@ -737,6 +745,7 @@ model Application {
   interviews          Interview[]
   aiInterviewSessions AiInterviewSession[]
   interviewProcess    InterviewProcess?
+  offer               Offer?
   notifications       Notification[]
   statusHistories     ApplicationStatusHistory[]
 
@@ -970,4 +979,41 @@ model AuditLog {
   createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("audit_logs")
+}
+
+model Offer {
+  id                  String       @id @default(uuid())
+  applicationId       String       @unique @map("application_id")
+  application         Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  status              OfferStatus  @default(PENDING)
+
+  salary              Decimal      @db.Decimal(12, 2)
+  salaryPeriod        String       @default("MONTHLY") @map("salary_period")
+  currency            String       @default("VND")
+  benefits            String?      @db.Text
+
+  startDate           DateTime     @map("start_date")
+  expiresAt           DateTime     @map("expires_at")
+
+  workType            String?      @map("work_type")
+  workLocation        String?      @map("work_location")
+
+  notes               String?      @db.Text
+  offerLetterUrl      String?      @map("offer_letter_url")
+
+  contactName         String?      @map("contact_name")
+  contactEmail        String?      @map("contact_email")
+  contactPhone        String?      @map("contact_phone")
+
+  candidateResponseAt DateTime?    @map("candidate_response_at")
+  declineReason       String?      @map("decline_reason")
+  declineNote         String?      @map("decline_note") @db.Text
+
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+
+  @@index([applicationId])
+  @@index([status])
+  @@map("offers")
 }

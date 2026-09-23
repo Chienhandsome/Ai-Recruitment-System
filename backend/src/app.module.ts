@@ -23,6 +23,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { AuthModule } from './modules/auth/auth.module';
 import { RecruitersModule } from './modules/recruiters/recruiters.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { OffersModule } from './modules/offers/offers.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AdminModule } from './modules/admin/admin.module';
     AuthModule,
     RecruitersModule,
     AdminModule,
+    OffersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

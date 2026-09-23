@@ -299,12 +299,13 @@ export class RecruitersService {
 
     // Calculate Average AI Score
     let avgAiScore = 0;
-    if (aiResults.length > 0) {
-      const sum = aiResults.reduce(
+    const safeAiResults = aiResults || [];
+    if (safeAiResults.length > 0) {
+      const sum = safeAiResults.reduce(
         (acc, curr) => acc + Number(curr.overallScore || 0),
         0,
       );
-      avgAiScore = Math.round((sum / aiResults.length) * 10) / 10;
+      avgAiScore = Math.round((sum / safeAiResults.length) * 10) / 10;
     }
 
     const hireConversionRate =
@@ -314,7 +315,7 @@ export class RecruitersService {
 
     // Stage counts map
     const stageCounts: Record<string, number> = {};
-    stageGroups.forEach((g) => {
+    (stageGroups || []).forEach((g) => {
       stageCounts[g.currentStage] = g._count.id;
     });
 
@@ -392,7 +393,7 @@ export class RecruitersService {
     let c80to89 = 0;
     let c90to100 = 0;
 
-    aiResults.forEach((r) => {
+    safeAiResults.forEach((r) => {
       const s = Number(r.overallScore || 0);
       if (s < 40) cLess40++;
       else if (s < 60) c40to59++;
@@ -401,7 +402,7 @@ export class RecruitersService {
       else c90to100++;
     });
 
-    const totalScores = aiResults.length || 1;
+    const totalScores = safeAiResults.length || 1;
     const scoreDistribution = [
       {
         range: '< 40',
@@ -441,7 +442,7 @@ export class RecruitersService {
     ];
 
     // Format upcoming interviews
-    const upcomingInterviews = upcomingInterviewsRaw.map((it) => ({
+    const upcomingInterviews = (upcomingInterviewsRaw || []).map((it) => ({
       id: it.id,
       title: it.title,
       type: it.type,
@@ -463,7 +464,7 @@ export class RecruitersService {
 
     // Calculate Top Skills demand vs match rate
     const skillCounts: Record<string, { name: string; requiredCount: number; matchedCount: number }> = {};
-    jobSkillsRaw.forEach((js) => {
+    (jobSkillsRaw || []).forEach((js) => {
       const name = js.skill.name;
       if (!skillCounts[name]) {
         skillCounts[name] = { name, requiredCount: 0, matchedCount: 0 };
@@ -471,7 +472,7 @@ export class RecruitersService {
       skillCounts[name].requiredCount++;
     });
 
-    aiResults.forEach((ar) => {
+    safeAiResults.forEach((ar) => {
       const matched = Array.isArray(ar.matchedSkills) ? ar.matchedSkills : [];
       matched.forEach((ms: any) => {
         const name = typeof ms === 'string' ? ms : ms?.name;
@@ -495,14 +496,14 @@ export class RecruitersService {
 
     return {
       kpis: {
-        totalActiveJobs,
-        totalApplications,
-        newApplicationsToday,
-        newApplicationsThisWeek,
-        totalInterviews,
-        totalHired,
-        avgAiScore,
-        hireConversionRate,
+        totalActiveJobs: totalActiveJobs || 0,
+        totalApplications: totalApplications || 0,
+        newApplicationsToday: newApplicationsToday || 0,
+        newApplicationsThisWeek: newApplicationsThisWeek || 0,
+        totalInterviews: totalInterviews || 0,
+        totalHired: totalHired || 0,
+        avgAiScore: avgAiScore || 0,
+        hireConversionRate: hireConversionRate || 0,
       },
       funnel: funnelStages,
       scoreDistribution,

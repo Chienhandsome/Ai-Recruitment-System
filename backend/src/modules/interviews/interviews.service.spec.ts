@@ -32,6 +32,13 @@ describe('InterviewsService', () => {
       },
       interviewRound: {
         update: jest.fn(),
+        findUnique: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({ id: 'round-1', order: 1, title: 'Vòng 1' }),
+      },
+      interviewProcess: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({ id: 'proc-1' }),
+        update: jest.fn().mockResolvedValue({ id: 'proc-1' }),
       },
       applicationStatusHistory: {
         create: jest.fn(),
@@ -189,6 +196,12 @@ describe('InterviewsService', () => {
         score: 76,
         interviewerNotes: 'Đã lưu đánh giá để HR ra quyết định vòng.',
         status: InterviewStatus.COMPLETED,
+      });
+      prisma.interviewRound.findUnique.mockResolvedValue({
+        id: 'round-1',
+        processId: 'proc-1',
+        order: 1,
+        process: { id: 'proc-1' },
       });
 
       const result = await service.submitFeedback('recruiter-user-1', 'int-2', {

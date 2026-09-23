@@ -18,6 +18,7 @@ import {
 import { applicationStageLabels, applicationStageStyles } from '@/lib/application-stage';
 import { interviewTypeLabels } from '@/lib/interview-api';
 import { CandidateApplicationInterviews } from '@/components/candidate/CandidateApplicationInterviews';
+import { CandidateOfferCard } from '@/components/candidate/offers/CandidateOfferCard';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -159,6 +160,16 @@ export default async function CandidateApplicationsPage({
                         ? 'Hồ sơ đã được tiếp nhận; nhà tuyển dụng sẽ xem xét thủ công.'
                         : 'Hồ sơ đã được tiếp nhận và đang được xử lý.'}
                   </p>
+
+                  {/* Thư mời nhận việc (Official Offer Letter) */}
+                  {application.offer && (
+                    <CandidateOfferCard
+                      offer={application.offer}
+                      token={session.access_token}
+                      jobTitle={application.job.title}
+                      companyName={application.job.company?.name}
+                    />
+                  )}
 
                   {/* Lịch phỏng vấn đa vòng & tương tác phản hồi 2 chiều */}
                   {application.interviews && application.interviews.length > 0 && (

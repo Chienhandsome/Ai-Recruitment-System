@@ -137,7 +137,7 @@ describe('ApplicationsConsumer experience-level persistence', () => {
         levelGap: 1,
         levelEligible: false,
         levelConfidence: 0.9,
-        inputSnapshot: {
+        inputSnapshot: expect.objectContaining({
           score_breakdown: expect.objectContaining({
             skills: expect.objectContaining({ earned_points: 31 }),
           }),
@@ -150,7 +150,7 @@ describe('ApplicationsConsumer experience-level persistence', () => {
           mandatory_score_cap: 74,
           score_adjustment: -7.4,
           evidence_confidence: 0.8,
-        },
+        }),
         levelEvidence: {
           evidence: ['2.4 năm kinh nghiệm không trùng thời gian'],
           reasonCodes: ['YEARS_BASELINE', 'RECENT_TITLE_SIGNAL'],

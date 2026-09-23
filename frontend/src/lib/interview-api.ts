@@ -9,6 +9,13 @@ export interface InterviewData {
   id: string;
   applicationId: string;
   roundId?: string | null;
+  round?: {
+    id: string;
+    order: number;
+    title: string;
+    status: InterviewRoundStatus;
+    resultScore?: number | null;
+  } | null;
   title: string;
   type: InterviewType;
   status: InterviewStatus;
@@ -187,6 +194,7 @@ export interface SubmitInterviewFeedbackInput {
   score: number;
   interviewerNotes: string;
   nextStage?: string;
+  decision?: 'PASSED' | 'FAILED';
 }
 
 export class InterviewApiError extends Error {

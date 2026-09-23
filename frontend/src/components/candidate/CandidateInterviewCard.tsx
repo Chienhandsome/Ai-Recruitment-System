@@ -133,7 +133,23 @@ export function CandidateInterviewCard({
               {interviewTypeLabels[interview.type] || interview.type}
             </span>
 
-            {interview.status === 'COMPLETED' ? (
+            {/* Round outcome badge if available */}
+            {interview.round && interview.round.status === 'PASSED' ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-black px-2.5 py-0.5 rounded-full border bg-emerald-100 text-emerald-800 border-emerald-300 shadow-2xs">
+                <CheckCircle2 className="size-3 text-emerald-600" />
+                ĐÃ QUA VÒNG
+              </span>
+            ) : interview.round && interview.round.status === 'FAILED' ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-rose-100 text-rose-800 border-rose-300 shadow-2xs">
+                <XCircle className="size-3 text-rose-600" />
+                Chưa đạt yêu cầu
+              </span>
+            ) : interview.round && interview.round.status === 'AWAITING_REVIEW' ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-50 text-amber-800 border-amber-300 shadow-2xs">
+                <Clock className="size-3 text-amber-600" />
+                Đang chờ kết quả
+              </span>
+            ) : interview.status === 'COMPLETED' ? (
               <>
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
                   <CheckCircle2 className="size-3 text-emerald-600" />

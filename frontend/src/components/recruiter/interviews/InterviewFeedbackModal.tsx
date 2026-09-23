@@ -10,6 +10,7 @@ import {
   AlertCircle,
   XCircle,
   Sparkles,
+  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { type InterviewData, submitInterviewFeedback } from '@/lib/interview-api';
@@ -34,10 +35,13 @@ export function InterviewFeedbackModal({
   const [score, setScore] = useState<number>(
     interview.score !== undefined && interview.score !== null ? Number(interview.score) : 80,
   );
+  const [decision, setDecision] = useState<'PASSED' | 'FAILED' | 'PENDING'>(
+    (interview.score !== undefined && interview.score !== null)
+      ? (Number(interview.score) >= 70 ? 'PASSED' : 'FAILED')
+      : 'PASSED',
+  );
   const [interviewerNotes, setInterviewerNotes] = useState(interview.interviewerNotes || '');
-  const [nextStage, setNextStage] = useState<string>('INTERVIEWED');
   const [submitting, setSubmitting] = useState(false);
-  const isManagedRound = Boolean(interview.roundId);
 
   if (!isOpen) return null;
 
@@ -53,14 +57,17 @@ export function InterviewFeedbackModal({
       await submitInterviewFeedback(token, interview.id, {
         score,
         interviewerNotes: interviewerNotes.trim(),
-        nextStage: isManagedRound ? undefined : nextStage,
+        decision: decision === 'PENDING' ? undefined : decision,
       });
 
-      toast.success(
-        isManagedRound
-          ? 'Đã lưu đánh giá. Vòng phỏng vấn đang chờ HR ra quyết định.'
-          : 'Đã lưu kết quả phỏng vấn và cập nhật trạng thái hồ sơ.',
-      );
+      if (decision === 'PASSED') {
+        toast.success('Đã lưu kết quả: Ứng viên ĐẠT vòng phỏng vấn!');
+      } else if (decision === 'FAILED') {
+        toast.info('Đã lưu kết quả: Ứng viên KHÔNG ĐẠT và đã dừng quy trình.');
+      } else {
+        toast.success('Đã lưu điểm và nhận xét (Vòng đang chờ HR duyệt).');
+      }
+
       await onSuccess();
       onClose();
     } catch (error) {
@@ -171,98 +178,67 @@ export function InterviewFeedbackModal({
             />
           </div>
 
-          {/* Quyết định bước tiếp theo */}
-          {isManagedRound ? (
-            <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3.5">
-              <AlertCircle className="mt-0.5 size-4 shrink-0 text-blue-700" />
-              <div>
-                <p className="text-xs font-black text-blue-950">
-                  Đánh giá thuộc quy trình nhiều vòng
-                </p>
-                <p className="mt-1 text-xs leading-5 text-blue-800">
-                  Thao tác này chỉ lưu điểm và nhận xét. Quyết định cho qua vòng, thực hiện lại hoặc
-                  từ chối ứng viên được thực hiện trong Quy trình phỏng vấn.
-                </p>
-              </div>
+          {/* Quyết định kết quả phỏng vấn */}
+          <div>
+            <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-2">
+              Quyết định kết quả vòng phỏng vấn
+            </label>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              <button
+                type="button"
+                onClick={() => setDecision('PASSED')}
+                className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                  decision === 'PASSED'
+                    ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500 shadow-sm'
+                    : 'border-slate-200 bg-white hover:border-emerald-300'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs">
+                  <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
+                  Đạt vòng này (PASSED)
+                </div>
+                <span className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                  Ứng viên đạt yêu cầu. Tự động chuyển tiếp vòng sau hoặc hoàn tất quy trình nếu là vòng cuối.
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDecision('FAILED')}
+                className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                  decision === 'FAILED'
+                    ? 'border-rose-500 bg-rose-50 ring-2 ring-rose-500 shadow-sm'
+                    : 'border-slate-200 bg-white hover:border-rose-300'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 text-rose-700 font-bold text-xs">
+                  <XCircle className="size-4 shrink-0 text-rose-600" />
+                  Chưa đạt (FAILED)
+                </div>
+                <span className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                  Ứng viên không đạt yêu cầu. Dừng quy trình và chuyển hồ sơ sang Chưa phù hợp (Từ chối).
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDecision('PENDING')}
+                className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                  decision === 'PENDING'
+                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500 shadow-sm'
+                    : 'border-slate-200 bg-white hover:border-blue-300'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 text-[#2563EB] font-bold text-xs">
+                  <Clock className="size-4 shrink-0 text-[#2563EB]" />
+                  Lưu tạm (Chờ duyệt)
+                </div>
+                <span className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                  Chỉ lưu điểm và nhận xét để hội đồng HR/Lead xem xét trước khi ra quyết định.
+                </span>
+              </button>
             </div>
-          ) : (
-            <div>
-              <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-2">
-                Quyết định chuyển bước tiếp theo
-              </label>
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => setNextStage('INTERVIEWED')}
-                  className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                    nextStage === 'INTERVIEWED'
-                      ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 shadow-sm'
-                      : 'border-slate-200 bg-white hover:border-blue-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 text-blue-700 font-bold text-xs">
-                    <Award className="size-4" />
-                    Hoàn tất phỏng vấn
-                  </div>
-                  <span className="text-[10px] text-slate-500 mt-1">
-                    Chuyển hồ sơ sang Đã phỏng vấn để tiếp tục cân nhắc
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setNextStage('OFFERED')}
-                  className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                    nextStage === 'OFFERED'
-                      ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500 shadow-sm'
-                      : 'border-slate-200 bg-white hover:border-emerald-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs">
-                    <CheckCircle2 className="size-4" />
-                    Gửi Offer
-                  </div>
-                  <span className="text-[10px] text-slate-500 mt-1">
-                    Chuyển sang bước Đề nghị nhận việc
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setNextStage('INTERVIEW_SCHEDULED')}
-                  className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                    nextStage === 'INTERVIEW_SCHEDULED'
-                      ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 shadow-sm'
-                      : 'border-slate-200 bg-white hover:border-blue-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 text-[#2563EB] font-bold text-xs">
-                    <Sparkles className="size-4" />
-                    Phỏng vấn Vòng 2
-                  </div>
-                  <span className="text-[10px] text-slate-500 mt-1">
-                    Lên lịch thêm 1 vòng đánh giá tiếp theo
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setNextStage('REJECTED')}
-                  className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                    nextStage === 'REJECTED'
-                      ? 'border-rose-500 bg-rose-50 ring-1 ring-rose-500 shadow-sm'
-                      : 'border-slate-200 bg-white hover:border-rose-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 text-rose-700 font-bold text-xs">
-                    <XCircle className="size-4" />
-                    Chưa phù hợp
-                  </div>
-                  <span className="text-[10px] text-slate-500 mt-1">Từ chối hồ sơ ứng viên</span>
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
 
           {/* Footer Action Buttons */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">

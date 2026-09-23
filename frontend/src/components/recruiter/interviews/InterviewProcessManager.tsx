@@ -19,6 +19,8 @@ import {
   UserRound,
   Video,
   X,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -41,6 +43,7 @@ import {
   type InterviewPurpose,
   type InterviewRoundData,
 } from '@/lib/interview-api';
+import { updateApplicationStage } from '@/lib/recruiter-api';
 import { AiInterviewReviewModal } from './AiInterviewReviewModal';
 import { InterviewDecisionDialog, type InterviewDecisionAction } from './InterviewDecisionDialog';
 
@@ -125,6 +128,13 @@ export function InterviewProcessManager({
   const [score, setScore] = useState(80);
   const [note, setNote] = useState('');
 
+  const [quickTitle, setQuickTitle] = useState('Phỏng vấn Chuyên môn');
+  const [quickMode, setQuickMode] = useState<InterviewMode>('VIDEO_CALL');
+  const [quickScheduledAt, setQuickScheduledAt] = useState('');
+  const [quickLocationOrLink, setQuickLocationOrLink] = useState('');
+  const [quickNotes, setQuickNotes] = useState('');
+  const [showCustomBuilder, setShowCustomBuilder] = useState(false);
+
   const currentRound = useMemo(
     () => process?.rounds.find((round) => round.order === process.currentRoundOrder),
     [process],
@@ -182,6 +192,71 @@ export function InterviewProcessManager({
     try {
       setProcess(await createInterviewProcess(token, applicationId));
       toast.success('Đã tạo kế hoạch phỏng vấn.');
+    } catch (requestError) {
+      reportError(requestError);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleQuickSchedule() {
+    if (!quickTitle.trim()) {
+      toast.error('Vui lòng nhập tiêu đề buổi phỏng vấn');
+      return;
+    }
+    if (!quickScheduledAt) {
+      toast.error('Vui lòng chọn thời gian phỏng vấn');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      let currentProcess = process;
+      if (!currentProcess) {
+        currentProcess = await createInterviewProcess(token, applicationId);
+      }
+      const newRound = await addInterviewRound(token, currentProcess.id, {
+        title: quickTitle.trim(),
+        description: quickNotes.trim() || undefined,
+        conductedBy: 'HUMAN',
+        mode: quickMode,
+        purpose: 'TECHNICAL',
+        scheduledAt: new Date(quickScheduledAt).toISOString(),
+        locationOrLink: quickLocationOrLink.trim() || undefined,
+        durationMinutes: 60,
+      });
+      await activateInterviewProcess(token, currentProcess.id);
+      await createInterview(token, {
+        applicationId,
+        roundId: newRound.id,
+        title: quickTitle.trim(),
+        type: quickMode === 'IN_PERSON' ? 'OFFLINE' : 'ONLINE',
+        scheduledAt: new Date(quickScheduledAt).toISOString(),
+        durationMinutes: 60,
+        locationOrLink: quickLocationOrLink.trim() || undefined,
+        interviewerNotes: quickNotes.trim() || undefined,
+      });
+      setProcess(await getInterviewProcess(token, applicationId));
+      toast.success('Đã lên lịch phỏng vấn và kích hoạt quy trình thành công!');
+      onCreated?.();
+    } catch (requestError) {
+      reportError(requestError);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSendOffer() {
+    setSaving(true);
+    try {
+      await updateApplicationStage(token, applicationId, {
+        targetStage: 'OFFERED',
+        expectedStage: 'INTERVIEWED',
+        note: 'Ứng viên đã hoàn tất xuất sắc các vòng phỏng vấn và được đề nghị nhận việc.',
+      });
+      toast.success('Đã chuyển trạng thái hồ sơ sang “Đã gửi đề nghị (Offer)” thành công!');
+      onCreated?.();
+      setOpen(false);
     } catch (requestError) {
       reportError(requestError);
     } finally {
@@ -453,28 +528,125 @@ export function InterviewProcessManager({
                 <div className="h-56 animate-pulse rounded-2xl bg-slate-100" />
               </div>
             ) : !process ? (
-              <div className="p-8 text-center">
-                <ClipboardCheck className="mx-auto h-10 w-10 text-blue-700" />
-                <h3 className="mt-4 text-lg font-black text-slate-950">
-                  Chưa có kế hoạch phỏng vấn
-                </h3>
-                <p className="mx-auto mt-2 max-w-lg text-sm text-slate-600">
-                  Tạo kế hoạch rồi thêm các vòng theo thứ tự. Ứng viên chỉ nhận thông tin của vòng
-                  đang được kích hoạt.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleCreateProcess}
-                  disabled={saving}
-                  className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-black text-white hover:bg-blue-800 disabled:opacity-60"
-                >
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Plus className="h-4 w-4" />
-                  )}
-                  Tạo kế hoạch
-                </button>
+              <div className="p-6 max-w-2xl mx-auto space-y-6">
+                <div className="text-center space-y-2">
+                  <div className="size-12 rounded-2xl bg-blue-50 border border-blue-200 text-[#2563EB] flex items-center justify-center mx-auto shadow-2xs">
+                    <ClipboardCheck className="size-6" />
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    Bắt đầu Kế hoạch Phỏng vấn
+                  </h3>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    Chọn lên lịch nhanh 1 buổi phỏng vấn (phổ biến) hoặc thiết lập quy trình phỏng vấn nhiều vòng linh hoạt.
+                  </p>
+                </div>
+
+                {/* Chế độ 1: Lên lịch nhanh 1 vòng */}
+                <div className="rounded-2xl border border-blue-200 bg-blue-50/40 p-5 space-y-4">
+                  <div className="flex items-center gap-2 text-xs font-black text-blue-900 uppercase tracking-wider">
+                    <Zap className="size-4 text-[#2563EB]" />
+                    Lên lịch nhanh 1 vòng (Phỏng vấn trực tiếp / Online)
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Tiêu đề phỏng vấn <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={quickTitle}
+                        onChange={(e) => setQuickTitle(e.target.value)}
+                        placeholder="VD: Phỏng vấn Chuyên môn / Technical"
+                        className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs font-medium text-slate-900 outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">
+                          Hình thức phỏng vấn
+                        </label>
+                        <select
+                          value={quickMode}
+                          onChange={(e) => setQuickMode(e.target.value as InterviewMode)}
+                          className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs font-medium text-slate-900 outline-none focus:border-[#2563EB]"
+                        >
+                          <option value="VIDEO_CALL">Online (Google Meet / Zoom)</option>
+                          <option value="IN_PERSON">Trực tiếp tại văn phòng</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">
+                          Thời gian phỏng vấn <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={quickScheduledAt}
+                          onChange={(e) => setQuickScheduledAt(e.target.value)}
+                          className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs font-medium text-slate-900 outline-none focus:border-[#2563EB]"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        {quickMode === 'IN_PERSON' ? 'Địa chỉ văn phòng' : 'Link Google Meet / Zoom'}
+                      </label>
+                      <input
+                        type="text"
+                        value={quickLocationOrLink}
+                        onChange={(e) => setQuickLocationOrLink(e.target.value)}
+                        placeholder={quickMode === 'IN_PERSON' ? 'VD: Tầng 5, Tòa nhà Keangnam, Hà Nội' : 'VD: https://meet.google.com/abc-defg-hij'}
+                        className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs font-medium text-slate-900 outline-none focus:border-[#2563EB]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Ghi chú dặn dò ứng viên (Tùy chọn)
+                      </label>
+                      <input
+                        type="text"
+                        value={quickNotes}
+                        onChange={(e) => setQuickNotes(e.target.value)}
+                        placeholder="VD: Ứng viên mang theo laptop và chuẩn bị portfolio"
+                        className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs font-medium text-slate-900 outline-none focus:border-[#2563EB]"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleQuickSchedule}
+                    disabled={saving}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] p-3 text-xs font-black text-white shadow-sm transition active:scale-[0.99] disabled:opacity-60"
+                  >
+                    {saving ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Zap className="size-4" />
+                    )}
+                    Tạo &amp; Chốt lịch phỏng vấn ngay
+                  </button>
+                </div>
+
+                {/* Hoặc tạo quy trình tùy chỉnh */}
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                  <span className="text-xs font-medium text-slate-500">
+                    Cần quy trình nhiều vòng (AI Test + Phỏng vấn)?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCreateProcess}
+                    disabled={saving}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition"
+                  >
+                    <Plus className="size-3.5" />
+                    Tạo kế hoạch nhiều vòng
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="grid gap-5 p-5 lg:grid-cols-[0.85fr_1.15fr]">
@@ -673,13 +845,29 @@ export function InterviewProcessManager({
                       </p>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                      <Check className="h-6 w-6 text-emerald-700" />
-                      <p className="mt-2 font-black text-emerald-900">Tất cả vòng đã hoàn tất</p>
-                      <p className="mt-1 text-sm text-emerald-800">
-                        Hồ sơ đã chuyển sang Đã phỏng vấn. HR có thể cân nhắc gửi Offer ở bước tiếp
-                        theo.
-                      </p>
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="size-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                          <Check className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-black text-emerald-950 text-sm">🎉 Ứng viên đã đạt toàn bộ các vòng phỏng vấn!</p>
+                          <p className="mt-1 text-xs text-emerald-800 leading-relaxed">
+                            Quy trình phỏng vấn đã hoàn tất thành công. Ứng viên đã vượt qua đầy đủ các tiêu chí tuyển dụng. Bạn có thể tiến hành gửi Offer ngay.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-emerald-200/60 flex items-center justify-end">
+                        <button
+                          type="button"
+                          onClick={handleSendOffer}
+                          disabled={saving}
+                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-4 py-2.5 text-xs font-black text-white shadow-sm transition active:scale-95 disabled:opacity-50"
+                        >
+                          {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
+                          Gửi Đề Nghị (Offer) ngay cho ứng viên
+                        </button>
+                      </div>
                     </div>
                   )}
                 </section>

@@ -1498,7 +1498,30 @@ export function CandidateScoringWorkspace({
                         <div key={item.id} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-2">
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <h6 className="font-bold text-slate-900">{item.title}</h6>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h6 className="font-bold text-slate-900">{item.title}</h6>
+                                {item.round && (
+                                  <span
+                                    className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+                                      item.round.status === 'PASSED'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                                        : item.round.status === 'FAILED'
+                                          ? 'bg-rose-50 text-rose-700 border-rose-300'
+                                          : item.round.status === 'AWAITING_REVIEW'
+                                            ? 'bg-amber-50 text-amber-700 border-amber-300'
+                                            : 'bg-blue-50 text-[#2563EB] border-blue-200'
+                                    }`}
+                                  >
+                                    {item.round.status === 'PASSED'
+                                      ? '✓ ĐÃ QUA VÒNG'
+                                      : item.round.status === 'FAILED'
+                                        ? '✗ KHÔNG ĐẠT'
+                                        : item.round.status === 'AWAITING_REVIEW'
+                                          ? 'CHỜ DUYỆT'
+                                          : `VÒNG ${item.round.order}`}
+                                  </span>
+                                )}
+                              </div>
                               <div className="flex items-center gap-1.5 mt-1">
                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] border border-blue-200">
                                   {interviewTypeLabels[item.type] || item.type}

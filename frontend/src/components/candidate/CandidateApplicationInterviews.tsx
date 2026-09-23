@@ -32,8 +32,18 @@ export function CandidateApplicationInterviews({
     return timeA - timeB;
   });
 
+  const allPassed =
+    sortedInterviews.length > 0 &&
+    sortedInterviews.every((i) => i.round?.status === 'PASSED');
+
   return (
     <div className="mt-4 space-y-3">
+      {allPassed && (
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 shadow-2xs">
+          <span className="text-base">🎉</span>
+          <span>Chúc mừng! Bạn đã hoàn thành xuất sắc các vòng phỏng vấn và đang chờ phản hồi từ nhà tuyển dụng.</span>
+        </div>
+      )}
       {sortedInterviews.map((interview, index) => (
         <CandidateInterviewCard
           key={interview.id}

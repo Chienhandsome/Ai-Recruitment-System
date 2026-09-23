@@ -10,6 +10,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { InterviewRoundDecision } from './decide-interview-round.dto';
 
 export class SubmitInterviewFeedbackDto {
   @ApiProperty({
@@ -40,4 +41,14 @@ export class SubmitInterviewFeedbackDto {
   @IsOptional()
   @IsEnum(ApplicationStage)
   nextStage?: ApplicationStage = ApplicationStage.INTERVIEWED;
+
+  @ApiPropertyOptional({
+    enum: InterviewRoundDecision,
+    description: 'Quyết định kết quả vòng phỏng vấn (PASSED hoặc FAILED). Nếu không chọn, vòng sẽ chuyển sang AWAITING_REVIEW.',
+    example: InterviewRoundDecision.PASSED,
+  })
+  @IsOptional()
+  @IsEnum(InterviewRoundDecision)
+  decision?: InterviewRoundDecision;
 }
+

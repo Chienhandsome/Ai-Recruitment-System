@@ -441,6 +441,16 @@ export class ApplicationsService {
           orderBy: { scheduledAt: 'desc' },
           select: {
             id: true,
+            roundId: true,
+            round: {
+              select: {
+                id: true,
+                order: true,
+                title: true,
+                status: true,
+                resultScore: true,
+              },
+            },
             title: true,
             type: true,
             status: true,
@@ -451,6 +461,26 @@ export class ApplicationsService {
             score: true,
             createdAt: true,
             updatedAt: true,
+          },
+        },
+        interviewProcess: {
+          select: {
+            id: true,
+            status: true,
+            currentRoundOrder: true,
+            rounds: {
+              orderBy: { order: 'asc' },
+              select: {
+                id: true,
+                order: true,
+                title: true,
+                status: true,
+                conductedBy: true,
+                mode: true,
+                scheduledAt: true,
+                resultScore: true,
+              },
+            },
           },
         },
         statusHistories: {
@@ -508,6 +538,7 @@ export class ApplicationsService {
         ...i,
         score: i.score !== null ? Number(i.score) : null,
       })),
+      interviewProcess: application.interviewProcess,
       statusHistories: application.statusHistories,
       appliedAt: application.appliedAt,
       updatedAt: application.updatedAt,

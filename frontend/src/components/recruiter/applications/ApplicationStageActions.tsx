@@ -19,6 +19,7 @@ interface ApplicationStageActionsProps {
   currentHrNotes?: string | null;
   onUpdated: () => void | Promise<void>;
   onScheduleInterview?: () => void;
+  onOpenOfferModal?: () => void;
   managedInterviewProcess?: boolean;
 }
 
@@ -39,6 +40,7 @@ export function ApplicationStageActions({
   currentHrNotes,
   onUpdated,
   onScheduleInterview,
+  onOpenOfferModal,
   managedInterviewProcess = false,
 }: ApplicationStageActionsProps) {
   const [target, setTarget] = useState<ApplicationStage | null>(null);
@@ -48,9 +50,11 @@ export function ApplicationStageActions({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const actionableTransitions = managedInterviewProcess
-    ? allowedTransitions.filter((stage) => stage !== 'INTERVIEW_SCHEDULED')
-    : allowedTransitions;
+  const actionableTransitions = (
+    managedInterviewProcess
+      ? allowedTransitions.filter((stage) => stage !== 'INTERVIEW_SCHEDULED')
+      : allowedTransitions
+  ).filter((stage) => stage !== 'HIRED');
 
   const close = () => {
     if (submitting) return;
@@ -123,7 +127,9 @@ export function ApplicationStageActions({
             key={stage}
             type="button"
             onClick={() => {
-              if (stage === 'INTERVIEW_SCHEDULED' && onScheduleInterview) {
+              if (stage === 'OFFERED' && onOpenOfferModal) {
+                onOpenOfferModal();
+              } else if (stage === 'INTERVIEW_SCHEDULED' && onScheduleInterview) {
                 onScheduleInterview();
               } else {
                 setTarget(stage);
@@ -132,8 +138,8 @@ export function ApplicationStageActions({
             className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
               stage === 'REJECTED'
                 ? 'border-rose-200 text-rose-700 hover:bg-rose-50'
-                : stage === 'HIRED'
-                  ? 'border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700'
+                : stage === 'OFFERED'
+                  ? 'border-blue-300 bg-[#EFF6FF] text-[#2563EB] hover:bg-blue-100 shadow-2xs'
                   : stage === 'INTERVIEW_SCHEDULED'
                     ? 'border-blue-300 bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-sm'
                     : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
@@ -141,7 +147,9 @@ export function ApplicationStageActions({
           >
             {stage === 'INTERVIEW_SCHEDULED'
               ? '📅 Lên lịch phỏng vấn'
-              : applicationStageLabels[stage]}
+              : stage === 'OFFERED'
+                ? '🎁 Soạn Thảo Offer'
+                : applicationStageLabels[stage]}
           </button>
         ))}
         <button

@@ -668,6 +668,7 @@ export function CandidateScoringWorkspace({
                         currentHrNotes={detail.hrNotes}
                         onUpdated={onRefresh}
                         onScheduleInterview={onScheduleInterview}
+                        onOpenOfferModal={() => setShowWorkspaceOfferModal(true)}
                         managedInterviewProcess
                       />
                     </div>

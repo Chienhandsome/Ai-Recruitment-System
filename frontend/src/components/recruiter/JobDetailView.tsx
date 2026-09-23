@@ -142,6 +142,7 @@ function detailToLegacyApplication(detail: RecruiterApplicationDetail) {
     },
     aiMatchingResults: detail.latestAiResult ? [detail.latestAiResult] : [],
     interviews: detail.interviews || [],
+    offer: detail.offer || null,
   };
 }
 

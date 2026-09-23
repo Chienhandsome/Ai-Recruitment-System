@@ -586,6 +586,17 @@ export class ApplicationsService {
       );
     }
 
+    if (dto.targetStage === ApplicationStage.OFFERED) {
+      throw new BadRequestException(
+        'Để chuyển sang giai đoạn Đề nghị (OFFERED), vui lòng phát hành Thư mời nhận việc (Offer) chính thức.',
+      );
+    }
+    if (dto.targetStage === ApplicationStage.HIRED) {
+      throw new BadRequestException(
+        'Giai đoạn Đã tuyển dụng (HIRED) được xác nhận tự động khi ứng viên chấp thuận Thư mời nhận việc (Offer).',
+      );
+    }
+
     const note = dto.note?.trim() || null;
     if (
       applicationTransitionRequiresNote(dto.expectedStage, dto.targetStage) &&

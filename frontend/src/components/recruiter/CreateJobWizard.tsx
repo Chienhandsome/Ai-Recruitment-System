@@ -230,7 +230,7 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobD
               <ChevronRight className="w-3 h-3 text-slate-400" />
               <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${step >= 2 ? 'bg-[#2563EB] text-white' : 'bg-[#EFF6FF] text-[#1F2937]'}`}>2. Chi tiết</span>
               <ChevronRight className="w-3 h-3 text-slate-400" />
-              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${step >= 3 ? 'bg-[#2563EB] text-white' : 'bg-[#EFF6FF] text-[#1F2937]'}`}>3. AI & Kỹ năng</span>
+              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${step >= 3 ? 'bg-[#2563EB] text-white' : 'bg-[#EFF6FF] text-[#1F2937]'}`}>3. Tiêu chí & Kỹ năng</span>
             </div>
           </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">

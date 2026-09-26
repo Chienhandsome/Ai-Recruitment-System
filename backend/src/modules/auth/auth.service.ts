@@ -62,7 +62,7 @@ export class AuthService {
 
     const existing = await this.prisma.user.findUnique({
       where: { id: authUser.id },
-      include: userProfileInclude,
+      include: userAuthBasicInclude,
     });
 
     if (existing) {
@@ -75,7 +75,7 @@ export class AuthService {
           email: authUser.email,
           lastLoginAt: new Date(),
         },
-        include: userProfileInclude,
+        include: userAuthBasicInclude,
       });
 
       return this.toAuthResponse(updated);

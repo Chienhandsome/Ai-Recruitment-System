@@ -626,6 +626,7 @@ export class AiInterviewsService {
             currentStage: true,
             job: {
               select: {
+                id: true,
                 title: true,
                 recruiter: { select: { userId: true } },
               },
@@ -725,6 +726,7 @@ export class AiInterviewsService {
               currentStage: true,
               job: {
                 select: {
+                  id: true,
                   title: true,
                   recruiter: { select: { userId: true } },
                 },
@@ -758,6 +760,7 @@ export class AiInterviewsService {
         id: string;
         currentStage: ApplicationStage;
         job: {
+          id: string;
           title: string;
           recruiter: { userId: string | null } | null;
         };
@@ -871,6 +874,8 @@ export class AiInterviewsService {
           : `Cuộc phỏng vấn AI cho vị trí ${session.application.job.title} kết thúc với trạng thái ${status}.`,
         payload: {
           applicationId: session.applicationId,
+          jobId: session.application.job.id,
+          jobTitle: session.application.job.title,
           aiInterviewSessionId: session.id,
           status,
         },

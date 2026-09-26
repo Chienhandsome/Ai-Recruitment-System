@@ -42,6 +42,7 @@ import {
   getRecruiterApplications,
   getRecruiterActionHub,
   getRecruiterJobs,
+  getRecruiterApplicationDetail,
   type RecruiterProfileData,
   type RecruiterDashboardStats,
   type RecruiterActionHubData,
@@ -144,6 +145,7 @@ export function RecruiterWorkspace({
 
   const [targetJobId, setTargetJobId] = useState<string | null>(null);
   const [targetJobTab, setTargetJobTab] = useState<"info" | "candidates">("candidates");
+  const [targetAppId, setTargetAppId] = useState<string | null>(null);
 
   useEffect(() => {
     if (defaultTab) {
@@ -165,6 +167,25 @@ export function RecruiterWorkspace({
     setTargetJobId(jobId);
     setTargetJobTab(initialTab);
     setActiveTab("jobs");
+  };
+
+  const handleNavigateToApplication = async (applicationId: string, jobId?: string) => {
+    setTargetAppId(applicationId);
+    setTargetJobTab("candidates");
+    if (jobId) {
+      setTargetJobId(jobId);
+      setActiveTab("jobs");
+    } else {
+      try {
+        const appDetail = await getRecruiterApplicationDetail(token, applicationId);
+        if (appDetail?.job?.id) {
+          setTargetJobId(appDetail.job.id);
+        }
+      } catch (err) {
+        console.warn('Failed to resolve job from application:', err);
+      }
+      setActiveTab("jobs");
+    }
   };
 
   return (
@@ -235,6 +256,7 @@ export function RecruiterWorkspace({
             <RecruiterNotificationBell
               token={token}
               onNavigateToInterviews={() => setActiveTab("interviews")}
+              onNavigateToApplication={handleNavigateToApplication}
             />
 
             <div className="h-8 w-[1px] bg-[#E2E8F0] mx-1"></div>
@@ -323,8 +345,10 @@ export function RecruiterWorkspace({
             token={token}
             selectedJobId={targetJobId}
             initialJobTab={targetJobTab}
+            selectedApplicationId={targetAppId}
             onClearSelectedJob={() => {
               setTargetJobId(null);
+              setTargetAppId(null);
               setTargetJobTab("info");
             }}
           />

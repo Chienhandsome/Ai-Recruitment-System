@@ -39,6 +39,7 @@ interface JobDetailViewProps {
   onEdit: (job: JobPostingData) => void;
   onJobDeleted: () => void;
   defaultTab?: "info" | "candidates";
+  initialSelectedAppId?: string | null;
 }
 
 const AI_PENDING_STATUSES = new Set([
@@ -153,11 +154,19 @@ export function JobDetailView({
   onEdit,
   onJobDeleted,
   defaultTab = "info",
+  initialSelectedAppId = null,
 }: JobDetailViewProps) {
-  const [activeTab, setActiveTab] = useState<"info" | "candidates">(defaultTab);
+  const [activeTab, setActiveTab] = useState<"info" | "candidates">(initialSelectedAppId ? "candidates" : defaultTab);
   const [job, setJob] = useState<JobPostingData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(initialSelectedAppId || null);
+
+  useEffect(() => {
+    if (initialSelectedAppId) {
+      setSelectedAppId(initialSelectedAppId);
+      setActiveTab("candidates");
+    }
+  }, [initialSelectedAppId]);
   const [searchCandidate, setSearchCandidate] = useState("");
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [feedbackInterview, setFeedbackInterview] = useState<InterviewData | null>(null);

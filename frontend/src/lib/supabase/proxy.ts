@@ -55,10 +55,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  // Fast-path: If visiting a non-protected route and user has no Supabase cookies, skip network call
+  // Fast-path: If visiting a non-protected route, pass through immediately without blocking on remote auth calls
   const isProtectedRoute = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
-  const hasSupabaseCookies = request.cookies.getAll().some((c) => c.name.startsWith("sb-"));
-  if (!isProtectedRoute && !hasSupabaseCookies) {
+  if (!isProtectedRoute) {
     return NextResponse.next({ request });
   }
 

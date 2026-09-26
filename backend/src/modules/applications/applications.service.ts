@@ -511,6 +511,13 @@ export class ApplicationsService {
                 mode: true,
                 scheduledAt: true,
                 resultScore: true,
+                decisionNote: true,
+                interviews: {
+                  orderBy: { createdAt: 'desc' },
+                },
+                aiInterviewSessions: {
+                  orderBy: { createdAt: 'desc' },
+                },
               },
             },
           },

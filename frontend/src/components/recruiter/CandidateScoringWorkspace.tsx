@@ -7,7 +7,7 @@ import {
   DollarSign, FolderGit2, Calendar, CheckCircle2, XCircle, ArrowRight,
   Search, Filter, Clock, ChevronRight, Video, Plus, ExternalLink,
   HelpCircle, Eye, Info, Check, X, AlertCircle, Globe, Gift, Edit3,
-  RotateCcw, Loader2
+  RotateCcw, Loader2, Play, Bot
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -18,6 +18,7 @@ import { ApplicationStageActions } from "./applications/ApplicationStageActions"
 import { applicationStageLabels, applicationStageStyles } from "@/lib/application-stage";
 import {
   type InterviewData,
+  type AiInterviewSession,
   interviewTypeLabels,
   interviewStatusLabels,
   candidateResponseLabels,
@@ -25,6 +26,7 @@ import {
 } from "@/lib/interview-api";
 import { format } from "date-fns";
 import { InterviewProcessManager } from "./interviews/InterviewProcessManager";
+import { AiInterviewReviewModal } from "./interviews/AiInterviewReviewModal";
 import { CreateOrEditOfferModal } from "./offers/CreateOrEditOfferModal";
 import { revokeOffer } from "@/lib/offer-api";
 
@@ -69,6 +71,13 @@ export function CandidateScoringWorkspace({
   const [showRevokeModal, setShowRevokeModal] = useState(false);
   const [revokeReason, setRevokeReason] = useState("");
   const [isRevoking, setIsRevoking] = useState(false);
+  const [reviewingAiModalData, setReviewingAiModalData] = useState<{
+    session: AiInterviewSession;
+    roundTitle: string;
+    nextRoundTitle?: string | null;
+    isFinalRound?: boolean;
+    canDecide?: boolean;
+  } | null>(null);
 
   const handleRevokeOffer = async () => {
     if (!selectedApplicationDetail?.offer?.id) return;
@@ -132,6 +141,26 @@ export function CandidateScoringWorkspace({
   const detail = selectedApplicationDetail && selectedApplicationDetail.id === activeAppId
     ? selectedApplicationDetail
     : null;
+
+  const aiInterviewToReview = useMemo(() => {
+    if (!detail?.interviewProcess?.rounds) return null;
+    const rounds = detail.interviewProcess.rounds;
+    for (let i = 0; i < rounds.length; i++) {
+      const r = rounds[i];
+      const completedSession = (r.aiInterviewSessions || []).find(
+        (s) => s.status === 'COMPLETED' || (Array.isArray(s.videos) && s.videos.length > 0),
+      );
+      if (completedSession) {
+        const nextRound = rounds.find((nr) => nr.order > r.order && nr.status !== 'CANCELLED');
+        return {
+          round: r,
+          session: completedSession,
+          nextRound,
+        };
+      }
+    }
+    return null;
+  }, [detail?.interviewProcess?.rounds]);
 
   const snapshot = detail?.profileSnapshot as {
     evaluationInput?: {
@@ -674,6 +703,63 @@ export function CandidateScoringWorkspace({
                         managedInterviewProcess
                         canMakeOffer={isAllInterviewProcessesCompleted(detail)}
                       />
+                    </div>
+                  </div>
+                )}
+
+                {/* 1.4. AI INTERVIEW REVIEW BANNER (VIDEO SẴN SÀNG) */}
+                {detail && aiInterviewToReview && (
+                  <div className="rounded-2xl border-2 border-blue-500 bg-gradient-to-r from-blue-50 via-white to-blue-50/50 p-4 shadow-sm mt-3 animate-in fade-in duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#2563EB] text-white shadow-md shadow-blue-500/20">
+                          <Video className="size-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-black text-slate-900">
+                              {aiInterviewToReview.round.title}
+                            </span>
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold border ${
+                                aiInterviewToReview.round.status === 'PASSED'
+                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                  : aiInterviewToReview.round.status === 'FAILED'
+                                    ? 'bg-rose-100 text-rose-800 border-rose-300'
+                                    : 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse'
+                              }`}
+                            >
+                              {aiInterviewToReview.round.status === 'PASSED'
+                                ? '✓ Đã đạt vòng này'
+                                : aiInterviewToReview.round.status === 'FAILED'
+                                  ? '✗ Không đạt vòng này'
+                                  : '● Chờ HR xem video & đánh giá'}
+                            </span>
+                            <span className="text-[11px] font-bold text-blue-700 bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded-full">
+                              {aiInterviewToReview.session.videos?.length || 0} video câu trả lời đã lưu
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-600 mt-1 font-medium">
+                            Ứng viên đã hoàn tất trả lời phỏng vấn trực tuyến với AI. Toàn bộ video từng câu hỏi và transcript đã sẵn sàng để HR xem lại và chấm điểm.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setReviewingAiModalData({
+                            session: aiInterviewToReview.session,
+                            roundTitle: aiInterviewToReview.round.title,
+                            nextRoundTitle: aiInterviewToReview.nextRound?.title || null,
+                            isFinalRound: !aiInterviewToReview.nextRound,
+                            canDecide: aiInterviewToReview.round.status === 'AWAITING_REVIEW',
+                          })
+                        }
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-600/20 transition active:scale-95 shrink-0 cursor-pointer"
+                      >
+                        <Play className="size-4 fill-white" />
+                        Xem Video & Đánh giá ngay
+                      </button>
                     </div>
                   </div>
                 )}
@@ -1607,7 +1693,14 @@ export function CandidateScoringWorkspace({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                     <h5 className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-[#2563EB]" /> Lịch phỏng vấn & Đánh giá ({detail?.interviews?.length || 0})
+                      <Calendar className="w-3.5 h-3.5 text-[#2563EB]" /> Lịch phỏng vấn & Đánh giá (
+                      {(detail?.interviewProcess?.rounds?.length || 0) +
+                        ((detail?.interviews || []).filter(
+                          (it) =>
+                            !it.roundId ||
+                            !(detail?.interviewProcess?.rounds || []).some((r) => r.id === it.roundId),
+                        ).length)}
+                      )
                     </h5>
                     {detail?.currentStage && ['SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEWED', 'OFFERED', 'HIRED'].includes(detail.currentStage) && (
                       <button
@@ -1620,65 +1713,167 @@ export function CandidateScoringWorkspace({
                     )}
                   </div>
 
-                  {detail?.interviews && detail.interviews.length > 0 ? (
+                  {((detail?.interviewProcess?.rounds?.length || 0) > 0 || (detail?.interviews?.length || 0) > 0) ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {detail.interviews.map((item: InterviewData) => (
-                        <div key={item.id} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h6 className="font-bold text-slate-900">{item.title}</h6>
-                                {item.round && (
+                      {/* 1. Rounds from InterviewProcess */}
+                      {(detail?.interviewProcess?.rounds || []).map((round) => {
+                        const isAi = round.conductedBy === 'AI';
+                        const latestAiSession = round.aiInterviewSessions?.[0];
+                        const videoCount = latestAiSession?.videos?.length || 0;
+                        const nextR = (detail?.interviewProcess?.rounds || []).find(
+                          (nr) => nr.order > round.order && nr.status !== 'CANCELLED',
+                        );
+
+                        return (
+                          <div
+                            key={round.id}
+                            className={`p-3.5 rounded-xl border text-xs space-y-2.5 transition-all ${
+                              round.status === 'AWAITING_REVIEW'
+                                ? 'border-blue-300 bg-blue-50/50 shadow-2xs ring-1 ring-blue-400/30'
+                                : 'border-slate-200 bg-slate-50'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h6 className="font-bold text-slate-900">
+                                    Vòng {round.order}: {round.title}
+                                  </h6>
                                   <span
                                     className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
-                                      item.round.status === 'PASSED'
+                                      round.status === 'PASSED'
                                         ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                                        : item.round.status === 'FAILED'
+                                        : round.status === 'FAILED'
                                           ? 'bg-rose-50 text-rose-700 border-rose-300'
-                                          : item.round.status === 'AWAITING_REVIEW'
-                                            ? 'bg-amber-50 text-amber-700 border-amber-300'
-                                            : 'bg-blue-50 text-[#2563EB] border-blue-200'
+                                          : round.status === 'AWAITING_REVIEW'
+                                            ? 'bg-amber-50 text-amber-700 border-amber-300 animate-pulse font-bold'
+                                            : round.status === 'IN_PROGRESS'
+                                              ? 'bg-blue-50 text-blue-700 border-blue-300'
+                                              : 'bg-slate-100 text-slate-700 border-slate-300'
                                     }`}
                                   >
-                                    {item.round.status === 'PASSED'
+                                    {round.status === 'PASSED'
                                       ? '✓ ĐÃ QUA VÒNG'
-                                      : item.round.status === 'FAILED'
+                                      : round.status === 'FAILED'
                                         ? '✗ KHÔNG ĐẠT'
-                                        : item.round.status === 'AWAITING_REVIEW'
-                                          ? 'CHỜ DUYỆT'
-                                          : `VÒNG ${item.round.order}`}
+                                        : round.status === 'AWAITING_REVIEW'
+                                          ? 'CHỜ HR ĐÁNH GIÁ'
+                                          : round.status === 'IN_PROGRESS'
+                                            ? 'ĐANG DIỄN RA'
+                                            : 'ĐÃ LÊN LỊCH'}
                                   </span>
-                                )}
+                                </div>
+
+                                <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] border border-blue-200 flex items-center gap-1">
+                                    {isAi ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
+                                    {isAi ? 'Phỏng vấn AI' : 'HR Phỏng vấn'}
+                                  </span>
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+                                    {round.mode === 'ASYNC_WEB'
+                                      ? 'Trực tuyến (Web AI)'
+                                      : round.mode === 'IN_PERSON'
+                                        ? 'Trực tiếp'
+                                        : 'Video call'}
+                                  </span>
+                                  {isAi && videoCount > 0 && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
+                                      <Video className="w-3 h-3" />
+                                      {videoCount} video đã ghi
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] border border-blue-200">
-                                  {interviewTypeLabels[item.type] || item.type}
+
+                              {round.resultScore !== null && round.resultScore !== undefined ? (
+                                <span className="text-xs font-black text-[#2563EB] bg-white px-2 py-1 rounded border border-slate-200 shadow-2xs">
+                                  {Number(round.resultScore)}/100
                                 </span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
-                                  {interviewStatusLabels[item.status] || item.status}
-                                </span>
-                              </div>
+                              ) : null}
                             </div>
-                            {item.score !== undefined && item.score !== null ? (
-                              <span className="text-xs font-black text-[#2563EB] bg-white px-2 py-1 rounded border border-slate-200">
-                                {Number(item.score)}/100
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => onFeedbackInterview(item)}
-                                className="px-2 py-1 rounded bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-700"
-                              >
-                                Chấm điểm
-                              </button>
-                            )}
+
+                            {/* Additional info or actions */}
+                            <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between gap-2">
+                              {round.scheduledAt ? (
+                                <div className="text-[11px] text-slate-500 flex items-center gap-1">
+                                  <Clock className="w-3 h-3 text-slate-400" />
+                                  {format(new Date(round.scheduledAt), 'HH:mm dd/MM/yyyy')}
+                                </div>
+                              ) : latestAiSession?.completedAt ? (
+                                <div className="text-[11px] text-slate-500 flex items-center gap-1">
+                                  <Clock className="w-3 h-3 text-slate-400" />
+                                  Nộp lúc: {format(new Date(latestAiSession.completedAt), 'HH:mm dd/MM/yyyy')}
+                                </div>
+                              ) : (
+                                <div className="text-[11px] text-slate-400 italic">
+                                  {isAi ? 'Chưa đặt lịch cố định' : 'Lịch linh hoạt'}
+                                </div>
+                              )}
+
+                              {isAi && latestAiSession && (latestAiSession.status === 'COMPLETED' || videoCount > 0) && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setReviewingAiModalData({
+                                      session: latestAiSession,
+                                      roundTitle: round.title,
+                                      nextRoundTitle: nextR?.title || null,
+                                      isFinalRound: !nextR,
+                                      canDecide: round.status === 'AWAITING_REVIEW',
+                                    })
+                                  }
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB] hover:bg-blue-700 text-white text-[11px] font-black transition shadow-2xs active:scale-95 cursor-pointer"
+                                >
+                                  <Play className="w-3 h-3 fill-white" />
+                                  Xem video & Đánh giá
+                                </button>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-[11px] text-slate-500 flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-slate-400" />
-                            {format(new Date(item.scheduledAt), "HH:mm dd/MM/yyyy")} ({item.durationMinutes} phút)
+                        );
+                      })}
+
+                      {/* 2. Standalone Interviews (not associated with above rounds) */}
+                      {(detail?.interviews || [])
+                        .filter(
+                          (it) =>
+                            !it.roundId ||
+                            !(detail?.interviewProcess?.rounds || []).some((r) => r.id === it.roundId),
+                        )
+                        .map((item: InterviewData) => (
+                          <div key={item.id} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <h6 className="font-bold text-slate-900">{item.title}</h6>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] border border-blue-200">
+                                    {interviewTypeLabels[item.type] || item.type}
+                                  </span>
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+                                    {interviewStatusLabels[item.status] || item.status}
+                                  </span>
+                                </div>
+                              </div>
+                              {item.score !== undefined && item.score !== null ? (
+                                <span className="text-xs font-black text-[#2563EB] bg-white px-2 py-1 rounded border border-slate-200">
+                                  {Number(item.score)}/100
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => onFeedbackInterview(item)}
+                                  className="px-2 py-1 rounded bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-700 cursor-pointer"
+                                >
+                                  Chấm điểm
+                                </button>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-slate-500 flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-slate-400" />
+                              {format(new Date(item.scheduledAt), 'HH:mm dd/MM/yyyy')} ({item.durationMinutes} phút)
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   ) : (
                     <p className="text-xs text-slate-400 italic p-3 bg-slate-50 rounded-xl">Chưa có lịch phỏng vấn.</p>
@@ -1771,6 +1966,25 @@ export function CandidateScoringWorkspace({
             </div>
           </div>
         </div>
+      )}
+
+      {reviewingAiModalData && (
+        <AiInterviewReviewModal
+          isOpen={!!reviewingAiModalData}
+          session={reviewingAiModalData.session}
+          token={token}
+          candidateName={candUser?.fullName || "Ứng viên"}
+          jobTitle={job.title}
+          roundTitle={reviewingAiModalData.roundTitle}
+          nextRoundTitle={reviewingAiModalData.nextRoundTitle}
+          isFinalRound={reviewingAiModalData.isFinalRound}
+          canDecide={reviewingAiModalData.canDecide}
+          onClose={() => setReviewingAiModalData(null)}
+          onEvaluated={() => {
+            setReviewingAiModalData(null);
+            onRefresh();
+          }}
+        />
       )}
     </div>
   );

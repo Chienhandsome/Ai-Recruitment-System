@@ -61,6 +61,12 @@ export class SupabaseAuthService {
     }
   }
 
+  private readonly tokenCache = new Map<
+    string,
+    { user: AuthenticatedUser; expiresAt: number }
+  >();
+  private readonly CACHE_MAX_TTL_MS = 60_000; // 60 seconds
+
   async verifyAccessToken(accessToken: string): Promise<AuthenticatedUser> {
     if (!this.client) {
       this.logger.error('verifyAccessToken called but Supabase client is null');
@@ -69,8 +75,14 @@ export class SupabaseAuthService {
       );
     }
 
+    const now = Date.now();
+    const cached = this.tokenCache.get(accessToken);
+    if (cached && cached.expiresAt > now) {
+      return cached.user;
+    }
+
     this.logger.debug(
-      `verifyAccessToken: Verifying token (first 20 chars: ${accessToken.substring(0, 20)}...)`,
+      `verifyAccessToken: Verifying token with Supabase cloud (first 20 chars: ${accessToken.substring(0, 20)}...)`,
     );
 
     const { data, error } = await this.client.auth.getClaims(accessToken);
@@ -108,12 +120,26 @@ export class SupabaseAuthService {
       `verifyAccessToken: Success — user=${email}, id=${id}`,
     );
 
-    return {
+    const user: AuthenticatedUser = {
       id,
       email: email.toLowerCase(),
       fullName,
       ...(avatarUrl ? { avatarUrl } : {}),
     };
+
+    // Calculate cache TTL based on JWT exp claim, capped at 60s
+    const expSec = typeof claims.exp === 'number' ? claims.exp : null;
+    const tokenExpMs = expSec ? expSec * 1000 : now + this.CACHE_MAX_TTL_MS;
+    const cacheExpiresAt = Math.min(now + this.CACHE_MAX_TTL_MS, tokenExpMs);
+
+    if (this.tokenCache.size > 2000) {
+      for (const [key, val] of this.tokenCache.entries()) {
+        if (val.expiresAt <= now) this.tokenCache.delete(key);
+      }
+    }
+    this.tokenCache.set(accessToken, { user, expiresAt: cacheExpiresAt });
+
+    return user;
   }
 
   async inviteAdmin(

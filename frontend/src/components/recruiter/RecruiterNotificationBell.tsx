@@ -29,11 +29,13 @@ import { createClient } from '@/lib/supabase/client';
 interface RecruiterNotificationBellProps {
   token: string;
   onNavigateToInterviews?: () => void;
+  onNavigateToApplication?: (applicationId: string, jobId?: string) => void;
 }
 
 export function RecruiterNotificationBell({
   token,
   onNavigateToInterviews,
+  onNavigateToApplication,
 }: RecruiterNotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -94,11 +96,18 @@ export function RecruiterNotificationBell({
   }, [isOpen, loadData]);
 
   useEffect(() => {
-    // Initial fetch once on mount
-    loadData();
+    // Initial fetch once on mount (only count to avoid heavy queries on page load)
+    loadUnreadCountOnly();
 
-    // Poll only unread count every 45s as a lightweight fallback (avoids fetching 50 interviews continuously)
-    const interval = setInterval(loadUnreadCountOnly, 45000);
+    // Poll every 15s to keep HR updated quickly
+    const interval = setInterval(loadUnreadCountOnly, 15000);
+
+    // Refresh immediately when window gains focus (e.g. user returns after interview in another tab)
+    const handleFocus = () => {
+      loadUnreadCountOnly();
+      if (isOpen) loadData();
+    };
+    window.addEventListener('focus', handleFocus);
 
     // Subscribe to realtime changes on notifications & interviews
     const supabase = createClient();
@@ -107,20 +116,27 @@ export function RecruiterNotificationBell({
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'notifications' },
-        () => loadData(),
+        () => {
+          loadUnreadCountOnly();
+          if (isOpen) loadData();
+        },
       )
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'interviews' },
-        () => loadData(),
+        () => {
+          loadUnreadCountOnly();
+          if (isOpen) loadData();
+        },
       )
       .subscribe();
 
     return () => {
       clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
       supabase.removeChannel(channel);
     };
-  }, [loadData, loadUnreadCountOnly]);
+  }, [isOpen, loadData, loadUnreadCountOnly]);
 
   const handleMarkAllRead = async () => {
     if (!token) return;
@@ -147,6 +163,15 @@ export function RecruiterNotificationBell({
       } catch (err) {
         console.error('Failed to mark notification read:', err);
       }
+    }
+
+    const targetAppId = ((item.payload as Record<string, unknown> | undefined)?.applicationId as string | undefined) || item.applicationId || undefined;
+    const targetJobId = (item.payload as Record<string, unknown> | undefined)?.jobId as string | undefined;
+
+    if (targetAppId && onNavigateToApplication) {
+      setIsOpen(false);
+      onNavigateToApplication(targetAppId, targetJobId);
+      return;
     }
 
     if (

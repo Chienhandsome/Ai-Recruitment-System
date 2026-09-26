@@ -13,6 +13,7 @@ interface JobsWorkspaceProps {
   token: string;
   selectedJobId?: string | null;
   initialJobTab?: "info" | "candidates";
+  selectedApplicationId?: string | null;
   onClearSelectedJob?: () => void;
 }
 
@@ -21,6 +22,7 @@ export function JobsWorkspace({
   token,
   selectedJobId: externalJobId,
   initialJobTab = "info",
+  selectedApplicationId,
   onClearSelectedJob,
 }: JobsWorkspaceProps) {
   const [data, setData] = useState<JobsResponse | null>(initialData);
@@ -119,6 +121,7 @@ export function JobsWorkspace({
           jobId={selectedJobId}
           token={token}
           defaultTab={jobDetailTab}
+          initialSelectedAppId={selectedApplicationId}
           onBack={handleBackFromDetail}
           onEdit={(job) => {
             setEditingJob(job);

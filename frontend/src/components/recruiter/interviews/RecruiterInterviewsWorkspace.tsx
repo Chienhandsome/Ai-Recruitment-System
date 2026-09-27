@@ -44,7 +44,7 @@ interface RecruiterInterviewsWorkspaceProps {
   token: string;
 }
 
-type FilterTab = 'ALL' | 'TODAY' | 'UPCOMING' | 'RESCHEDULE_REQUESTED' | 'COMPLETED' | 'CANCELLED';
+type FilterTab = 'ALL' | 'TODAY' | 'UPCOMING' | 'RESCHEDULE_REQUESTED' | 'NO_SHOW' | 'COMPLETED' | 'CANCELLED';
 
 export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorkspaceProps) {
   const [interviews, setInterviews] = useState<InterviewData[]>([]);
@@ -59,7 +59,26 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
   const [selectedInterviewForEdit, setSelectedInterviewForEdit] = useState<InterviewData | null>(null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [selectedInterviewForFeedback, setSelectedInterviewForFeedback] = useState<InterviewData | null>(null);
+  const [interviewToCancel, setInterviewToCancel] = useState<InterviewData | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const [acceptingSlotId, setAcceptingSlotId] = useState<string | null>(null);
+
+  const handleConfirmCancel = async () => {
+    if (!interviewToCancel) return;
+    setCancelling(true);
+    try {
+      await updateInterview(token, interviewToCancel.id, {
+        status: 'CANCELLED',
+      });
+      toast.success('Đã hủy lịch phỏng vấn thành công.');
+      setInterviewToCancel(null);
+      await fetchInterviewsData();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Không thể hủy lịch phỏng vấn');
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const fetchInterviewsData = useCallback(async () => {
     if (!token) return;
@@ -113,10 +132,14 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
     let todayCount = 0;
     let upcomingCount = 0;
     let rescheduleRequestedCount = 0;
+    let noShowCount = 0;
     let completedCount = 0;
 
     interviews.forEach((item) => {
       const date = parseISO(item.scheduledAt);
+      if (item.round?.status === 'NO_SHOW') {
+        noShowCount++;
+      }
       if (item.status === 'COMPLETED') {
         completedCount++;
       } else if (item.candidateResponse === 'RESCHEDULE_REQUESTED') {
@@ -130,7 +153,7 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
       }
     });
 
-    return { todayCount, upcomingCount, rescheduleRequestedCount, completedCount };
+    return { todayCount, upcomingCount, rescheduleRequestedCount, noShowCount, completedCount };
   }, [interviews]);
 
   // Filtered & sorted interviews
@@ -155,6 +178,8 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
           if (!isFuture(date) || item.status === 'CANCELLED' || item.status === 'COMPLETED') return false;
         } else if (activeFilterTab === 'RESCHEDULE_REQUESTED') {
           if (item.candidateResponse !== 'RESCHEDULE_REQUESTED') return false;
+        } else if (activeFilterTab === 'NO_SHOW') {
+          if (item.round?.status !== 'NO_SHOW') return false;
         } else if (activeFilterTab === 'COMPLETED') {
           if (item.status !== 'COMPLETED') return false;
         } else if (activeFilterTab === 'CANCELLED') {
@@ -382,6 +407,22 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
           </button>
           <button
             type="button"
+            onClick={() => setActiveFilterTab('NO_SHOW')}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 ${
+              activeFilterTab === 'NO_SHOW'
+                ? 'bg-amber-600 text-white shadow-sm'
+                : 'text-amber-800 bg-amber-50/80 hover:bg-amber-100'
+            }`}
+          >
+            <span>Vắng mặt (No-Show)</span>
+            {stats.noShowCount > 0 && (
+              <span className="px-1.5 py-0.2 bg-amber-700 text-white rounded-full text-[10px]">
+                {stats.noShowCount}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveFilterTab('COMPLETED')}
             className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all ${
               activeFilterTab === 'COMPLETED'
@@ -505,14 +546,18 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
                     {/* Status Badge */}
                     <span
                       className={`text-[11px] font-bold px-2.5 py-0.5 rounded-lg border ${
-                        item.status === 'COMPLETED'
+                        item.round?.status === 'NO_SHOW'
+                          ? 'bg-amber-100 text-amber-900 border-amber-300 font-extrabold'
+                          : item.status === 'COMPLETED'
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           : item.status === 'CANCELLED'
                           ? 'bg-rose-50 text-rose-700 border-rose-200'
                           : 'bg-amber-50 text-amber-700 border-amber-200'
                       }`}
                     >
-                      {interviewStatusLabels[item.status] || item.status}
+                      {item.round?.status === 'NO_SHOW'
+                        ? 'VẮNG MẶT (NO-SHOW)'
+                        : interviewStatusLabels[item.status] || item.status}
                     </span>
                   </div>
 
@@ -603,28 +648,41 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
 
                   {/* Action Buttons & Score (3 cols) */}
                   <div className="lg:col-span-3 flex flex-wrap lg:flex-col items-end justify-center gap-2">
-                    {item.locationOrLink?.startsWith('http') && (
-                      <a
-                        href={item.locationOrLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-xs transition-all w-full sm:w-auto justify-center"
-                      >
-                        <Video className="w-3.5 h-3.5" /> Vào phòng họp Online
-                      </a>
+                    {item.locationOrLink?.startsWith('http') &&
+                      (item.status === 'SCHEDULED' || item.status === 'IN_PROGRESS' || item.status === 'RESCHEDULED') && (
+                        <a
+                          href={item.locationOrLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-xs transition-all w-full sm:w-auto justify-center"
+                        >
+                          <Video className="w-3.5 h-3.5" /> Vào phòng họp Online
+                        </a>
                     )}
 
-                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedInterviewForEdit(item);
-                          setIsScheduleModalOpen(true);
-                        }}
-                        className="px-3 py-1.5 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-xs font-bold text-slate-700 transition-all"
-                      >
-                        Đổi lịch
-                      </button>
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                      {item.status !== 'CANCELLED' && item.status !== 'COMPLETED' && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedInterviewForEdit(item);
+                              setIsScheduleModalOpen(true);
+                            }}
+                            className="px-3 py-1.5 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-xs font-bold text-slate-700 transition-all"
+                          >
+                            Đổi lịch
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setInterviewToCancel(item)}
+                            className="px-3 py-1.5 rounded-xl border border-rose-200 hover:border-rose-300 hover:bg-rose-50 text-xs font-bold text-rose-700 transition-all"
+                          >
+                            Hủy lịch
+                          </button>
+                        </>
+                      )}
 
                       {item.score !== undefined && item.score !== null ? (
                         <div className="bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl text-right">
@@ -632,13 +690,15 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
                           <span className="text-sm font-black text-emerald-800">{Number(item.score)}/100</span>
                         </div>
                       ) : (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedInterviewForFeedback(item)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all"
-                        >
-                          <Award className="w-3.5 h-3.5" /> Chấm điểm
-                        </button>
+                        item.status !== 'CANCELLED' && (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedInterviewForFeedback(item)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all"
+                          >
+                            <Award className="w-3.5 h-3.5" /> Chấm điểm
+                          </button>
+                        )
                       )}
                     </div>
                   </div>
@@ -708,6 +768,28 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
                   </div>
                 )}
 
+                {/* No-Show Notice */}
+                {item.round?.status === 'NO_SHOW' && !isRescheduleRequested && (
+                  <div className="rounded-xl bg-amber-50 p-3.5 border border-amber-200 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>
+                        Ứng viên được đánh dấu <strong>Vắng mặt (No-Show)</strong>. Hệ thống cho phép ứng viên 24 giờ để gửi đề xuất dời lịch. Sau 24 giờ không phản hồi, hồ sơ sẽ tự động đóng.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedInterviewForEdit(item);
+                        setIsScheduleModalOpen(true);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-amber-200/70 hover:bg-amber-200 text-amber-950 text-xs font-bold shrink-0 transition text-center"
+                    >
+                      Đổi lịch chủ động
+                    </button>
+                  </div>
+                )}
+
                 {/* Interviewer Notes if any */}
                 {item.interviewerNotes && (
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700">
@@ -758,6 +840,53 @@ export function RecruiterInterviewsWorkspace({ token }: RecruiterInterviewsWorks
           candidateName={selectedInterviewForFeedback.application?.candidate?.fullName || 'Ứng viên'}
           onSuccess={fetchInterviewsData}
         />
+      )}
+
+      {/* Cancel Interview Confirmation Modal */}
+      {interviewToCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-100 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#1F2937]">Xác nhận hủy phỏng vấn</h3>
+                <p className="text-xs text-slate-500">Thao tác này sẽ hủy lịch hẹn và gửi thông báo tới ứng viên.</p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
+              <div className="font-semibold text-slate-800">{interviewToCancel.title}</div>
+              <div className="text-slate-600">
+                Ứng viên: <span className="font-medium text-slate-900">{interviewToCancel.application?.candidate?.fullName || 'Ứng viên'}</span>
+              </div>
+              <div className="text-slate-600">
+                Thời gian: <span className="font-medium text-slate-900">{new Date(interviewToCancel.scheduledAt).toLocaleString('vi-VN')}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setInterviewToCancel(null)}
+                disabled={cancelling}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancel}
+                disabled={cancelling}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-all disabled:opacity-50"
+              >
+                {cancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                <span>Xác nhận hủy</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

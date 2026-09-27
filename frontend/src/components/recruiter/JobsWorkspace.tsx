@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Plus, Search, Filter, Eye, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Filter, Eye, Pencil, ChevronLeft, ChevronRight, TrendingUp, Calendar, Clock, AlertTriangle, Users } from 'lucide-react';
 import type { JobsResponse, JobPostingData } from '@/lib/recruiter-api';
 import { updateRecruiterJob, getRecruiterJobs } from '@/lib/recruiter-api';
 import { CreateJobWizard } from './CreateJobWizard';
 import { JobDetailView } from './JobDetailView';
-import { format } from 'date-fns';
+import { AdjustJobQuotaModal } from './jobs/AdjustJobQuotaModal';
+import { ExtendJobDeadlineModal } from './jobs/ExtendJobDeadlineModal';
+import { format, isPast, isToday, differenceInDays } from 'date-fns';
 
 interface JobsWorkspaceProps {
   initialData: JobsResponse | null;
@@ -34,6 +36,8 @@ export function JobsWorkspace({
   const [selectedJobId, setSelectedJobId] = useState<string | null>(externalJobId || null);
   const [jobDetailTab, setJobDetailTab] = useState<"info" | "candidates">(initialJobTab);
   const [editingJob, setEditingJob] = useState<JobPostingData | null>(null);
+  const [adjustQuotaJob, setAdjustQuotaJob] = useState<JobPostingData | null>(null);
+  const [extendExpiryJob, setExtendExpiryJob] = useState<JobPostingData | null>(null);
   const isFirstMount = useRef(true);
 
   useEffect(() => {
@@ -228,141 +232,231 @@ export function JobsWorkspace({
                 <tr>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                    className="px-5 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
                   >
                     Vị trí / Mã Job
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
                   >
                     Phòng ban
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-center text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                  >
+                    Chỉ tiêu tuyển dụng
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                  >
+                    Hạn nộp hồ sơ
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-3 py-3 text-center text-xs font-bold text-[#1F2937] uppercase tracking-wider"
                   >
                     Ứng viên
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
-                  >
-                    Ngày tạo
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-bold text-[#1F2937] uppercase tracking-wider"
                   >
                     Trạng thái
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-right text-xs font-bold text-[#1F2937] uppercase tracking-wider"
+                    className="px-5 py-3 text-right text-xs font-bold text-[#1F2937] uppercase tracking-wider"
                   >
                     Thao tác
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-100">
-                {data.data.map((job) => (
-                  <tr
-                    key={job.id}
-                    onClick={() => setSelectedJobId(job.id)}
-                    className="hover:bg-slate-50 transition-colors group cursor-pointer"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-[#1F2937] group-hover:text-[#2563EB] transition-colors">
-                          {job.title}
-                        </span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded font-mono font-bold border border-blue-200">
-                            {job.jobCode}
+                {data.data.map((job) => {
+                  const hired = job.hiredCount ?? 0;
+                  const target = job.targetHires ?? 1;
+                  const isQuotaReached = hired >= target;
+                  const expiry = job.expiryDate ? new Date(job.expiryDate) : null;
+                  const isExpired = expiry ? isPast(expiry) && !isToday(expiry) : false;
+                  const daysLeft = expiry ? differenceInDays(expiry, new Date()) : null;
+
+                  return (
+                    <tr
+                      key={job.id}
+                      onClick={() => setSelectedJobId(job.id)}
+                      className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                    >
+                      <td className="px-5 py-4 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-[#1F2937] group-hover:text-[#2563EB] transition-colors">
+                            {job.title}
                           </span>
-                          {job.workingModel && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                              {job.workingModel === 'ON_SITE'
-                                ? 'On-site'
-                                : job.workingModel === 'HYBRID'
-                                  ? 'Hybrid'
-                                  : job.workingModel === 'REMOTE'
-                                    ? 'Remote'
-                                    : 'Shift'}
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded font-mono font-bold border border-blue-200">
+                              {job.jobCode}
                             </span>
-                          )}
-                          {job.requiresProofOfWork && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] border border-blue-200">
-                              Req Proof
+                            {job.workingModel && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                                {job.workingModel === 'ON_SITE'
+                                  ? 'On-site'
+                                  : job.workingModel === 'HYBRID'
+                                    ? 'Hybrid'
+                                    : job.workingModel === 'REMOTE'
+                                      ? 'Remote'
+                                      : 'Shift'}
+                              </span>
+                            )}
+                            {job.requiresProofOfWork && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] border border-blue-200">
+                                Req Proof
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className="text-sm font-medium text-slate-600">
+                          {job.department?.name || 'Chưa xếp'}
+                        </span>
+                      </td>
+                      {/* Headcount column */}
+                      <td className="px-4 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-extrabold border ${
+                              isQuotaReached
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                                : 'bg-[#EFF6FF] text-[#2563EB] border-blue-200'
+                            }`}
+                          >
+                            <Users className="w-3.5 h-3.5" />
+                            {hired}/{target} {isQuotaReached ? '(Đã đủ)' : ''}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setAdjustQuotaJob(job)}
+                            title="Điều chỉnh chỉ tiêu tuyển dụng"
+                            className="p-1 text-slate-400 hover:text-[#2563EB] hover:bg-blue-50 rounded-md transition-colors"
+                          >
+                            <TrendingUp className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                      {/* Expiry Date Column */}
+                      <td className="px-4 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-2">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                              {expiry ? format(expiry, 'dd/MM/yyyy') : 'Không giới hạn'}
+                            </span>
+                            {isExpired && (
+                              <span className="text-[10px] font-extrabold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 w-fit mt-0.5">
+                                Đã hết hạn
+                              </span>
+                            )}
+                            {!isExpired && daysLeft !== null && daysLeft <= 3 && daysLeft >= 0 && (
+                              <span className="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 w-fit mt-0.5">
+                                Còn {daysLeft === 0 ? 'hôm nay' : `${daysLeft} ngày`}
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setExtendExpiryJob(job)}
+                            title="Gia hạn thời hạn tuyển dụng"
+                            className="p-1 text-slate-400 hover:text-[#2563EB] hover:bg-blue-50 rounded-md transition-colors"
+                          >
+                            <Clock className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                      {/* Applications count */}
+                      <td className="px-3 py-4 whitespace-nowrap text-center">
+                        <div className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-[#EFF6FF] text-[#2563EB] text-xs font-bold border border-blue-200">
+                          {job._count?.applications || 0}
+                        </div>
+                      </td>
+                      {/* Status Column */}
+                      <td
+                        className="px-4 py-4 whitespace-nowrap"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex flex-col gap-1">
+                          <select
+                            value={job.status}
+                            onChange={(e) => handleStatusChange(job.id, e.target.value)}
+                            className={`text-xs font-bold rounded-full px-3 py-1 outline-none cursor-pointer border ${
+                              job.status === 'PUBLISHED'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                                : job.status === 'DRAFT'
+                                  ? 'bg-amber-50 text-amber-700 border-amber-300'
+                                  : job.status === 'PAUSED'
+                                    ? 'bg-slate-100 text-slate-700 border-slate-300'
+                                    : 'bg-red-50 text-red-700 border-red-300'
+                            }`}
+                          >
+                            <option value="DRAFT">Nháp</option>
+                            <option value="PUBLISHED">Đang mở</option>
+                            <option value="PAUSED">Tạm dừng</option>
+                            <option value="CLOSED">Đóng</option>
+                          </select>
+                          {job.status === 'CLOSED' && job.closeReason && (
+                            <span className="text-[10px] font-bold text-slate-500">
+                              {job.closeReason === 'QUOTA_REACHED'
+                                ? '• Đủ chỉ tiêu'
+                                : job.closeReason === 'EXPIRED'
+                                  ? '• Hết hạn'
+                                  : '• Đóng thủ công'}
                             </span>
                           )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-slate-600">
-                        {job.department?.name || 'Chưa xếp'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-[#EFF6FF] text-[#2563EB] text-xs font-bold border border-blue-200">
-                        {job._count?.applications || 0}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-slate-500 font-medium">
-                        {format(new Date(job.createdAt), 'dd/MM/yyyy')}
-                      </span>
-                    </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <select
-                        value={job.status}
-                        onChange={(e) => handleStatusChange(job.id, e.target.value)}
-                        className={`text-xs font-bold rounded-full px-3 py-1 outline-none cursor-pointer border ${
-                          job.status === 'PUBLISHED'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                            : job.status === 'DRAFT'
-                              ? 'bg-amber-50 text-amber-700 border-amber-300'
-                              : job.status === 'PAUSED'
-                                ? 'bg-slate-100 text-slate-700 border-slate-300'
-                                : 'bg-red-50 text-red-700 border-red-300'
-                        }`}
+                      </td>
+                      {/* Actions */}
+                      <td
+                        className="px-5 py-4 whitespace-nowrap text-right text-sm font-medium"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <option value="DRAFT">Nháp</option>
-                        <option value="PUBLISHED">Mở</option>
-                        <option value="PAUSED">Tạm dừng</option>
-                        <option value="CLOSED">Đóng</option>
-                      </select>
-                    </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => setSelectedJobId(job.id)}
-                          title="Xem chi tiết & ứng viên"
-                          className="p-1.5 text-slate-400 hover:text-[#2563EB] rounded-md hover:bg-blue-50"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingJob(job);
-                            setIsWizardOpen(true);
-                          }}
-                          title="Sửa JD"
-                          className="p-1.5 text-slate-400 hover:text-[#2563EB] rounded-md hover:bg-blue-50"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => setSelectedJobId(job.id)}
+                            title="Xem chi tiết & ứng viên"
+                            className="p-1.5 text-slate-400 hover:text-[#2563EB] rounded-md hover:bg-blue-50 transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingJob(job);
+                              setIsWizardOpen(true);
+                            }}
+                            title="Sửa JD"
+                            className="p-1.5 text-slate-400 hover:text-[#2563EB] rounded-md hover:bg-blue-50 transition-colors"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setAdjustQuotaJob(job)}
+                            title="Tăng chỉ tiêu"
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-md hover:bg-emerald-50 transition-colors"
+                          >
+                            <TrendingUp className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setExtendExpiryJob(job)}
+                            title="Gia hạn JD"
+                            className="p-1.5 text-slate-400 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+                          >
+                            <Clock className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             {data.meta.totalPages > 1 && (
@@ -437,6 +531,30 @@ export function JobsWorkspace({
             setEditingJob(null);
             setPage(1);
             loadJobs(activeTab, search, 1);
+          }}
+        />
+      )}
+
+      {adjustQuotaJob && (
+        <AdjustJobQuotaModal
+          isOpen={!!adjustQuotaJob}
+          onClose={() => setAdjustQuotaJob(null)}
+          job={adjustQuotaJob}
+          token={token}
+          onSuccess={() => {
+            loadJobs(activeTab, search, page);
+          }}
+        />
+      )}
+
+      {extendExpiryJob && (
+        <ExtendJobDeadlineModal
+          isOpen={!!extendExpiryJob}
+          onClose={() => setExtendExpiryJob(null)}
+          job={extendExpiryJob}
+          token={token}
+          onSuccess={() => {
+            loadJobs(activeTab, search, page);
           }}
         />
       )}

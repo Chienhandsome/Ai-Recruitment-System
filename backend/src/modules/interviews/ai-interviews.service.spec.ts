@@ -43,6 +43,15 @@ describe('AiInterviewsService', () => {
       interviewRound: {
         findFirst: jest.fn(),
         update: jest.fn(),
+        create: jest.fn().mockResolvedValue({ id: 'round-1', order: 1, title: 'AI Video Screening' }),
+      },
+      interviewProcess: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({
+          id: 'process-1',
+          applicationId: APPLICATION_ID,
+          rounds: [],
+        }),
       },
       $transaction: jest.fn(async (callback) => callback(prisma)),
     };

@@ -3,12 +3,17 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../database/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { QueryJobDto } from './dto/query-job.dto';
-import { Prisma, JobStatus } from '@prisma/client';
+import { AdjustJobQuotaDto } from './dto/adjust-job-quota.dto';
+import { ExtendJobExpiryDto } from './dto/extend-job-expiry.dto';
+import { Prisma, JobStatus, JobCloseReason, ApplicationStage } from '@prisma/client';
 import { QueryCandidateJobDto } from './dto/query-candidate-job.dto';
 
 const candidateJobListInclude = {
@@ -50,7 +55,12 @@ type CandidateJobDetailRecord = Prisma.JobPostingGetPayload<{
 
 @Injectable()
 export class JobsService {
-  constructor(private readonly prisma: PrismaService) { }
+  private readonly logger = new Logger(JobsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) { }
 
   private async getRecruiterProfile(userId: string) {
     const profile = await this.prisma.recruiterProfile.findUnique({
@@ -148,6 +158,9 @@ export class JobsService {
           experienceWeight: dto.experienceWeight,
           educationWeight: dto.educationWeight,
           otherWeight: dto.otherWeight,
+          targetHires: dto.targetHires ?? 1,
+          autoCloseOnQuota: dto.autoCloseOnQuota ?? true,
+          closeReason: dto.closeReason ?? null,
           status: JobStatus.DRAFT,
           jobSkills: {
             create: skillsData,
@@ -247,12 +260,25 @@ export class JobsService {
           _count: {
             select: { applications: true },
           },
+          applications: {
+            where: { currentStage: ApplicationStage.HIRED },
+            select: { id: true },
+          },
         },
       }),
     ]);
 
+    const mappedItems = items.map((job) => {
+      const hiredCount = job.applications?.length ?? 0;
+      const { applications, ...rest } = job;
+      return {
+        ...rest,
+        hiredCount,
+      };
+    });
+
     return {
-      data: items,
+      data: mappedItems,
       meta: {
         total,
         page,
@@ -765,7 +791,14 @@ export class JobsService {
       );
     }
 
-    return job;
+    const hiredCount = job.applications.filter(
+      (app) => app.currentStage === ApplicationStage.HIRED,
+    ).length;
+
+    return {
+      ...job,
+      hiredCount,
+    };
   }
 
   async update(userId: string, id: string, dto: UpdateJobDto) {
@@ -799,6 +832,16 @@ export class JobsService {
       otherWeight: dto.otherWeight,
     };
 
+    if (dto.targetHires !== undefined) {
+      updateData.targetHires = dto.targetHires;
+    }
+    if (dto.autoCloseOnQuota !== undefined) {
+      updateData.autoCloseOnQuota = dto.autoCloseOnQuota;
+    }
+    if (dto.closeReason !== undefined) {
+      updateData.closeReason = dto.closeReason;
+    }
+
     if (dto.status) {
       updateData.status = dto.status;
       if (
@@ -808,6 +851,12 @@ export class JobsService {
         updateData.publishedAt = new Date();
       } else if (dto.status === JobStatus.CLOSED) {
         updateData.closedAt = new Date();
+        if (!dto.closeReason) {
+          updateData.closeReason = JobCloseReason.MANUAL_HR;
+        }
+      } else if (dto.status === JobStatus.PUBLISHED && job.status === JobStatus.CLOSED) {
+        updateData.closedAt = null;
+        updateData.closeReason = null;
       }
     }
 
@@ -833,7 +882,7 @@ export class JobsService {
       };
     }
 
-    return this.prisma.jobPosting.update({
+    const updated = await this.prisma.jobPosting.update({
       where: { id },
       data: updateData,
       include: {
@@ -845,6 +894,159 @@ export class JobsService {
         jobCertificates: true,
       },
     });
+
+    return {
+      ...updated,
+      hiredCount: job.hiredCount,
+    };
+  }
+
+  async adjustQuota(userId: string, id: string, dto: AdjustJobQuotaDto) {
+    const job = await this.findOne(userId, id);
+    const hiredCount = job.hiredCount ?? 0;
+
+    const reopenIfClosed = dto.reopenIfClosed ?? true;
+    let newStatus = job.status;
+    let newClosedAt = job.closedAt;
+    let newCloseReason = job.closeReason;
+
+    // If job was closed due to quota reached, and new target > current hired count:
+    if (
+      reopenIfClosed &&
+      job.status === JobStatus.CLOSED &&
+      job.closeReason === JobCloseReason.QUOTA_REACHED &&
+      dto.targetHires > hiredCount
+    ) {
+      // Reopen only if job is not expired
+      const isExpired = job.expiryDate && new Date(job.expiryDate) <= new Date();
+      if (!isExpired) {
+        newStatus = JobStatus.PUBLISHED;
+        newClosedAt = null;
+        newCloseReason = null;
+      }
+    }
+
+    const updated = await this.prisma.jobPosting.update({
+      where: { id },
+      data: {
+        targetHires: dto.targetHires,
+        status: newStatus,
+        closedAt: newClosedAt,
+        closeReason: newCloseReason,
+      },
+      include: {
+        department: true,
+        category: true,
+        jobSkills: {
+          include: { skill: true },
+        },
+        jobCertificates: true,
+      },
+    });
+
+    return {
+      ...updated,
+      hiredCount,
+      reopened: newStatus === JobStatus.PUBLISHED && job.status === JobStatus.CLOSED,
+    };
+  }
+
+  async extendExpiry(userId: string, id: string, dto: ExtendJobExpiryDto) {
+    const job = await this.findOne(userId, id);
+
+    const newExpiryDate = new Date(dto.expiryDate);
+    if (isNaN(newExpiryDate.getTime())) {
+      throw new BadRequestException('Định dạng ngày hết hạn không hợp lệ.');
+    }
+    if (newExpiryDate <= new Date()) {
+      throw new BadRequestException('Ngày hết hạn mới phải lớn hơn thời điểm hiện tại.');
+    }
+
+    const hiredCount = job.hiredCount ?? 0;
+    const reopenIfClosed = dto.reopenIfClosed ?? true;
+    let newStatus = job.status;
+    let newClosedAt = job.closedAt;
+    let newCloseReason = job.closeReason;
+
+    // If job was closed due to expiration, and hired quota not reached:
+    if (
+      reopenIfClosed &&
+      job.status === JobStatus.CLOSED &&
+      job.closeReason === JobCloseReason.EXPIRED &&
+      hiredCount < job.targetHires
+    ) {
+      newStatus = JobStatus.PUBLISHED;
+      newClosedAt = null;
+      newCloseReason = null;
+    }
+
+    const updated = await this.prisma.jobPosting.update({
+      where: { id },
+      data: {
+        expiryDate: newExpiryDate,
+        status: newStatus,
+        closedAt: newClosedAt,
+        closeReason: newCloseReason,
+      },
+      include: {
+        department: true,
+        category: true,
+        jobSkills: {
+          include: { skill: true },
+        },
+        jobCertificates: true,
+      },
+    });
+
+    return {
+      ...updated,
+      hiredCount,
+      reopened: newStatus === JobStatus.PUBLISHED && job.status === JobStatus.CLOSED,
+    };
+  }
+
+  @Cron(CronExpression.EVERY_30_MINUTES)
+  async handleAutoExpirePastJobs() {
+    const now = new Date();
+    const expiredJobs = await this.prisma.jobPosting.findMany({
+      where: {
+        status: JobStatus.PUBLISHED,
+        expiryDate: { lte: now },
+      },
+      include: {
+        recruiter: {
+          select: { userId: true },
+        },
+      },
+    });
+
+    if (expiredJobs.length === 0) return;
+
+    this.logger.log(`Found ${expiredJobs.length} expired jobs to auto-close.`);
+
+    for (const job of expiredJobs) {
+      await this.prisma.jobPosting.update({
+        where: { id: job.id },
+        data: {
+          status: JobStatus.CLOSED,
+          closeReason: JobCloseReason.EXPIRED,
+          closedAt: now,
+        },
+      });
+
+      if (job.recruiter?.userId) {
+        try {
+          await this.notificationsService.createNotification({
+            recipientUserId: job.recruiter.userId,
+            title: `Tin tuyển dụng đã hết hạn: ${job.title}`,
+            message: `Tin tuyển dụng '${job.title}' (${job.jobCode}) đã quá hạn ngày nộp hồ sơ (${job.expiryDate?.toLocaleDateString('vi-VN')}) và đã được tự động đóng. Bạn có thể gia hạn bất kỳ lúc nào để tiếp tục nhận hồ sơ.`,
+            payload: { jobId: job.id, type: 'JOB_EXPIRED' },
+          });
+        } catch (err) {
+          this.logger.warn(`Failed to notify recruiter about expired job: ${err}`);
+        }
+      }
+    }
   }
 
   async remove(userId: string, id: string) {

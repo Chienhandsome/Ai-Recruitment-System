@@ -6,7 +6,9 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import {
+  AiInterviewStatus,
   ApplicationStage,
   CandidateResponseStatus,
   InterviewStatus,
@@ -72,6 +74,48 @@ export class InterviewsService {
     const scheduledDate = new Date(dto.scheduledAt);
     if (isNaN(scheduledDate.getTime())) {
       throw new BadRequestException('Thời gian phỏng vấn không hợp lệ.');
+    }
+    if (scheduledDate.getTime() < Date.now() - 5 * 60 * 1000) {
+      throw new BadRequestException(
+        'Thời gian phỏng vấn không thể ở trong quá khứ. Vui lòng chọn thời gian trong tương lai.',
+      );
+    }
+
+    const durationMinutes = dto.durationMinutes ?? 60;
+    const interviewEnd = new Date(
+      scheduledDate.getTime() + durationMinutes * 60 * 1000,
+    );
+
+    // Kiểm tra trùng lịch của ứng viên
+    const candidateInterviews = await this.prisma.interview.findMany({
+      where: {
+        application: { candidateId: application.candidate.id },
+        status: {
+          in: [
+            InterviewStatus.SCHEDULED,
+            InterviewStatus.IN_PROGRESS,
+            InterviewStatus.RESCHEDULED,
+          ],
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        scheduledAt: true,
+        durationMinutes: true,
+      },
+    });
+
+    for (const item of candidateInterviews) {
+      const itemStart = new Date(item.scheduledAt);
+      const itemEnd = new Date(
+        itemStart.getTime() + (item.durationMinutes || 60) * 60 * 1000,
+      );
+      if (scheduledDate < itemEnd && interviewEnd > itemStart) {
+        throw new ConflictException(
+          `Ứng viên đã có lịch phỏng vấn khác ("${item.title}") bị trùng khung giờ (${itemStart.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${itemEnd.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}).`,
+        );
+      }
     }
 
     let targetRoundId = dto.roundId;
@@ -484,6 +528,7 @@ export class InterviewsService {
             job: { select: { title: true } },
             candidate: {
               select: {
+                id: true,
                 userId: true,
                 user: { select: { fullName: true } },
               },
@@ -502,6 +547,51 @@ export class InterviewsService {
       : undefined;
     if (scheduledDate && isNaN(scheduledDate.getTime())) {
       throw new BadRequestException('Thời gian phỏng vấn không hợp lệ.');
+    }
+
+    if (scheduledDate) {
+      if (scheduledDate.getTime() < Date.now() - 5 * 60 * 1000) {
+        throw new BadRequestException(
+          'Thời gian phỏng vấn không thể ở trong quá khứ. Vui lòng chọn thời gian trong tương lai.',
+        );
+      }
+      const durationMinutes =
+        dto.durationMinutes ?? existing.durationMinutes ?? 60;
+      const interviewEnd = new Date(
+        scheduledDate.getTime() + durationMinutes * 60 * 1000,
+      );
+
+      const candidateInterviews = await this.prisma.interview.findMany({
+        where: {
+          id: { not: existing.id },
+          application: { candidateId: existing.application.candidate.id },
+          status: {
+            in: [
+              InterviewStatus.SCHEDULED,
+              InterviewStatus.IN_PROGRESS,
+              InterviewStatus.RESCHEDULED,
+            ],
+          },
+        },
+        select: {
+          id: true,
+          title: true,
+          scheduledAt: true,
+          durationMinutes: true,
+        },
+      });
+
+      for (const item of candidateInterviews) {
+        const itemStart = new Date(item.scheduledAt);
+        const itemEnd = new Date(
+          itemStart.getTime() + (item.durationMinutes || 60) * 60 * 1000,
+        );
+        if (scheduledDate < itemEnd && interviewEnd > itemStart) {
+          throw new ConflictException(
+            `Ứng viên đã có lịch phỏng vấn khác ("${item.title}") bị trùng khung giờ (${itemStart.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${itemEnd.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}).`,
+          );
+        }
+      }
     }
 
     // Determine candidate response & status transitions
@@ -539,12 +629,21 @@ export class InterviewsService {
         },
       });
 
+      if (targetStatus === InterviewStatus.CANCELLED && existing.roundId) {
+        await prisma.interviewRound.update({
+          where: { id: existing.roundId },
+          data: { status: InterviewRoundStatus.CANCELLED },
+        });
+      }
+
       const dateStr = scheduledDate
         ? scheduledDate.toLocaleString('vi-VN')
         : existing.scheduledAt.toLocaleString('vi-VN');
 
       let historyNote = `Nhà tuyển dụng đã cập nhật lịch phỏng vấn: "${result.title}" (${dateStr}).`;
-      if (targetCandidateResponse === CandidateResponseStatus.ACCEPTED) {
+      if (targetStatus === InterviewStatus.CANCELLED) {
+        historyNote = `Nhà tuyển dụng đã hủy buổi phỏng vấn: "${result.title}" (${dateStr}).`;
+      } else if (targetCandidateResponse === CandidateResponseStatus.ACCEPTED) {
         historyNote = `Nhà tuyển dụng đã chấp nhận khung giờ mới và chốt lịch phỏng vấn: "${result.title}" (${dateStr}).`;
       }
 
@@ -570,7 +669,10 @@ export class InterviewsService {
       let notifTitle = `Cập nhật lịch phỏng vấn: ${jobTitle}`;
       let notifMsg = `Lịch phỏng vấn "${updated.title}" cho vị trí ${jobTitle} đã được cập nhật lại vào lúc ${dateStr}. Vui lòng kiểm tra và xác nhận trên hệ thống.`;
 
-      if (targetCandidateResponse === CandidateResponseStatus.ACCEPTED) {
+      if (targetStatus === InterviewStatus.CANCELLED) {
+        notifTitle = `Hủy lịch phỏng vấn: ${jobTitle}`;
+        notifMsg = `Buổi phỏng vấn "${updated.title}" cho vị trí ${jobTitle} vào lúc ${dateStr} đã được hủy bỏ.`;
+      } else if (targetCandidateResponse === CandidateResponseStatus.ACCEPTED) {
         notifTitle = `Xác nhận đổi lịch phỏng vấn: ${jobTitle}`;
         notifMsg = `Nhà tuyển dụng đã đồng ý dời lịch phỏng vấn "${updated.title}" sang lúc ${dateStr}. Buổi phỏng vấn đã được chốt thành công.`;
       }
@@ -749,6 +851,37 @@ export class InterviewsService {
               data: { status: InterviewRoundStatus.CANCELLED },
             });
 
+            await prisma.interview.updateMany({
+              where: {
+                applicationId: existing.application.id,
+                id: { not: existing.id },
+                status: {
+                  in: [
+                    InterviewStatus.SCHEDULED,
+                    InterviewStatus.IN_PROGRESS,
+                    InterviewStatus.RESCHEDULED,
+                  ],
+                },
+              },
+              data: { status: InterviewStatus.CANCELLED },
+            });
+
+            await prisma.aiInterviewSession.updateMany({
+              where: {
+                applicationId: existing.application.id,
+                status: {
+                  in: [
+                    AiInterviewStatus.CREATED,
+                    AiInterviewStatus.IN_PROGRESS,
+                  ],
+                },
+              },
+              data: {
+                status: AiInterviewStatus.TERMINATED,
+                terminationReason: 'Ứng viên không đạt vòng phỏng vấn.',
+              },
+            });
+
             targetStage = ApplicationStage.REJECTED;
             await prisma.application.update({
               where: { id: existing.application.id },
@@ -766,6 +899,39 @@ export class InterviewsService {
                 newStage: ApplicationStage.REJECTED,
                 changedByUserId: userId,
                 note: `Không đạt vòng phỏng vấn (${dto.score}/100 điểm). Nhận xét: ${dto.interviewerNotes.slice(0, 300)}`,
+              },
+            });
+          } else if (dto.decision === InterviewRoundDecision.NO_SHOW) {
+            await prisma.interview.update({
+              where: { id },
+              data: {
+                status: InterviewStatus.RESCHEDULED,
+                candidateResponse: CandidateResponseStatus.PENDING,
+                interviewerNotes:
+                  dto.interviewerNotes ||
+                  'Ứng viên vắng mặt (No-Show). Đang chờ ứng viên đề xuất dời lịch trong 24 giờ.',
+              },
+            });
+
+            await prisma.interviewRound.update({
+              where: { id: existing.roundId },
+              data: {
+                status: InterviewRoundStatus.NO_SHOW,
+                decisionNote:
+                  dto.interviewerNotes ||
+                  'Ứng viên vắng mặt (No-Show). Cho phép dời lịch trong 24 giờ.',
+                decidedByUserId: userId,
+                decidedAt: new Date(),
+              },
+            });
+
+            await prisma.applicationStatusHistory.create({
+              data: {
+                applicationId: existing.application.id,
+                previousStage: existing.application.currentStage,
+                newStage: existing.application.currentStage,
+                changedByUserId: userId,
+                note: `Đã đánh dấu ứng viên Vắng mặt (No-Show). Đã gửi thông báo cho ứng viên 24 giờ để đề xuất dời lịch lại.`,
               },
             });
           } else {
@@ -817,25 +983,31 @@ export class InterviewsService {
     });
 
     if (this.notificationsService && existing.application.candidate?.userId) {
-      const outcomeNote =
-        dto.decision === InterviewRoundDecision.PASSED
-          ? 'Đạt yêu cầu vòng phỏng vấn'
-          : dto.decision === InterviewRoundDecision.FAILED
-            ? 'Chưa phù hợp với yêu cầu phỏng vấn'
-            : 'Đã hoàn tất phỏng vấn và đang chờ HR duyệt';
+      let notifTitle = `Kết quả phỏng vấn: ${existing.application.job?.title || 'Công việc'}`;
+      let notifMsg = `Buổi phỏng vấn "${existing.title}" đã được chấm điểm (${dto.score}/100 điểm).`;
+
+      if (dto.decision === InterviewRoundDecision.NO_SHOW) {
+        notifTitle = `Thông báo vắng mặt buổi phỏng vấn: ${existing.application.job?.title || 'Công việc'}`;
+        notifMsg = `Bạn đã vắng mặt trong buổi phỏng vấn "${existing.title}". Bạn có 24 giờ để gửi đề xuất khung giờ dời lịch trên hệ thống. Sau thời gian này, hồ sơ sẽ tự động chuyển sang Chưa phù hợp.`;
+      } else if (dto.decision === InterviewRoundDecision.PASSED) {
+        notifMsg = `Chúc mừng! Bạn đã đạt yêu cầu vòng phỏng vấn "${existing.title}" (${dto.score}/100 điểm).`;
+      } else if (dto.decision === InterviewRoundDecision.FAILED) {
+        notifMsg = `Cảm ơn bạn đã tham gia. Kết quả vòng phỏng vấn "${existing.title}" chưa phù hợp với yêu cầu hiện tại.`;
+      }
 
       await this.notificationsService.createNotification({
         recipientUserId: existing.application.candidate.userId,
         applicationId: existing.application.id,
         type: NotificationType.APPLICATION_STATUS_CHANGED,
-        title: `Kết quả phỏng vấn: ${existing.application.job?.title || 'Công việc'}`,
-        message: `Buổi phỏng vấn "${existing.title}" đã được chấm điểm (${dto.score}/100 điểm). Trạng thái: ${outcomeNote}.`,
+        title: notifTitle,
+        message: notifMsg,
         payload: {
           applicationId: existing.application.id,
           interviewId: existing.id,
           score: dto.score,
           decision: dto.decision,
           nextStage: targetStage,
+          isNoShow: dto.decision === InterviewRoundDecision.NO_SHOW,
         },
       });
     }
@@ -926,6 +1098,17 @@ export class InterviewsService {
           where: { id: interview.roundId },
           data: { status: InterviewRoundStatus.CANCELLED },
         });
+      } else if (
+        interview.roundId &&
+        dto.response === CandidateResponseStatus.RESCHEDULE_REQUESTED
+      ) {
+        await prisma.interviewRound.update({
+          where: { id: interview.roundId },
+          data: {
+            status: InterviewRoundStatus.READY,
+            decisionNote: `Ứng viên đề xuất dời lịch: ${dto.candidateNotes || 'Không có ghi chú'}.`,
+          },
+        });
       }
 
       const candidateName =
@@ -983,5 +1166,106 @@ export class InterviewsService {
       ...updated,
       score: updated.score !== null ? Number(updated.score) : null,
     };
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async handleExpiredNoShows(now = new Date()) {
+    const expiredCutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const expiredRounds = await this.prisma.interviewRound.findMany({
+      where: {
+        status: InterviewRoundStatus.NO_SHOW,
+        decidedAt: { lte: expiredCutoff },
+      },
+      include: {
+        interviews: {
+          select: {
+            id: true,
+            status: true,
+            candidateResponse: true,
+          },
+        },
+        process: {
+          include: {
+            application: {
+              include: {
+                candidate: { select: { userId: true } },
+                job: { select: { title: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (const round of expiredRounds) {
+      const hasRescheduled = round.interviews.some(
+        (i) => i.candidateResponse === CandidateResponseStatus.RESCHEDULE_REQUESTED,
+      );
+      if (hasRescheduled) {
+        continue;
+      }
+
+      try {
+        await this.prisma.$transaction(async (tx) => {
+          await tx.interviewRound.update({
+            where: { id: round.id },
+            data: {
+              status: InterviewRoundStatus.FAILED,
+              decisionNote:
+                'Quá thời hạn 24 giờ đề xuất dời lịch sau buổi phỏng vấn vắng mặt (No-Show).',
+            },
+          });
+
+          await tx.interview.updateMany({
+            where: { roundId: round.id },
+            data: {
+              status: InterviewStatus.CANCELLED,
+            },
+          });
+
+          const app = round.process?.application;
+          if (
+            app &&
+            app.currentStage !== ApplicationStage.REJECTED &&
+            app.currentStage !== ApplicationStage.WITHDRAWN
+          ) {
+            await tx.application.update({
+              where: { id: app.id },
+              data: {
+                currentStage: ApplicationStage.REJECTED,
+                statusHistories: {
+                  create: {
+                    previousStage: app.currentStage,
+                    newStage: ApplicationStage.REJECTED,
+                    note: 'Tự động đóng hồ sơ do quá thời hạn 24 giờ đề xuất dời lịch sau khi vắng mặt (No-Show).',
+                  },
+                },
+              },
+            });
+
+            if (this.notificationsService && app.candidate?.userId) {
+              await this.notificationsService.createNotification({
+                recipientUserId: app.candidate.userId,
+                applicationId: app.id,
+                type: NotificationType.APPLICATION_STATUS_CHANGED,
+                title: `Hồ sơ đã dừng lại: ${app.job?.title || 'Công việc'}`,
+                message: `Hồ sơ ứng tuyển của bạn đã dừng lại do quá thời hạn 24 giờ đề xuất dời lịch sau buổi phỏng vấn vắng mặt.`,
+                payload: {
+                  applicationId: app.id,
+                  newStage: ApplicationStage.REJECTED,
+                  reason: 'NO_SHOW_EXPIRED',
+                },
+              });
+            }
+          }
+        });
+      } catch (err) {
+        this.logger.error(
+          `Error auto-closing expired no-show round ${round.id}:`,
+          err,
+        );
+      }
+    }
   }
 }

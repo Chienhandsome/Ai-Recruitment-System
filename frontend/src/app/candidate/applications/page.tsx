@@ -171,10 +171,13 @@ export default async function CandidateApplicationsPage({
                     />
                   )}
 
-                  {/* Lịch phỏng vấn đa vòng & tương tác phản hồi 2 chiều */}
-                  {application.interviews && application.interviews.length > 0 && (
+                  {/* Lịch phỏng vấn đa vòng & tương tác phản hồi 2 chiều & phỏng vấn AI */}
+                  {((application.interviews && application.interviews.length > 0) ||
+                    (application.aiInterviewSessions &&
+                      application.aiInterviewSessions.length > 0)) && (
                     <CandidateApplicationInterviews
-                      interviews={application.interviews}
+                      interviews={application.interviews || []}
+                      aiSessions={application.aiInterviewSessions || []}
                       token={session.access_token}
                       recruiterInfo={application.job.recruiter}
                     />

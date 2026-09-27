@@ -14,6 +14,8 @@ import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { QueryJobDto } from './dto/query-job.dto';
+import { AdjustJobQuotaDto } from './dto/adjust-job-quota.dto';
+import { ExtendJobExpiryDto } from './dto/extend-job-expiry.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -67,6 +69,28 @@ export class JobsController {
     @Body() updateJobDto: UpdateJobDto
   ) {
     return this.jobsService.update(user.id, id, updateJobDto);
+  }
+
+  @Post(':id/adjust-quota')
+  @ApiOperation({ summary: 'Adjust target hires quota and optionally reopen job' })
+  @ApiResponse({ status: 200, description: 'Quota adjusted successfully' })
+  adjustQuota(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: AdjustJobQuotaDto
+  ) {
+    return this.jobsService.adjustQuota(user.id, id, dto);
+  }
+
+  @Post(':id/extend-expiry')
+  @ApiOperation({ summary: 'Extend job expiry deadline and optionally reopen job' })
+  @ApiResponse({ status: 200, description: 'Job deadline extended successfully' })
+  extendExpiry(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: ExtendJobExpiryDto
+  ) {
+    return this.jobsService.extendExpiry(user.id, id, dto);
   }
 
   @Delete(':id')

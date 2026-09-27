@@ -20,6 +20,7 @@ import {
   SkillRequirementType,
   WorkingModel,
   ProofType,
+  JobCloseReason,
 } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -136,6 +137,22 @@ export class CreateJobDto {
   @IsOptional()
   @IsString()
   expiryDate?: string;
+
+  @ApiPropertyOptional({ description: 'Target number of hires', default: 1 })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  targetHires?: number;
+
+  @ApiPropertyOptional({ description: 'Automatically close job when target hires quota is reached', default: true })
+  @IsOptional()
+  @IsBoolean()
+  autoCloseOnQuota?: boolean;
+
+  @ApiPropertyOptional({ enum: JobCloseReason, description: 'Reason for closing the job' })
+  @IsOptional()
+  @IsEnum(JobCloseReason)
+  closeReason?: JobCloseReason;
 
   @ApiPropertyOptional({ description: 'Required experience in years' })
   @IsOptional()

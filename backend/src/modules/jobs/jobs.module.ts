@@ -5,9 +5,10 @@ import { JobsService } from './jobs.service';
 import { PrismaModule } from '../../database/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { CandidateJobsController } from './candidate-jobs.controller';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule, AuthModule, NotificationsModule],
   controllers: [
     JobsController,
     CandidateJobsController,

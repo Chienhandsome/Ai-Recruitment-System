@@ -7,8 +7,10 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import {
+  AiInterviewStatus,
   ApplicationProcessingStatus,
   ApplicationStage,
+  InterviewStatus,
   JobStatus,
   NotificationStatus,
   NotificationType,
@@ -701,6 +703,37 @@ export class ApplicationsService {
           },
           data: { status: InterviewRoundStatus.CANCELLED },
         });
+        await prisma.interview.updateMany({
+          where: {
+            applicationId,
+            status: {
+              in: [
+                InterviewStatus.SCHEDULED,
+                InterviewStatus.IN_PROGRESS,
+                InterviewStatus.RESCHEDULED,
+              ],
+            },
+          },
+          data: { status: InterviewStatus.CANCELLED },
+        });
+        await prisma.aiInterviewSession.updateMany({
+          where: {
+            applicationId,
+            status: {
+              in: [
+                AiInterviewStatus.CREATED,
+                AiInterviewStatus.IN_PROGRESS,
+              ],
+            },
+          },
+          data: {
+            status: AiInterviewStatus.TERMINATED,
+            terminationReason:
+              dto.targetStage === ApplicationStage.WITHDRAWN
+                ? 'Ứng viên đã rút hồ sơ ứng tuyển.'
+                : 'Hồ sơ đã chuyển sang trạng thái Chưa phù hợp (Từ chối).',
+          },
+        });
       }
 
       const historyEntry = await prisma.applicationStatusHistory.create({
@@ -888,6 +921,28 @@ export class ApplicationsService {
               },
             },
           },
+          aiInterviewSessions: {
+            orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              roundId: true,
+              round: {
+                select: {
+                  id: true,
+                  order: true,
+                  title: true,
+                  status: true,
+                  resultScore: true,
+                },
+              },
+              status: true,
+              launchUrl: true,
+              expiresAt: true,
+              startedAt: true,
+              completedAt: true,
+              createdAt: true,
+            },
+          },
           offer: true,
         },
       }),
@@ -915,6 +970,7 @@ export class ApplicationsService {
         hasUnreadUpdate: (application.notifications?.length ?? 0) > 0,
         interviews: application.interviews,
         interviewProcess: application.interviewProcess,
+        aiInterviewSessions: application.aiInterviewSessions,
         offer: application.offer,
         appliedAt: application.appliedAt,
         updatedAt: application.updatedAt,

@@ -17,6 +17,7 @@ import {
   Loader2,
   ChevronDown,
   X,
+  AlertTriangle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -134,7 +135,12 @@ export function CandidateInterviewCard({
             </span>
 
             {/* Round outcome badge if available */}
-            {interview.round && interview.round.status === 'PASSED' ? (
+            {interview.round && interview.round.status === 'NO_SHOW' ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-black px-2.5 py-0.5 rounded-full border bg-amber-100 text-amber-900 border-amber-300 shadow-2xs">
+                <AlertTriangle className="size-3 text-amber-600" />
+                VẮNG MẶT (NO-SHOW)
+              </span>
+            ) : interview.round && interview.round.status === 'PASSED' ? (
               <span className="inline-flex items-center gap-1.5 text-[11px] font-black px-2.5 py-0.5 rounded-full border bg-emerald-100 text-emerald-800 border-emerald-300 shadow-2xs">
                 <CheckCircle2 className="size-3 text-emerald-600" />
                 ĐÃ QUA VÒNG
@@ -232,6 +238,21 @@ export function CandidateInterviewCard({
           </div>
         )}
 
+        {/* No-Show Grace Period Banner */}
+        {interview.round?.status === 'NO_SHOW' && (
+          <div className="rounded-xl bg-amber-50 border border-amber-300 p-3.5 text-xs text-amber-950 space-y-1.5 shadow-2xs">
+            <div className="flex items-center gap-1.5 font-bold text-amber-900">
+              <AlertTriangle className="size-4 text-amber-600 shrink-0" />
+              Thông báo vắng mặt buổi phỏng vấn (No-Show)
+            </div>
+            <p className="text-amber-800 leading-relaxed">
+              Hệ thống ghi nhận bạn đã vắng mặt trong buổi phỏng vấn này. Theo chính sách, bạn có{' '}
+              <strong className="underline text-amber-950 font-bold">24 giờ</strong> để bấm nút{' '}
+              <strong>"Đề xuất dời lịch ngay"</strong> bên dưới nhằm chọn lại các khung giờ phù hợp. Sau 24 giờ nếu không có phản hồi, hồ sơ sẽ tự động chuyển sang Chưa phù hợp.
+            </p>
+          </div>
+        )}
+
         {/* Reschedule Requested Details Banner */}
         {isRescheduled && (
           <div className="rounded-xl bg-orange-50/90 p-3 border border-orange-200 text-xs text-orange-900 space-y-1.5">
@@ -307,21 +328,33 @@ export function CandidateInterviewCard({
           <div className="flex items-center gap-2">
             {(isPending || isRescheduled) && (
               <>
-                <button
-                  type="button"
-                  disabled={submittingAction !== null}
-                  onClick={handleAccept}
-                  className="flex items-center gap-1.5 rounded-xl bg-[#2563EB] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#1d4ed8] active:scale-95 transition disabled:opacity-50"
-                >
-                  {submittingAction === 'ACCEPT' ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : (
-                    <CheckCircle2 className="size-3.5" />
-                  )}
-                  {isRescheduled ? 'Giữ lịch cũ' : 'Xác nhận tham gia'}
-                </button>
+                {interview.round?.status === 'NO_SHOW' ? (
+                  <button
+                    type="button"
+                    disabled={submittingAction !== null}
+                    onClick={() => setIsRescheduleModalOpen(true)}
+                    className="flex items-center gap-1.5 rounded-xl bg-[#2563EB] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#1d4ed8] active:scale-95 transition"
+                  >
+                    <CalendarClock className="size-3.5" />
+                    Đề xuất dời lịch ngay (Còn 24h)
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={submittingAction !== null}
+                    onClick={handleAccept}
+                    className="flex items-center gap-1.5 rounded-xl bg-[#2563EB] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#1d4ed8] active:scale-95 transition disabled:opacity-50"
+                  >
+                    {submittingAction === 'ACCEPT' ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="size-3.5" />
+                    )}
+                    {isRescheduled ? 'Giữ lịch cũ' : 'Xác nhận tham gia'}
+                  </button>
+                )}
 
-                {isPending && (
+                {isPending && interview.round?.status !== 'NO_SHOW' && (
                   <button
                     type="button"
                     disabled={submittingAction !== null}

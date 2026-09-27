@@ -46,6 +46,11 @@ export interface JobPostingData {
   };
   location?: string;
   expiryDate?: string;
+  targetHires?: number;
+  autoCloseOnQuota?: boolean;
+  closeReason?: 'QUOTA_REACHED' | 'EXPIRED' | 'MANUAL_HR' | null;
+  closedAt?: string | null;
+  hiredCount?: number;
   createdAt: string;
   jobSkills?: JobSkillData[];
   applications?: any[];
@@ -365,6 +370,60 @@ export async function updateRecruiterJob(
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to update job: ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function adjustJobQuota(
+  token: string,
+  jobId: string,
+  data: { targetHires: number; reopenIfClosed?: boolean },
+): Promise<JobPostingData> {
+  const res = await fetch(`${API_URL}/jobs/${jobId}/adjust-quota`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    let message = 'Failed to adjust job quota';
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.message) message = parsed.message;
+    } catch {}
+    throw new Error(message);
+  }
+
+  return res.json();
+}
+
+export async function extendJobExpiry(
+  token: string,
+  jobId: string,
+  data: { expiryDate: string; reopenIfClosed?: boolean },
+): Promise<JobPostingData> {
+  const res = await fetch(`${API_URL}/jobs/${jobId}/extend-expiry`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    let message = 'Failed to extend job expiry';
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.message) message = parsed.message;
+    } catch {}
+    throw new Error(message);
   }
 
   return res.json();

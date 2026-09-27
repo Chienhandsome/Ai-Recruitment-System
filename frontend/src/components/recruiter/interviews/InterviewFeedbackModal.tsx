@@ -11,6 +11,7 @@ import {
   XCircle,
   Sparkles,
   Clock,
+  UserX,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { type InterviewData, submitInterviewFeedback } from '@/lib/interview-api';
@@ -35,7 +36,7 @@ export function InterviewFeedbackModal({
   const [score, setScore] = useState<number>(
     interview.score !== undefined && interview.score !== null ? Number(interview.score) : 80,
   );
-  const [decision, setDecision] = useState<'PASSED' | 'FAILED' | 'PENDING'>(
+  const [decision, setDecision] = useState<'PASSED' | 'FAILED' | 'NO_SHOW' | 'PENDING'>(
     (interview.score !== undefined && interview.score !== null)
       ? (Number(interview.score) >= 70 ? 'PASSED' : 'FAILED')
       : 'PASSED',
@@ -64,6 +65,8 @@ export function InterviewFeedbackModal({
         toast.success('Đã lưu kết quả: Ứng viên ĐẠT vòng phỏng vấn!');
       } else if (decision === 'FAILED') {
         toast.info('Đã lưu kết quả: Ứng viên KHÔNG ĐẠT và đã dừng quy trình.');
+      } else if (decision === 'NO_SHOW') {
+        toast.warning('Đã đánh dấu No-Show: Ứng viên có 24 giờ để gửi đề xuất dời lịch lại.');
       } else {
         toast.success('Đã lưu điểm và nhận xét (Vòng đang chờ HR duyệt).');
       }
@@ -183,7 +186,7 @@ export function InterviewFeedbackModal({
             <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-2">
               Quyết định kết quả vòng phỏng vấn
             </label>
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
               <button
                 type="button"
                 onClick={() => setDecision('PASSED')}
@@ -222,6 +225,27 @@ export function InterviewFeedbackModal({
 
               <button
                 type="button"
+                onClick={() => {
+                  setDecision('NO_SHOW');
+                  setScore(0);
+                }}
+                className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                  decision === 'NO_SHOW'
+                    ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-500 shadow-sm'
+                    : 'border-slate-200 bg-white hover:border-amber-300'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 text-amber-700 font-bold text-xs">
+                  <UserX className="size-4 shrink-0 text-amber-600" />
+                  Vắng mặt (No-Show)
+                </div>
+                <span className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                  Ứng viên không tham gia. Hệ thống sẽ mở 24 giờ cho ứng viên đề xuất dời lịch lại.
+                </span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setDecision('PENDING')}
                 className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
                   decision === 'PENDING'
@@ -238,6 +262,18 @@ export function InterviewFeedbackModal({
                 </span>
               </button>
             </div>
+
+            {decision === 'NO_SHOW' && (
+              <div className="rounded-xl bg-amber-50 p-3 border border-amber-200 text-xs text-amber-900 flex items-start gap-2 mt-3">
+                <AlertCircle className="size-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold block">Chính sách xử lý Vắng mặt (No-Show)</span>
+                  <span className="text-amber-800 text-[11px] block mt-0.5">
+                    Hệ thống sẽ gửi thông báo cấp thời hạn 24 giờ cho ứng viên đề xuất khung giờ mới. Nếu sau 24 giờ ứng viên không phản hồi, hồ sơ sẽ tự động chuyển sang trạng thái Chưa phù hợp (Từ chối).
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Footer Action Buttons */}

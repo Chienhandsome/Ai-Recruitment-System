@@ -14,6 +14,9 @@ import {
   ApplicationStage,
   NotificationType,
   InterviewConductedBy,
+  InterviewMode,
+  InterviewProcessStatus,
+  InterviewPurpose,
   InterviewRoundStatus,
   Prisma,
 } from '@prisma/client';
@@ -134,10 +137,12 @@ export class AiInterviewsService {
       );
     }
 
-    if (dto.roundId) {
+    let targetRoundId = dto.roundId;
+
+    if (targetRoundId) {
       const round = await this.prisma.interviewRound.findFirst({
         where: {
-          id: dto.roundId,
+          id: targetRoundId,
           process: { applicationId: application.id },
         },
         select: { id: true, conductedBy: true, status: true },
@@ -154,6 +159,66 @@ export class AiInterviewsService {
         throw new ConflictException(
           'Vòng phỏng vấn chưa sẵn sàng hoặc đã được tạo link.',
         );
+      }
+    } else if (this.prisma.interviewProcess?.findUnique) {
+      let interviewProc = await this.prisma.interviewProcess.findUnique({
+        where: { applicationId: application.id },
+        include: {
+          rounds: { orderBy: { order: 'desc' }, take: 1 },
+        },
+      });
+
+      if (!interviewProc && this.prisma.interviewProcess?.create) {
+        interviewProc = await this.prisma.interviewProcess.create({
+          data: {
+            applicationId: application.id,
+            createdByUserId: userId,
+            status: InterviewProcessStatus.ACTIVE,
+            startedAt: new Date(),
+          },
+          include: {
+            rounds: { orderBy: { order: 'desc' }, take: 1 },
+          },
+        });
+      } else if (
+        interviewProc &&
+        interviewProc.status === InterviewProcessStatus.DRAFT &&
+        this.prisma.interviewProcess?.update
+      ) {
+        await this.prisma.interviewProcess.update({
+          where: { id: interviewProc.id },
+          data: {
+            status: InterviewProcessStatus.ACTIVE,
+            startedAt: interviewProc.startedAt || new Date(),
+          },
+        });
+      }
+
+      if (interviewProc && this.prisma.interviewRound?.create) {
+        const nextOrder = (interviewProc.rounds?.[0]?.order ?? 0) + 1;
+        const round = await this.prisma.interviewRound.create({
+          data: {
+            processId: interviewProc.id,
+            order: nextOrder,
+            title: 'Phỏng vấn sơ tuyển tự động qua AI',
+            description:
+              'Bài phỏng vấn tương tác giọng nói / video tự động với trợ lý AI.',
+            conductedBy: InterviewConductedBy.AI,
+            mode: InterviewMode.ASYNC_WEB,
+            purpose: InterviewPurpose.SCREENING,
+            status: InterviewRoundStatus.READY,
+            durationMinutes: 30,
+          },
+        });
+
+        if (this.prisma.interviewProcess?.update) {
+          await this.prisma.interviewProcess.update({
+            where: { id: interviewProc.id },
+            data: { currentRoundOrder: nextOrder },
+          });
+        }
+
+        targetRoundId = round.id;
       }
     }
 
@@ -262,7 +327,7 @@ export class AiInterviewsService {
       const created = await prisma.aiInterviewSession.create({
         data: {
           applicationId: application.id,
-          roundId: dto.roundId,
+          roundId: targetRoundId,
           interviewServiceId: remote.interview_id,
           status: AiInterviewStatus.CREATED,
           launchUrl: remote.launch_url,
@@ -272,9 +337,9 @@ export class AiInterviewsService {
         },
       });
 
-      if (dto.roundId) {
+      if (targetRoundId) {
         await prisma.interviewRound.update({
-          where: { id: dto.roundId },
+          where: { id: targetRoundId },
           data: {
             status: InterviewRoundStatus.SCHEDULED,
             evaluationCriteria: config,

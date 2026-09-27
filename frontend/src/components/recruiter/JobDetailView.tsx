@@ -5,7 +5,7 @@ import {
   ArrowLeft, Edit, Trash2, CheckCircle2, Bot, MapPin, Briefcase,
   DollarSign, Clock, FileText, Award, HelpCircle, User, Sparkles, Filter, Search,
   GraduationCap, Code, AlertTriangle, ExternalLink, ThumbsUp, ThumbsDown, ChevronRight,
-  Phone, Mail, FolderGit2, ShieldCheck, Calendar, Video, Plus, Loader2
+  Phone, Mail, FolderGit2, ShieldCheck, Calendar, Video, Plus, Loader2, TrendingUp, Users
 } from "lucide-react";
 import {
   type JobPostingData,
@@ -26,7 +26,9 @@ import {
 } from "@/lib/interview-api";
 import { ScheduleInterviewModal } from "./interviews/ScheduleInterviewModal";
 import { InterviewFeedbackModal } from "./interviews/InterviewFeedbackModal";
-import { format } from "date-fns";
+import { AdjustJobQuotaModal } from "./jobs/AdjustJobQuotaModal";
+import { ExtendJobDeadlineModal } from "./jobs/ExtendJobDeadlineModal";
+import { format, isPast, isToday, differenceInDays } from "date-fns";
 import { ApplicationStageActions } from "./applications/ApplicationStageActions";
 import { applicationStageLabels, applicationStageStyles } from "@/lib/application-stage";
 import { CandidateScoringWorkspace } from "./CandidateScoringWorkspace";
@@ -174,6 +176,8 @@ export function JobDetailView({
     useState<RecruiterApplicationDetail | null>(null);
   const [interviewToEdit, setInterviewToEdit] = useState<InterviewData | null>(null);
   const [acceptingSlotId, setAcceptingSlotId] = useState<string | null>(null);
+  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
+  const [isExpiryModalOpen, setIsExpiryModalOpen] = useState(false);
 
   const handleAcceptProposedSlot = async (interview: InterviewData, slotIso: string) => {
     const slotKey = `${interview.id}-${slotIso}`;
@@ -372,6 +376,20 @@ export function JobDetailView({
 
         {/* Header Quick Actions */}
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsQuotaModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl border border-emerald-200 transition-colors shadow-sm"
+          >
+            <TrendingUp className="w-4 h-4" /> Chỉ tiêu: {job.hiredCount ?? (job.applications?.filter((a: any) => a.currentStage === "HIRED").length || 0)}/{job.targetHires ?? 1}
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsExpiryModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] text-xs font-bold rounded-xl border border-blue-200 transition-colors shadow-sm"
+          >
+            <Calendar className="w-4 h-4" /> Gia hạn
+          </button>
           {job.status === "DRAFT" && (
             <button
               onClick={() => handleStatusChange("PUBLISHED")}
@@ -406,6 +424,51 @@ export function JobDetailView({
         </div>
       </div>
 
+      {/* Alert Banner if Closed for Quota or Expired */}
+      {job.status === "CLOSED" && job.closeReason === "QUOTA_REACHED" && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-bold text-amber-900">
+                Vị trí tuyển dụng đã tự động đóng vì đã tuyển đủ chỉ tiêu ({job.hiredCount ?? (job.applications?.filter((a: any) => a.currentStage === "HIRED").length || 0)}/{job.targetHires ?? 1} người)
+              </h4>
+              <p className="text-xs text-amber-700 mt-0.5">
+                Các ứng viên còn lại trong quy trình được bảo lưu an toàn trong Talent Pool. Bạn có thể tăng thêm chỉ tiêu bất kỳ lúc nào để mở lại tin và tiếp tục tuyển chọn.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsQuotaModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-xl shadow-md transition-all shrink-0"
+          >
+            <TrendingUp className="w-4 h-4" /> Tăng chỉ tiêu & Mở lại
+          </button>
+        </div>
+      )}
+
+      {job.status === "CLOSED" && job.closeReason === "EXPIRED" && (
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-start gap-3">
+            <Clock className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-bold text-rose-900">
+                Tin tuyển dụng đã tự động đóng do quá hạn nộp hồ sơ ({job.expiryDate ? format(new Date(job.expiryDate), "dd/MM/yyyy") : ""})
+              </h4>
+              <p className="text-xs text-rose-700 mt-0.5">
+                Gia hạn ngày hết hạn mới để tự động mở lại tin trên bảng tuyển dụng và tiếp tục nhận hồ sơ từ ứng viên.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsExpiryModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-xl shadow-md transition-all shrink-0"
+          >
+            <Calendar className="w-4 h-4" /> Gia hạn thời hạn tuyển dụng
+          </button>
+        </div>
+      )}
+
       {/* Tabs Switcher */}
       <div className="flex p-1 bg-[#EFF6FF] rounded-xl border border-blue-100">
         <button
@@ -429,14 +492,91 @@ export function JobDetailView({
       </div>
 
       {/* TAB 1: Job Description Info */}
-      {activeTab === "info" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {activeTab === "info" && (() => {
+        const hired = job.hiredCount ?? (job.applications?.filter((a: any) => a.currentStage === "HIRED").length || 0);
+        const quota = job.targetHires ?? 1;
+        const progress = quota > 0 ? Math.min(100, Math.round((hired / quota) * 100)) : 0;
+        const expiry = job.expiryDate ? new Date(job.expiryDate) : null;
+        const isExpired = expiry ? isPast(expiry) && !isToday(expiry) : false;
+        const daysLeft = expiry ? differenceInDays(expiry, new Date()) : null;
 
-          {/* Main Info */}
-          <div className="lg:col-span-2 space-y-6">
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-slate-200">
+            {/* Main Info */}
+            <div className="lg:col-span-2 space-y-6">
+
+              {/* Headcount Quota & Expiry Tracker */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-[#EFF6FF] text-[#2563EB] rounded-xl border border-blue-200">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tiến độ Tuyển dụng (Headcount)</span>
+                      <h3 className="text-lg font-extrabold text-[#1F2937]">
+                        Đã tuyển {hired} / {quota} chỉ tiêu ({progress}%)
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsQuotaModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-xl shadow-sm transition-all active:scale-95"
+                    >
+                      <TrendingUp className="w-4 h-4" /> Tăng chỉ tiêu (+)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsExpiryModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] text-xs font-bold rounded-xl border border-blue-200 transition-colors"
+                    >
+                      <Calendar className="w-4 h-4" /> Gia hạn tin
+                    </button>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span className="text-slate-600">Ứng viên đã nhận việc (HIRED): <strong className="text-[#2563EB]">{hired}</strong></span>
+                    <span className={hired >= quota ? "text-emerald-600 font-extrabold" : "text-slate-600"}>
+                      {hired >= quota ? "✓ ĐÃ ĐẠT CHỈ TIÊU (100%)" : `Còn thiếu ${quota - hired} vị trí`}
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        hired >= quota ? "bg-emerald-500" : "bg-[#2563EB]"
+                      }`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Status details footer */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+                  <div className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <Clock className="w-4 h-4 text-slate-400 shrink-0" />
+                    <span className="text-slate-600">
+                      Thời hạn: <strong>{expiry ? format(expiry, "dd/MM/yyyy") : "Không giới hạn"}</strong>
+                      {isExpired ? " (Đã hết hạn)" : daysLeft !== null && daysLeft <= 3 && daysLeft >= 0 ? ` (Còn ${daysLeft === 0 ? "hôm nay" : `${daysLeft} ngày`})` : ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span className="text-slate-600">
+                      Chính sách: <strong>{job.autoCloseOnQuota ? "Tự động đóng khi đủ chỉ tiêu" : "Giữ mở tuyển liên tục"}</strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-slate-200">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-[#EFF6FF] text-[#2563EB] rounded-lg">
                   <MapPin className="w-5 h-5" />
@@ -599,7 +739,8 @@ export function JobDetailView({
 
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* TAB 2: AI Candidate Evaluation — Candidate Scoring Workspace */}
       {activeTab === "candidates" && (
@@ -657,6 +798,32 @@ export function JobDetailView({
           interview={feedbackInterview}
           candidateName={selectedApplicationDetail.candidate?.fullName || "Ứng viên"}
           onSuccess={refreshApplications}
+        />
+      )}
+
+      {isQuotaModalOpen && (
+        <AdjustJobQuotaModal
+          isOpen={isQuotaModalOpen}
+          onClose={() => setIsQuotaModalOpen(false)}
+          job={job}
+          token={token}
+          onSuccess={(updatedJob) => {
+            setJob((prev) => (prev ? { ...prev, ...updatedJob } : updatedJob));
+            fetchJobDetail();
+          }}
+        />
+      )}
+
+      {isExpiryModalOpen && (
+        <ExtendJobDeadlineModal
+          isOpen={isExpiryModalOpen}
+          onClose={() => setIsExpiryModalOpen(false)}
+          job={job}
+          token={token}
+          onSuccess={(updatedJob) => {
+            setJob((prev) => (prev ? { ...prev, ...updatedJob } : updatedJob));
+            fetchJobDetail();
+          }}
         />
       )}
     </div>

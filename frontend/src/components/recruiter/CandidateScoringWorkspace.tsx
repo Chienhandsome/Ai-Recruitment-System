@@ -1702,7 +1702,7 @@ export function CandidateScoringWorkspace({
                         ).length)}
                       )
                     </h5>
-                    {detail?.currentStage && ['SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEWED', 'OFFERED', 'HIRED'].includes(detail.currentStage) && (
+                    {detail?.currentStage && ['SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEWED'].includes(detail.currentStage) && (
                       <button
                         type="button"
                         onClick={onScheduleInterview}
@@ -1745,22 +1745,30 @@ export function CandidateScoringWorkspace({
                                         ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
                                         : round.status === 'FAILED'
                                           ? 'bg-rose-50 text-rose-700 border-rose-300'
-                                          : round.status === 'AWAITING_REVIEW'
-                                            ? 'bg-amber-50 text-amber-700 border-amber-300 animate-pulse font-bold'
-                                            : round.status === 'IN_PROGRESS'
-                                              ? 'bg-blue-50 text-blue-700 border-blue-300'
-                                              : 'bg-slate-100 text-slate-700 border-slate-300'
+                                          : round.status === 'NO_SHOW'
+                                            ? 'bg-amber-100 text-amber-900 border-amber-300 font-extrabold'
+                                            : round.status === 'AWAITING_REVIEW'
+                                              ? 'bg-amber-50 text-amber-700 border-amber-300 animate-pulse font-bold'
+                                              : round.status === 'IN_PROGRESS'
+                                                ? 'bg-blue-50 text-blue-700 border-blue-300'
+                                                : round.status === 'CANCELLED'
+                                                  ? 'bg-slate-100 text-slate-500 border-slate-300'
+                                                  : 'bg-slate-100 text-slate-700 border-slate-300'
                                     }`}
                                   >
                                     {round.status === 'PASSED'
                                       ? '✓ ĐÃ QUA VÒNG'
                                       : round.status === 'FAILED'
                                         ? '✗ KHÔNG ĐẠT'
-                                        : round.status === 'AWAITING_REVIEW'
-                                          ? 'CHỜ HR ĐÁNH GIÁ'
-                                          : round.status === 'IN_PROGRESS'
-                                            ? 'ĐANG DIỄN RA'
-                                            : 'ĐÃ LÊN LỊCH'}
+                                        : round.status === 'NO_SHOW'
+                                          ? '⚠ VẮNG MẶT (NO-SHOW)'
+                                          : round.status === 'AWAITING_REVIEW'
+                                            ? 'CHỜ HR ĐÁNH GIÁ'
+                                            : round.status === 'IN_PROGRESS'
+                                              ? 'ĐANG DIỄN RA'
+                                              : round.status === 'CANCELLED'
+                                                ? 'ĐÃ HỦY'
+                                                : 'ĐÃ LÊN LỊCH'}
                                   </span>
                                 </div>
 
@@ -1791,6 +1799,14 @@ export function CandidateScoringWorkspace({
                                 </span>
                               ) : null}
                             </div>
+
+                            {/* No-Show alert banner */}
+                            {round.status === 'NO_SHOW' && (
+                              <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 flex items-center gap-1.5">
+                                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                <span>Ứng viên vắng mặt (No-Show). Có thời hạn 24 giờ để gửi đề xuất dời lịch.</span>
+                              </div>
+                            )}
 
                             {/* Additional info or actions */}
                             <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between gap-2">
@@ -1828,6 +1844,22 @@ export function CandidateScoringWorkspace({
                                   Xem video & Đánh giá
                                 </button>
                               )}
+
+                              {!isAi && (() => {
+                                const matchingInterview = (detail?.interviews || []).find((it) => it.roundId === round.id);
+                                if (!matchingInterview) return null;
+                                if (round.status === 'PASSED' || round.status === 'FAILED' || round.status === 'CANCELLED') return null;
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={() => onFeedbackInterview(matchingInterview)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition shadow-2xs active:scale-95 cursor-pointer"
+                                  >
+                                    <Award className="w-3 h-3" />
+                                    Chấm điểm
+                                  </button>
+                                );
+                              })()}
                             </div>
                           </div>
                         );

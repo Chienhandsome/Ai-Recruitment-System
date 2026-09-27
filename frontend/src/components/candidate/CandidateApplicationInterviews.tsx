@@ -3,10 +3,12 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { CandidateInterviewCard } from './CandidateInterviewCard';
-import { type InterviewData } from '@/lib/interview-api';
+import { CandidateAiInterviewCard } from './CandidateAiInterviewCard';
+import { type InterviewData, type AiInterviewSession } from '@/lib/interview-api';
 
 interface CandidateApplicationInterviewsProps {
-  interviews: InterviewData[];
+  interviews?: InterviewData[];
+  aiSessions?: AiInterviewSession[];
   token: string;
   recruiterInfo?: {
     title?: string | null;
@@ -17,13 +19,19 @@ interface CandidateApplicationInterviewsProps {
 }
 
 export function CandidateApplicationInterviews({
-  interviews,
+  interviews = [],
+  aiSessions = [],
   token,
   recruiterInfo,
 }: CandidateApplicationInterviewsProps) {
   const router = useRouter();
 
-  if (!interviews || interviews.length === 0) return null;
+  if (
+    (!interviews || interviews.length === 0) &&
+    (!aiSessions || aiSessions.length === 0)
+  ) {
+    return null;
+  }
 
   // Sort ascending by creation or scheduled time so Round 1 is first, Round 2 next
   const sortedInterviews = [...interviews].sort((a, b) => {
@@ -34,7 +42,8 @@ export function CandidateApplicationInterviews({
 
   const allPassed =
     sortedInterviews.length > 0 &&
-    sortedInterviews.every((i) => i.round?.status === 'PASSED');
+    sortedInterviews.every((i) => i.round?.status === 'PASSED') &&
+    (aiSessions.length === 0 || aiSessions.every((s) => s.status === 'COMPLETED'));
 
   return (
     <div className="mt-4 space-y-3">
@@ -44,13 +53,31 @@ export function CandidateApplicationInterviews({
           <span>Chúc mừng! Bạn đã hoàn thành xuất sắc các vòng phỏng vấn và đang chờ phản hồi từ nhà tuyển dụng.</span>
         </div>
       )}
+
+      {/* Render AI Sessions */}
+      {aiSessions.map((session, index) => (
+        <CandidateAiInterviewCard
+          key={session.id}
+          session={session}
+          roundIndex={session.round?.order || index + 1}
+        />
+      ))}
+
+      {/* Render Human Interviews */}
       {sortedInterviews.map((interview, index) => (
         <CandidateInterviewCard
           key={interview.id}
           interview={interview}
           token={token}
           recruiterInfo={recruiterInfo}
-          roundIndex={sortedInterviews.length > 1 ? index + 1 : 1}
+          roundIndex={
+            interview.round?.order ||
+            (aiSessions.length > 0
+              ? aiSessions.length + index + 1
+              : sortedInterviews.length > 1
+                ? index + 1
+                : 1)
+          }
           onRefresh={() => router.refresh()}
         />
       ))}

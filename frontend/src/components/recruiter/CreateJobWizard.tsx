@@ -52,6 +52,8 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobD
     proofOfWorkType: "PORTFOLIO",
     requiredExperienceYears: "",
     expiryDate: "",
+    targetHires: 1,
+    autoCloseOnQuota: true,
     autoShortlistThreshold: 85,
     autoRejectThreshold: 40,
     rejectOnMissingMandatory: true,
@@ -112,6 +114,8 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobD
         proofOfWorkType: initialJobData.proofOfWorkType || "PORTFOLIO",
         requiredExperienceYears: initialJobData.requiredExperienceYears ? String(initialJobData.requiredExperienceYears) : "",
         expiryDate: initialJobData.expiryDate ? new Date(initialJobData.expiryDate).toISOString().split("T")[0] : "",
+        targetHires: initialJobData.targetHires ?? 1,
+        autoCloseOnQuota: initialJobData.autoCloseOnQuota ?? true,
         autoShortlistThreshold: initialJobData.autoShortlistThreshold || 85,
         autoRejectThreshold: initialJobData.autoRejectThreshold || 40,
         rejectOnMissingMandatory: initialJobData.rejectOnMissingMandatory ?? true,
@@ -191,6 +195,8 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobD
         maxSalary: formData.maxSalary ? Number(formData.maxSalary) : undefined,
         requiredExperienceYears: formData.requiredExperienceYears ? Number(formData.requiredExperienceYears) : undefined,
         expiryDate: formData.expiryDate ? formData.expiryDate : undefined,
+        targetHires: Number(formData.targetHires) || 1,
+        autoCloseOnQuota: Boolean(formData.autoCloseOnQuota),
         autoShortlistThreshold: Number(formData.autoShortlistThreshold),
         autoRejectThreshold: formData.autoRejectThreshold ? Number(formData.autoRejectThreshold) : undefined,
         skillWeight: Number(formData.skillWeight),
@@ -353,6 +359,45 @@ export function CreateJobWizard({ isOpen, onClose, token, onSuccess, initialJobD
                 <div>
                   <label className="block text-xs font-bold text-[#1F2937] mb-1">Hạn nộp hồ sơ (Expiry Date)</label>
                   <input type="date" name="expiryDate" value={formData.expiryDate} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] text-[#1F2937]" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#1F2937] mb-1">
+                    Chỉ tiêu tuyển dụng (Headcount) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    name="targetHires"
+                    value={formData.targetHires}
+                    onChange={handleChange}
+                    placeholder="1"
+                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] text-[#1F2937] font-semibold"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1">Mặc định: 1 người. HR có thể điều chỉnh sau.</p>
+                </div>
+                <div className="flex items-center">
+                  <div className="p-3.5 bg-[#EFF6FF] border border-blue-200 rounded-xl w-full">
+                    <label className="flex items-start gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="autoCloseOnQuota"
+                        checked={formData.autoCloseOnQuota}
+                        onChange={handleChange}
+                        className="mt-0.5 w-4 h-4 text-[#2563EB] rounded border-slate-300 focus:ring-[#2563EB]"
+                      />
+                      <div>
+                        <span className="text-xs font-bold text-[#1F2937] block">
+                          Tự động đóng tin khi đã tuyển đủ chỉ tiêu
+                        </span>
+                        <span className="text-[11px] text-slate-600 block mt-0.5">
+                          Tự đóng bài đăng và bảo lưu toàn bộ ứng viên còn lại trong Talent Pool khi đạt số lượng tuyển dụng.
+                        </span>
+                      </div>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

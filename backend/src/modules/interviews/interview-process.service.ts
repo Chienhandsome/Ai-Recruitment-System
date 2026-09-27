@@ -5,11 +5,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  AiInterviewStatus,
   ApplicationStage,
   InterviewConductedBy,
   InterviewMode,
   InterviewProcessStatus,
   InterviewRoundStatus,
+  InterviewStatus,
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
@@ -96,6 +98,19 @@ export class InterviewProcessService {
     this.assertProcessEditable(process.status);
     this.validateRoundCombination(dto.conductedBy, dto.mode);
 
+    let scheduledDate: Date | null = null;
+    if (dto.scheduledAt) {
+      scheduledDate = new Date(dto.scheduledAt);
+      if (isNaN(scheduledDate.getTime())) {
+        throw new BadRequestException('Thời gian phỏng vấn không hợp lệ.');
+      }
+      if (scheduledDate.getTime() < Date.now() - 5 * 60 * 1000) {
+        throw new BadRequestException(
+          'Thời gian phỏng vấn không thể ở trong quá khứ. Vui lòng chọn thời gian trong tương lai.',
+        );
+      }
+    }
+
     const last = await this.prisma.interviewRound.findFirst({
       where: { processId },
       orderBy: { order: 'desc' },
@@ -111,7 +126,7 @@ export class InterviewProcessService {
         mode: dto.mode,
         purpose: dto.purpose,
         required: dto.required,
-        scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : null,
+        scheduledAt: scheduledDate,
         durationMinutes: dto.durationMinutes ?? 60,
         locationOrLink: dto.locationOrLink?.trim(),
         evaluationCriteria: dto.evaluationCriteria
@@ -139,6 +154,24 @@ export class InterviewProcessService {
     const mode = dto.mode ?? round.mode;
     this.validateRoundCombination(conductedBy, mode);
 
+    let updatedScheduledDate: Date | null | undefined = undefined;
+    if (dto.scheduledAt !== undefined) {
+      if (dto.scheduledAt === null) {
+        updatedScheduledDate = null;
+      } else {
+        const parsed = new Date(dto.scheduledAt);
+        if (isNaN(parsed.getTime())) {
+          throw new BadRequestException('Thời gian phỏng vấn không hợp lệ.');
+        }
+        if (parsed.getTime() < Date.now() - 5 * 60 * 1000) {
+          throw new BadRequestException(
+            'Thời gian phỏng vấn không thể ở trong quá khứ. Vui lòng chọn thời gian trong tương lai.',
+          );
+        }
+        updatedScheduledDate = parsed;
+      }
+    }
+
     const updated = await this.prisma.interviewRound.update({
       where: { id: roundId },
       data: {
@@ -152,8 +185,8 @@ export class InterviewProcessService {
         ...(dto.mode !== undefined ? { mode: dto.mode } : {}),
         ...(dto.purpose !== undefined ? { purpose: dto.purpose } : {}),
         ...(dto.required !== undefined ? { required: dto.required } : {}),
-        ...(dto.scheduledAt !== undefined
-          ? { scheduledAt: new Date(dto.scheduledAt) }
+        ...(updatedScheduledDate !== undefined
+          ? { scheduledAt: updatedScheduledDate }
           : {}),
         ...(dto.durationMinutes !== undefined
           ? { durationMinutes: dto.durationMinutes }
@@ -436,6 +469,34 @@ export class InterviewProcessService {
             },
           },
           data: { status: InterviewRoundStatus.CANCELLED },
+        });
+        await prisma.interview?.updateMany?.({
+          where: {
+            applicationId: round.process.applicationId,
+            status: {
+              in: [
+                InterviewStatus.SCHEDULED,
+                InterviewStatus.IN_PROGRESS,
+                InterviewStatus.RESCHEDULED,
+              ],
+            },
+          },
+          data: { status: InterviewStatus.CANCELLED },
+        });
+        await prisma.aiInterviewSession?.updateMany?.({
+          where: {
+            applicationId: round.process.applicationId,
+            status: {
+              in: [
+                AiInterviewStatus.CREATED,
+                AiInterviewStatus.IN_PROGRESS,
+              ],
+            },
+          },
+          data: {
+            status: AiInterviewStatus.TERMINATED,
+            terminationReason: 'Ứng viên không đạt vòng phỏng vấn.',
+          },
         });
         if (
           round.process.application.currentStage !== ApplicationStage.REJECTED

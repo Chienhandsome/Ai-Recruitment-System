@@ -90,6 +90,13 @@ export interface AiInterviewSession {
   id: string;
   applicationId: string;
   roundId?: string | null;
+  round?: {
+    id: string;
+    order: number;
+    title: string;
+    status: string;
+    resultScore?: number | null;
+  } | null;
   interviewServiceId: string;
   status: AiInterviewStatus;
   launchUrl: string;
@@ -245,7 +252,7 @@ export interface SubmitInterviewFeedbackInput {
   score: number;
   interviewerNotes: string;
   nextStage?: string;
-  decision?: 'PASSED' | 'FAILED';
+  decision?: 'PASSED' | 'FAILED' | 'NO_SHOW';
 }
 
 export class InterviewApiError extends Error {

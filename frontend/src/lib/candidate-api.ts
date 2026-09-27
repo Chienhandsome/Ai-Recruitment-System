@@ -136,6 +136,7 @@ export interface CandidateApplicationItem {
   processingStatus: CandidateApplicationProcessingStatus;
   hasUnreadUpdate?: boolean;
   interviews?: import('./interview-api').InterviewData[];
+  aiInterviewSessions?: import('./interview-api').AiInterviewSession[];
   offer?: import('./offer-api').OfferData | null;
   appliedAt: string;
   updatedAt: string;

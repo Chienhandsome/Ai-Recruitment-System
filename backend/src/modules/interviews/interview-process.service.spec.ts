@@ -36,6 +36,12 @@ describe('InterviewProcessService', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         delete: jest.fn(),
       },
+      interview: {
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
+      aiInterviewSession: {
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
       applicationStatusHistory: { create: jest.fn() },
       $transaction: jest.fn(async (callback) => callback(prisma)),
     };

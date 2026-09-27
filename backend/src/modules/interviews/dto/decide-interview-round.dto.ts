@@ -12,6 +12,7 @@ import {
 export enum InterviewRoundDecision {
   PASSED = 'PASSED',
   FAILED = 'FAILED',
+  NO_SHOW = 'NO_SHOW',
 }
 
 export class DecideInterviewRoundDto {

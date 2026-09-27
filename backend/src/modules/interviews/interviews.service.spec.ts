@@ -24,7 +24,7 @@ describe('InterviewsService', () => {
       },
       interview: {
         create: jest.fn(),
-        findMany: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
         findFirst: jest.fn(),
         findUnique: jest.fn(),
         update: jest.fn(),
@@ -91,6 +91,8 @@ describe('InterviewsService', () => {
         },
       };
 
+      const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      prisma.interview.findMany.mockResolvedValue([]);
       prisma.application.findFirst.mockResolvedValue(mockApp);
       prisma.interview.create.mockResolvedValue({
         id: 'int-1',
@@ -98,7 +100,7 @@ describe('InterviewsService', () => {
         title: 'Phỏng vấn Vòng 1',
         type: InterviewType.TECHNICAL,
         status: InterviewStatus.SCHEDULED,
-        scheduledAt: new Date('2026-09-01T10:00:00Z'),
+        scheduledAt: futureDate,
         durationMinutes: 60,
         locationOrLink: 'https://meet.google.com/abc-defg-hij',
         interviewerNotes: null,
@@ -112,7 +114,7 @@ describe('InterviewsService', () => {
           applicationId: 'app-1',
           title: 'Phỏng vấn Vòng 1',
           type: InterviewType.TECHNICAL,
-          scheduledAt: '2026-09-01T10:00:00Z',
+          scheduledAt: futureDate.toISOString(),
           durationMinutes: 60,
           locationOrLink: 'https://meet.google.com/abc-defg-hij',
         })
@@ -137,7 +139,7 @@ describe('InterviewsService', () => {
         service.create('recruiter-user-1', {
           applicationId: 'non-existent',
           title: 'Phỏng vấn',
-          scheduledAt: '2026-09-01T10:00:00Z',
+          scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         }),
       ).rejects.toThrow(NotFoundException);
     });

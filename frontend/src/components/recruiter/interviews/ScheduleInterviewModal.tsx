@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import {
   type InterviewData,
   type InterviewType,
+  createAiInterview,
   createInterview,
   updateInterview,
   interviewTypeLabels,
@@ -73,6 +74,12 @@ export function ScheduleInterviewModal({
   const [interviewerNotes, setInterviewerNotes] = useState(interviewToEdit?.interviewerNotes || '');
   const [submitting, setSubmitting] = useState(false);
 
+  // AI Screening specific configurations
+  const [aiExpiryDays, setAiExpiryDays] = useState(3);
+  const [aiMaxQuestions, setAiMaxQuestions] = useState(5);
+  const [aiCompetencies, setAiCompetencies] = useState('Kỹ năng chuyên môn, Giải quyết vấn đề, Giao tiếp');
+  const [aiQuestion1, setAiQuestion1] = useState('Hãy giới thiệu ngắn gọn về bản thân và kinh nghiệm làm việc nổi bật của bạn.');
+
   // Sync state whenever modal is opened or interviewToEdit / existingInterviewsCount changes
   useEffect(() => {
     if (isOpen) {
@@ -107,13 +114,43 @@ export function ScheduleInterviewModal({
       toast.error('Vui lòng nhập tiêu đề buổi phỏng vấn');
       return;
     }
-    if (!scheduledAt) {
+    if (type !== 'AI_SCREENING' && !scheduledAt) {
       toast.error('Vui lòng chọn thời gian phỏng vấn');
       return;
     }
 
     setSubmitting(true);
     try {
+      if (type === 'AI_SCREENING' && !interviewToEdit) {
+        const openingQuestions = [aiQuestion1.trim()].filter(Boolean);
+        const competencyList = aiCompetencies
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean);
+
+        await createAiInterview(token, {
+          applicationId,
+          openingQuestions:
+            openingQuestions.length > 0
+              ? openingQuestions
+              : ['Hãy giới thiệu ngắn gọn về bản thân và kinh nghiệm làm việc nổi bật của bạn.'],
+          competencies:
+            competencyList.length > 0
+              ? competencyList
+              : ['Kỹ năng chuyên môn', 'Giải quyết vấn đề', 'Giao tiếp'],
+          maxQuestions: aiMaxQuestions,
+          expiresInHours: aiExpiryDays * 24,
+        });
+        toast.success(
+          existingInterviewsCount > 0
+            ? `Đã tạo link phỏng vấn AI cho Vòng ${existingInterviewsCount + 1} thành công!`
+            : 'Đã tạo link phỏng vấn AI và gửi thông báo tới ứng viên!',
+        );
+        await onSuccess();
+        onClose();
+        return;
+      }
+
       if (interviewToEdit) {
         await updateInterview(token, interviewToEdit.id, {
           title: title.trim(),
@@ -252,67 +289,142 @@ export function ScheduleInterviewModal({
               </select>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-1.5">
-                Thời lượng (phút)
-              </label>
-              <div className="flex gap-1.5">
-                {durationOptions.map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => setDurationMinutes(opt)}
-                    className={`flex-1 py-2 text-xs font-extrabold rounded-lg border transition-all ${
-                      durationMinutes === opt
-                        ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-sm'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300'
-                    }`}
-                  >
-                    {opt}p
-                  </button>
-                ))}
+            {type !== 'AI_SCREENING' && (
+              <div>
+                <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-1.5">
+                  Thời lượng (phút)
+                </label>
+                <div className="flex gap-1.5">
+                  {durationOptions.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setDurationMinutes(opt)}
+                      className={`flex-1 py-2 text-xs font-extrabold rounded-lg border transition-all ${
+                        durationMinutes === opt
+                          ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-sm'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300'
+                      }`}
+                    >
+                      {opt}p
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Ngày & Giờ */}
-          <div>
-            <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-1.5">
-              Thời gian bắt đầu <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="datetime-local"
-                value={scheduledAt}
-                onChange={(e) => setScheduledAt(e.target.value)}
-                className="w-full rounded-xl border border-blue-200 bg-[#EFF6FF]/40 px-3.5 py-2.5 text-xs font-semibold text-[#1F2937] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer"
-                required
-              />
-            </div>
-          </div>
+          {type === 'AI_SCREENING' ? (
+            <div className="rounded-2xl border border-blue-200 bg-[#EFF6FF]/50 p-4 space-y-3.5 shadow-2xs">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#2563EB]">
+                <Sparkles className="size-4" /> Cấu hình phỏng vấn sơ tuyển tự động qua Trợ lý AI
+              </div>
 
-          {/* Link phòng họp / Địa chỉ */}
-          <div>
-            <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-1.5 flex items-center justify-between">
-              <span>{type === 'ONLINE' ? 'Link phòng họp (Google Meet / Zoom)' : 'Địa điểm phỏng vấn'}</span>
-              {type === 'ONLINE' ? (
-                <Video className="size-3.5 text-[#2563EB]" />
-              ) : (
-                <MapPin className="size-3.5 text-[#2563EB]" />
-              )}
-            </label>
-            <input
-              type="text"
-              value={locationOrLink}
-              onChange={(e) => setLocationOrLink(e.target.value)}
-              placeholder={
-                type === 'ONLINE'
-                  ? 'https://meet.google.com/xxx-yyyy-zzz hoặc Zoom link'
-                  : 'Tầng 5, Tòa nhà Innovation, 123 Đường Công Nghệ, Q.1'
-              }
-              className="w-full rounded-xl border border-blue-200 bg-[#EFF6FF]/40 px-3.5 py-2.5 text-xs font-medium text-[#1F2937] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100 transition-all"
-            />
-          </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#1F2937] uppercase tracking-wider mb-1">
+                    Hạn chót làm bài
+                  </label>
+                  <select
+                    value={aiExpiryDays}
+                    onChange={(e) => setAiExpiryDays(Number(e.target.value))}
+                    className="w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-[#1F2937] outline-none focus:border-[#2563EB]"
+                  >
+                    <option value={1}>1 ngày (24 giờ)</option>
+                    <option value={3}>3 ngày (72 giờ) - Khuyên dùng</option>
+                    <option value={5}>5 ngày (120 giờ)</option>
+                    <option value={7}>7 ngày (1 tuần)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-[#1F2937] uppercase tracking-wider mb-1">
+                    Số câu hỏi tối đa
+                  </label>
+                  <select
+                    value={aiMaxQuestions}
+                    onChange={(e) => setAiMaxQuestions(Number(e.target.value))}
+                    className="w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-[#1F2937] outline-none focus:border-[#2563EB]"
+                  >
+                    <option value={3}>3 câu hỏi (~10 phút)</option>
+                    <option value={5}>5 câu hỏi (~15 phút) - Khuyên dùng</option>
+                    <option value={8}>8 câu hỏi (~25 phút)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#1F2937] uppercase tracking-wider mb-1">
+                  Năng lực trọng tâm đánh giá (phân cách bằng dấu phẩy)
+                </label>
+                <input
+                  type="text"
+                  value={aiCompetencies}
+                  onChange={(e) => setAiCompetencies(e.target.value)}
+                  placeholder="VD: Kỹ năng chuyên môn, Giải quyết vấn đề, Giao tiếp"
+                  className="w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-medium text-[#1F2937] outline-none focus:border-[#2563EB]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#1F2937] uppercase tracking-wider mb-1">
+                  Câu hỏi mở đầu cho ứng viên
+                </label>
+                <input
+                  type="text"
+                  value={aiQuestion1}
+                  onChange={(e) => setAiQuestion1(e.target.value)}
+                  placeholder="VD: Hãy giới thiệu ngắn gọn về bản thân và kinh nghiệm của bạn..."
+                  className="w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-medium text-[#1F2937] outline-none focus:border-[#2563EB]"
+                />
+              </div>
+
+              <p className="text-[11px] text-slate-500 italic">
+                * Trợ lý AI sẽ tự động sinh link test độc quyền, gửi thông báo cho ứng viên, ghi video và tự động chấm điểm bài thi.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Ngày & Giờ */}
+              <div>
+                <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-1.5">
+                  Thời gian bắt đầu <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(e) => setScheduledAt(e.target.value)}
+                    className="w-full rounded-xl border border-blue-200 bg-[#EFF6FF]/40 px-3.5 py-2.5 text-xs font-semibold text-[#1F2937] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Link phòng họp / Địa chỉ */}
+              <div>
+                <label className="block text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span>{type === 'ONLINE' ? 'Link phòng họp (Google Meet / Zoom)' : 'Địa điểm phỏng vấn'}</span>
+                  {type === 'ONLINE' ? (
+                    <Video className="size-3.5 text-[#2563EB]" />
+                  ) : (
+                    <MapPin className="size-3.5 text-[#2563EB]" />
+                  )}
+                </label>
+                <input
+                  type="text"
+                  value={locationOrLink}
+                  onChange={(e) => setLocationOrLink(e.target.value)}
+                  placeholder={
+                    type === 'ONLINE'
+                      ? 'https://meet.google.com/xxx-yyyy-zzz hoặc Zoom link'
+                      : 'Tầng 5, Tòa nhà Innovation, 123 Đường Công Nghệ, Q.1'
+                  }
+                  className="w-full rounded-xl border border-blue-200 bg-[#EFF6FF]/40 px-3.5 py-2.5 text-xs font-medium text-[#1F2937] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100 transition-all"
+                />
+              </div>
+            </>
+          )}
 
           {/* Ghi chú */}
           <div>

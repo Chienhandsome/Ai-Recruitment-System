@@ -338,7 +338,26 @@ export class AiInterviewsService {
       this.logger.error(
         `Interview Service create failed (${response.status}): ${detail.slice(0, 500)}`,
       );
-      throw new BadGatewayException('Không thể tạo cuộc phỏng vấn AI.');
+      let reason = `Interview Service HTTP ${response.status}`;
+      try {
+        const parsed = JSON.parse(detail) as {
+          detail?: unknown;
+          message?: string;
+        };
+        if (typeof parsed.message === 'string') {
+          reason = parsed.message;
+        } else if (typeof parsed.detail === 'string') {
+          reason = parsed.detail;
+        } else if (Array.isArray(parsed.detail) && parsed.detail[0]) {
+          const first = parsed.detail[0] as { msg?: string };
+          if (typeof first.msg === 'string') reason = first.msg;
+        }
+      } catch {
+        if (detail.trim()) reason = detail.slice(0, 240);
+      }
+      throw new BadGatewayException(
+        `Không thể tạo cuộc phỏng vấn AI: ${reason}`,
+      );
     }
 
     const parsedResponse = interviewServiceCreateResponseSchema.safeParse(

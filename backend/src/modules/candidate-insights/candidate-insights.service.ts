@@ -177,9 +177,12 @@ export class CandidateInsightsService {
     }
   }
 
-  async listMyJdFitAnalyses(userId: string) {
+  async listMyJdFitAnalyses(userId: string, jobId?: string) {
     const rows = await this.prisma.candidateJdFitAnalysis.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...(jobId ? { jobId } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       take: 50,
       include: {
@@ -190,6 +193,17 @@ export class CandidateInsightsService {
       ...this.serializeAnalysis(row),
       job: row.job,
     }));
+  }
+
+  async getLatestJdFitForJob(userId: string, jobId: string) {
+    const row = await this.prisma.candidateJdFitAnalysis.findFirst({
+      where: { userId, jobId },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!row) {
+      return null;
+    }
+    return { ...this.serializeAnalysis(row), reused: true };
   }
 
   async createMockInterview(

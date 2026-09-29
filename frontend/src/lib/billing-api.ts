@@ -208,6 +208,13 @@ export function analyzeJdFit(
   );
 }
 
+export function getLatestJdFit(accessToken: string, jobId: string) {
+  return billingRequest<Record<string, unknown> | null>(
+    `/candidate/insights/jd-fit/latest?jobId=${encodeURIComponent(jobId)}`,
+    accessToken,
+  );
+}
+
 export function createCandidateMockInterview(
   accessToken: string,
   body: { jobId: string; requestId: string; applicationId?: string },

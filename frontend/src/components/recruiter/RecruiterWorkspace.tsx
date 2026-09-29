@@ -247,6 +247,12 @@ export function RecruiterWorkspace({
                 <Calendar className="w-3.5 h-3.5" />
                 Lịch phỏng vấn
               </button>
+              <a
+                href="/recruiter/billing"
+                className="px-4 py-2 text-xs font-bold rounded-lg transition-all text-[#1F2937] hover:text-[#2563EB] hover:bg-white/60"
+              >
+                Gói dịch vụ
+              </a>
             </nav>
           </div>
 

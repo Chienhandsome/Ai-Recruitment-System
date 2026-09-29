@@ -163,6 +163,13 @@ describe('ApplicationsService', () => {
       prisma as never,
       evaluationService as never,
       {} as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     const result = await service.applyForJob(
@@ -247,6 +254,13 @@ describe('ApplicationsService', () => {
       prisma as never,
       evaluationService as never,
       {} as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     await expect(
@@ -266,6 +280,13 @@ describe('ApplicationsService', () => {
       prisma as never,
       evaluationService as never,
       {} as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     await expect(
@@ -286,6 +307,13 @@ describe('ApplicationsService', () => {
       prisma as never,
       evaluationService as never,
       {} as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     await expect(
@@ -301,6 +329,13 @@ describe('ApplicationsService', () => {
       prisma as never,
       evaluationService as never,
       {} as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     const result = await service.applyForJob(
@@ -338,6 +373,9 @@ describe('ApplicationsService', () => {
       prisma as never,
       {} as never,
       accessService as never,
+      {
+        getEffectiveEntitlement: jest.fn(),
+      } as never,
     );
 
     await expect(
@@ -383,6 +421,9 @@ describe('ApplicationsService', () => {
       prisma as never,
       {} as never,
       accessService as never,
+      {
+        getEffectiveEntitlement: jest.fn(),
+      } as never,
     );
 
     await expect(

@@ -67,7 +67,9 @@ describe('JobsService candidate browsing', () => {
         findMany: jest.fn().mockResolvedValue([publishedJob]),
       },
     } as any;
-    const service = new JobsService(prisma);
+    const service = new JobsService(prisma, {} as never, {
+      assertCanPublishJob: jest.fn().mockResolvedValue({}),
+    } as never);
 
     const result = await service.findCandidateJobs({
       search: 'NestJS',
@@ -114,7 +116,9 @@ describe('JobsService candidate browsing', () => {
       jobPosting: { findFirst: jest.fn().mockResolvedValue(publishedJob) },
       candidateProfile: { findUnique: jest.fn().mockResolvedValue(null) },
     } as any;
-    const service = new JobsService(prisma);
+    const service = new JobsService(prisma, {} as never, {
+      assertCanPublishJob: jest.fn().mockResolvedValue({}),
+    } as never);
 
     const result = await service.findCandidateJobById('job-1', 'user-1');
 
@@ -147,7 +151,9 @@ describe('JobsService candidate browsing', () => {
     const prisma = {
       jobPosting: { findFirst: jest.fn().mockResolvedValue(null) },
     } as any;
-    const service = new JobsService(prisma);
+    const service = new JobsService(prisma, {} as never, {
+      assertCanPublishJob: jest.fn().mockResolvedValue({}),
+    } as never);
 
     await expect(
       service.findCandidateJobById('unavailable-job', 'user-1'),
@@ -223,7 +229,9 @@ describe('JobsService candidate browsing', () => {
         findMany: jest.fn().mockResolvedValue([feJob, accountantJob, mobileJob]),
       },
     } as any;
-    const service = new JobsService(prisma);
+    const service = new JobsService(prisma, {} as never, {
+      assertCanPublishJob: jest.fn().mockResolvedValue({}),
+    } as never);
 
     const result = await service.findRecommendedCandidateJobs('user-1', {
       page: 1,
@@ -250,7 +258,9 @@ describe('JobsService candidate browsing', () => {
         findMany: jest.fn().mockResolvedValue([publishedJob]),
       },
     } as any;
-    const service = new JobsService(prisma);
+    const service = new JobsService(prisma, {} as never, {
+      assertCanPublishJob: jest.fn().mockResolvedValue({}),
+    } as never);
 
     const result = await service.findRecommendedCandidateJobs('user-no-profile', {
       page: 1,

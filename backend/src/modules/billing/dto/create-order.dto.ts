@@ -1,0 +1,10 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsIn, IsString } from 'class-validator';
+import { PACKAGE_CODES } from '../billing.types';
+
+export class CreateOrderDto {
+  @ApiProperty({ enum: [PACKAGE_CODES.HR_PRO, PACKAGE_CODES.HR_PREMIUM] })
+  @IsString()
+  @IsIn([PACKAGE_CODES.HR_PRO, PACKAGE_CODES.HR_PREMIUM])
+  packageCode!: string;
+}

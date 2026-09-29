@@ -59,6 +59,13 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     const result = await service.updateStage(
@@ -107,6 +114,13 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     await expect(
@@ -124,6 +138,13 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     await expect(
@@ -176,6 +197,13 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     const result = await service.findAllForRecruiter('user-1', {
@@ -191,6 +219,11 @@ describe('ApplicationsService decision workflow', () => {
       page: 2,
       limit: 2,
       totalPages: 2,
+      features: {
+        advancedFilters: true,
+        aiRanking: true,
+        packageCode: 'HR_PREMIUM',
+      },
     });
   });
 
@@ -224,6 +257,13 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
     );
 
     const result = await service.findMine('candidate-user-1', {

@@ -6,14 +6,14 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   BrainCircuit,
-  Building,
   Briefcase,
   Users,
   LogOut,
   Menu,
   X,
   Settings,
-  Bell
+  Bell,
+  CreditCard,
 } from "lucide-react";
 import type { AuthProfile } from "@/types/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -23,6 +23,7 @@ const MENU_ITEMS = [
   { name: "Master Data & AI", icon: BrainCircuit, href: "/admin/skills" },
   { name: "Jobs Moderation", icon: Briefcase, href: "/admin/jobs" },
   { name: "Users", icon: Users, href: "/admin/users" },
+  { name: "Gói HR", icon: CreditCard, href: "/admin/packages" },
 ];
 
 export function AdminLayout({

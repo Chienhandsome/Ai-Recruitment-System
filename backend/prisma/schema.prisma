@@ -282,6 +282,38 @@ enum CandidateProfileStatus {
   FAILED
 }
 
+enum PackageAudience {
+  EMPLOYER
+  CANDIDATE
+}
+
+enum PackageOrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentProvider {
+  MOCK
+  MOMO
+  VNPAY
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum EntitlementStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
 // ==========================================
 // MODELS
 // ==========================================
@@ -299,6 +331,7 @@ model Company {
 
   departments       Department[]
   recruiterProfiles RecruiterProfile[]
+  entitlements      PackageEntitlement[]
 
   @@map("companies")
 }
@@ -335,6 +368,9 @@ model User {
   recruiterProfile RecruiterProfile?
   candidateProfile CandidateProfile?
   notifications    Notification[]
+  packageOrders    PackageOrder[]
+  entitlements     PackageEntitlement[]
+  cvUnlocks        CvUnlock[]
 
   @@index([email])
   @@map("users")
@@ -537,6 +573,8 @@ model CandidateProfile {
   linkedinUrl         String?                @map("linkedin_url")
   githubUrl           String?                @map("github_url")
   portfolioUrl        String?                @map("portfolio_url")
+  /// When true, profile may appear in the Premium talent pool (contact still gated by unlock).
+  isProfilePublic     Boolean                @default(false) @map("is_profile_public")
   primaryResumeId     String?                @unique @map("primary_resume_id")
   primaryResume       Resume?                @relation("PrimaryResume", fields: [primaryResumeId], references: [id], onDelete: SetNull)
   createdAt           DateTime               @default(now()) @map("created_at")
@@ -554,10 +592,12 @@ model CandidateProfile {
   projects        Project[]
   certificates    Certificate[]
   proofs          CandidateProof[]
+  cvUnlocks       CvUnlock[]
 
   @@index([email])
   @@index([phone])
   @@index([status])
+  @@index([isProfilePublic, status])
   @@map("candidate_profiles")
 }
 
@@ -1030,4 +1070,121 @@ model Offer {
   @@index([applicationId])
   @@index([status])
   @@map("offers")
+}
+
+// ==========================================
+// BILLING / EMPLOYER PACKAGES (Phase 1)
+// ==========================================
+
+model ServicePackage {
+  id               String          @id @default(uuid())
+  code             String          @unique
+  name             String
+  description      String?
+  audience         PackageAudience @default(EMPLOYER)
+  priceVnd         Int             @map("price_vnd")
+  durationDays     Int?            @map("duration_days")
+  maxActiveJobs    Int?            @map("max_active_jobs")
+  cvUnlockQuota    Int             @default(0) @map("cv_unlock_quota")
+  aiRanking        Boolean         @default(false) @map("ai_ranking")
+  advancedFilters  Boolean         @default(false) @map("advanced_filters")
+  recruitmentStats Boolean         @default(false) @map("recruitment_stats")
+  talentPoolAccess Boolean         @default(false) @map("talent_pool_access")
+  isActive         Boolean         @default(true) @map("is_active")
+  sortOrder        Int             @default(0) @map("sort_order")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  orders       PackageOrder[]
+  entitlements PackageEntitlement[]
+
+  @@index([audience, isActive, sortOrder])
+  @@map("service_packages")
+}
+
+model PackageOrder {
+  id              String             @id @default(uuid())
+  orderCode       String             @unique @map("order_code")
+  userId          String             @map("user_id") @db.Uuid
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  packageId       String             @map("package_id")
+  package         ServicePackage     @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  amountVnd       Int                @map("amount_vnd")
+  currency        String             @default("VND")
+  status          PackageOrderStatus @default(PENDING)
+  paymentProvider PaymentProvider    @default(MOCK) @map("payment_provider")
+  expiresAt       DateTime?          @map("expires_at")
+  paidAt          DateTime?          @map("paid_at")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  transactions PaymentTransaction[]
+  entitlement  PackageEntitlement?
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@map("package_orders")
+}
+
+model PaymentTransaction {
+  id            String                   @id @default(uuid())
+  orderId       String                   @map("order_id")
+  order         PackageOrder             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider      PaymentProvider          @default(MOCK)
+  providerTxnId String?                  @map("provider_txn_id")
+  amountVnd     Int                      @map("amount_vnd")
+  status        PaymentTransactionStatus @default(PENDING)
+  rawPayload    Json?                    @map("raw_payload")
+  paidAt        DateTime?                @map("paid_at")
+  createdAt     DateTime                 @default(now()) @map("created_at")
+  updatedAt     DateTime                 @updatedAt @map("updated_at")
+
+  @@index([orderId])
+  @@index([provider, providerTxnId])
+  @@map("payment_transactions")
+}
+
+model PackageEntitlement {
+  id                String             @id @default(uuid())
+  userId            String             @map("user_id") @db.Uuid
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId         String?            @map("company_id")
+  company           Company?           @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  packageId         String             @map("package_id")
+  package           ServicePackage     @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  orderId           String?            @unique @map("order_id")
+  order             PackageOrder?      @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  status            EntitlementStatus @default(ACTIVE)
+  startsAt          DateTime           @map("starts_at")
+  endsAt            DateTime?          @map("ends_at")
+  maxActiveJobs     Int?               @map("max_active_jobs")
+  cvUnlockRemaining Int                @default(0) @map("cv_unlock_remaining")
+  aiRanking         Boolean            @default(false) @map("ai_ranking")
+  advancedFilters   Boolean            @default(false) @map("advanced_filters")
+  recruitmentStats  Boolean            @default(false) @map("recruitment_stats")
+  talentPoolAccess  Boolean            @default(false) @map("talent_pool_access")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+
+  cvUnlocks CvUnlock[]
+
+  @@index([userId, status, endsAt])
+  @@index([companyId, status])
+  @@map("package_entitlements")
+}
+
+model CvUnlock {
+  id                 String             @id @default(uuid())
+  entitlementId      String             @map("entitlement_id")
+  entitlement        PackageEntitlement @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
+  unlockedByUserId   String             @map("unlocked_by_user_id") @db.Uuid
+  unlockedBy         User               @relation(fields: [unlockedByUserId], references: [id], onDelete: Cascade)
+  candidateProfileId String             @map("candidate_profile_id")
+  candidateProfile   CandidateProfile   @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  unlockedAt         DateTime           @default(now()) @map("unlocked_at")
+
+  @@unique([unlockedByUserId, candidateProfileId])
+  @@index([entitlementId])
+  @@index([candidateProfileId])
+  @@map("cv_unlocks")
 }

@@ -175,6 +175,8 @@ export class CandidatesService {
       profileData.githubUrl = dto.githubUrl || null;
     if (dto.portfolioUrl !== undefined)
       profileData.portfolioUrl = dto.portfolioUrl || null;
+    if (dto.isProfilePublic !== undefined)
+      profileData.isProfilePublic = dto.isProfilePublic;
 
     const updated = await this.prisma.$transaction(async (tx) => {
       // 1. Update Profile scalars

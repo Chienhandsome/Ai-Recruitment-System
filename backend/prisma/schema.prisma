@@ -371,6 +371,8 @@ model User {
   packageOrders    PackageOrder[]
   entitlements     PackageEntitlement[]
   cvUnlocks        CvUnlock[]
+  packageUsageLogs PackageUsageLog[]
+  jdFitAnalyses    CandidateJdFitAnalysis[]
 
   @@index([email])
   @@map("users")
@@ -470,6 +472,7 @@ model JobPosting {
   jobSkills       JobSkill[]
   jobCertificates JobCertificate[]
   applications    Application[]
+  jdFitAnalyses   CandidateJdFitAnalysis[]
 
   @@index([status])
   @@index([status, expiryDate, publishedAt])
@@ -619,6 +622,7 @@ model Resume {
   parsedData                 ResumeParsedData?
   candidateSkills            CandidateSkill[]
   applications               Application[]
+  jdFitAnalyses              CandidateJdFitAnalysis[]
   primaryForCandidateProfile CandidateProfile? @relation("PrimaryResume")
   workExperiences            WorkExperience[]  @relation("WorkExperienceResume")
   educations                 Education[]       @relation("EducationResume")
@@ -1090,6 +1094,13 @@ model ServicePackage {
   advancedFilters  Boolean         @default(false) @map("advanced_filters")
   recruitmentStats Boolean         @default(false) @map("recruitment_stats")
   talentPoolAccess Boolean         @default(false) @map("talent_pool_access")
+  /// Candidate Pro: CV–JD fit analysis
+  jdFitAnalysis         Boolean @default(false) @map("jd_fit_analysis")
+  cvImproveSuggestions  Boolean @default(false) @map("cv_improve_suggestions")
+  jdFitQuota            Int     @default(0) @map("jd_fit_quota")
+  /// Candidate Premium: AI mock interview by JD
+  aiMockInterview       Boolean @default(false) @map("ai_mock_interview")
+  mockInterviewQuota    Int     @default(0) @map("mock_interview_quota")
   isActive         Boolean         @default(true) @map("is_active")
   sortOrder        Int             @default(0) @map("sort_order")
   createdAt        DateTime        @default(now()) @map("created_at")
@@ -1103,20 +1114,24 @@ model ServicePackage {
 }
 
 model PackageOrder {
-  id              String             @id @default(uuid())
-  orderCode       String             @unique @map("order_code")
-  userId          String             @map("user_id") @db.Uuid
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  packageId       String             @map("package_id")
-  package         ServicePackage     @relation(fields: [packageId], references: [id], onDelete: Restrict)
-  amountVnd       Int                @map("amount_vnd")
-  currency        String             @default("VND")
-  status          PackageOrderStatus @default(PENDING)
-  paymentProvider PaymentProvider    @default(MOCK) @map("payment_provider")
-  expiresAt       DateTime?          @map("expires_at")
-  paidAt          DateTime?          @map("paid_at")
-  createdAt       DateTime           @default(now()) @map("created_at")
-  updatedAt       DateTime           @updatedAt @map("updated_at")
+  id                    String             @id @default(uuid())
+  orderCode             String             @unique @map("order_code")
+  userId                String             @map("user_id") @db.Uuid
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  packageId             String             @map("package_id")
+  package               ServicePackage     @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  amountVnd             Int                @map("amount_vnd")
+  currency              String             @default("VND")
+  status                PackageOrderStatus @default(PENDING)
+  paymentProvider       PaymentProvider    @default(MOCK) @map("payment_provider")
+  /// Snapshots at order time (admin price changes must not rewrite these)
+  packageCodeSnapshot   String             @map("package_code_snapshot")
+  durationDaysSnapshot  Int?               @map("duration_days_snapshot")
+  featuresSnapshot      Json               @map("features_snapshot")
+  expiresAt             DateTime?          @map("expires_at")
+  paidAt                DateTime?          @map("paid_at")
+  createdAt             DateTime           @default(now()) @map("created_at")
+  updatedAt             DateTime           @updatedAt @map("updated_at")
 
   transactions PaymentTransaction[]
   entitlement  PackageEntitlement?
@@ -1163,14 +1178,62 @@ model PackageEntitlement {
   advancedFilters   Boolean            @default(false) @map("advanced_filters")
   recruitmentStats  Boolean            @default(false) @map("recruitment_stats")
   talentPoolAccess  Boolean            @default(false) @map("talent_pool_access")
+  jdFitAnalysis         Boolean @default(false) @map("jd_fit_analysis")
+  cvImproveSuggestions  Boolean @default(false) @map("cv_improve_suggestions")
+  jdFitRemaining        Int     @default(0) @map("jd_fit_remaining")
+  aiMockInterview       Boolean @default(false) @map("ai_mock_interview")
+  mockInterviewRemaining Int    @default(0) @map("mock_interview_remaining")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
 
-  cvUnlocks CvUnlock[]
+  cvUnlocks  CvUnlock[]
+  usageLogs  PackageUsageLog[]
+  jdFitAnalyses CandidateJdFitAnalysis[]
 
   @@index([userId, status, endsAt])
   @@index([companyId, status])
   @@map("package_entitlements")
+}
+
+model PackageUsageLog {
+  id            String              @id @default(uuid())
+  userId        String              @map("user_id") @db.Uuid
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entitlementId String              @map("entitlement_id")
+  entitlement   PackageEntitlement  @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
+  featureCode   String              @map("feature_code")
+  requestId     String              @map("request_id")
+  refType       String?             @map("ref_type")
+  refId         String?             @map("ref_id")
+  status        String              @default("CONSUMED")
+  createdAt     DateTime            @default(now()) @map("created_at")
+
+  @@unique([userId, requestId])
+  @@index([entitlementId, featureCode, createdAt])
+  @@index([userId, featureCode, createdAt])
+  @@map("package_usage_logs")
+}
+
+model CandidateJdFitAnalysis {
+  id               String             @id @default(uuid())
+  userId           String             @map("user_id") @db.Uuid
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entitlementId    String?            @map("entitlement_id")
+  entitlement      PackageEntitlement? @relation(fields: [entitlementId], references: [id], onDelete: SetNull)
+  jobId            String             @map("job_id")
+  job              JobPosting         @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  resumeId         String             @map("resume_id")
+  resume           Resume             @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  requestId        String             @unique @map("request_id")
+  overallScore     Decimal            @map("overall_score") @db.Decimal(5, 2)
+  matchLevel       MatchLevel?        @map("match_level")
+  analysis         Json
+  suggestions      Json
+  createdAt        DateTime           @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([jobId, userId])
+  @@map("candidate_jd_fit_analyses")
 }
 
 model CvUnlock {

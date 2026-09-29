@@ -25,6 +25,7 @@ import { RecruitersModule } from './modules/recruiters/recruiters.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { OffersModule } from './modules/offers/offers.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { CandidateInsightsModule } from './modules/candidate-insights/candidate-insights.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { BillingModule } from './modules/billing/billing.module';
     AdminModule,
     OffersModule,
     BillingModule,
+    CandidateInsightsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

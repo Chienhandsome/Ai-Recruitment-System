@@ -36,7 +36,7 @@ export default function TalentPoolPage() {
       }
       setToken(session.access_token);
       try {
-        const status = await getMyEntitlement(session.access_token);
+        const status = await getMyEntitlement(session.access_token, "EMPLOYER");
         setEntitlement(status);
         if (status.talentPoolAccess) {
           const result = await searchTalentPool(session.access_token, {});
@@ -72,7 +72,7 @@ export default function TalentPoolPage() {
     try {
       const updated = await unlockTalentProfile(token, id);
       setRows((prev) => prev.map((row) => (row.id === id ? updated : row)));
-      const status = await getMyEntitlement(token);
+      const status = await getMyEntitlement(token, "EMPLOYER");
       setEntitlement(status);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Mở khóa thất bại.");

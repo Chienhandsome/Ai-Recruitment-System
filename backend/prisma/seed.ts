@@ -4,6 +4,7 @@ import {
 } from '@prisma/client';
 import { seedSkillCatalog } from './seed-skill-catalog';
 import { seedEmployerPackages } from './seed-employer-packages';
+import { seedCandidatePackages } from './seed-candidate-packages';
 
 const prisma = new PrismaClient();
 
@@ -77,6 +78,10 @@ async function main() {
   // 5. Employer billing packages
   const packageCount = await seedEmployerPackages(prisma);
   console.log(`Seeded ${packageCount} employer service packages.`);
+
+  // 6. Candidate billing packages
+  const candidatePackageCount = await seedCandidatePackages(prisma);
+  console.log(`Seeded ${candidatePackageCount} candidate service packages.`);
 
   console.log('Seeding finished.');
 }

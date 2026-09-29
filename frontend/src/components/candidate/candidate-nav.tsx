@@ -11,6 +11,7 @@ const navigation = [
   { href: '/candidate', label: 'Việc làm' },
   { href: '/candidate/applications', label: 'Đơn ứng tuyển' },
   { href: '/candidate/profile', label: 'Hồ sơ' },
+  { href: '/candidate/billing', label: 'Gói dịch vụ' },
 ];
 
 export function CandidateNav() {

@@ -16,6 +16,11 @@ export type ServicePackage = {
   advancedFilters: boolean;
   recruitmentStats: boolean;
   talentPoolAccess: boolean;
+  jdFitAnalysis?: boolean;
+  cvImproveSuggestions?: boolean;
+  jdFitQuota?: number;
+  aiMockInterview?: boolean;
+  mockInterviewQuota?: number;
   isActive: boolean;
   sortOrder: number;
 };
@@ -29,9 +34,15 @@ export type EntitlementStatus = {
   advancedFilters: boolean;
   recruitmentStats: boolean;
   talentPoolAccess: boolean;
-  startsAt: string;
+  jdFitAnalysis?: boolean;
+  cvImproveSuggestions?: boolean;
+  jdFitRemaining?: number;
+  aiMockInterview?: boolean;
+  mockInterviewRemaining?: number;
+  startsAt: string | null;
   endsAt: string | null;
-  entitlementId: string;
+  entitlementId: string | null;
+  isVirtualFree?: boolean;
   activeJobCount: number;
   canPublishMoreJobs: boolean;
   disclaimer: string;
@@ -52,6 +63,7 @@ export type PackageOrder = {
     code: string;
     name: string;
     durationDays: number | null;
+    audience?: string;
   };
 };
 
@@ -62,29 +74,6 @@ export type CheckoutSession = {
   provider: string;
   checkoutUrl: string;
   providerSessionId: string;
-};
-
-export type TalentPoolCard = {
-  id: string;
-  displayName: string;
-  desiredTitle: string | null;
-  professionalSummary: string | null;
-  locationHint: string | null;
-  skills: Array<{
-    skill: { id: string; name: string };
-    proficiencyLevel: string;
-    isPrimary: boolean;
-  }>;
-  contactUnlocked: boolean;
-  contact: {
-    email: string;
-    phone: string | null;
-    linkedinUrl: string | null;
-    githubUrl: string | null;
-    portfolioUrl: string | null;
-    address: string | null;
-  } | null;
-  privacyNote: string | null;
 };
 
 async function billingRequest<T>(
@@ -120,17 +109,27 @@ async function billingRequest<T>(
   return (await response.json()) as T;
 }
 
-export function listBillingPackages() {
-  return billingRequest<ServicePackage[]>("/billing/packages");
+export function listBillingPackages(audience: "CANDIDATE" | "EMPLOYER" = "CANDIDATE") {
+  return billingRequest<ServicePackage[]>(`/billing/packages?audience=${audience}`);
 }
 
-export function getMyEntitlement(accessToken: string) {
-  return billingRequest<EntitlementStatus>("/billing/me", accessToken);
+export function getMyEntitlement(
+  accessToken: string,
+  audience: "CANDIDATE" | "EMPLOYER" = "CANDIDATE",
+) {
+  return billingRequest<EntitlementStatus>(
+    `/billing/me?audience=${audience}`,
+    accessToken,
+  );
 }
 
 export function createPackageOrder(
   accessToken: string,
-  packageCode: "HR_PRO" | "HR_PREMIUM",
+  packageCode:
+    | "HR_PRO"
+    | "HR_PREMIUM"
+    | "CANDIDATE_PRO"
+    | "CANDIDATE_PREMIUM",
 ) {
   return billingRequest<PackageOrder>("/billing/orders", accessToken, {
     method: "POST",
@@ -138,9 +137,14 @@ export function createPackageOrder(
   });
 }
 
-export function checkoutOrder(accessToken: string, orderId: string) {
+export function checkoutOrder(
+  accessToken: string,
+  orderId: string,
+  path = "/candidate/billing",
+) {
+  const qs = new URLSearchParams({ path });
   return billingRequest<CheckoutSession>(
-    `/billing/orders/${orderId}/checkout`,
+    `/billing/orders/${orderId}/checkout?${qs.toString()}`,
     accessToken,
     { method: "POST" },
   );
@@ -161,11 +165,19 @@ export function getOrder(accessToken: string, orderId: string) {
   );
 }
 
-export function listMyOrders(accessToken: string) {
-  return billingRequest<PackageOrder[]>("/billing/orders", accessToken);
+export function listMyOrders(
+  accessToken: string,
+  audience?: "CANDIDATE" | "EMPLOYER",
+) {
+  const qs = audience ? `?audience=${audience}` : "";
+  return billingRequest<PackageOrder[]>(`/billing/orders${qs}`, accessToken);
 }
 
-export function listMyTransactions(accessToken: string) {
+export function listMyTransactions(
+  accessToken: string,
+  audience?: "CANDIDATE" | "EMPLOYER",
+) {
+  const qs = audience ? `?audience=${audience}` : "";
   return billingRequest<
     Array<{
       id: string;
@@ -182,8 +194,83 @@ export function listMyTransactions(accessToken: string) {
         package: { code: string; name: string };
       };
     }>
-  >("/billing/transactions", accessToken);
+  >(`/billing/transactions${qs}`, accessToken);
 }
+
+export function analyzeJdFit(
+  accessToken: string,
+  body: { jobId: string; resumeId?: string; requestId: string },
+) {
+  return billingRequest<Record<string, unknown>>(
+    "/candidate/insights/jd-fit",
+    accessToken,
+    { method: "POST", body: JSON.stringify(body) },
+  );
+}
+
+export function createCandidateMockInterview(
+  accessToken: string,
+  body: { jobId: string; requestId: string; applicationId?: string },
+) {
+  return billingRequest<{
+    reused: boolean;
+    session: {
+      id: string;
+      launchUrl: string;
+      expiresAt: string;
+      status: string;
+    };
+  }>("/candidate/mock-interviews", accessToken, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function adminListPackages(
+  accessToken: string,
+  audience?: "CANDIDATE" | "EMPLOYER",
+) {
+  const qs = audience ? `?audience=${audience}` : "";
+  return billingRequest<ServicePackage[]>(`/admin/packages${qs}`, accessToken);
+}
+
+export function adminUpdatePackage(
+  accessToken: string,
+  packageId: string,
+  body: Partial<ServicePackage>,
+) {
+  return billingRequest<ServicePackage>(
+    `/admin/packages/${packageId}`,
+    accessToken,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export type TalentPoolCard = {
+  id: string;
+  displayName: string;
+  desiredTitle: string | null;
+  professionalSummary: string | null;
+  locationHint: string | null;
+  skills: Array<{
+    skill: { id: string; name: string };
+    proficiencyLevel: string;
+    isPrimary: boolean;
+  }>;
+  contactUnlocked: boolean;
+  contact: {
+    email: string;
+    phone: string | null;
+    linkedinUrl: string | null;
+    githubUrl: string | null;
+    portfolioUrl: string | null;
+    address: string | null;
+  } | null;
+  privacyNote: string | null;
+};
 
 export function searchTalentPool(
   accessToken: string,
@@ -211,29 +298,14 @@ export function unlockTalentProfile(
   );
 }
 
-export function adminListPackages(accessToken: string) {
-  return billingRequest<ServicePackage[]>("/admin/packages", accessToken);
-}
-
-export function adminUpdatePackage(
-  accessToken: string,
-  packageId: string,
-  body: Partial<ServicePackage>,
-) {
-  return billingRequest<ServicePackage>(
-    `/admin/packages/${packageId}`,
-    accessToken,
-    {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    },
-  );
-}
-
 export function formatVnd(amount: number) {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
   }).format(amount);
+}
+
+export function newRequestId(prefix: string) {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }

@@ -1,6 +1,6 @@
 import { requireProfile } from "@/lib/server-profile";
 import { createClient } from "@/lib/supabase/server";
-import { BillingWorkspace } from "@/components/recruiter/billing/BillingWorkspace";
+import { CandidateBillingWorkspace } from "@/components/candidate/billing/CandidateBillingWorkspace";
 import {
   getMyEntitlement,
   listBillingPackages,
@@ -13,8 +13,8 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function RecruiterBillingPage() {
-  await requireProfile("RECRUITER");
+export default async function CandidateBillingPage() {
+  await requireProfile("CANDIDATE");
   const supabase = await createClient();
   const {
     data: { session },
@@ -29,18 +29,18 @@ export default async function RecruiterBillingPage() {
   if (token) {
     try {
       [packages, entitlement, orders, transactions] = await Promise.all([
-        listBillingPackages("EMPLOYER"),
-        getMyEntitlement(token, "EMPLOYER"),
-        listMyOrders(token, "EMPLOYER"),
-        listMyTransactions(token, "EMPLOYER"),
+        listBillingPackages("CANDIDATE"),
+        getMyEntitlement(token, "CANDIDATE"),
+        listMyOrders(token, "CANDIDATE"),
+        listMyTransactions(token, "CANDIDATE"),
       ]);
     } catch (error) {
-      console.error("Failed to load billing data", error);
+      console.error("Failed to load candidate billing", error);
     }
   }
 
   return (
-    <BillingWorkspace
+    <CandidateBillingWorkspace
       token={token}
       packages={packages}
       entitlement={entitlement}

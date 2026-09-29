@@ -59,9 +59,33 @@ export class AiInterviewsService {
   ) {}
 
   async create(userId: string, dto: CreateAiInterviewDto) {
-    const scope = await this.accessService.recruiterApplicationWhere(userId);
+    return this.createSession(userId, dto, 'recruiter');
+  }
+
+  async createForCandidate(userId: string, dto: CreateAiInterviewDto) {
+    return this.createSession(userId, dto, 'candidate');
+  }
+
+  private async createSession(
+    userId: string,
+    dto: CreateAiInterviewDto,
+    actor: 'recruiter' | 'candidate',
+  ) {
+    const applicationWhere =
+      actor === 'recruiter'
+        ? {
+            AND: [
+              await this.accessService.recruiterApplicationWhere(userId),
+              { id: dto.applicationId },
+            ],
+          }
+        : {
+            id: dto.applicationId,
+            candidate: { userId },
+          };
+
     const application = await this.prisma.application.findFirst({
-      where: { AND: [scope, { id: dto.applicationId }] },
+      where: applicationWhere,
       select: {
         id: true,
         profileSnapshot: true,
@@ -133,11 +157,15 @@ export class AiInterviewsService {
 
     if (!application) {
       throw new NotFoundException(
-        'Đơn ứng tuyển không tồn tại hoặc bạn không có quyền truy cập.',
+        actor === 'candidate'
+          ? 'Đơn ứng tuyển không tồn tại hoặc không thuộc về bạn.'
+          : 'Đơn ứng tuyển không tồn tại hoặc bạn không có quyền truy cập.',
       );
     }
 
-    let targetRoundId = dto.roundId;
+    // Skip multi-round process scaffolding for candidate self-practice mocks.
+    let targetRoundId =
+      actor === 'candidate' ? undefined : dto.roundId;
 
     if (targetRoundId) {
       const round = await this.prisma.interviewRound.findFirst({
@@ -160,7 +188,10 @@ export class AiInterviewsService {
           'Vòng phỏng vấn chưa sẵn sàng hoặc đã được tạo link.',
         );
       }
-    } else if (this.prisma.interviewProcess?.findUnique) {
+    } else if (
+      actor === 'recruiter' &&
+      this.prisma.interviewProcess?.findUnique
+    ) {
       let interviewProc = await this.prisma.interviewProcess.findUnique({
         where: { applicationId: application.id },
         include: {

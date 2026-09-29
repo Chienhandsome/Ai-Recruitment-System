@@ -20,7 +20,11 @@ import {
 } from './payment/payment-provider.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
-import { PACKAGE_CODES } from './billing.types';
+import {
+  PACKAGE_CODES,
+  isMockPaymentAllowed,
+  snapshotFromPackage,
+} from './billing.types';
 
 @Injectable()
 export class BillingService {
@@ -31,14 +35,19 @@ export class BillingService {
     private readonly paymentProvider: PaymentProviderAdapter,
   ) {}
 
-  listEmployerPackages(includeInactive = false) {
+  listPackages(audience: PackageAudience, includeInactive = false) {
     return this.prisma.servicePackage.findMany({
       where: {
-        audience: PackageAudience.EMPLOYER,
+        audience,
         ...(includeInactive ? {} : { isActive: true }),
       },
       orderBy: { sortOrder: 'asc' },
     });
+  }
+
+  /** @deprecated Prefer listPackages(PackageAudience.EMPLOYER) — kept for HR call sites */
+  listEmployerPackages(includeInactive = false) {
+    return this.listPackages(PackageAudience.EMPLOYER, includeInactive);
   }
 
   async updatePackage(packageId: string, dto: UpdatePackageDto) {
@@ -62,38 +71,61 @@ export class BillingService {
         advancedFilters: dto.advancedFilters,
         recruitmentStats: dto.recruitmentStats,
         talentPoolAccess: dto.talentPoolAccess,
+        jdFitAnalysis: dto.jdFitAnalysis,
+        cvImproveSuggestions: dto.cvImproveSuggestions,
+        jdFitQuota: dto.jdFitQuota,
+        aiMockInterview: dto.aiMockInterview,
+        mockInterviewQuota: dto.mockInterviewQuota,
         isActive: dto.isActive,
         sortOrder: dto.sortOrder,
       },
     });
   }
 
-  async getMyStatus(userId: string) {
-    return this.entitlements.getEntitlementStatus(userId);
+  getMyStatus(userId: string, audience: PackageAudience) {
+    return this.entitlements.getEntitlementStatus(userId, audience);
   }
 
   async createOrder(userId: string, dto: CreateOrderDto) {
-    const recruiter = await this.prisma.recruiterProfile.findUnique({
-      where: { userId },
-      select: { id: true },
-    });
-    if (!recruiter) {
-      throw new ForbiddenException('Chỉ tài khoản nhà tuyển dụng mới mua gói HR.');
-    }
-
     const pkg = await this.prisma.servicePackage.findFirst({
       where: {
         code: dto.packageCode,
-        audience: PackageAudience.EMPLOYER,
         isActive: true,
       },
     });
     if (!pkg) {
       throw new NotFoundException('Gói dịch vụ không tồn tại hoặc đã tắt.');
     }
-    if (pkg.code === PACKAGE_CODES.HR_FREE || pkg.priceVnd <= 0) {
+
+    if (pkg.audience === PackageAudience.EMPLOYER) {
+      const recruiter = await this.prisma.recruiterProfile.findUnique({
+        where: { userId },
+        select: { id: true },
+      });
+      if (!recruiter) {
+        throw new ForbiddenException(
+          'Chỉ tài khoản nhà tuyển dụng mới mua gói HR.',
+        );
+      }
+    } else {
+      const candidate = await this.prisma.candidateProfile.findUnique({
+        where: { userId },
+        select: { id: true },
+      });
+      if (!candidate) {
+        throw new ForbiddenException(
+          'Chỉ tài khoản ứng viên mới mua gói Candidate.',
+        );
+      }
+    }
+
+    if (
+      pkg.code === PACKAGE_CODES.HR_FREE ||
+      pkg.code === PACKAGE_CODES.CANDIDATE_FREE ||
+      pkg.priceVnd <= 0
+    ) {
       throw new BadRequestException(
-        'Gói Free được kích hoạt tự động, không cần thanh toán.',
+        'Gói Free là mặc định, không cần thanh toán.',
       );
     }
 
@@ -111,6 +143,7 @@ export class BillingService {
 
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 2);
+    const featuresSnapshot = snapshotFromPackage(pkg);
 
     const order = await this.prisma.packageOrder.create({
       data: {
@@ -121,6 +154,9 @@ export class BillingService {
         currency: 'VND',
         status: PackageOrderStatus.PENDING,
         paymentProvider: PaymentProvider.MOCK,
+        packageCodeSnapshot: pkg.code,
+        durationDaysSnapshot: pkg.durationDays,
+        featuresSnapshot: featuresSnapshot as unknown as Prisma.InputJsonValue,
         expiresAt,
       },
     });
@@ -128,10 +164,12 @@ export class BillingService {
     return this.toOrderResponse(order, pkg);
   }
 
-  async checkout(userId: string, orderId: string) {
+  async checkout(userId: string, orderId: string, checkoutPath: string) {
     const order = await this.findOwnedOrder(userId, orderId);
     if (order.status !== PackageOrderStatus.PENDING) {
-      throw new BadRequestException('Đơn hàng không còn ở trạng thái chờ thanh toán.');
+      throw new BadRequestException(
+        'Đơn hàng không còn ở trạng thái chờ thanh toán.',
+      );
     }
     if (order.expiresAt && order.expiresAt < new Date()) {
       await this.prisma.packageOrder.update({
@@ -142,13 +180,19 @@ export class BillingService {
     }
 
     const siteUrl = process.env.FRONTEND_SITE_URL ?? 'http://localhost:3000';
+    // Temporarily override checkout URL builder via return paths
     const checkout = await this.paymentProvider.createCheckout({
       orderId: order.id,
       orderCode: order.orderCode,
       amountVnd: order.amountVnd,
-      returnUrl: `${siteUrl}/recruiter/billing/result?orderId=${order.id}`,
-      cancelUrl: `${siteUrl}/recruiter/billing?cancelled=1`,
+      returnUrl: `${siteUrl}${checkoutPath}/result?orderId=${order.id}`,
+      cancelUrl: `${siteUrl}${checkoutPath}?cancelled=1`,
     });
+
+    // Rewrite checkout URL to the audience-specific path while keeping session id
+    const checkoutUrl = new URL(`${siteUrl}${checkoutPath}/checkout`);
+    checkoutUrl.searchParams.set('orderId', order.id);
+    checkoutUrl.searchParams.set('session', checkout.providerSessionId);
 
     await this.prisma.paymentTransaction.create({
       data: {
@@ -158,7 +202,7 @@ export class BillingService {
         amountVnd: order.amountVnd,
         status: PaymentTransactionStatus.PENDING,
         rawPayload: {
-          checkoutUrl: checkout.checkoutUrl,
+          checkoutUrl: checkoutUrl.toString(),
           sessionId: checkout.providerSessionId,
         } as Prisma.InputJsonValue,
       },
@@ -169,12 +213,18 @@ export class BillingService {
       orderCode: order.orderCode,
       amountVnd: order.amountVnd,
       provider: checkout.provider,
-      checkoutUrl: checkout.checkoutUrl,
+      checkoutUrl: checkoutUrl.toString(),
       providerSessionId: checkout.providerSessionId,
     };
   }
 
   async confirmMockPayment(userId: string, orderId: string) {
+    if (!isMockPaymentAllowed()) {
+      throw new ForbiddenException(
+        'Mock payment bị tắt trên môi trường production.',
+      );
+    }
+
     if (!this.paymentProvider.confirmMockPayment) {
       throw new BadRequestException(
         'Nhà cung cấp thanh toán hiện tại không hỗ trợ xác nhận sandbox.',
@@ -182,8 +232,13 @@ export class BillingService {
     }
 
     const order = await this.findOwnedOrder(userId, orderId);
+    const audience = order.package.audience;
+
     if (order.status === PackageOrderStatus.PAID) {
-      const entitlement = await this.entitlements.getEntitlementStatus(userId);
+      const entitlement = await this.entitlements.getEntitlementStatus(
+        userId,
+        audience,
+      );
       return {
         order: this.toOrderResponse(order, order.package),
         entitlement,
@@ -204,18 +259,20 @@ export class BillingService {
     const confirm = await this.paymentProvider.confirmMockPayment(order.id);
     const paidAt = new Date();
 
-    const recruiter = await this.prisma.recruiterProfile.findUnique({
-      where: { userId },
-      select: { companyId: true },
-    });
+    const companyId =
+      audience === PackageAudience.EMPLOYER
+        ? (
+            await this.prisma.recruiterProfile.findUnique({
+              where: { userId },
+              select: { companyId: true },
+            })
+          )?.companyId
+        : null;
 
     const result = await this.prisma.$transaction(async (tx) => {
       const updatedOrder = await tx.packageOrder.update({
         where: { id: order.id },
-        data: {
-          status: PackageOrderStatus.PAID,
-          paidAt,
-        },
+        data: { status: PackageOrderStatus.PAID, paidAt },
         include: { package: true },
       });
 
@@ -234,14 +291,25 @@ export class BillingService {
       return updatedOrder;
     });
 
+    const featuresSnapshot =
+      (order.featuresSnapshot as unknown as ReturnType<
+        typeof snapshotFromPackage
+      >) ?? snapshotFromPackage(order.package);
+
     await this.entitlements.activateFromPaidOrder({
       userId,
       packageId: order.packageId,
       orderId: order.id,
-      companyId: recruiter?.companyId,
+      companyId,
+      audience,
+      featuresSnapshot,
+      durationDaysSnapshot: order.durationDaysSnapshot,
     });
 
-    const entitlement = await this.entitlements.getEntitlementStatus(userId);
+    const entitlement = await this.entitlements.getEntitlementStatus(
+      userId,
+      audience,
+    );
 
     return {
       order: this.toOrderResponse(result, result.package),
@@ -255,9 +323,12 @@ export class BillingService {
     return this.toOrderResponse(order, order.package);
   }
 
-  async listMyOrders(userId: string) {
+  async listMyOrders(userId: string, audience?: PackageAudience) {
     const orders = await this.prisma.packageOrder.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...(audience ? { package: { audience } } : {}),
+      },
       include: { package: true },
       orderBy: { createdAt: 'desc' },
       take: 50,
@@ -265,16 +336,21 @@ export class BillingService {
     return orders.map((o) => this.toOrderResponse(o, o.package));
   }
 
-  async listMyTransactions(userId: string) {
+  async listMyTransactions(userId: string, audience?: PackageAudience) {
     return this.prisma.paymentTransaction.findMany({
-      where: { order: { userId } },
+      where: {
+        order: {
+          userId,
+          ...(audience ? { package: { audience } } : {}),
+        },
+      },
       include: {
         order: {
           select: {
             id: true,
             orderCode: true,
             status: true,
-            package: { select: { code: true, name: true } },
+            package: { select: { code: true, name: true, audience: true } },
           },
         },
       },
@@ -308,11 +384,20 @@ export class BillingService {
       currency: string;
       status: PackageOrderStatus;
       paymentProvider: PaymentProvider;
+      packageCodeSnapshot?: string;
+      durationDaysSnapshot?: number | null;
+      featuresSnapshot?: unknown;
       expiresAt: Date | null;
       paidAt: Date | null;
       createdAt: Date;
     },
-    pkg: { id: string; code: string; name: string; durationDays: number | null },
+    pkg: {
+      id: string;
+      code: string;
+      name: string;
+      durationDays: number | null;
+      audience?: PackageAudience;
+    },
   ) {
     return {
       id: order.id,
@@ -321,6 +406,9 @@ export class BillingService {
       currency: order.currency,
       status: order.status,
       paymentProvider: order.paymentProvider,
+      packageCodeSnapshot: order.packageCodeSnapshot ?? pkg.code,
+      durationDaysSnapshot: order.durationDaysSnapshot ?? pkg.durationDays,
+      featuresSnapshot: order.featuresSnapshot ?? null,
       expiresAt: order.expiresAt,
       paidAt: order.paidAt,
       createdAt: order.createdAt,
@@ -329,6 +417,7 @@ export class BillingService {
         code: pkg.code,
         name: pkg.name,
         durationDays: pkg.durationDays,
+        audience: pkg.audience,
       },
     };
   }

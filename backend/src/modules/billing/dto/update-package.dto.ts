@@ -77,6 +77,35 @@ export class UpdatePackageDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsBoolean()
+  jdFitAnalysis?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  cvImproveSuggestions?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  jdFitQuota?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  aiMockInterview?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  mockInterviewQuota?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
   isActive?: boolean;
 
   @ApiPropertyOptional()

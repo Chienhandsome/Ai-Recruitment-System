@@ -1,281 +1,257 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 import { EntitlementStatus, PackageAudience } from '@prisma/client';
 import { EntitlementsService } from './entitlements.service';
-import { PACKAGE_CODES } from './billing.types';
+import { PACKAGE_CODES, USAGE_FEATURES } from './billing.types';
 
-describe('EntitlementsService', () => {
+describe('EntitlementsService (candidate + shared core)', () => {
   let service: EntitlementsService;
-  let prisma: {
-    servicePackage: { findUnique: jest.Mock; findFirst: jest.Mock };
-    recruiterProfile: { findUnique: jest.Mock };
-    packageEntitlement: {
-      findFirst: jest.Mock;
-      findMany: jest.Mock;
-      create: jest.Mock;
-      updateMany: jest.Mock;
-    };
-    jobPosting: { count: jest.Mock };
-  };
+  let prisma: any;
 
-  const freePackage = {
-    id: 'pkg-free',
-    code: PACKAGE_CODES.HR_FREE,
-    name: 'HR Free',
-    maxActiveJobs: 1,
+  const freeCandidate = {
+    id: 'pkg-c-free',
+    code: PACKAGE_CODES.CANDIDATE_FREE,
+    name: 'Candidate Free',
+    audience: PackageAudience.CANDIDATE,
+    maxActiveJobs: null,
     cvUnlockQuota: 0,
     aiRanking: false,
     advancedFilters: false,
     recruitmentStats: false,
     talentPoolAccess: false,
+    jdFitAnalysis: false,
+    cvImproveSuggestions: false,
+    jdFitQuota: 0,
+    aiMockInterview: false,
+    mockInterviewQuota: 0,
     durationDays: null,
     priceVnd: 0,
   };
 
-  const proPackage = {
-    id: 'pkg-pro',
-    code: PACKAGE_CODES.HR_PRO,
-    name: 'HR Pro 30 ngày',
-    maxActiveJobs: null,
-    cvUnlockQuota: 0,
-    aiRanking: true,
-    advancedFilters: true,
-    recruitmentStats: false,
-    talentPoolAccess: false,
+  const proCandidate = {
+    ...freeCandidate,
+    id: 'pkg-c-pro',
+    code: PACKAGE_CODES.CANDIDATE_PRO,
+    name: 'Candidate Pro',
+    priceVnd: 69000,
     durationDays: 30,
-    priceVnd: 249000,
+    jdFitAnalysis: true,
+    cvImproveSuggestions: true,
+    jdFitQuota: 10,
   };
 
-  const premiumPackage = {
-    id: 'pkg-premium',
-    code: PACKAGE_CODES.HR_PREMIUM,
-    name: 'HR Premium 30 ngày',
-    maxActiveJobs: null,
-    cvUnlockQuota: 50,
-    aiRanking: true,
-    advancedFilters: true,
-    recruitmentStats: true,
-    talentPoolAccess: true,
-    durationDays: 30,
-    priceVnd: 599000,
+  const premiumCandidate = {
+    ...proCandidate,
+    id: 'pkg-c-premium',
+    code: PACKAGE_CODES.CANDIDATE_PREMIUM,
+    name: 'Candidate Premium',
+    priceVnd: 129000,
+    aiMockInterview: true,
+    mockInterviewQuota: 5,
   };
 
   beforeEach(() => {
     prisma = {
       servicePackage: {
-        findUnique: jest.fn(),
+        findUnique: jest.fn().mockResolvedValue(freeCandidate),
         findFirst: jest.fn(),
-      },
-      recruiterProfile: {
-        findUnique: jest.fn().mockResolvedValue({
-          id: 'rec-1',
-          companyId: 'company-1',
-        }),
       },
       packageEntitlement: {
-        findFirst: jest.fn(),
-        findMany: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        update: jest.fn(),
         create: jest.fn(),
-        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
-      jobPosting: {
-        count: jest.fn().mockResolvedValue(0),
+      packageUsageLog: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        create: jest.fn(),
+        update: jest.fn(),
       },
+      jobPosting: { count: jest.fn().mockResolvedValue(0) },
+      recruiterProfile: { findUnique: jest.fn() },
+      $transaction: jest.fn(async (fn: (tx: typeof prisma) => unknown) =>
+        fn(prisma),
+      ),
     };
-
-    service = new EntitlementsService(prisma as never);
+    service = new EntitlementsService(prisma);
   });
 
-  it('bootstraps HR Free entitlement when missing', async () => {
-    prisma.servicePackage.findUnique.mockResolvedValue(freePackage);
-    prisma.packageEntitlement.findFirst.mockResolvedValue(null);
-    prisma.packageEntitlement.create.mockResolvedValue({
-      id: 'ent-free',
-      ...freePackage,
-      package: freePackage,
-      maxActiveJobs: 1,
-      cvUnlockRemaining: 0,
-      startsAt: new Date(),
-      endsAt: null,
-    });
-    prisma.packageEntitlement.findMany.mockResolvedValue([
-      {
-        id: 'ent-free',
-        maxActiveJobs: 1,
-        cvUnlockRemaining: 0,
-        aiRanking: false,
-        advancedFilters: false,
-        recruitmentStats: false,
-        talentPoolAccess: false,
-        startsAt: new Date(),
-        endsAt: null,
-        package: freePackage,
-      },
-    ]);
-
-    const result = await service.getEffectiveEntitlement('user-1');
-
-    expect(result.packageCode).toBe(PACKAGE_CODES.HR_FREE);
-    expect(result.maxActiveJobs).toBe(1);
-    expect(prisma.packageEntitlement.create).toHaveBeenCalled();
+  it('returns virtual Free without creating DB entitlement', async () => {
+    const result = await service.getEffectiveEntitlement(
+      'user-1',
+      PackageAudience.CANDIDATE,
+    );
+    expect(result.isVirtualFree).toBe(true);
+    expect(result.packageCode).toBe(PACKAGE_CODES.CANDIDATE_FREE);
+    expect(result.entitlementId).toBeNull();
+    expect(prisma.packageEntitlement.create).not.toHaveBeenCalled();
   });
 
-  it('prefers Premium over Free when both active', async () => {
-    prisma.packageEntitlement.findMany.mockResolvedValue([
-      {
-        id: 'ent-free',
-        maxActiveJobs: 1,
-        cvUnlockRemaining: 0,
-        aiRanking: false,
-        advancedFilters: false,
-        recruitmentStats: false,
-        talentPoolAccess: false,
-        startsAt: new Date(),
-        endsAt: null,
-        package: freePackage,
-      },
-      {
-        id: 'ent-premium',
-        maxActiveJobs: null,
-        cvUnlockRemaining: 40,
-        aiRanking: true,
-        advancedFilters: true,
-        recruitmentStats: true,
-        talentPoolAccess: true,
-        startsAt: new Date(),
-        endsAt: new Date(Date.now() + 86400000),
-        package: premiumPackage,
-      },
-    ]);
-    prisma.servicePackage.findUnique.mockResolvedValue(freePackage);
-    prisma.packageEntitlement.findFirst.mockResolvedValue({
-      id: 'ent-free',
-      package: freePackage,
-    });
-
-    const result = await service.getEffectiveEntitlement('user-1');
-
-    expect(result.packageCode).toBe(PACKAGE_CODES.HR_PREMIUM);
-    expect(result.talentPoolAccess).toBe(true);
-  });
-
-  it('blocks publishing when Free quota is exhausted', async () => {
-    prisma.servicePackage.findUnique.mockResolvedValue(freePackage);
-    prisma.packageEntitlement.findFirst.mockResolvedValue({
-      id: 'ent-free',
-      package: freePackage,
-    });
-    prisma.packageEntitlement.findMany.mockResolvedValue([
-      {
-        id: 'ent-free',
-        maxActiveJobs: 1,
-        cvUnlockRemaining: 0,
-        aiRanking: false,
-        advancedFilters: false,
-        recruitmentStats: false,
-        talentPoolAccess: false,
-        startsAt: new Date(),
-        endsAt: null,
-        package: freePackage,
-      },
-    ]);
-    prisma.jobPosting.count.mockResolvedValue(1);
-
-    await expect(service.assertCanPublishJob('user-1')).rejects.toThrow(
+  it('blocks JD-fit on Free', async () => {
+    await expect(service.assertCandidateJdFit('user-1')).rejects.toThrow(
       ForbiddenException,
     );
   });
 
-  it('allows unlimited publish for Pro', async () => {
-    prisma.servicePackage.findUnique.mockResolvedValue(freePackage);
-    prisma.packageEntitlement.findFirst.mockResolvedValue({
-      id: 'ent-free',
-      package: freePackage,
-    });
+  it('allows JD-fit on Pro and consumes quota idempotently', async () => {
     prisma.packageEntitlement.findMany.mockResolvedValue([
       {
         id: 'ent-pro',
         maxActiveJobs: null,
         cvUnlockRemaining: 0,
-        aiRanking: true,
-        advancedFilters: true,
+        aiRanking: false,
+        advancedFilters: false,
         recruitmentStats: false,
         talentPoolAccess: false,
+        jdFitAnalysis: true,
+        cvImproveSuggestions: true,
+        jdFitRemaining: 10,
+        aiMockInterview: false,
+        mockInterviewRemaining: 0,
         startsAt: new Date(),
         endsAt: new Date(Date.now() + 86400000),
-        package: proPackage,
+        package: proCandidate,
       },
     ]);
-
-    await expect(service.assertCanPublishJob('user-1')).resolves.toMatchObject({
-      packageCode: PACKAGE_CODES.HR_PRO,
+    prisma.packageUsageLog.create.mockResolvedValue({
+      id: 'usage-1',
+      requestId: 'req-1',
+      status: 'CONSUMED',
     });
-    expect(prisma.jobPosting.count).not.toHaveBeenCalled();
+
+    const first = await service.consumeQuotaAtomically({
+      userId: 'user-1',
+      audience: PackageAudience.CANDIDATE,
+      featureCode: USAGE_FEATURES.JD_FIT_ANALYSIS,
+      requestId: 'req-1',
+      quotaField: 'jdFitRemaining',
+    });
+    expect(first.reused).toBe(false);
+    expect(prisma.packageEntitlement.updateMany).toHaveBeenCalled();
+
+    prisma.packageUsageLog.findUnique.mockResolvedValue({
+      id: 'usage-1',
+      requestId: 'req-1',
+      status: 'CONSUMED',
+    });
+    const second = await service.consumeQuotaAtomically({
+      userId: 'user-1',
+      audience: PackageAudience.CANDIDATE,
+      featureCode: USAGE_FEATURES.JD_FIT_ANALYSIS,
+      requestId: 'req-1',
+      quotaField: 'jdFitRemaining',
+    });
+    expect(second.reused).toBe(true);
   });
 
-  it('requires Premium for talent pool', async () => {
-    prisma.servicePackage.findUnique.mockResolvedValue(freePackage);
-    prisma.packageEntitlement.findFirst.mockResolvedValue({
-      id: 'ent-pro',
-      package: proPackage,
+  it('refunds quota on AI failure path', async () => {
+    prisma.packageUsageLog.findUnique.mockResolvedValue({
+      id: 'usage-1',
+      entitlementId: 'ent-pro',
+      status: 'CONSUMED',
     });
+    await service.refundQuotaForRequest({
+      userId: 'user-1',
+      requestId: 'req-fail',
+      quotaField: 'jdFitRemaining',
+    });
+    expect(prisma.packageEntitlement.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { jdFitRemaining: { increment: 1 } },
+      }),
+    );
+    expect(prisma.packageUsageLog.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { status: 'REFUNDED' },
+      }),
+    );
+  });
+
+  it('rejects concurrent consume when quota is zero', async () => {
     prisma.packageEntitlement.findMany.mockResolvedValue([
       {
         id: 'ent-pro',
         maxActiveJobs: null,
         cvUnlockRemaining: 0,
-        aiRanking: true,
-        advancedFilters: true,
+        aiRanking: false,
+        advancedFilters: false,
         recruitmentStats: false,
         talentPoolAccess: false,
+        jdFitAnalysis: true,
+        cvImproveSuggestions: true,
+        jdFitRemaining: 0,
+        aiMockInterview: false,
+        mockInterviewRemaining: 0,
         startsAt: new Date(),
         endsAt: new Date(Date.now() + 86400000),
-        package: proPackage,
+        package: proCandidate,
       },
     ]);
+    prisma.packageEntitlement.updateMany.mockResolvedValue({ count: 0 });
 
-    await expect(service.assertTalentPool('user-1')).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(
+      service.consumeQuotaAtomically({
+        userId: 'user-1',
+        audience: PackageAudience.CANDIDATE,
+        featureCode: USAGE_FEATURES.JD_FIT_ANALYSIS,
+        requestId: 'req-empty',
+        quotaField: 'jdFitRemaining',
+      }),
+    ).rejects.toThrow(ForbiddenException);
   });
 
-  it('activates paid entitlement from order', async () => {
-    prisma.servicePackage.findFirst.mockResolvedValue(proPackage);
-    prisma.packageEntitlement.updateMany.mockResolvedValue({ count: 1 });
+  it('upgrades Pro to Premium by expiring prior paid entitlement', async () => {
+    prisma.servicePackage.findFirst.mockResolvedValue(premiumCandidate);
     prisma.packageEntitlement.create.mockResolvedValue({
-      id: 'ent-new',
-      package: proPackage,
+      id: 'ent-premium',
+      package: premiumCandidate,
     });
 
     await service.activateFromPaidOrder({
       userId: 'user-1',
-      packageId: proPackage.id,
-      orderId: 'order-1',
-      companyId: 'company-1',
+      packageId: premiumCandidate.id,
+      orderId: 'order-premium',
+      audience: PackageAudience.CANDIDATE,
     });
 
-    expect(prisma.servicePackage.findFirst).toHaveBeenCalledWith(
+    expect(prisma.packageEntitlement.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({
-          audience: PackageAudience.EMPLOYER,
-        }),
+        data: { status: EntitlementStatus.EXPIRED },
       }),
     );
     expect(prisma.packageEntitlement.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          orderId: 'order-1',
-          status: EntitlementStatus.ACTIVE,
-          aiRanking: true,
+          orderId: 'order-premium',
+          aiMockInterview: true,
+          mockInterviewRemaining: 5,
+          jdFitRemaining: 10,
         }),
       }),
     );
   });
 
-  it('throws when free package catalog is missing', async () => {
-    prisma.servicePackage.findUnique.mockResolvedValue(null);
-
-    await expect(service.ensureFreeEntitlement('user-1')).rejects.toThrow(
-      NotFoundException,
-    );
+  it('requires Premium for mock interview', async () => {
+    prisma.packageEntitlement.findMany.mockResolvedValue([
+      {
+        id: 'ent-pro',
+        maxActiveJobs: null,
+        cvUnlockRemaining: 0,
+        aiRanking: false,
+        advancedFilters: false,
+        recruitmentStats: false,
+        talentPoolAccess: false,
+        jdFitAnalysis: true,
+        cvImproveSuggestions: true,
+        jdFitRemaining: 5,
+        aiMockInterview: false,
+        mockInterviewRemaining: 0,
+        startsAt: new Date(),
+        endsAt: new Date(Date.now() + 86400000),
+        package: proCandidate,
+      },
+    ]);
+    await expect(
+      service.assertCandidateMockInterview('user-1'),
+    ).rejects.toThrow(ForbiddenException);
   });
 });

@@ -238,12 +238,19 @@ export class TalentPoolService {
         'Đã hết lượt mở khóa CV trong gói hiện tại. Gia hạn Premium hoặc chờ chu kỳ mới.',
       );
     }
+    if (!entitlement.entitlementId) {
+      throw new ForbiddenException(
+        'Gói Free không hỗ trợ mở khóa CV. Nâng cấp HR Premium.',
+      );
+    }
+
+    const entitlementId = entitlement.entitlementId;
 
     try {
       await this.prisma.$transaction(async (tx) => {
         const updated = await tx.packageEntitlement.updateMany({
           where: {
-            id: entitlement.entitlementId,
+            id: entitlementId,
             status: EntitlementStatus.ACTIVE,
             cvUnlockRemaining: { gt: 0 },
           },
@@ -255,7 +262,7 @@ export class TalentPoolService {
 
         await tx.cvUnlock.create({
           data: {
-            entitlementId: entitlement.entitlementId,
+            entitlementId,
             unlockedByUserId: userId,
             candidateProfileId,
           },

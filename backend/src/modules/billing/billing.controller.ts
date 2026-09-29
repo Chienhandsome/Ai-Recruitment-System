@@ -10,9 +10,11 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { PackageAudience } from '@prisma/client';
 import { BillingService } from './billing.service';
 import { TalentPoolService } from './talent-pool.service';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -22,7 +24,11 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryTalentPoolDto } from './dto/query-talent-pool.dto';
 import { Public } from '../auth/decorators/public.decorator';
 
-@ApiTags('Billing / Employer Packages')
+/**
+ * Shared billing HTTP surface. Candidate and HR both use BillingService core.
+ * Talent-pool endpoints remain RECRUITER-only (HR feature), not imported by Candidate UI.
+ */
+@ApiTags('Billing')
 @ApiBearerAuth()
 @Controller('billing')
 export class BillingController {
@@ -33,21 +39,41 @@ export class BillingController {
 
   @Get('packages')
   @Public()
-  @ApiOperation({ summary: 'List active employer packages (public catalog)' })
-  listPackages() {
-    return this.billingService.listEmployerPackages(false);
+  @ApiOperation({ summary: 'List active packages by audience' })
+  @ApiQuery({
+    name: 'audience',
+    required: false,
+    enum: PackageAudience,
+    description: 'Default CANDIDATE for public catalog in Candidate demo',
+  })
+  listPackages(@Query('audience') audience?: string) {
+    const resolved =
+      audience === 'EMPLOYER'
+        ? PackageAudience.EMPLOYER
+        : PackageAudience.CANDIDATE;
+    return this.billingService.listPackages(resolved, false);
   }
 
   @Get('me')
-  @Roles('RECRUITER')
-  @ApiOperation({ summary: 'Get current recruiter package entitlement status' })
-  getMyStatus(@CurrentUser() user: AuthenticatedUser) {
-    return this.billingService.getMyStatus(user.id);
+  @Roles('CANDIDATE', 'RECRUITER')
+  @ApiOperation({ summary: 'Current package entitlement for caller role audience' })
+  @ApiQuery({ name: 'audience', required: false, enum: PackageAudience })
+  getMyStatus(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('audience') audience?: string,
+  ) {
+    const resolved =
+      audience === 'EMPLOYER'
+        ? PackageAudience.EMPLOYER
+        : audience === 'CANDIDATE'
+          ? PackageAudience.CANDIDATE
+          : PackageAudience.CANDIDATE;
+    return this.billingService.getMyStatus(user.id, resolved);
   }
 
   @Post('orders')
-  @Roles('RECRUITER')
-  @ApiOperation({ summary: 'Create a pending package order' })
+  @Roles('CANDIDATE', 'RECRUITER')
+  @ApiOperation({ summary: 'Create pending package order (audience inferred from package code)' })
   createOrder(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateOrderDto,
@@ -56,15 +82,23 @@ export class BillingController {
   }
 
   @Get('orders')
-  @Roles('RECRUITER')
-  @ApiOperation({ summary: 'List my package orders' })
-  listOrders(@CurrentUser() user: AuthenticatedUser) {
-    return this.billingService.listMyOrders(user.id);
+  @Roles('CANDIDATE', 'RECRUITER')
+  @ApiQuery({ name: 'audience', required: false, enum: PackageAudience })
+  listOrders(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('audience') audience?: string,
+  ) {
+    const resolved =
+      audience === 'EMPLOYER'
+        ? PackageAudience.EMPLOYER
+        : audience === 'CANDIDATE'
+          ? PackageAudience.CANDIDATE
+          : undefined;
+    return this.billingService.listMyOrders(user.id, resolved);
   }
 
   @Get('orders/:orderId')
-  @Roles('RECRUITER')
-  @ApiOperation({ summary: 'Get package order detail' })
+  @Roles('CANDIDATE', 'RECRUITER')
   getOrder(
     @CurrentUser() user: AuthenticatedUser,
     @Param('orderId', ParseUUIDPipe) orderId: string,
@@ -73,20 +107,25 @@ export class BillingController {
   }
 
   @Post('orders/:orderId/checkout')
-  @Roles('RECRUITER')
-  @ApiOperation({ summary: 'Start sandbox checkout for an order' })
+  @Roles('CANDIDATE', 'RECRUITER')
+  @ApiOperation({ summary: 'Start sandbox checkout' })
   @ApiResponse({ status: 200, description: 'Returns mock checkout URL' })
+  @ApiQuery({ name: 'path', required: false, description: 'Frontend base path e.g. /candidate/billing' })
   checkout(
     @CurrentUser() user: AuthenticatedUser,
     @Param('orderId', ParseUUIDPipe) orderId: string,
+    @Query('path') path?: string,
   ) {
-    return this.billingService.checkout(user.id, orderId);
+    const checkoutPath = path?.startsWith('/')
+      ? path
+      : '/candidate/billing';
+    return this.billingService.checkout(user.id, orderId, checkoutPath);
   }
 
   @Post('orders/:orderId/mock-pay')
-  @Roles('RECRUITER')
+  @Roles('CANDIDATE', 'RECRUITER')
   @ApiOperation({
-    summary: 'Confirm sandbox/mock payment and activate entitlement',
+    summary: 'Confirm sandbox mock payment (disabled in production)',
   })
   mockPay(
     @CurrentUser() user: AuthenticatedUser,
@@ -96,17 +135,25 @@ export class BillingController {
   }
 
   @Get('transactions')
-  @Roles('RECRUITER')
-  @ApiOperation({ summary: 'List my payment transactions' })
-  listTransactions(@CurrentUser() user: AuthenticatedUser) {
-    return this.billingService.listMyTransactions(user.id);
+  @Roles('CANDIDATE', 'RECRUITER')
+  @ApiQuery({ name: 'audience', required: false, enum: PackageAudience })
+  listTransactions(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('audience') audience?: string,
+  ) {
+    const resolved =
+      audience === 'EMPLOYER'
+        ? PackageAudience.EMPLOYER
+        : audience === 'CANDIDATE'
+          ? PackageAudience.CANDIDATE
+          : undefined;
+    return this.billingService.listMyTransactions(user.id, resolved);
   }
+
+  // --- HR-only talent pool (kept; Candidate demo does not surface these) ---
 
   @Get('talent-pool')
   @Roles('RECRUITER')
-  @ApiOperation({
-    summary: 'Search public talent pool (Premium). Contact info redacted until unlock.',
-  })
   searchTalentPool(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: QueryTalentPoolDto,
@@ -116,7 +163,6 @@ export class BillingController {
 
   @Get('talent-pool/:candidateProfileId')
   @Roles('RECRUITER')
-  @ApiOperation({ summary: 'Get public talent profile (contact gated)' })
   getTalentProfile(
     @CurrentUser() user: AuthenticatedUser,
     @Param('candidateProfileId', ParseUUIDPipe) candidateProfileId: string,
@@ -126,7 +172,6 @@ export class BillingController {
 
   @Post('talent-pool/:candidateProfileId/unlock')
   @Roles('RECRUITER')
-  @ApiOperation({ summary: 'Unlock candidate contact from talent pool (Premium)' })
   unlockTalent(
     @CurrentUser() user: AuthenticatedUser,
     @Param('candidateProfileId', ParseUUIDPipe) candidateProfileId: string,

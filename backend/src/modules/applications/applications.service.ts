@@ -44,6 +44,7 @@ import {
   toPrismaJson,
 } from './application-evaluation.snapshot';
 import { EntitlementsService } from '../billing/entitlements.service';
+import { PackageAudience } from '@prisma/client';
 
 const candidateProfileInclude = {
   workExperiences: true,
@@ -296,7 +297,10 @@ export class ApplicationsService {
     userId: string,
     query: QueryRecruiterApplicationsDto,
   ) {
-    const entitlement = await this.entitlements.getEffectiveEntitlement(userId);
+    const entitlement = await this.entitlements.getEffectiveEntitlement(
+      userId,
+      PackageAudience.EMPLOYER,
+    );
     const wantsAdvancedFilters =
       query.minScore !== undefined || query.maxScore !== undefined;
     const wantsAiSort = query.sortBy === ApplicationSortBy.AI_SCORE;

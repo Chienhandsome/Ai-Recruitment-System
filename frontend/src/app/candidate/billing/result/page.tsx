@@ -18,9 +18,7 @@ function ResultContent() {
   const orderId = searchParams.get("orderId");
   const status = searchParams.get("status");
   const [order, setOrder] = useState<PackageOrder | null>(null);
-  const [entitlement, setEntitlement] = useState<EntitlementStatus | null>(
-    null,
-  );
+  const [entitlement, setEntitlement] = useState<EntitlementStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,7 +35,7 @@ function ResultContent() {
       try {
         const [orderData, entitlementData] = await Promise.all([
           getOrder(session.access_token, orderId),
-          getMyEntitlement(session.access_token, "EMPLOYER"),
+          getMyEntitlement(session.access_token, "CANDIDATE"),
         ]);
         setOrder(orderData);
         setEntitlement(entitlementData);
@@ -63,31 +61,27 @@ function ResultContent() {
         </h1>
         {order && (
           <p className="mt-2 text-sm text-slate-600">
-            Đơn {order.orderCode} · {order.package.name} ·{" "}
-            {formatVnd(order.amountVnd)}
+            {order.package.name} · {formatVnd(order.amountVnd)}
           </p>
         )}
         {entitlement && success && (
-          <p className="mt-3 text-sm text-slate-700">
+          <p className="mt-3 text-sm">
             Gói hiện tại: <strong>{entitlement.packageName}</strong>
-            {entitlement.endsAt
-              ? ` (đến ${new Date(entitlement.endsAt).toLocaleDateString("vi-VN")})`
-              : ""}
           </p>
         )}
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
         <div className="mt-6 flex flex-col gap-3">
           <Link
-            href="/recruiter/billing"
+            href="/candidate/billing"
             className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"
           >
             Xem trạng thái gói
           </Link>
           <Link
-            href="/recruiter/dashboard"
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium"
+            href="/candidate"
+            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm"
           >
-            Về dashboard
+            Về việc làm
           </Link>
         </div>
       </div>
@@ -95,16 +89,10 @@ function ResultContent() {
   );
 }
 
-export default function BillingResultPage() {
+export default function CandidateBillingResultPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Suspense
-        fallback={
-          <div className="p-10 text-center text-sm text-slate-500">
-            Đang tải kết quả...
-          </div>
-        }
-      >
+      <Suspense fallback={<div className="p-10 text-center text-sm">Đang tải...</div>}>
         <ResultContent />
       </Suspense>
     </div>

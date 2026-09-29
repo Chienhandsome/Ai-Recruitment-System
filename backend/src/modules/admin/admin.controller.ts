@@ -26,6 +26,7 @@ import {
 } from './dto/update-admin-status.dto';
 import { BillingService } from '../billing/billing.service';
 import { UpdatePackageDto } from '../billing/dto/update-package.dto';
+import { PackageAudience } from '@prisma/client';
 
 @ApiTags('Admin Workspace')
 @ApiBearerAuth()
@@ -110,12 +111,22 @@ export class AdminController {
     return this.adminService.deleteUser(id);
   }
 
-  // --- EMPLOYER PACKAGE CONFIG ---
+  // --- PACKAGE CONFIG (ADMIN only via class-level @Roles) ---
 
   @Get('packages')
-  @ApiOperation({ summary: 'List all employer packages (including inactive)' })
-  listPackages() {
-    return this.billingService.listEmployerPackages(true);
+  @ApiOperation({ summary: 'List packages by audience (including inactive)' })
+  @ApiQuery({ name: 'audience', required: false, enum: ['EMPLOYER', 'CANDIDATE'] })
+  listPackages(@Query('audience') audience?: string) {
+    if (audience === 'EMPLOYER') {
+      return this.billingService.listPackages(PackageAudience.EMPLOYER, true);
+    }
+    if (audience === 'CANDIDATE') {
+      return this.billingService.listPackages(PackageAudience.CANDIDATE, true);
+    }
+    return Promise.all([
+      this.billingService.listPackages(PackageAudience.EMPLOYER, true),
+      this.billingService.listPackages(PackageAudience.CANDIDATE, true),
+    ]).then(([employer, candidate]) => [...employer, ...candidate]);
   }
 
   @Patch('packages/:id')

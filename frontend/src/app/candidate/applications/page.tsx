@@ -19,6 +19,7 @@ import { applicationStageLabels, applicationStageStyles } from '@/lib/applicatio
 import { interviewTypeLabels } from '@/lib/interview-api';
 import { CandidateApplicationInterviews } from '@/components/candidate/CandidateApplicationInterviews';
 import { CandidateOfferCard } from '@/components/candidate/offers/CandidateOfferCard';
+import { CandidatePremiumActions } from '@/components/candidate/CandidatePremiumActions';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -182,6 +183,13 @@ export default async function CandidateApplicationsPage({
                       recruiterInfo={application.job.recruiter}
                     />
                   )}
+
+                  <CandidatePremiumActions
+                    jobId={application.job.id}
+                    applicationId={application.id}
+                    hasApplied
+                    compact
+                  />
                 </div>
                 <Button asChild variant="outline" size="sm">
                   <Link href={`/candidate/jobs/${application.job.id}`}>Xem công việc</Link>

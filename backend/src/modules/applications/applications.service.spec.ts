@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ApplicationsService } from './applications.service';
+import { EvaluationPayloadBuilder } from '../evaluation/evaluation-payload.builder';
 
 const now = new Date('2026-08-09T10:00:00.000Z');
 
@@ -170,6 +171,7 @@ describe('ApplicationsService', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.applyForJob(
@@ -261,6 +263,7 @@ describe('ApplicationsService', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -287,6 +290,7 @@ describe('ApplicationsService', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -314,6 +318,7 @@ describe('ApplicationsService', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -336,6 +341,7 @@ describe('ApplicationsService', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.applyForJob(
@@ -376,6 +382,7 @@ describe('ApplicationsService', () => {
       {
         getEffectiveEntitlement: jest.fn(),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -424,6 +431,7 @@ describe('ApplicationsService', () => {
       {
         getEffectiveEntitlement: jest.fn(),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(

@@ -7,6 +7,7 @@ import {
 } from '@prisma/client';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
+import { EvaluationPayloadBuilder } from '../evaluation/evaluation-payload.builder';
 import {
   ApplicationSortBy,
   SortOrder,
@@ -66,6 +67,7 @@ describe('ApplicationsService decision workflow', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.updateStage(
@@ -121,6 +123,7 @@ describe('ApplicationsService decision workflow', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -145,6 +148,7 @@ describe('ApplicationsService decision workflow', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -204,6 +208,7 @@ describe('ApplicationsService decision workflow', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.findAllForRecruiter('user-1', {
@@ -264,6 +269,7 @@ describe('ApplicationsService decision workflow', () => {
           advancedFilters: true,
         }),
       } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.findMine('candidate-user-1', {

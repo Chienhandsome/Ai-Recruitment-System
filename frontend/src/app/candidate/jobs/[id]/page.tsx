@@ -24,6 +24,7 @@ import {
 } from '@/lib/job-display';
 import { createClient } from '@/lib/supabase/server';
 import { ApplyButton } from '@/components/candidate/apply-button';
+import { CandidatePremiumActions } from '@/components/candidate/CandidatePremiumActions';
 import { applicationStageLabels, applicationStageStyles } from '@/lib/application-stage';
 
 export const dynamic = 'force-dynamic';
@@ -212,6 +213,13 @@ export default async function CandidateJobDetailPage({
               <Button asChild variant="outline" className="mt-3 w-full">
                 <Link href="/candidate/profile">Cập nhật hồ sơ của tôi</Link>
               </Button>
+            )}
+            {!!session?.access_token && (
+              <CandidatePremiumActions
+                jobId={job.id}
+                applicationId={job.application?.id}
+                hasApplied={job.hasApplied}
+              />
             )}
           </section>
         </aside>

@@ -16,8 +16,16 @@ import { PrismaService } from '../../database/prisma.service';
 import { EntitlementsService } from '../billing/entitlements.service';
 import { USAGE_FEATURES } from '../billing/billing.types';
 import { AiInterviewsService } from '../interviews/ai-interviews.service';
+import { AiMatchingClient } from '../evaluation/ai-matching.client';
+import { EvaluationPayloadBuilderService } from '../evaluation/evaluation-payload.builder.service';
+import {
+  evaluationCandidateInclude,
+  evaluationJobInclude,
+  evaluationResumeSelect,
+} from '../evaluation/evaluation-payload.builder';
 import { CreateJdFitAnalysisDto } from './dto/create-jd-fit-analysis.dto';
 import { CreateCandidateMockInterviewDto } from './dto/create-candidate-mock-interview.dto';
+import { mapAiResultToCandidateJdFit } from './jd-fit-ai.mapper';
 
 @Injectable()
 export class CandidateInsightsService {
@@ -25,9 +33,12 @@ export class CandidateInsightsService {
     private readonly prisma: PrismaService,
     private readonly entitlements: EntitlementsService,
     private readonly aiInterviews: AiInterviewsService,
+    private readonly payloadBuilder: EvaluationPayloadBuilderService,
+    private readonly aiMatching: AiMatchingClient,
   ) {}
 
   async analyzeJdFit(userId: string, dto: CreateJdFitAnalysisDto) {
+    // 1) Idempotency: same requestId never re-calls AI / re-consumes quota
     const existingUsage = await this.entitlements.findUsageByRequestId(
       userId,
       dto.requestId,
@@ -41,39 +52,31 @@ export class CandidateInsightsService {
       }
     }
 
+    // 2) Entitlement / quota gate before AI
     await this.entitlements.assertCandidateJdFit(userId);
 
     const candidate = await this.prisma.candidateProfile.findUnique({
       where: { userId },
-      select: {
-        id: true,
-        primaryResumeId: true,
-        fullName: true,
-        desiredTitle: true,
-        professionalSummary: true,
-        candidateSkills: {
-          select: { skill: { select: { name: true } }, isPrimary: true },
-        },
-      },
+      include: evaluationCandidateInclude,
     });
     if (!candidate) {
       throw new NotFoundException('Không tìm thấy hồ sơ ứng viên.');
     }
 
-    const resumeId = dto.resumeId ?? candidate.primaryResumeId;
-    if (!resumeId) {
-      throw new BadRequestException(
-        'Cần có CV đã parse (primary resume) để phân tích.',
-      );
-    }
+    const resumeRef = await this.resolveParsedResumeForJdFit({
+      candidateId: candidate.id,
+      primaryResumeId: candidate.primaryResumeId,
+      preferredResumeId: dto.resumeId,
+      jobId: dto.jobId,
+    });
 
     const resume = await this.prisma.resume.findFirst({
       where: {
-        id: resumeId,
+        id: resumeRef.id,
         candidateId: candidate.id,
         parsingStatus: ResumeParsingStatus.PARSED,
       },
-      select: { id: true },
+      select: evaluationResumeSelect,
     });
     if (!resume) {
       throw new ForbiddenException(
@@ -87,40 +90,44 @@ export class CandidateInsightsService {
         status: JobStatus.PUBLISHED,
         OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
       },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        requirements: true,
-        jobSkills: {
-          select: {
-            requirementType: true,
-            skill: { select: { name: true } },
-          },
-        },
-      },
+      include: evaluationJobInclude,
     });
     if (!job) {
-      throw new NotFoundException('Tin tuyển dụng không tồn tại hoặc không còn mở.');
-    }
-
-    let analysisPayload: {
-      overallScore: number;
-      matchLevel: MatchLevel;
-      analysis: Record<string, unknown>;
-      suggestions: unknown[];
-    };
-
-    try {
-      analysisPayload = await this.buildJdFitResult(candidate, job);
-    } catch (error) {
-      throw new BadGatewayException(
-        error instanceof Error
-          ? `Phân tích AI thất bại, quota không bị trừ: ${error.message}`
-          : 'Phân tích AI thất bại, quota không bị trừ.',
+      throw new NotFoundException(
+        'Tin tuyển dụng không tồn tại hoặc không còn mở.',
       );
     }
 
+    const application = await this.prisma.application.findFirst({
+      where: { jobId: job.id, candidateId: candidate.id },
+      select: { id: true },
+    });
+
+    const evaluationApplicationId =
+      application?.id ?? `candidate-jd-fit:${dto.requestId}`;
+
+    const scopedProfile = this.payloadBuilder.scopeCandidateProfileToResume(
+      candidate,
+      resume.id,
+    );
+
+    const evaluationPayload = this.payloadBuilder.buildEvaluationRequest({
+      applicationId: evaluationApplicationId,
+      profile: scopedProfile,
+      resume,
+      job,
+    });
+
+    // 3) Call shared AI Matching Engine — failures must not consume quota
+    let mapped: ReturnType<typeof mapAiResultToCandidateJdFit>;
+    try {
+      const aiResult = await this.aiMatching.evaluate(evaluationPayload);
+      mapped = mapAiResultToCandidateJdFit(aiResult);
+    } catch (error) {
+      this.aiMatching.toHttpException(error);
+    }
+
+    // 4) Consume quota only after AI success, then persist (refund on DB failure)
     const consume = await this.entitlements.consumeQuotaAtomically({
       userId,
       audience: PackageAudience.CANDIDATE,
@@ -153,10 +160,10 @@ export class CandidateInsightsService {
           jobId: job.id,
           resumeId: resume.id,
           requestId: dto.requestId,
-          overallScore: analysisPayload.overallScore,
-          matchLevel: analysisPayload.matchLevel,
-          analysis: analysisPayload.analysis as Prisma.InputJsonValue,
-          suggestions: analysisPayload.suggestions as Prisma.InputJsonValue,
+          overallScore: mapped.overallScore,
+          matchLevel: mapped.matchLevel,
+          analysis: mapped.analysis as Prisma.InputJsonValue,
+          suggestions: mapped.suggestions as Prisma.InputJsonValue,
         },
       });
       return { ...this.serializeAnalysis(saved), reused: false };
@@ -222,7 +229,9 @@ export class CandidateInsightsService {
       select: { id: true, title: true },
     });
     if (!job) {
-      throw new NotFoundException('Tin tuyển dụng không tồn tại hoặc không còn mở.');
+      throw new NotFoundException(
+        'Tin tuyển dụng không tồn tại hoặc không còn mở.',
+      );
     }
 
     const candidate = await this.prisma.candidateProfile.findUnique({
@@ -247,7 +256,9 @@ export class CandidateInsightsService {
       );
     }
     if (dto.applicationId && dto.applicationId !== application.id) {
-      throw new ForbiddenException('applicationId không thuộc về bạn hoặc không khớp job.');
+      throw new ForbiddenException(
+        'applicationId không thuộc về bạn hoặc không khớp job.',
+      );
     }
 
     let sessionResult: {
@@ -264,7 +275,11 @@ export class CandidateInsightsService {
           `Hãy giới thiệu ngắn gọn về kinh nghiệm phù hợp với vị trí ${job.title}.`,
           'Bạn giải quyết xung đột trong team như thế nào?',
         ],
-        competencies: ['technical_experience', 'problem_solving', 'communication'],
+        competencies: [
+          'technical_experience',
+          'problem_solving',
+          'communication',
+        ],
         maxQuestions: 6,
         expiresInHours: 72,
       });
@@ -311,149 +326,90 @@ export class CandidateInsightsService {
       select: { id: true },
     });
     if (!application) {
-      throw new ForbiddenException('Bạn không có quyền truy cập phiên phỏng vấn này.');
+      throw new ForbiddenException(
+        'Bạn không có quyền truy cập phiên phỏng vấn này.',
+      );
     }
   }
 
-  private async buildJdFitResult(
-    candidate: {
-      desiredTitle: string | null;
-      professionalSummary: string | null;
-      candidateSkills: Array<{
-        isPrimary: boolean;
-        skill: { name: string };
-      }>;
-    },
-    job: {
-      title: string;
-      description: string;
-      requirements: string | null;
-      jobSkills: Array<{
-        requirementType: string;
-        skill: { name: string };
-      }>;
-    },
-  ) {
-    const candidateSkillNames = candidate.candidateSkills.map((s) =>
-      s.skill.name.toLowerCase(),
-    );
-    const required = job.jobSkills.filter(
-      (s) => s.requirementType === 'MANDATORY',
-    );
-    const preferred = job.jobSkills.filter(
-      (s) => s.requirementType !== 'MANDATORY',
-    );
+  /**
+   * Prefer explicit resumeId → primary if PARSED → application CV for this job →
+   * latest PARSED resume. Surface clear Vietnamese errors when CV is missing/stuck.
+   */
+  private async resolveParsedResumeForJdFit(params: {
+    candidateId: string;
+    primaryResumeId: string | null;
+    preferredResumeId?: string;
+    jobId: string;
+  }): Promise<{ id: string }> {
+    const { candidateId, primaryResumeId, preferredResumeId, jobId } = params;
 
-    const matchedRequired = required.filter((s) =>
-      candidateSkillNames.some(
-        (n) =>
-          n.includes(s.skill.name.toLowerCase()) ||
-          s.skill.name.toLowerCase().includes(n),
-      ),
-    );
-    const matchedPreferred = preferred.filter((s) =>
-      candidateSkillNames.some(
-        (n) =>
-          n.includes(s.skill.name.toLowerCase()) ||
-          s.skill.name.toLowerCase().includes(n),
-      ),
-    );
-    const missingRequired = required.filter(
-      (s) => !matchedRequired.some((m) => m.skill.name === s.skill.name),
-    );
-
-    const requiredScore =
-      required.length === 0
-        ? 70
-        : (matchedRequired.length / required.length) * 100;
-    const preferredScore =
-      preferred.length === 0
-        ? 20
-        : (matchedPreferred.length / preferred.length) * 20;
-    const titleBonus =
-      candidate.desiredTitle &&
-      job.title
-        .toLowerCase()
-        .split(/\s+/)
-        .some((w) => w.length > 3 && candidate.desiredTitle!.toLowerCase().includes(w))
-        ? 10
-        : 0;
-
-    const overallScore = Math.min(
-      100,
-      Math.round(requiredScore * 0.7 + preferredScore + titleBonus),
-    );
-    const matchLevel =
-      overallScore >= 75
-        ? MatchLevel.HIGH
-        : overallScore >= 50
-          ? MatchLevel.MEDIUM
-          : MatchLevel.LOW;
-
-    const suggestions = [
-      ...missingRequired.map((s) => ({
-        type: 'ADD_SKILL',
-        skill: s.skill.name,
-        message: `Bổ sung kỹ năng bắt buộc "${s.skill.name}" vào CV hoặc dự án liên quan.`,
-      })),
-      ...(candidate.professionalSummary
-        ? []
-        : [
-            {
-              type: 'SUMMARY',
-              message:
-                'Thêm professional summary nêu rõ kinh nghiệm phù hợp với JD.',
-            },
-          ]),
-      {
-        type: 'TAILOR',
-        message: `Điều chỉnh tiêu đề/mong muốn gần với "${job.title}" và nhấn mạnh kỹ năng đã khớp.`,
-      },
-    ];
-
-    // Optional remote AI call — failure throws so caller does not consume quota.
-    const aiUrl = process.env.AI_SERVICE_URL;
-    if (aiUrl && process.env.CANDIDATE_JD_FIT_USE_AI === 'true') {
-      const response = await fetch(
-        `${aiUrl.replace(/\/$/, '')}/api/v1/matching/evaluate`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            job: {
-              title: job.title,
-              description: job.description,
-              requirements: job.requirements,
-              skills: job.jobSkills.map((s) => ({
-                name: s.skill.name,
-                requirement_type: s.requirementType,
-              })),
-            },
-            candidate: {
-              desired_title: candidate.desiredTitle,
-              summary: candidate.professionalSummary,
-              skills: candidate.candidateSkills.map((s) => s.skill.name),
-            },
-          }),
+    const findParsed = (id: string) =>
+      this.prisma.resume.findFirst({
+        where: {
+          id,
+          candidateId,
+          parsingStatus: ResumeParsingStatus.PARSED,
         },
-      );
-      if (!response.ok) {
-        throw new Error(`AI service HTTP ${response.status}`);
+        select: { id: true },
+      });
+
+    if (preferredResumeId) {
+      const owned = await this.prisma.resume.findFirst({
+        where: { id: preferredResumeId, candidateId },
+        select: { id: true, parsingStatus: true },
+      });
+      if (!owned) {
+        throw new ForbiddenException(
+          'resumeId không thuộc tài khoản của bạn.',
+        );
       }
+      if (owned.parsingStatus !== ResumeParsingStatus.PARSED) {
+        throw new BadRequestException(
+          `CV đang ở trạng thái ${owned.parsingStatus}. Đợi parse xong hoặc tải lại CV tại hồ sơ trước khi phân tích.`,
+        );
+      }
+      return { id: owned.id };
     }
 
-    return {
-      overallScore,
-      matchLevel,
-      analysis: {
-        matchedRequired: matchedRequired.map((s) => s.skill.name),
-        matchedPreferred: matchedPreferred.map((s) => s.skill.name),
-        missingRequired: missingRequired.map((s) => s.skill.name),
-        explanation:
-          'Điểm dựa trên kỹ năng bắt buộc/ưu tiên so với CV. AI hỗ trợ xếp hạng; bạn tự quyết định cải thiện hồ sơ.',
+    if (primaryResumeId) {
+      const primary = await findParsed(primaryResumeId);
+      if (primary) return primary;
+    }
+
+    const application = await this.prisma.application.findFirst({
+      where: { jobId, candidateId },
+      select: { resumeId: true },
+    });
+    if (application?.resumeId) {
+      const fromApp = await findParsed(application.resumeId);
+      if (fromApp) return fromApp;
+    }
+
+    const latestParsed = await this.prisma.resume.findFirst({
+      where: {
+        candidateId,
+        parsingStatus: ResumeParsingStatus.PARSED,
       },
-      suggestions,
-    };
+      orderBy: { createdAt: 'desc' },
+      select: { id: true },
+    });
+    if (latestParsed) return latestParsed;
+
+    const anyResume = await this.prisma.resume.findFirst({
+      where: { candidateId },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, parsingStatus: true },
+    });
+    if (!anyResume) {
+      throw new BadRequestException(
+        'Bạn chưa có CV. Vào hồ sơ ứng viên để tải CV trước khi phân tích CV–JD.',
+      );
+    }
+
+    throw new BadRequestException(
+      `CV chưa parse xong (trạng thái: ${anyResume.parsingStatus}). Vào hồ sơ đợi xử lý hoặc tải lại CV.`,
+    );
   }
 
   private serializeAnalysis(row: {
@@ -478,7 +434,7 @@ export class CandidateInsightsService {
       suggestions: row.suggestions,
       createdAt: row.createdAt,
       disclaimer:
-        'AI chỉ hỗ trợ phân tích mức phù hợp và gợi ý. Không cam kết được tuyển dụng.',
+        'Điểm số do AI hỗ trợ đánh giá dựa trên CV và yêu cầu công việc, chỉ mang tính tham khảo.',
     };
   }
 }

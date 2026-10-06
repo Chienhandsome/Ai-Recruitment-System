@@ -300,6 +300,7 @@ enum PaymentProvider {
   MOCK
   MOMO
   VNPAY
+  PAYOS
 }
 
 enum PaymentTransactionStatus {

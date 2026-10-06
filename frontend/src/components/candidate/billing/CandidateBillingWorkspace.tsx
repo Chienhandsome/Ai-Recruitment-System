@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowDownRight,
   ArrowUpRight,
   Check,
+  CheckCircle2,
   CreditCard,
   Crown,
   Info,
+  Loader2,
   Sparkles,
   X,
+  Zap,
 } from "lucide-react";
 import {
+  checkOrderStatus,
   checkoutOrder,
   createPackageOrder,
   formatVnd,
@@ -51,7 +55,7 @@ type PaymentHistoryItem = {
 };
 
 type PurchasePreview = {
-  code: "CANDIDATE_PRO" | "CANDIDATE_PREMIUM";
+  code: "CANDIDATE_TEST" | "CANDIDATE_PRO" | "CANDIDATE_PREMIUM";
   packageName: string;
   amountVnd: number;
   title: string;
@@ -120,7 +124,7 @@ function remainingDays(endsAt: string | null | undefined) {
 }
 
 function buildPurchasePreview(params: {
-  code: "CANDIDATE_PRO" | "CANDIDATE_PREMIUM";
+  code: "CANDIDATE_TEST" | "CANDIDATE_PRO" | "CANDIDATE_PREMIUM";
   target: ServicePackage;
   entitlement: EntitlementStatus | null;
   proPrice: number;
@@ -140,6 +144,18 @@ function buildPurchasePreview(params: {
   const current = entitlement?.packageCode ?? "CANDIDATE_FREE";
   const remain = remainingDays(entitlement?.endsAt);
 
+  if (code === "CANDIDATE_TEST") {
+    return {
+      code,
+      packageName: target.name,
+      amountVnd: target.priceVnd,
+      title: "Đăng ký Gói Test PayOS 10k",
+      explanation: `Thanh toán ${formatVnd(target.priceVnd)} để trải nghiệm thanh toán VietQR thật và dùng thử tính năng AI Phân tích CV–JD (${target.jdFitQuota ?? 3} lượt) & Mock interview AI (${target.mockInterviewQuota ?? 2} lượt) trong ${target.durationDays ?? 3} ngày.`,
+      canProceed: true,
+      note: "Quét mã VietQR chuyển khoản ngân hàng qua cổng PayOS an toàn & tự động kích hoạt.",
+    };
+  }
+
   if (code === "CANDIDATE_PREMIUM") {
     if (current === "CANDIDATE_PRO" && remain != null && remain > 0) {
       const residual = Math.round((proPrice * remain) / proDays);
@@ -151,7 +167,7 @@ function buildPurchasePreview(params: {
         title: "Nâng cấp Pro → Premium",
         explanation: `Pro còn khoảng ${remain}/${proDays} ngày (ước tính giá trị còn lại ${formatVnd(residual)}). Bạn chỉ thanh toán phần chênh lệch ${formatVnd(premiumPrice)} − ${formatVnd(residual)} = ${formatVnd(amount)}. Sau khi thanh toán, Premium có hiệu lực ngay ${premiumDays} ngày mới kèm quota đầy đủ.`,
         canProceed: true,
-        note: "Số tiền mang tính minh họa trên UI (sandbox); backend chưa trừ chênh lệch tự động.",
+        note: "Quét mã VietQR chuyển khoản ngân hàng qua cổng PayOS an toàn & tự động kích hoạt.",
       };
     }
     return {
@@ -161,7 +177,7 @@ function buildPurchasePreview(params: {
       title: "Mua gói Premium",
       explanation: `Thanh toán ${formatVnd(premiumPrice)} cho chu kỳ ${premiumDays} ngày Premium (gồm quyền Pro + mock interview AI).`,
       canProceed: true,
-      note: "Thanh toán sandbox — dùng để test luồng mua gói.",
+      note: "Quét mã VietQR chuyển khoản ngân hàng qua cổng PayOS an toàn & tự động kích hoạt.",
     };
   }
 
@@ -184,7 +200,7 @@ function buildPurchasePreview(params: {
     title: "Mua gói Pro",
     explanation: `Thanh toán ${formatVnd(proPrice)} cho chu kỳ ${proDays} ngày Pro (AI phân tích CV–JD theo quota gói).`,
     canProceed: true,
-    note: "Thanh toán sandbox — dùng để test luồng mua gói.",
+    note: "Quét mã VietQR chuyển khoản ngân hàng qua cổng PayOS an toàn & tự động kích hoạt.",
   };
 }
 
@@ -299,7 +315,7 @@ function HistoryRow({ item }: { item: PaymentHistoryItem }) {
   );
 }
 
-export function CandidateBillingWorkspace({
+function CandidateBillingWorkspaceContent({
   token,
   packages,
   entitlement,
@@ -307,8 +323,11 @@ export function CandidateBillingWorkspace({
   transactions,
 }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [syncingOrder, setSyncingOrder] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(false);
   const [purchase, setPurchase] = useState<PurchasePreview | null>(null);
@@ -336,7 +355,33 @@ export function CandidateBillingWorkspace({
   const upgradeMid = premiumPrice - residualValue;
   const upgradeImmediate = premiumPrice - proPrice;
 
-  const openPurchase = (code: "CANDIDATE_PRO" | "CANDIDATE_PREMIUM") => {
+  // PayOS automatic return handler: When redirected back from PayOS VietQR with ?orderCode=...
+  useEffect(() => {
+    const orderCodeParam = searchParams.get("orderCode");
+
+    if (orderCodeParam && token) {
+      setSyncingOrder(true);
+      checkOrderStatus(token, orderCodeParam)
+        .then((res) => {
+          if (res.isPaid) {
+            setSuccessMessage(
+              `Thanh toán đơn hàng #${orderCodeParam} thành công! Gói ${res.entitlement.packageName} đã được kích hoạt.`,
+            );
+            router.replace("/candidate/billing");
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to sync candidate order status on return:", err);
+        })
+        .finally(() => {
+          setSyncingOrder(false);
+        });
+    }
+  }, [searchParams, token, router]);
+
+  const openPurchase = (
+    code: "CANDIDATE_TEST" | "CANDIDATE_PRO" | "CANDIDATE_PREMIUM",
+  ) => {
     const target = sorted.find((p) => p.code === code);
     if (!target) return;
     setError(null);
@@ -361,9 +406,20 @@ export function CandidateBillingWorkspace({
       const order = await createPackageOrder(token, purchase.code);
       const session = await checkoutOrder(token, order.id, "/candidate/billing");
       setPurchase(null);
-      router.push(
-        `/candidate/billing/checkout?orderId=${order.id}&session=${session.providerSessionId}`,
-      );
+
+      if (
+        session.checkoutUrl &&
+        (session.checkoutUrl.startsWith("https://") ||
+          session.checkoutUrl.startsWith("http://")) &&
+        !session.checkoutUrl.includes("/candidate/billing/checkout")
+      ) {
+        // Redirect to real PayOS VietQR portal
+        window.location.href = session.checkoutUrl;
+      } else {
+        router.push(
+          `/candidate/billing/checkout?orderId=${order.id}&session=${session.providerSessionId}`,
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không tạo được đơn.");
       setPurchase(null);
@@ -394,6 +450,31 @@ export function CandidateBillingWorkspace({
         </button>
       </div>
 
+      {syncingOrder && (
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900 shadow-sm">
+          <Loader2 className="h-5 w-5 animate-spin text-sky-600 shrink-0" />
+          <p className="text-sm font-medium">
+            Đang đồng bộ trạng thái thanh toán từ PayOS, vui lòng chờ trong giây lát...
+          </p>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-900 shadow-sm">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+            <p className="text-sm font-medium">{successMessage}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccessMessage(null)}
+            className="text-xs font-semibold text-emerald-700 hover:text-emerald-900"
+          >
+            Đóng
+          </button>
+        </div>
+      )}
+
       {entitlement && (
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase text-slate-500">
@@ -420,29 +501,55 @@ export function CandidateBillingWorkspace({
         </p>
       )}
 
-      <div className="mt-8 grid gap-5 md:grid-cols-3">
+      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {sorted.map((pkg) => {
-          const payable =
-            pkg.code === "CANDIDATE_PRO" || pkg.code === "CANDIDATE_PREMIUM";
+          const payable = pkg.code !== "CANDIDATE_FREE";
           const current = entitlement?.packageCode === pkg.code;
           return (
             <div
               key={pkg.id}
-              className={`flex flex-col rounded-2xl border bg-white p-5 shadow-sm ${
+              className={`flex flex-col rounded-2xl border bg-white p-5 shadow-sm transition-all hover:shadow-md ${
                 pkg.code === "CANDIDATE_PREMIUM"
-                  ? "border-slate-900"
-                  : "border-slate-200"
+                  ? "border-[#1F2937] ring-1 ring-[#1F2937]"
+                  : pkg.code === "CANDIDATE_TEST"
+                    ? "border-amber-300 bg-amber-50/20"
+                    : "border-slate-200"
               }`}
             >
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="font-semibold">{pkg.name}</h3>
+                <h3 className="font-semibold text-slate-900">{pkg.name}</h3>
                 {pkg.code === "CANDIDATE_PREMIUM" ? (
                   <Crown className="h-5 w-5 text-amber-500" />
                 ) : pkg.code === "CANDIDATE_PRO" ? (
                   <Sparkles className="h-5 w-5 text-sky-500" />
+                ) : pkg.code === "CANDIDATE_TEST" ? (
+                  <Zap className="h-5 w-5 text-amber-500" />
                 ) : null}
               </div>
-              <p className="text-2xl font-bold">
+
+              {pkg.code === "CANDIDATE_TEST" && (
+                <div className="mb-2">
+                  <span className="inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800">
+                    Thử nghiệm 10k VietQR
+                  </span>
+                </div>
+              )}
+              {pkg.code === "CANDIDATE_PRO" && (
+                <div className="mb-2">
+                  <span className="inline-block rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-semibold text-sky-800">
+                    Phổ biến
+                  </span>
+                </div>
+              )}
+              {pkg.code === "CANDIDATE_PREMIUM" && (
+                <div className="mb-2">
+                  <span className="inline-block rounded-full bg-[#1F2937] px-2.5 py-0.5 text-[11px] font-semibold text-amber-300">
+                    Đầy đủ AI Mock
+                  </span>
+                </div>
+              )}
+
+              <p className="text-2xl font-bold text-slate-900">
                 {pkg.priceVnd === 0 ? "Miễn phí" : formatVnd(pkg.priceVnd)}
               </p>
               <p className="mt-1 text-xs text-slate-500">
@@ -452,7 +559,7 @@ export function CandidateBillingWorkspace({
                 {featuresOf(pkg).map((item) => (
                   <li key={item} className="flex gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                    {item}
+                    <span>{item}</span>
                   </li>
                 ))}
               </ul>
@@ -461,15 +568,24 @@ export function CandidateBillingWorkspace({
                   type="button"
                   disabled={current || busy}
                   onClick={() =>
-                    openPurchase(pkg.code as "CANDIDATE_PRO" | "CANDIDATE_PREMIUM")
+                    openPurchase(
+                      pkg.code as
+                        | "CANDIDATE_TEST"
+                        | "CANDIDATE_PRO"
+                        | "CANDIDATE_PREMIUM",
+                    )
                   }
-                  className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                  className={`mt-5 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50 ${
+                    pkg.code === "CANDIDATE_TEST"
+                      ? "bg-amber-500 text-white hover:bg-amber-600"
+                      : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+                  }`}
                 >
                   <CreditCard className="h-4 w-4" />
-                  {current ? "Đang dùng" : "Đăng kí"}
+                  {current ? "Đang dùng" : "Chọn gói & thanh toán"}
                 </button>
               ) : (
-                <div className="mt-5 rounded-xl bg-slate-50 py-2.5 text-center text-sm text-slate-600">
+                <div className="mt-5 rounded-xl bg-slate-50 py-2.5 text-center text-sm font-medium text-slate-500">
                   Mặc định
                 </div>
               )}
@@ -668,5 +784,13 @@ export function CandidateBillingWorkspace({
         </Link>
       </p>
     </div>
+  );
+}
+
+export function CandidateBillingWorkspace(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <CandidateBillingWorkspaceContent {...props} />
+    </Suspense>
   );
 }

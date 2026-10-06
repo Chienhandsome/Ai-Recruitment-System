@@ -266,7 +266,7 @@ export class InterviewApiError extends Error {
 }
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? 'https://ai-recruitment-system-test-deploy.onrender.com/api';
+  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 async function readInterviewApiError(response: Response, fallback: string) {
   try {

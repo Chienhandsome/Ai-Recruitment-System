@@ -134,6 +134,26 @@ export class BillingController {
     return this.billingService.confirmMockPayment(user.id, orderId);
   }
 
+  @Post('webhook/payos')
+  @Public()
+  @ApiOperation({
+    summary: 'PayOS webhook notification for automated bank payment confirmation',
+  })
+  payosWebhook(@Body() body: any) {
+    return this.billingService.handlePayosWebhook(body);
+  }
+
+  @Get('orders/check-status')
+  @Roles('CANDIDATE', 'RECRUITER')
+  @ApiOperation({ summary: 'Check payment status and sync with PayOS if needed' })
+  @ApiQuery({ name: 'orderCode', required: true, description: 'orderCode or orderId' })
+  checkOrderStatus(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('orderCode') orderCode: string,
+  ) {
+    return this.billingService.checkPayosOrderStatus(user.id, orderCode);
+  }
+
   @Get('transactions')
   @Roles('CANDIDATE', 'RECRUITER')
   @ApiQuery({ name: 'audience', required: false, enum: PackageAudience })

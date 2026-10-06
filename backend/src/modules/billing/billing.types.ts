@@ -2,10 +2,13 @@ import { PackageAudience } from '@prisma/client';
 
 export const PACKAGE_CODES = {
   HR_FREE: 'HR_FREE',
+  HR_TEST: 'HR_TEST',
+  HR_STARTER: 'HR_STARTER',
   HR_PRO: 'HR_PRO',
   /** @deprecated Merged into HR_PRO — kept for legacy orders/entitlements */
   HR_PREMIUM: 'HR_PREMIUM',
   CANDIDATE_FREE: 'CANDIDATE_FREE',
+  CANDIDATE_TEST: 'CANDIDATE_TEST',
   CANDIDATE_PRO: 'CANDIDATE_PRO',
   CANDIDATE_PREMIUM: 'CANDIDATE_PREMIUM',
 } as const;
@@ -80,7 +83,7 @@ export class ActiveJobQuotaExceededError extends Error {
     public readonly currentActiveJobs: number,
   ) {
     super(
-      `Gói hiện tại chỉ cho phép tối đa ${maxActiveJobs} tin tuyển dụng đang hoạt động (hiện có ${currentActiveJobs}). Nâng cấp HR Pro để đăng thêm tin.`,
+      `Gói hiện tại chỉ cho phép tối đa ${maxActiveJobs} tin tuyển dụng đang hoạt động (hiện có ${currentActiveJobs}). Nâng cấp gói trả phí để đăng thêm tin.`,
     );
     this.name = 'ActiveJobQuotaExceededError';
   }
@@ -92,7 +95,7 @@ export class MonthlyJobCreateQuotaExceededError extends Error {
     public readonly createdThisMonth: number,
   ) {
     super(
-      `Gói Free chỉ cho phép tạo tối đa ${monthlyLimit} tin tuyển dụng mỗi tháng (đã tạo ${createdThisMonth}). Nâng cấp HR Pro để tạo không giới hạn.`,
+      `Gói Free chỉ cho phép tạo tối đa ${monthlyLimit} tin tuyển dụng mỗi tháng (đã tạo ${createdThisMonth}). Nâng cấp HR Starter hoặc Pro để tạo thêm tin.`,
     );
     this.name = 'MonthlyJobCreateQuotaExceededError';
   }
@@ -104,7 +107,7 @@ export class ApplicantCapReachedError extends Error {
     public readonly currentApplicants: number,
   ) {
     super(
-      `Tin này đã đạt giới hạn ${maxApplicants} ứng viên của gói Free (hiện có ${currentApplicants}). Tin đã ẩn với ứng viên — nâng cấp HR Pro để mở lại không giới hạn.`,
+      `Tin này đã đạt giới hạn ${maxApplicants} ứng viên của gói hiện tại (hiện có ${currentApplicants}). Tin đã ẩn với ứng viên — nâng cấp gói cao hơn để mở lại không giới hạn.`,
     );
     this.name = 'ApplicantCapReachedError';
   }
@@ -129,9 +132,13 @@ export function tierRank(code: string): number {
   switch (code) {
     case PACKAGE_CODES.HR_PREMIUM:
     case PACKAGE_CODES.CANDIDATE_PREMIUM:
-      return 3;
+      return 4;
     case PACKAGE_CODES.HR_PRO:
+      return 3;
+    case PACKAGE_CODES.HR_STARTER:
+    case PACKAGE_CODES.HR_TEST:
     case PACKAGE_CODES.CANDIDATE_PRO:
+    case PACKAGE_CODES.CANDIDATE_TEST:
       return 2;
     case PACKAGE_CODES.HR_FREE:
     case PACKAGE_CODES.CANDIDATE_FREE:

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Check,
@@ -10,8 +10,11 @@ import {
   Info,
   Lock,
   Sparkles,
+  CheckCircle2,
+  QrCode,
 } from "lucide-react";
 import {
+  checkOrderStatus,
   checkoutOrder,
   createPackageOrder,
   formatVnd,
@@ -73,9 +76,38 @@ export function BillingWorkspace({
   transactions,
 }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [busyCode, setBusyCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<ServicePackage | null>(null);
+  const [currentEntitlement, setCurrentEntitlement] = useState(entitlement);
+  const [paymentSuccessNotice, setPaymentSuccessNotice] = useState<string | null>(null);
+
+  const orderCodeParam = searchParams.get("orderCode");
+  const statusParam = searchParams.get("status");
+
+  // Sync entitlement if returning from PayOS gateway
+  useEffect(() => {
+    if (orderCodeParam && token) {
+      if (statusParam === "CANCELLED") {
+        setError("Giao dịch thanh toán đã bị hủy trên cổng PayOS.");
+        return;
+      }
+      checkOrderStatus(token, orderCodeParam)
+        .then((res) => {
+          if (res.isPaid) {
+            setPaymentSuccessNotice(
+              `Thanh toán đơn hàng #${orderCodeParam} thành công! Gói ${res.order.package.name} đã được kích hoạt.`,
+            );
+            setCurrentEntitlement(res.entitlement);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to sync order status:", err);
+        });
+    }
+  }, [orderCodeParam, statusParam, token]);
 
   const sorted = useMemo(
     () =>
@@ -85,19 +117,28 @@ export function BillingWorkspace({
     [packages],
   );
 
-  const proPkg = sorted.find((p) => p.code === "HR_PRO");
-
   const startCheckout = async () => {
-    if (!token) return;
-    setBusyCode("HR_PRO");
+    if (!token || !selectedPackage) return;
+    setBusyCode(selectedPackage.code);
     setError(null);
     try {
-      const order = await createPackageOrder(token, "HR_PRO");
-      const session = await checkoutOrder(token, order.id);
+      const order = await createPackageOrder(token, selectedPackage.code);
+      const session = await checkoutOrder(token, order.id, "/recruiter/billing");
       setConfirmOpen(false);
-      router.push(
-        `/recruiter/billing/checkout?orderId=${order.id}&session=${session.providerSessionId}`,
-      );
+
+      if (
+        session.checkoutUrl &&
+        (session.checkoutUrl.startsWith("https://") ||
+          session.checkoutUrl.startsWith("http://")) &&
+        !session.checkoutUrl.includes("/recruiter/billing/checkout")
+      ) {
+        // Redirect to real PayOS VietQR portal
+        window.location.href = session.checkoutUrl;
+      } else {
+        router.push(
+          `/recruiter/billing/checkout?orderId=${order.id}&session=${session.providerSessionId}`,
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tạo đơn hàng.");
       setConfirmOpen(false);
@@ -108,7 +149,7 @@ export function BillingWorkspace({
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-8">
           <Link
             href="/recruiter/dashboard"
@@ -116,68 +157,73 @@ export function BillingWorkspace({
           >
             <ArrowLeft className="h-4 w-4" /> Về workspace HR
           </Link>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Gói dịch vụ nhà tuyển dụng
+          <h1 className="text-3xl font-semibold tracking-tight text-[#1F2937]">
+            Gói dịch vụ & Hạn mức tuyển dụng
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">
-            Free: 3 tin/tháng, 100 ứng viên/tin, AI matching & ATS cơ bản. Pro:
-            không giới hạn + lọc nâng cao, dashboard, kho CV. AI chỉ hỗ trợ —
-            quyết định tuyển dụng thuộc về bạn.
+          <p className="mt-2 max-w-3xl text-sm text-slate-600">
+            Lựa chọn gói dịch vụ tối ưu theo nhu cầu tuyển dụng: HR Free (Trải nghiệm cơ bản), HR Starter (Doanh nghiệp vừa & nhỏ), HR Pro (Tuyển dụng không giới hạn). Thanh toán VietQR Napas 247 an toàn và kích hoạt tức thì.
           </p>
         </div>
 
-        {entitlement && (
+        {paymentSuccessNotice && (
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 shadow-sm animate-in fade-in">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
+            <p className="text-sm font-semibold">{paymentSuccessNotice}</p>
+          </div>
+        )}
+
+        {currentEntitlement && (
           <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Gói hiện tại
                 </p>
-                <h2 className="mt-1 text-xl font-semibold">
-                  {entitlement.packageName}
+                <h2 className="mt-1 text-xl font-semibold text-[#1F2937]">
+                  {currentEntitlement.packageName}
                 </h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  Tin đã tạo tháng này: {entitlement.jobsCreatedThisMonth ?? 0}
-                  {entitlement.monthlyJobCreateLimit != null
-                    ? ` / ${entitlement.monthlyJobCreateLimit}`
+                  Tin đã tạo tháng này: {currentEntitlement.jobsCreatedThisMonth ?? 0}
+                  {currentEntitlement.monthlyJobCreateLimit != null
+                    ? ` / ${currentEntitlement.monthlyJobCreateLimit}`
                     : " (không giới hạn)"}
-                  {entitlement.maxApplicantsPerJob != null
-                    ? ` · Tối đa ${entitlement.maxApplicantsPerJob} UV/tin`
+                  {currentEntitlement.maxApplicantsPerJob != null
+                    ? ` · Tối đa ${currentEntitlement.maxApplicantsPerJob} UV/tin`
                     : " · UV/tin không giới hạn"}
-                  {entitlement.endsAt
-                    ? ` · Hết hạn ${new Date(entitlement.endsAt).toLocaleDateString("vi-VN")}`
+                  {currentEntitlement.endsAt
+                    ? ` · Hết hạn ${new Date(currentEntitlement.endsAt).toLocaleDateString("vi-VN")}`
                     : " · Không thời hạn"}
                 </p>
-                {entitlement.talentPoolAccess && (
+                {currentEntitlement.talentPoolAccess && (
                   <p className="mt-1 text-sm text-slate-600">
-                    Lượt mở khóa CV còn lại: {entitlement.cvUnlockRemaining}
+                    Lượt mở khóa CV còn lại: {currentEntitlement.cvUnlockRemaining}
                   </p>
                 )}
               </div>
               <div className="flex flex-wrap gap-2 text-xs font-semibold">
-                {entitlement.aiRanking && (
+                {currentEntitlement.aiRanking && (
                   <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
                     AI matching
                   </span>
                 )}
-                {entitlement.advancedFilters && (
+                {currentEntitlement.advancedFilters && (
                   <span className="rounded-full bg-sky-50 px-3 py-1 text-sky-700">
                     Lọc nâng cao
                   </span>
                 )}
-                {entitlement.recruitmentStats && (
+                {currentEntitlement.recruitmentStats && (
                   <span className="rounded-full bg-violet-50 px-3 py-1 text-violet-700">
                     Dashboard
                   </span>
                 )}
-                {entitlement.talentPoolAccess && (
+                {currentEntitlement.talentPoolAccess && (
                   <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-700">
                     Talent pool
                   </span>
                 )}
               </div>
             </div>
-            <p className="mt-4 text-xs text-slate-500">{entitlement.disclaimer}</p>
+            <p className="mt-4 text-xs text-slate-500">{currentEntitlement.disclaimer}</p>
           </div>
         )}
 
@@ -187,26 +233,63 @@ export function BillingWorkspace({
           </div>
         )}
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {sorted.map((pkg) => {
-            const isCurrent = entitlement?.packageCode === pkg.code;
-            const payable = pkg.code === "HR_PRO";
+            const isCurrent = currentEntitlement?.packageCode === pkg.code;
+            const payable = pkg.priceVnd > 0;
+            const isPro = pkg.code === "HR_PRO";
+            const isStarter = pkg.code === "HR_STARTER";
+            const isTest = pkg.code === "HR_TEST";
+
             return (
               <div
                 key={pkg.id}
-                className={`flex flex-col rounded-2xl border bg-white p-5 shadow-sm ${
-                  pkg.code === "HR_PRO" ? "border-slate-900" : "border-slate-200"
+                className={`flex flex-col rounded-2xl border bg-white p-5 shadow-sm transition-all relative ${
+                  isPro
+                    ? "border-[#2563EB] shadow-md ring-2 ring-[#2563EB]/20"
+                    : isTest
+                      ? "border-amber-400 shadow-sm bg-gradient-to-b from-amber-50/30 to-white hover:border-amber-500"
+                      : isStarter
+                        ? "border-slate-300 hover:border-slate-400"
+                        : "border-slate-200"
                 }`}
               >
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">{pkg.name}</h3>
-                  {pkg.code === "HR_PRO" ? (
-                    <Sparkles className="h-5 w-5 text-sky-500" />
+                {isPro && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="rounded-full bg-[#2563EB] px-3 py-0.5 text-[11px] font-bold text-white shadow-sm">
+                      Phổ biến nhất
+                    </span>
+                  </div>
+                )}
+                {isTest && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="rounded-full bg-amber-600 px-3 py-0.5 text-[11px] font-bold text-white shadow-sm">
+                      Thử nghiệm 10k
+                    </span>
+                  </div>
+                )}
+                {isStarter && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="rounded-full bg-slate-800 px-3 py-0.5 text-[11px] font-bold text-white shadow-sm">
+                      Tiết kiệm
+                    </span>
+                  </div>
+                )}
+
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-[#1F2937]">{pkg.name}</h3>
+                  {isPro ? (
+                    <Sparkles className="h-5 w-5 text-[#2563EB]" />
+                  ) : isTest ? (
+                    <Sparkles className="h-5 w-5 text-amber-500" />
+                  ) : isStarter ? (
+                    <Sparkles className="h-5 w-5 text-slate-500" />
                   ) : (
                     <Lock className="h-5 w-5 text-slate-400" />
                   )}
                 </div>
-                <p className="text-2xl font-bold tracking-tight">
+
+                <p className="text-2xl font-extrabold tracking-tight text-[#1F2937]">
                   {pkg.priceVnd === 0 ? "Miễn phí" : formatVnd(pkg.priceVnd)}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
@@ -214,8 +297,8 @@ export function BillingWorkspace({
                     ? `${pkg.durationDays} ngày`
                     : "Luôn sẵn sàng"}
                 </p>
-                <p className="mt-3 text-sm text-slate-600">{pkg.description}</p>
-                <ul className="mt-4 flex-1 space-y-2">
+                <p className="mt-3 text-sm text-slate-600 min-h-[40px]">{pkg.description}</p>
+                <ul className="mt-4 flex-1 space-y-2.5">
                   {featureList(pkg).map((item) => (
                     <li
                       key={item}
@@ -230,8 +313,17 @@ export function BillingWorkspace({
                   <button
                     type="button"
                     disabled={isCurrent || busyCode === pkg.code}
-                    onClick={() => setConfirmOpen(true)}
-                    className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => {
+                      setSelectedPackage(pkg);
+                      setConfirmOpen(true);
+                    }}
+                    className={`mt-6 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+                      isPro
+                        ? "bg-[#2563EB] hover:bg-blue-700"
+                        : isTest
+                          ? "bg-amber-600 hover:bg-amber-700"
+                          : "bg-slate-900 hover:bg-slate-800"
+                    }`}
                   >
                     <CreditCard className="h-4 w-4" />
                     {isCurrent
@@ -241,7 +333,7 @@ export function BillingWorkspace({
                         : "Chọn gói & thanh toán"}
                   </button>
                 ) : (
-                  <div className="mt-5 rounded-xl bg-slate-50 px-4 py-2.5 text-center text-sm font-medium text-slate-600">
+                  <div className="mt-6 rounded-xl bg-slate-50 px-4 py-2.5 text-center text-sm font-medium text-slate-600 border border-slate-100">
                     {isCurrent ? "Gói mặc định đang dùng" : "Kích hoạt tự động"}
                   </div>
                 )}
@@ -250,7 +342,7 @@ export function BillingWorkspace({
           })}
         </div>
 
-        {confirmOpen && proPkg && (
+        {confirmOpen && selectedPackage && (
           <div
             className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
             role="presentation"
@@ -259,27 +351,26 @@ export function BillingWorkspace({
             <div
               role="dialog"
               aria-modal="true"
-              className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+              className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="mb-3 flex items-center gap-2 text-slate-900">
+              <div className="mb-3 flex items-center gap-2 text-[#1F2937]">
                 <Info className="h-5 w-5 text-[#2563EB]" />
-                <h3 className="text-base font-extrabold">Xác nhận mua HR Pro</h3>
+                <h3 className="text-base font-extrabold">Xác nhận mua {selectedPackage.name}</h3>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="rounded-xl border border-slate-200 bg-[#EFF6FF] px-4 py-3">
                 <p className="text-xs font-semibold uppercase text-slate-500">
                   Số tiền cần thanh toán
                 </p>
-                <p className="mt-1 text-2xl font-extrabold">
-                  {formatVnd(proPkg.priceVnd)}
+                <p className="mt-1 text-2xl font-extrabold text-[#2563EB]">
+                  {formatVnd(selectedPackage.priceVnd)}
                 </p>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-slate-700">
-                Thanh toán sandbox {formatVnd(proPkg.priceVnd)} cho{" "}
-                {proPkg.durationDays ?? 30} ngày Pro: bỏ giới hạn 3 tin/tháng và
-                100 UV/tin; mở lọc nâng cao, dashboard và kho CV.
+                Thanh toán an toàn {formatVnd(selectedPackage.priceVnd)} qua VietQR Napas 247 cho{" "}
+                {selectedPackage.durationDays ?? 30} ngày sử dụng gói {selectedPackage.name}. Bạn sẽ được chuyển đến cổng thanh toán để quét mã QR bằng ứng dụng ngân hàng.
               </p>
-              <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   disabled={!!busyCode}
@@ -292,10 +383,10 @@ export function BillingWorkspace({
                   type="button"
                   disabled={!!busyCode}
                   onClick={() => void startCheckout()}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50 transition-all"
                 >
-                  <CreditCard className="h-4 w-4" />
-                  {busyCode ? "Đang tạo đơn..." : "Thanh toán sandbox"}
+                  <QrCode className="h-4 w-4" />
+                  {busyCode ? "Đang tạo mã QR..." : "Thanh toán VietQR"}
                 </button>
               </div>
             </div>

@@ -1,6 +1,6 @@
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://ai-recruitment-system-test-deploy.onrender.com/api";
+  "http://localhost:3001/api";
 
 export type ServicePackage = {
   id: string;
@@ -132,7 +132,14 @@ export function getMyEntitlement(
 
 export function createPackageOrder(
   accessToken: string,
-  packageCode: "HR_PRO" | "CANDIDATE_PRO" | "CANDIDATE_PREMIUM",
+  packageCode:
+    | "HR_TEST"
+    | "HR_STARTER"
+    | "HR_PRO"
+    | "CANDIDATE_TEST"
+    | "CANDIDATE_PRO"
+    | "CANDIDATE_PREMIUM"
+    | (string & {}),
 ) {
   return billingRequest<PackageOrder>("/billing/orders", accessToken, {
     method: "POST",
@@ -150,6 +157,17 @@ export function checkoutOrder(
     `/billing/orders/${orderId}/checkout?${qs.toString()}`,
     accessToken,
     { method: "POST" },
+  );
+}
+
+export function checkOrderStatus(accessToken: string, orderCode: string) {
+  return billingRequest<{
+    order: PackageOrder;
+    entitlement: EntitlementStatus;
+    isPaid: boolean;
+  }>(
+    `/billing/orders/check-status?orderCode=${encodeURIComponent(orderCode)}`,
+    accessToken,
   );
 }
 

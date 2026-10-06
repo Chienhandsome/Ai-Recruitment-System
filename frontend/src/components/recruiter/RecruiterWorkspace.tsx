@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Briefcase,
@@ -18,6 +19,7 @@ import {
   User,
   Calendar,
   Clock,
+  CreditCard,
   Video,
   Award,
   CheckCircle2,
@@ -247,7 +249,13 @@ export function RecruiterWorkspace({
                 <Calendar className="w-3.5 h-3.5" />
                 Lịch phỏng vấn
               </button>
-              {/* HR billing menu hidden during Candidate demo — routes remain at /recruiter/billing* */}
+              <Link
+                href="/recruiter/billing"
+                className="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 text-[#1F2937] hover:text-[#2563EB] hover:bg-white/60"
+              >
+                <CreditCard className="w-3.5 h-3.5" />
+                Gói dịch vụ
+              </Link>
             </nav>
           </div>
 
@@ -306,6 +314,14 @@ export function RecruiterWorkspace({
                           <User className="size-4 text-[#64748B]" />
                           Hồ sơ cá nhân
                         </button>
+                        <Link
+                          href="/recruiter/billing"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#0F172A] hover:bg-[#F8FAFC] rounded-lg transition-colors"
+                        >
+                          <CreditCard className="size-4 text-[#64748B]" />
+                          Gói dịch vụ & Hạn mức
+                        </Link>
                         <button 
                           onClick={handleLogout}
                           className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors mt-1"

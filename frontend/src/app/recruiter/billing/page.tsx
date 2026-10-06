@@ -26,16 +26,36 @@ export default async function RecruiterBillingPage() {
   let orders: PackageOrder[] = [];
   let transactions: Awaited<ReturnType<typeof listMyTransactions>> = [];
 
+  try {
+    packages = await listBillingPackages("EMPLOYER");
+  } catch (error) {
+    console.error("Failed to load billing packages", error);
+  }
+
   if (token) {
-    try {
-      [packages, entitlement, orders, transactions] = await Promise.all([
-        listBillingPackages("EMPLOYER"),
+    const [entitlementRes, ordersRes, transactionsRes] =
+      await Promise.allSettled([
         getMyEntitlement(token, "EMPLOYER"),
         listMyOrders(token, "EMPLOYER"),
         listMyTransactions(token, "EMPLOYER"),
       ]);
-    } catch (error) {
-      console.error("Failed to load billing data", error);
+
+    if (entitlementRes.status === "fulfilled") {
+      entitlement = entitlementRes.value;
+    } else {
+      console.error("Failed to load entitlement", entitlementRes.reason);
+    }
+
+    if (ordersRes.status === "fulfilled") {
+      orders = ordersRes.value;
+    } else {
+      console.error("Failed to load orders", ordersRes.reason);
+    }
+
+    if (transactionsRes.status === "fulfilled") {
+      transactions = transactionsRes.value;
+    } else {
+      console.error("Failed to load transactions", transactionsRes.reason);
     }
   }
 

@@ -26,6 +26,26 @@ export async function seedCandidatePackages(prisma: PrismaClient) {
       sortOrder: 1,
     },
     {
+      code: 'CANDIDATE_TEST',
+      name: 'Gói Test PayOS 10k',
+      description:
+        'Gói 10.000đ để thử nghiệm thanh toán VietQR thật qua PayOS cho ứng viên. Trải nghiệm tính năng trong 3 ngày.',
+      priceVnd: 10000,
+      durationDays: 3,
+      maxActiveJobs: null,
+      cvUnlockQuota: 0,
+      aiRanking: false,
+      advancedFilters: false,
+      recruitmentStats: false,
+      talentPoolAccess: false,
+      jdFitAnalysis: true,
+      cvImproveSuggestions: true,
+      jdFitQuota: 3,
+      aiMockInterview: true,
+      mockInterviewQuota: 2,
+      sortOrder: 2,
+    },
+    {
       code: 'CANDIDATE_PRO',
       name: 'Candidate Pro 30 ngày',
       description:
@@ -43,7 +63,7 @@ export async function seedCandidatePackages(prisma: PrismaClient) {
       jdFitQuota: 10,
       aiMockInterview: false,
       mockInterviewQuota: 0,
-      sortOrder: 2,
+      sortOrder: 3,
     },
     {
       code: 'CANDIDATE_PREMIUM',
@@ -63,7 +83,7 @@ export async function seedCandidatePackages(prisma: PrismaClient) {
       jdFitQuota: 10,
       aiMockInterview: true,
       mockInterviewQuota: 5,
-      sortOrder: 3,
+      sortOrder: 4,
     },
   ];
 

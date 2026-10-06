@@ -17,6 +17,7 @@ describe('OffersService', () => {
       application: {
         findFirst: jest.fn(),
         update: jest.fn(),
+        count: jest.fn().mockResolvedValue(0),
       },
       offer: {
         upsert: jest.fn(),
@@ -31,6 +32,9 @@ describe('OffersService', () => {
       },
       interviewRound: {
         updateMany: jest.fn(),
+      },
+      jobPosting: {
+        update: jest.fn(),
       },
       applicationStatusHistory: {
         create: jest.fn(),

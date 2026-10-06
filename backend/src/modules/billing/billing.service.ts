@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
@@ -18,6 +19,7 @@ import {
   PAYMENT_PROVIDER,
   type PaymentProviderAdapter,
 } from './payment/payment-provider.interface';
+import { PayosPaymentProvider } from './payment/payos-payment.provider';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import {
@@ -28,6 +30,8 @@ import {
 
 @Injectable()
 export class BillingService {
+  private readonly logger = new Logger(BillingService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly entitlements: EntitlementsService,
@@ -182,19 +186,21 @@ export class BillingService {
     }
 
     const siteUrl = process.env.FRONTEND_SITE_URL ?? 'http://localhost:3000';
-    // Temporarily override checkout URL builder via return paths
     const checkout = await this.paymentProvider.createCheckout({
       orderId: order.id,
       orderCode: order.orderCode,
       amountVnd: order.amountVnd,
-      returnUrl: `${siteUrl}${checkoutPath}/result?orderId=${order.id}`,
-      cancelUrl: `${siteUrl}${checkoutPath}?cancelled=1`,
+      returnUrl: `${siteUrl}${checkoutPath}?orderCode=${order.orderCode}&status=PAID`,
+      cancelUrl: `${siteUrl}${checkoutPath}?orderCode=${order.orderCode}&status=CANCELLED`,
     });
 
-    // Rewrite checkout URL to the audience-specific path while keeping session id
-    const checkoutUrl = new URL(`${siteUrl}${checkoutPath}/checkout`);
-    checkoutUrl.searchParams.set('orderId', order.id);
-    checkoutUrl.searchParams.set('session', checkout.providerSessionId);
+    let checkoutUrl = checkout.checkoutUrl;
+    if (checkout.provider === PaymentProvider.MOCK) {
+      const mockUrl = new URL(`${siteUrl}${checkoutPath}/checkout`);
+      mockUrl.searchParams.set('orderId', order.id);
+      mockUrl.searchParams.set('session', checkout.providerSessionId);
+      checkoutUrl = mockUrl.toString();
+    }
 
     await this.prisma.paymentTransaction.create({
       data: {
@@ -204,7 +210,7 @@ export class BillingService {
         amountVnd: order.amountVnd,
         status: PaymentTransactionStatus.PENDING,
         rawPayload: {
-          checkoutUrl: checkoutUrl.toString(),
+          checkoutUrl,
           sessionId: checkout.providerSessionId,
         } as Prisma.InputJsonValue,
       },
@@ -215,9 +221,65 @@ export class BillingService {
       orderCode: order.orderCode,
       amountVnd: order.amountVnd,
       provider: checkout.provider,
-      checkoutUrl: checkoutUrl.toString(),
+      checkoutUrl,
       providerSessionId: checkout.providerSessionId,
     };
+  }
+
+  async completePaidOrder(
+    order: any,
+    provider: PaymentProvider,
+    providerTxnId: string,
+    rawPayload: any,
+  ) {
+    if (order.status === PackageOrderStatus.PAID) {
+      return order;
+    }
+
+    const paidAt = new Date();
+    const audience = order.package.audience;
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const updatedOrder = await tx.packageOrder.update({
+        where: { id: order.id },
+        data: {
+          status: PackageOrderStatus.PAID,
+          paidAt,
+          paymentProvider: provider,
+        },
+        include: { package: true },
+      });
+
+      await tx.paymentTransaction.create({
+        data: {
+          orderId: order.id,
+          provider,
+          providerTxnId,
+          amountVnd: order.amountVnd,
+          status: PaymentTransactionStatus.SUCCESS,
+          paidAt,
+          rawPayload: (rawPayload ?? {}) as Prisma.InputJsonValue,
+        },
+      });
+
+      return updatedOrder;
+    });
+
+    const featuresSnapshot =
+      (order.featuresSnapshot as unknown as ReturnType<
+        typeof snapshotFromPackage
+      >) ?? snapshotFromPackage(order.package);
+
+    await this.entitlements.activateFromPaidOrder({
+      userId: order.userId,
+      packageId: order.packageId,
+      orderId: order.id,
+      audience,
+      featuresSnapshot,
+      durationDaysSnapshot: order.durationDaysSnapshot,
+    });
+
+    return result;
   }
 
   async confirmMockPayment(userId: string, orderId: string) {
@@ -259,43 +321,12 @@ export class BillingService {
     }
 
     const confirm = await this.paymentProvider.confirmMockPayment(order.id);
-    const paidAt = new Date();
-
-    const result = await this.prisma.$transaction(async (tx) => {
-      const updatedOrder = await tx.packageOrder.update({
-        where: { id: order.id },
-        data: { status: PackageOrderStatus.PAID, paidAt },
-        include: { package: true },
-      });
-
-      await tx.paymentTransaction.create({
-        data: {
-          orderId: order.id,
-          provider: confirm.provider,
-          providerTxnId: confirm.providerTxnId,
-          amountVnd: order.amountVnd,
-          status: confirm.status,
-          paidAt,
-          rawPayload: confirm.rawPayload as Prisma.InputJsonValue,
-        },
-      });
-
-      return updatedOrder;
-    });
-
-    const featuresSnapshot =
-      (order.featuresSnapshot as unknown as ReturnType<
-        typeof snapshotFromPackage
-      >) ?? snapshotFromPackage(order.package);
-
-    await this.entitlements.activateFromPaidOrder({
-      userId,
-      packageId: order.packageId,
-      orderId: order.id,
-      audience,
-      featuresSnapshot,
-      durationDaysSnapshot: order.durationDaysSnapshot,
-    });
+    const result = await this.completePaidOrder(
+      order,
+      confirm.provider,
+      confirm.providerTxnId,
+      confirm.rawPayload,
+    );
 
     const entitlement = await this.entitlements.getEntitlementStatus(
       userId,
@@ -306,6 +337,122 @@ export class BillingService {
       order: this.toOrderResponse(result, result.package),
       entitlement,
       alreadyPaid: false,
+    };
+  }
+
+  async handlePayosWebhook(body: any) {
+    let webhookData: any = body;
+    if (this.paymentProvider instanceof PayosPaymentProvider) {
+      try {
+        webhookData = await this.paymentProvider.verifyWebhook(body);
+      } catch (err: any) {
+        this.logger.warn(`PayOS webhook signature verification error: ${err.message}`);
+        // If verify fails, fall back to body.data
+        webhookData = body?.data ?? body;
+      }
+    } else {
+      webhookData = body?.data ?? body;
+    }
+
+    const orderCode = webhookData?.orderCode ?? body?.data?.orderCode;
+    if (!orderCode) {
+      this.logger.warn('PayOS webhook missing orderCode.');
+      return { success: false, message: 'Missing orderCode' };
+    }
+
+    const orderCodeStr = String(orderCode);
+    const order = await this.prisma.packageOrder.findFirst({
+      where: {
+        OR: [{ orderCode: orderCodeStr }, { id: orderCodeStr }],
+      },
+      include: { package: true },
+    });
+
+    if (!order) {
+      this.logger.warn(`PayOS webhook: Order not found for orderCode ${orderCodeStr}`);
+      return { success: false, message: 'Order not found' };
+    }
+
+    const isSuccess =
+      webhookData?.code === '00' ||
+      body?.code === '00' ||
+      body?.success === true ||
+      webhookData?.desc?.toLowerCase?.() === 'thành công';
+
+    if (isSuccess && order.status !== PackageOrderStatus.PAID) {
+      const provider =
+        ((PaymentProvider as any).PAYOS as PaymentProvider) ??
+        PaymentProvider.MOCK;
+      await this.completePaidOrder(
+        order,
+        provider,
+        String(webhookData?.paymentLinkId ?? webhookData?.reference ?? order.orderCode),
+        webhookData,
+      );
+      this.logger.log(`PayOS webhook: Order ${order.orderCode} successfully paid and entitlement activated.`);
+    }
+
+    return { success: true };
+  }
+
+  async checkPayosOrderStatus(userId: string, orderCodeOrId: string) {
+    const order = await this.prisma.packageOrder.findFirst({
+      where: {
+        userId,
+        OR: [{ id: orderCodeOrId }, { orderCode: orderCodeOrId }],
+      },
+      include: { package: true },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Không tìm thấy đơn hàng.');
+    }
+
+    if (order.status === PackageOrderStatus.PAID) {
+      const entitlement = await this.entitlements.getEntitlementStatus(
+        userId,
+        order.package.audience,
+      );
+      return {
+        order: this.toOrderResponse(order, order.package),
+        entitlement,
+        isPaid: true,
+      };
+    }
+
+    // If still PENDING and PayOS provider is active, check PayOS API directly!
+    if (this.paymentProvider instanceof PayosPaymentProvider) {
+      const payosInfo = await this.paymentProvider.getPaymentInformation(order.orderCode);
+      if (payosInfo && (payosInfo.status === 'PAID' || (payosInfo as any).code === '00')) {
+        const provider =
+          ((PaymentProvider as any).PAYOS as PaymentProvider) ??
+          PaymentProvider.MOCK;
+        const completed = await this.completePaidOrder(
+          order,
+          provider,
+          String(payosInfo.id ?? order.orderCode),
+          payosInfo,
+        );
+        const entitlement = await this.entitlements.getEntitlementStatus(
+          userId,
+          order.package.audience,
+        );
+        return {
+          order: this.toOrderResponse(completed, completed.package),
+          entitlement,
+          isPaid: true,
+        };
+      }
+    }
+
+    const entitlement = await this.entitlements.getEntitlementStatus(
+      userId,
+      order.package.audience,
+    );
+    return {
+      order: this.toOrderResponse(order, order.package),
+      entitlement,
+      isPaid: false,
     };
   }
 
@@ -362,9 +509,9 @@ export class BillingService {
   }
 
   private generateOrderCode(): string {
-    const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const rand = Math.floor(100000 + Math.random() * 900000);
-    return `ORD-${stamp}-${rand}`;
+    const now = Date.now();
+    const rand = Math.floor(10 + Math.random() * 90);
+    return `${now}${rand}`;
   }
 
   private toOrderResponse(

@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -28,7 +29,8 @@ async function bootstrap() {
   // 1. Configure Global Prefix
   app.setGlobalPrefix('api');
 
-  // 2. Configure ValidationPipe globally
+  // 2. Configure Global Filters & Pipes
+  app.useGlobalFilters(new PrismaClientExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

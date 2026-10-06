@@ -247,14 +247,18 @@ function ModalShell({
   onClose,
   children,
   footer,
+  size = "md",
 }: {
   open: boolean;
   title: string;
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  size?: "md" | "lg" | "xl";
 }) {
   if (!open) return null;
+  const maxW =
+    size === "xl" ? "max-w-3xl" : size === "lg" ? "max-w-2xl" : "max-w-lg";
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
@@ -264,23 +268,23 @@ function ModalShell({
       <div
         role="dialog"
         aria-modal="true"
-        className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+        className={`flex max-h-[90vh] w-full ${maxW} flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h3 className="text-base font-extrabold text-slate-900">{title}</h3>
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+          <h3 className="text-lg font-extrabold text-slate-900">{title}</h3>
           <button
             type="button"
             onClick={onClose}
-            className="flex size-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-700"
+            className="flex size-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-700"
             aria-label="Đóng"
           >
             <X className="size-5" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
+        <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
         {footer && (
-          <div className="border-t border-slate-100 px-5 py-3">{footer}</div>
+          <div className="border-t border-slate-100 px-6 py-4">{footer}</div>
         )}
       </div>
     </div>
@@ -631,65 +635,67 @@ function CandidateBillingWorkspaceContent({
         open={policyOpen}
         title="Chính sách gói dịch vụ"
         onClose={() => setPolicyOpen(false)}
+        size="xl"
         footer={
           <div className="text-right">
             <button
               type="button"
               onClick={() => setPolicyOpen(false)}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Đóng
             </button>
           </div>
         }
       >
-        <div className="space-y-4 text-sm text-slate-700">
-          {/* <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            Thông tin tham khảo trên UI. Thanh toán đang sandbox — backend chưa
-            trừ chênh lệch tự động.
-          </p> */}
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-3">
-              <p className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-emerald-700">
-                <ArrowUpRight className="size-3.5" />
+        <div className="space-y-5 text-[15px] leading-relaxed text-slate-700">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5">
+              <p className="inline-flex items-center gap-2 text-sm font-extrabold uppercase tracking-wide text-emerald-700">
+                <ArrowUpRight className="size-4" />
                 Pro → Premium
               </p>
-              <p className="mt-2 leading-relaxed">
+              <p className="mt-3">
                 Nâng cấp ngay. Chỉ trả phần chênh lệch theo thời gian Pro còn
                 lại, rồi nhận chu kỳ Premium mới ({premiumDays} ngày) kèm quota
                 đầy đủ.
               </p>
             </div>
-            <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-3">
-              <p className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-amber-800">
-                <ArrowDownRight className="size-3.5" />
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5">
+              <p className="inline-flex items-center gap-2 text-sm font-extrabold uppercase tracking-wide text-amber-800">
+                <ArrowDownRight className="size-4" />
                 Premium → Pro
               </p>
-              <p className="mt-2 leading-relaxed">
+              <p className="mt-3">
                 Không hạ ngay và không hoàn tiền. Premium dùng đến hết hạn, giữ
                 nguyên quota. Hết hạn mới mua Pro cho chu kỳ tiếp theo.
               </p>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-500">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-extrabold uppercase tracking-wide text-slate-500">
               Ví dụ tính phí
             </p>
-            <p className="mt-2 text-xs text-slate-600">
+            <p className="mt-3 text-sm text-slate-600">
               Pro {formatVnd(proPrice)} / {proDays} ngày · Premium{" "}
               {formatVnd(premiumPrice)} / {premiumDays} ngày
             </p>
-            <ul className="mt-3 list-disc space-y-2 pl-4 leading-relaxed">
+            <ul className="mt-4 list-disc space-y-3 pl-5">
               <li>
                 Dùng Pro {usedDays} ngày, còn {midRemainDays} ngày → giá trị còn
                 lại {formatVnd(residualValue)}; phí nâng ={" "}
-                <strong>{formatVnd(upgradeMid)}</strong>.
+                <strong className="text-slate-900">
+                  {formatVnd(upgradeMid)}
+                </strong>
+                .
               </li>
               <li>
                 Mua Pro rồi nâng Premium ngay → phí nâng ={" "}
-                <strong>{formatVnd(upgradeImmediate)}</strong>.
+                <strong className="text-slate-900">
+                  {formatVnd(upgradeImmediate)}
+                </strong>
+                .
               </li>
               <li>
                 Đang Premium muốn xuống Pro → dùng đến hết hạn, không hoàn tiền;
@@ -759,6 +765,7 @@ function CandidateBillingWorkspaceContent({
         open={historyOpen}
         title="Toàn bộ lịch sử thanh toán"
         onClose={() => setHistoryOpen(false)}
+        size="lg"
         footer={
           <div className="text-right">
             <button

@@ -103,10 +103,11 @@ async function billingRequest<T>(
     try {
       const payload = (await response.json()) as {
         message?: string | string[];
+        error?: string;
       };
       message = Array.isArray(payload.message)
         ? payload.message.join(", ")
-        : payload.message ?? message;
+        : payload.message ?? payload.error ?? message;
     } catch {
       // ignore
     }

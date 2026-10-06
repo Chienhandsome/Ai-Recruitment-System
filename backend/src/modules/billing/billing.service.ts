@@ -232,54 +232,97 @@ export class BillingService {
     providerTxnId: string,
     rawPayload: any,
   ) {
-    if (order.status === PackageOrderStatus.PAID) {
-      return order;
-    }
-
     const paidAt = new Date();
-    const audience = order.package.audience;
 
-    const result = await this.prisma.$transaction(async (tx) => {
-      const updatedOrder = await tx.packageOrder.update({
-        where: { id: order.id },
-        data: {
-          status: PackageOrderStatus.PAID,
-          paidAt,
-          paymentProvider: provider,
-        },
-        include: { package: true },
-      });
+    // Atomic + idempotent: webhook and return-URL check-status can race.
+    const { updatedOrder, alreadyPaid } = await this.prisma.$transaction(
+      async (tx) => {
+        const current = await tx.packageOrder.findUnique({
+          where: { id: order.id },
+          include: { package: true },
+        });
+        if (!current) {
+          throw new NotFoundException('Không tìm thấy đơn hàng.');
+        }
+        if (current.status === PackageOrderStatus.PAID) {
+          return { updatedOrder: current, alreadyPaid: true };
+        }
 
-      await tx.paymentTransaction.create({
-        data: {
-          orderId: order.id,
-          provider,
-          providerTxnId,
-          amountVnd: order.amountVnd,
-          status: PaymentTransactionStatus.SUCCESS,
-          paidAt,
-          rawPayload: (rawPayload ?? {}) as Prisma.InputJsonValue,
-        },
-      });
+        const updated = await tx.packageOrder.update({
+          where: { id: current.id },
+          data: {
+            status: PackageOrderStatus.PAID,
+            paidAt,
+            paymentProvider: provider,
+          },
+          include: { package: true },
+        });
 
-      return updatedOrder;
-    });
+        const pendingTx = await tx.paymentTransaction.findFirst({
+          where: {
+            orderId: current.id,
+            status: PaymentTransactionStatus.PENDING,
+          },
+          orderBy: { createdAt: 'desc' },
+        });
 
+        if (pendingTx) {
+          await tx.paymentTransaction.update({
+            where: { id: pendingTx.id },
+            data: {
+              provider,
+              providerTxnId,
+              status: PaymentTransactionStatus.SUCCESS,
+              paidAt,
+              rawPayload: (rawPayload ?? {}) as Prisma.InputJsonValue,
+            },
+          });
+        } else {
+          await tx.paymentTransaction.create({
+            data: {
+              orderId: current.id,
+              provider,
+              providerTxnId,
+              amountVnd: current.amountVnd,
+              status: PaymentTransactionStatus.SUCCESS,
+              paidAt,
+              rawPayload: (rawPayload ?? {}) as Prisma.InputJsonValue,
+            },
+          });
+        }
+
+        return { updatedOrder: updated, alreadyPaid: false };
+      },
+    );
+
+    const audience = updatedOrder.package.audience;
     const featuresSnapshot =
+      (updatedOrder.featuresSnapshot as unknown as ReturnType<
+        typeof snapshotFromPackage
+      >) ??
       (order.featuresSnapshot as unknown as ReturnType<
         typeof snapshotFromPackage
-      >) ?? snapshotFromPackage(order.package);
+      >) ??
+      snapshotFromPackage(updatedOrder.package);
 
+    // activateFromPaidOrder is itself idempotent per orderId.
     await this.entitlements.activateFromPaidOrder({
-      userId: order.userId,
-      packageId: order.packageId,
-      orderId: order.id,
+      userId: updatedOrder.userId,
+      packageId: updatedOrder.packageId,
+      orderId: updatedOrder.id,
       audience,
       featuresSnapshot,
-      durationDaysSnapshot: order.durationDaysSnapshot,
+      durationDaysSnapshot:
+        updatedOrder.durationDaysSnapshot ?? order.durationDaysSnapshot,
     });
 
-    return result;
+    if (alreadyPaid) {
+      this.logger.log(
+        `Order ${updatedOrder.orderCode} already PAID — ensured entitlement is active.`,
+      );
+    }
+
+    return updatedOrder;
   }
 
   async confirmMockPayment(userId: string, orderId: string) {
@@ -408,40 +451,62 @@ export class BillingService {
       throw new NotFoundException('Không tìm thấy đơn hàng.');
     }
 
-    if (order.status === PackageOrderStatus.PAID) {
+    const buildPaidResponse = async (paidOrder: typeof order) => {
       const entitlement = await this.entitlements.getEntitlementStatus(
         userId,
-        order.package.audience,
+        paidOrder.package.audience,
       );
       return {
-        order: this.toOrderResponse(order, order.package),
+        order: this.toOrderResponse(paidOrder, paidOrder.package),
         entitlement,
-        isPaid: true,
+        isPaid: true as const,
       };
+    };
+
+    if (order.status === PackageOrderStatus.PAID) {
+      return buildPaidResponse(order);
     }
 
-    // If still PENDING and PayOS provider is active, check PayOS API directly!
+    // If still PENDING and PayOS provider is active, check PayOS API directly.
     if (this.paymentProvider instanceof PayosPaymentProvider) {
-      const payosInfo = await this.paymentProvider.getPaymentInformation(order.orderCode);
-      if (payosInfo && (payosInfo.status === 'PAID' || (payosInfo as any).code === '00')) {
+      const payosInfo = await this.paymentProvider.getPaymentInformation(
+        order.orderCode,
+      );
+      if (
+        payosInfo &&
+        (payosInfo.status === 'PAID' || (payosInfo as any).code === '00')
+      ) {
         const provider =
           ((PaymentProvider as any).PAYOS as PaymentProvider) ??
           PaymentProvider.MOCK;
-        const completed = await this.completePaidOrder(
-          order,
-          provider,
-          String(payosInfo.id ?? order.orderCode),
-          payosInfo,
-        );
-        const entitlement = await this.entitlements.getEntitlementStatus(
-          userId,
-          order.package.audience,
-        );
-        return {
-          order: this.toOrderResponse(completed, completed.package),
-          entitlement,
-          isPaid: true,
-        };
+        try {
+          const completed = await this.completePaidOrder(
+            order,
+            provider,
+            String(
+              (payosInfo as any).id ??
+                (payosInfo as any).paymentLinkId ??
+                order.orderCode,
+            ),
+            payosInfo,
+          );
+          return buildPaidResponse(completed);
+        } catch (err) {
+          // Another request (webhook / Strict Mode) may have finished first.
+          this.logger.warn(
+            `checkPayosOrderStatus complete race for ${order.orderCode}: ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+          );
+          const refreshed = await this.prisma.packageOrder.findFirst({
+            where: { id: order.id, userId },
+            include: { package: true },
+          });
+          if (refreshed?.status === PackageOrderStatus.PAID) {
+            return buildPaidResponse(refreshed);
+          }
+          throw err;
+        }
       }
     }
 

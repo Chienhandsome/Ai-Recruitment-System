@@ -488,6 +488,15 @@ export class EntitlementsService {
     featuresSnapshot?: PackageFeaturesSnapshot;
     durationDaysSnapshot?: number | null;
   }) {
+    // Idempotent: webhook + check-status may both try to activate the same order.
+    const existingForOrder = await this.prisma.packageEntitlement.findUnique({
+      where: { orderId: params.orderId },
+      include: { package: { select: packageSelect } },
+    });
+    if (existingForOrder) {
+      return existingForOrder;
+    }
+
     const pkg = await this.prisma.servicePackage.findFirst({
       where: {
         id: params.packageId,
@@ -532,31 +541,46 @@ export class EntitlementsService {
       data: { status: EntitlementStatus.EXPIRED },
     });
 
-    return this.prisma.packageEntitlement.create({
-      data: {
-        userId: params.userId,
-        companyId: null,
-        packageId: pkg.id,
-        orderId: params.orderId,
-        status: EntitlementStatus.ACTIVE,
-        startsAt,
-        endsAt,
-        maxActiveJobs: snapshot.maxActiveJobs,
-        monthlyJobCreateLimit: snapshot.monthlyJobCreateLimit,
-        maxApplicantsPerJob: snapshot.maxApplicantsPerJob,
-        cvUnlockRemaining: snapshot.cvUnlockQuota,
-        aiRanking: snapshot.aiRanking,
-        advancedFilters: snapshot.advancedFilters,
-        recruitmentStats: snapshot.recruitmentStats,
-        talentPoolAccess: snapshot.talentPoolAccess,
-        jdFitAnalysis: snapshot.jdFitAnalysis,
-        cvImproveSuggestions: snapshot.cvImproveSuggestions,
-        jdFitRemaining: snapshot.jdFitQuota,
-        aiMockInterview: snapshot.aiMockInterview,
-        mockInterviewRemaining: snapshot.mockInterviewQuota,
-      },
-      include: { package: { select: packageSelect } },
-    });
+    try {
+      return await this.prisma.packageEntitlement.create({
+        data: {
+          userId: params.userId,
+          companyId: null,
+          packageId: pkg.id,
+          orderId: params.orderId,
+          status: EntitlementStatus.ACTIVE,
+          startsAt,
+          endsAt,
+          maxActiveJobs: snapshot.maxActiveJobs,
+          monthlyJobCreateLimit: snapshot.monthlyJobCreateLimit ?? null,
+          maxApplicantsPerJob: snapshot.maxApplicantsPerJob ?? null,
+          cvUnlockRemaining: snapshot.cvUnlockQuota,
+          aiRanking: snapshot.aiRanking,
+          advancedFilters: snapshot.advancedFilters,
+          recruitmentStats: snapshot.recruitmentStats,
+          talentPoolAccess: snapshot.talentPoolAccess,
+          jdFitAnalysis: snapshot.jdFitAnalysis,
+          cvImproveSuggestions: snapshot.cvImproveSuggestions,
+          jdFitRemaining: snapshot.jdFitQuota,
+          aiMockInterview: snapshot.aiMockInterview,
+          mockInterviewRemaining: snapshot.mockInterviewQuota,
+        },
+        include: { package: { select: packageSelect } },
+      });
+    } catch (err) {
+      // Concurrent activate for the same orderId (P2002).
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        const raced = await this.prisma.packageEntitlement.findUnique({
+          where: { orderId: params.orderId },
+          include: { package: { select: packageSelect } },
+        });
+        if (raced) return raced;
+      }
+      throw err;
+    }
   }
 
   private async virtualFreeEntitlement(

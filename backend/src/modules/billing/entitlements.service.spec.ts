@@ -59,6 +59,7 @@ describe('EntitlementsService (candidate + shared core)', () => {
       },
       packageEntitlement: {
         findMany: jest.fn().mockResolvedValue([]),
+        findUnique: jest.fn().mockResolvedValue(null),
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         update: jest.fn(),
         create: jest.fn(),
@@ -206,6 +207,7 @@ describe('EntitlementsService (candidate + shared core)', () => {
   });
 
   it('upgrades Pro to Premium by expiring prior paid entitlement', async () => {
+    prisma.packageEntitlement.findUnique.mockResolvedValue(null);
     prisma.servicePackage.findFirst.mockResolvedValue(premiumCandidate);
     prisma.packageEntitlement.create.mockResolvedValue({
       id: 'ent-premium',

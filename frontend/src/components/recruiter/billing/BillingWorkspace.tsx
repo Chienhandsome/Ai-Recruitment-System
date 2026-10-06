@@ -376,23 +376,40 @@ function BillingWorkspaceContent({
       setError("Giao dịch thanh toán đã bị hủy trên cổng PayOS.");
       return;
     }
-    setSyncingOrder(true);
-    checkOrderStatus(token, orderCodeParam)
-      .then((res) => {
+
+    let cancelled = false;
+
+    const syncPayment = async () => {
+      setSyncingOrder(true);
+      setError(null);
+      try {
+        const res = await checkOrderStatus(token, orderCodeParam);
+        if (cancelled) return;
         if (res.isPaid) {
           setPaymentSuccessNotice(
             `Thanh toán đơn hàng #${orderCodeParam} thành công! Gói ${res.order.package.name} đã được kích hoạt.`,
           );
           setCurrentEntitlement(res.entitlement);
           router.replace("/recruiter/billing");
+          router.refresh();
         }
-      })
-      .catch((err) => {
+      } catch (err) {
+        if (cancelled) return;
         console.error("Failed to sync order status:", err);
-      })
-      .finally(() => {
-        setSyncingOrder(false);
-      });
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Không đồng bộ được trạng thái thanh toán. Nếu đã trừ tiền, hãy tải lại trang.",
+        );
+      } finally {
+        if (!cancelled) setSyncingOrder(false);
+      }
+    };
+
+    void syncPayment();
+    return () => {
+      cancelled = true;
+    };
   }, [orderCodeParam, statusParam, token, router]);
 
   const sorted = useMemo(

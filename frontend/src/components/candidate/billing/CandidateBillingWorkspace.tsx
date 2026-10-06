@@ -362,25 +362,40 @@ function CandidateBillingWorkspaceContent({
   // PayOS automatic return handler: When redirected back from PayOS VietQR with ?orderCode=...
   useEffect(() => {
     const orderCodeParam = searchParams.get("orderCode");
+    if (!orderCodeParam || !token) return;
 
-    if (orderCodeParam && token) {
+    let cancelled = false;
+
+    const syncPayment = async () => {
       setSyncingOrder(true);
-      checkOrderStatus(token, orderCodeParam)
-        .then((res) => {
-          if (res.isPaid) {
-            setSuccessMessage(
-              `Thanh toán đơn hàng #${orderCodeParam} thành công! Gói ${res.entitlement.packageName} đã được kích hoạt.`,
-            );
-            router.replace("/candidate/billing");
-          }
-        })
-        .catch((err) => {
-          console.error("Failed to sync candidate order status on return:", err);
-        })
-        .finally(() => {
-          setSyncingOrder(false);
-        });
-    }
+      setError(null);
+      try {
+        const res = await checkOrderStatus(token, orderCodeParam);
+        if (cancelled) return;
+        if (res.isPaid) {
+          setSuccessMessage(
+            `Thanh toán đơn hàng #${orderCodeParam} thành công! Gói ${res.entitlement.packageName} đã được kích hoạt.`,
+          );
+          router.replace("/candidate/billing");
+          router.refresh();
+        }
+      } catch (err) {
+        if (cancelled) return;
+        console.error("Failed to sync candidate order status on return:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Không đồng bộ được trạng thái thanh toán. Nếu đã trừ tiền, hãy tải lại trang.",
+        );
+      } finally {
+        if (!cancelled) setSyncingOrder(false);
+      }
+    };
+
+    void syncPayment();
+    return () => {
+      cancelled = true;
+    };
   }, [searchParams, token, router]);
 
   const openPurchase = (

@@ -11,6 +11,8 @@ export type ServicePackage = {
   priceVnd: number;
   durationDays: number | null;
   maxActiveJobs: number | null;
+  monthlyJobCreateLimit?: number | null;
+  maxApplicantsPerJob?: number | null;
   cvUnlockQuota: number;
   aiRanking: boolean;
   advancedFilters: boolean;
@@ -29,6 +31,11 @@ export type EntitlementStatus = {
   packageCode: string;
   packageName: string;
   maxActiveJobs: number | null;
+  monthlyJobCreateLimit?: number | null;
+  maxApplicantsPerJob?: number | null;
+  jobsCreatedThisMonth?: number;
+  monthlyJobCreateRemaining?: number | null;
+  canCreateMoreJobs?: boolean;
   cvUnlockRemaining: number;
   aiRanking: boolean;
   advancedFilters: boolean;
@@ -125,11 +132,7 @@ export function getMyEntitlement(
 
 export function createPackageOrder(
   accessToken: string,
-  packageCode:
-    | "HR_PRO"
-    | "HR_PREMIUM"
-    | "CANDIDATE_PRO"
-    | "CANDIDATE_PREMIUM",
+  packageCode: "HR_PRO" | "CANDIDATE_PRO" | "CANDIDATE_PREMIUM",
 ) {
   return billingRequest<PackageOrder>("/billing/orders", accessToken, {
     method: "POST",

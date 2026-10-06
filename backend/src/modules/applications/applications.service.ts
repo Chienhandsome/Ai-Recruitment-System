@@ -205,12 +205,32 @@ export class ApplicationsService {
         status: JobStatus.PUBLISHED,
         OR: [{ expiryDate: null }, { expiryDate: { gt: now } }],
       },
-      include: jobEvaluationInclude,
+      include: {
+        ...jobEvaluationInclude,
+        recruiter: { select: { userId: true } },
+      },
     });
     if (!job) {
       throw new NotFoundException(
         'Job posting is not published or is no longer accepting applications.',
       );
+    }
+
+    const applicantCap =
+      await this.entitlements.getApplicantCapForJobOwner(job.recruiter.userId);
+    if (applicantCap != null) {
+      const currentApplicants = await this.prisma.application.count({
+        where: { jobId: job.id },
+      });
+      if (currentApplicants >= applicantCap) {
+        await this.entitlements.hideJobIfApplicantCapReached(
+          job.id,
+          job.recruiter.userId,
+        );
+        throw new ForbiddenException(
+          `Tin tuyển dụng đã đạt giới hạn ${applicantCap} ứng viên và tạm ẩn với ứng viên.`,
+        );
+      }
     }
 
     const profileSnapshot = this.buildProfileSnapshot(
@@ -264,12 +284,18 @@ export class ApplicationsService {
       );
     }
 
+    const capped = await this.entitlements.hideJobIfApplicantCapReached(
+      job.id,
+      job.recruiter.userId,
+    );
+
     return {
       message: published
         ? 'Ứng tuyển thành công. Đang phân tích hồ sơ...'
         : 'Ứng tuyển thành công. Đánh giá AI đã được lên lịch thử lại.',
       applicationId: application.id,
       evaluationStatus: published ? 'QUEUED' : 'RETRY_SCHEDULED',
+      ...(capped ? { jobHiddenDueToApplicantCap: true as const } : {}),
     };
   }
 

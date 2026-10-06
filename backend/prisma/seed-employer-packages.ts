@@ -10,12 +10,15 @@ export type EmployerPackageSeed = {
   priceVnd: number;
   durationDays: number | null;
   maxActiveJobs: number | null;
+  monthlyJobCreateLimit: number | null;
+  maxApplicantsPerJob: number | null;
   cvUnlockQuota: number;
   aiRanking: boolean;
   advancedFilters: boolean;
   recruitmentStats: boolean;
   talentPoolAccess: boolean;
   sortOrder: number;
+  isActive: boolean;
 };
 
 export const EMPLOYER_PACKAGE_SEEDS: EmployerPackageSeed[] = [
@@ -23,46 +26,55 @@ export const EMPLOYER_PACKAGE_SEEDS: EmployerPackageSeed[] = [
     code: 'HR_FREE',
     name: 'HR Free',
     description:
-      'Đăng tối đa 1 tin tuyển dụng đang hoạt động và xem danh sách CV ứng tuyển. Không cam kết tuyển được người.',
+      'Tạo tối đa 3 tin/tháng, tối đa 100 ứng viên/tin. AI matching cơ bản và ATS cơ bản. Không cam kết tuyển được người.',
     priceVnd: 0,
     durationDays: null,
-    maxActiveJobs: 1,
+    maxActiveJobs: null,
+    monthlyJobCreateLimit: 3,
+    maxApplicantsPerJob: 100,
     cvUnlockQuota: 0,
-    aiRanking: false,
+    aiRanking: true,
     advancedFilters: false,
     recruitmentStats: false,
     talentPoolAccess: false,
     sortOrder: 1,
+    isActive: true,
   },
   {
     code: 'HR_PRO',
     name: 'HR Pro 30 ngày',
     description:
-      'Đăng nhiều tin, AI xếp hạng CV theo JD kèm lý do phù hợp, và lọc ứng viên nâng cao. HR vẫn là người quyết định tuyển dụng.',
-    priceVnd: 249000,
+      'Không giới hạn tin và ứng viên. AI xếp hạng đầy đủ, lọc nâng cao, dashboard thống kê và kho CV công khai. HR vẫn là người quyết định tuyển dụng.',
+    priceVnd: 349000,
     durationDays: 30,
     maxActiveJobs: null,
-    cvUnlockQuota: 0,
-    aiRanking: true,
-    advancedFilters: true,
-    recruitmentStats: false,
-    talentPoolAccess: false,
-    sortOrder: 2,
-  },
-  {
-    code: 'HR_PREMIUM',
-    name: 'HR Premium 30 ngày',
-    description:
-      'Bao gồm Pro, thêm dashboard thống kê tuyển dụng và tìm kiếm/mở khóa CV trong kho ứng viên công khai.',
-    priceVnd: 599000,
-    durationDays: 30,
-    maxActiveJobs: null,
+    monthlyJobCreateLimit: null,
+    maxApplicantsPerJob: null,
     cvUnlockQuota: 50,
     aiRanking: true,
     advancedFilters: true,
     recruitmentStats: true,
     talentPoolAccess: true,
-    sortOrder: 3,
+    sortOrder: 2,
+    isActive: true,
+  },
+  {
+    code: 'HR_PREMIUM',
+    name: 'HR Premium 30 ngày (ngừng bán)',
+    description:
+      'Đã gộp vào HR Pro. Giữ mã để tương thích đơn hàng cũ.',
+    priceVnd: 599000,
+    durationDays: 30,
+    maxActiveJobs: null,
+    monthlyJobCreateLimit: null,
+    maxApplicantsPerJob: null,
+    cvUnlockQuota: 50,
+    aiRanking: true,
+    advancedFilters: true,
+    recruitmentStats: true,
+    talentPoolAccess: true,
+    sortOrder: 99,
+    isActive: false,
   },
 ];
 
@@ -77,12 +89,14 @@ export async function seedEmployerPackages(prisma: PrismaClient) {
         priceVnd: pkg.priceVnd,
         durationDays: pkg.durationDays,
         maxActiveJobs: pkg.maxActiveJobs,
+        monthlyJobCreateLimit: pkg.monthlyJobCreateLimit,
+        maxApplicantsPerJob: pkg.maxApplicantsPerJob,
         cvUnlockQuota: pkg.cvUnlockQuota,
         aiRanking: pkg.aiRanking,
         advancedFilters: pkg.advancedFilters,
         recruitmentStats: pkg.recruitmentStats,
         talentPoolAccess: pkg.talentPoolAccess,
-        isActive: true,
+        isActive: pkg.isActive,
         sortOrder: pkg.sortOrder,
       },
       create: {
@@ -93,12 +107,14 @@ export async function seedEmployerPackages(prisma: PrismaClient) {
         priceVnd: pkg.priceVnd,
         durationDays: pkg.durationDays,
         maxActiveJobs: pkg.maxActiveJobs,
+        monthlyJobCreateLimit: pkg.monthlyJobCreateLimit,
+        maxApplicantsPerJob: pkg.maxApplicantsPerJob,
         cvUnlockQuota: pkg.cvUnlockQuota,
         aiRanking: pkg.aiRanking,
         advancedFilters: pkg.advancedFilters,
         recruitmentStats: pkg.recruitmentStats,
         talentPoolAccess: pkg.talentPoolAccess,
-        isActive: true,
+        isActive: pkg.isActive,
         sortOrder: pkg.sortOrder,
       },
     });

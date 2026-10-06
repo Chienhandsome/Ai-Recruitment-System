@@ -13,6 +13,8 @@ describe('EntitlementsService (candidate + shared core)', () => {
     name: 'Candidate Free',
     audience: PackageAudience.CANDIDATE,
     maxActiveJobs: null,
+    monthlyJobCreateLimit: null,
+    maxApplicantsPerJob: null,
     cvUnlockQuota: 0,
     aiRanking: false,
     advancedFilters: false,
@@ -97,6 +99,8 @@ describe('EntitlementsService (candidate + shared core)', () => {
       {
         id: 'ent-pro',
         maxActiveJobs: null,
+        monthlyJobCreateLimit: null,
+        maxApplicantsPerJob: null,
         cvUnlockRemaining: 0,
         aiRanking: false,
         advancedFilters: false,
@@ -171,6 +175,8 @@ describe('EntitlementsService (candidate + shared core)', () => {
       {
         id: 'ent-pro',
         maxActiveJobs: null,
+        monthlyJobCreateLimit: null,
+        maxApplicantsPerJob: null,
         cvUnlockRemaining: 0,
         aiRanking: false,
         advancedFilters: false,
@@ -235,6 +241,8 @@ describe('EntitlementsService (candidate + shared core)', () => {
       {
         id: 'ent-pro',
         maxActiveJobs: null,
+        monthlyJobCreateLimit: null,
+        maxApplicantsPerJob: null,
         cvUnlockRemaining: 0,
         aiRanking: false,
         advancedFilters: false,

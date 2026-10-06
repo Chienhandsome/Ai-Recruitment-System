@@ -38,6 +38,7 @@ enum JobCloseReason {
   QUOTA_REACHED
   EXPIRED
   MANUAL_HR
+  APPLICANT_CAP_REACHED
 }
 
 enum EmploymentType {
@@ -1089,6 +1090,10 @@ model ServicePackage {
   priceVnd         Int             @map("price_vnd")
   durationDays     Int?            @map("duration_days")
   maxActiveJobs    Int?            @map("max_active_jobs")
+  /// Employer Free: max new JD creates in calendar month (VN). null = unlimited
+  monthlyJobCreateLimit Int?       @map("monthly_job_create_limit")
+  /// Employer Free: max applications per JD before hiding from candidates. null = unlimited
+  maxApplicantsPerJob   Int?       @map("max_applicants_per_job")
   cvUnlockQuota    Int             @default(0) @map("cv_unlock_quota")
   aiRanking        Boolean         @default(false) @map("ai_ranking")
   advancedFilters  Boolean         @default(false) @map("advanced_filters")
@@ -1173,6 +1178,8 @@ model PackageEntitlement {
   startsAt          DateTime           @map("starts_at")
   endsAt            DateTime?          @map("ends_at")
   maxActiveJobs     Int?               @map("max_active_jobs")
+  monthlyJobCreateLimit Int?           @map("monthly_job_create_limit")
+  maxApplicantsPerJob   Int?           @map("max_applicants_per_job")
   cvUnlockRemaining Int                @default(0) @map("cv_unlock_remaining")
   aiRanking         Boolean            @default(false) @map("ai_ranking")
   advancedFilters   Boolean            @default(false) @map("advanced_filters")

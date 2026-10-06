@@ -66,6 +66,8 @@ export class BillingService {
         priceVnd: dto.priceVnd,
         durationDays: dto.durationDays,
         maxActiveJobs: dto.maxActiveJobs,
+        monthlyJobCreateLimit: dto.monthlyJobCreateLimit,
+        maxApplicantsPerJob: dto.maxApplicantsPerJob,
         cvUnlockQuota: dto.cvUnlockQuota,
         aiRanking: dto.aiRanking,
         advancedFilters: dto.advancedFilters,
@@ -259,16 +261,6 @@ export class BillingService {
     const confirm = await this.paymentProvider.confirmMockPayment(order.id);
     const paidAt = new Date();
 
-    const companyId =
-      audience === PackageAudience.EMPLOYER
-        ? (
-            await this.prisma.recruiterProfile.findUnique({
-              where: { userId },
-              select: { companyId: true },
-            })
-          )?.companyId
-        : null;
-
     const result = await this.prisma.$transaction(async (tx) => {
       const updatedOrder = await tx.packageOrder.update({
         where: { id: order.id },
@@ -300,7 +292,6 @@ export class BillingService {
       userId,
       packageId: order.packageId,
       orderId: order.id,
-      companyId,
       audience,
       featuresSnapshot,
       durationDaysSnapshot: order.durationDaysSnapshot,

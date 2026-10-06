@@ -47,6 +47,24 @@ export class UpdatePackageDto {
   @Min(1)
   maxActiveJobs?: number | null;
 
+  @ApiPropertyOptional({
+    description: 'null = unlimited JD creates per calendar month',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  monthlyJobCreateLimit?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'null = unlimited applicants per job',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  maxApplicantsPerJob?: number | null;
+
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)

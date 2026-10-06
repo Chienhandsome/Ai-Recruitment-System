@@ -88,6 +88,7 @@ export class JobsService {
 
   async create(userId: string, dto: CreateJobDto) {
     const recruiter = await this.getRecruiterProfile(userId);
+    await this.entitlements.assertCanCreateJob(userId);
 
     // Prepare skills data if provided
     const skillsData =

@@ -1,4 +1,4 @@
-import { isMockPaymentAllowed } from './billing.types';
+import { isMockPaymentAllowed, vietnamMonthWindow } from './billing.types';
 
 describe('isMockPaymentAllowed', () => {
   const originalEnv = process.env.NODE_ENV;
@@ -29,5 +29,19 @@ describe('isMockPaymentAllowed', () => {
     process.env.NODE_ENV = 'production';
     process.env.ALLOW_MOCK_PAYMENT = 'true';
     expect(isMockPaymentAllowed()).toBe(true);
+  });
+});
+
+describe('vietnamMonthWindow', () => {
+  it('returns Asia/Ho_Chi_Minh calendar month bounds', () => {
+    const { start, end } = vietnamMonthWindow(
+      new Date('2026-10-06T08:00:00+07:00'),
+    );
+    expect(start.toISOString()).toBe(
+      new Date('2026-10-01T00:00:00+07:00').toISOString(),
+    );
+    expect(end.toISOString()).toBe(
+      new Date('2026-11-01T00:00:00+07:00').toISOString(),
+    );
   });
 });

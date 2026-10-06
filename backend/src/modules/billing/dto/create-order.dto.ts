@@ -6,7 +6,6 @@ export class CreateOrderDto {
   @ApiProperty({
     enum: [
       PACKAGE_CODES.HR_PRO,
-      PACKAGE_CODES.HR_PREMIUM,
       PACKAGE_CODES.CANDIDATE_PRO,
       PACKAGE_CODES.CANDIDATE_PREMIUM,
     ],
@@ -14,7 +13,6 @@ export class CreateOrderDto {
   @IsString()
   @IsIn([
     PACKAGE_CODES.HR_PRO,
-    PACKAGE_CODES.HR_PREMIUM,
     PACKAGE_CODES.CANDIDATE_PRO,
     PACKAGE_CODES.CANDIDATE_PREMIUM,
   ])

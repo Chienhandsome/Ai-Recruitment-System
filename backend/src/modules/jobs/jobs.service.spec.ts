@@ -69,6 +69,7 @@ describe('JobsService candidate browsing', () => {
     } as any;
     const service = new JobsService(prisma, {} as never, {
       assertCanPublishJob: jest.fn().mockResolvedValue({}),
+      assertCanCreateJob: jest.fn().mockResolvedValue({}),
     } as never);
 
     const result = await service.findCandidateJobs({
@@ -118,6 +119,7 @@ describe('JobsService candidate browsing', () => {
     } as any;
     const service = new JobsService(prisma, {} as never, {
       assertCanPublishJob: jest.fn().mockResolvedValue({}),
+      assertCanCreateJob: jest.fn().mockResolvedValue({}),
     } as never);
 
     const result = await service.findCandidateJobById('job-1', 'user-1');
@@ -153,6 +155,7 @@ describe('JobsService candidate browsing', () => {
     } as any;
     const service = new JobsService(prisma, {} as never, {
       assertCanPublishJob: jest.fn().mockResolvedValue({}),
+      assertCanCreateJob: jest.fn().mockResolvedValue({}),
     } as never);
 
     await expect(
@@ -231,6 +234,7 @@ describe('JobsService candidate browsing', () => {
     } as any;
     const service = new JobsService(prisma, {} as never, {
       assertCanPublishJob: jest.fn().mockResolvedValue({}),
+      assertCanCreateJob: jest.fn().mockResolvedValue({}),
     } as never);
 
     const result = await service.findRecommendedCandidateJobs('user-1', {
@@ -260,6 +264,7 @@ describe('JobsService candidate browsing', () => {
     } as any;
     const service = new JobsService(prisma, {} as never, {
       assertCanPublishJob: jest.fn().mockResolvedValue({}),
+      assertCanCreateJob: jest.fn().mockResolvedValue({}),
     } as never);
 
     const result = await service.findRecommendedCandidateJobs('user-no-profile', {

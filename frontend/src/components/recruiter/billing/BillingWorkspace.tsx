@@ -7,7 +7,7 @@ import {
   ArrowLeft,
   Check,
   CreditCard,
-  Crown,
+  Info,
   Lock,
   Sparkles,
 } from "lucide-react";
@@ -43,13 +43,21 @@ type Props = {
 };
 
 function featureList(pkg: ServicePackage) {
-  const items = [
-    pkg.maxActiveJobs === null
-      ? "Đăng nhiều tin tuyển dụng đang hoạt động"
-      : `Tối đa ${pkg.maxActiveJobs} tin đang hoạt động`,
-    "Xem danh sách CV ứng tuyển",
-  ];
-  if (pkg.aiRanking) items.push("AI xếp hạng CV theo JD (HR quyết định)");
+  const items: string[] = [];
+  if (pkg.monthlyJobCreateLimit != null) {
+    items.push(`Tạo tối đa ${pkg.monthlyJobCreateLimit} tin / tháng`);
+  } else if (pkg.code !== "HR_FREE") {
+    items.push("Tạo tin tuyển dụng không giới hạn");
+  }
+  if (pkg.maxApplicantsPerJob != null) {
+    items.push(
+      `Tối đa ${pkg.maxApplicantsPerJob} ứng viên / tin (đủ thì ẩn với ứng viên)`,
+    );
+  } else if (pkg.code !== "HR_FREE") {
+    items.push("Không giới hạn ứng viên mỗi tin");
+  }
+  items.push("Xem danh sách CV ứng tuyển & ATS cơ bản");
+  if (pkg.aiRanking) items.push("AI matching / xếp hạng CV theo JD");
   if (pkg.advancedFilters) items.push("Bộ lọc ứng viên nâng cao");
   if (pkg.recruitmentStats) items.push("Dashboard thống kê tuyển dụng");
   if (pkg.talentPoolAccess)
@@ -67,24 +75,32 @@ export function BillingWorkspace({
   const router = useRouter();
   const [busyCode, setBusyCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const sorted = useMemo(
-    () => [...packages].sort((a, b) => a.sortOrder - b.sortOrder),
+    () =>
+      [...packages]
+        .filter((p) => p.code !== "HR_PREMIUM")
+        .sort((a, b) => a.sortOrder - b.sortOrder),
     [packages],
   );
 
-  const startCheckout = async (packageCode: "HR_PRO" | "HR_PREMIUM") => {
+  const proPkg = sorted.find((p) => p.code === "HR_PRO");
+
+  const startCheckout = async () => {
     if (!token) return;
-    setBusyCode(packageCode);
+    setBusyCode("HR_PRO");
     setError(null);
     try {
-      const order = await createPackageOrder(token, packageCode);
+      const order = await createPackageOrder(token, "HR_PRO");
       const session = await checkoutOrder(token, order.id);
+      setConfirmOpen(false);
       router.push(
         `/recruiter/billing/checkout?orderId=${order.id}&session=${session.providerSessionId}`,
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tạo đơn hàng.");
+      setConfirmOpen(false);
     } finally {
       setBusyCode(null);
     }
@@ -92,29 +108,22 @@ export function BillingWorkspace({
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <Link
-              href="/recruiter/dashboard"
-              className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800"
-            >
-              <ArrowLeft className="h-4 w-4" /> Về workspace HR
-            </Link>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              Gói dịch vụ nhà tuyển dụng
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-600">
-              AI chỉ hỗ trợ xếp hạng và giải thích mức phù hợp. Quyết định tuyển
-              dụng thuộc về bạn. Hệ thống không cam kết tuyển được người.
-            </p>
-          </div>
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+        <div className="mb-8">
           <Link
-            href="/recruiter/talent-pool"
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+            href="/recruiter/dashboard"
+            className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800"
           >
-            <Crown className="h-4 w-4" /> Kho CV Premium
+            <ArrowLeft className="h-4 w-4" /> Về workspace HR
           </Link>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Gói dịch vụ nhà tuyển dụng
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-600">
+            Free: 3 tin/tháng, 100 ứng viên/tin, AI matching & ATS cơ bản. Pro:
+            không giới hạn + lọc nâng cao, dashboard, kho CV. AI chỉ hỗ trợ —
+            quyết định tuyển dụng thuộc về bạn.
+          </p>
         </div>
 
         {entitlement && (
@@ -128,10 +137,13 @@ export function BillingWorkspace({
                   {entitlement.packageName}
                 </h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  Tin đang hoạt động: {entitlement.activeJobCount}
-                  {entitlement.maxActiveJobs !== null
-                    ? ` / ${entitlement.maxActiveJobs}`
+                  Tin đã tạo tháng này: {entitlement.jobsCreatedThisMonth ?? 0}
+                  {entitlement.monthlyJobCreateLimit != null
+                    ? ` / ${entitlement.monthlyJobCreateLimit}`
                     : " (không giới hạn)"}
+                  {entitlement.maxApplicantsPerJob != null
+                    ? ` · Tối đa ${entitlement.maxApplicantsPerJob} UV/tin`
+                    : " · UV/tin không giới hạn"}
                   {entitlement.endsAt
                     ? ` · Hết hạn ${new Date(entitlement.endsAt).toLocaleDateString("vi-VN")}`
                     : " · Không thời hạn"}
@@ -145,7 +157,7 @@ export function BillingWorkspace({
               <div className="flex flex-wrap gap-2 text-xs font-semibold">
                 {entitlement.aiRanking && (
                   <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
-                    AI ranking
+                    AI matching
                   </span>
                 )}
                 {entitlement.advancedFilters && (
@@ -175,24 +187,20 @@ export function BillingWorkspace({
           </div>
         )}
 
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2">
           {sorted.map((pkg) => {
             const isCurrent = entitlement?.packageCode === pkg.code;
-            const payable = pkg.code === "HR_PRO" || pkg.code === "HR_PREMIUM";
+            const payable = pkg.code === "HR_PRO";
             return (
               <div
                 key={pkg.id}
                 className={`flex flex-col rounded-2xl border bg-white p-5 shadow-sm ${
-                  pkg.code === "HR_PREMIUM"
-                    ? "border-slate-900"
-                    : "border-slate-200"
+                  pkg.code === "HR_PRO" ? "border-slate-900" : "border-slate-200"
                 }`}
               >
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">{pkg.name}</h3>
-                  {pkg.code === "HR_PREMIUM" ? (
-                    <Crown className="h-5 w-5 text-amber-500" />
-                  ) : pkg.code === "HR_PRO" ? (
+                  {pkg.code === "HR_PRO" ? (
                     <Sparkles className="h-5 w-5 text-sky-500" />
                   ) : (
                     <Lock className="h-5 w-5 text-slate-400" />
@@ -222,9 +230,7 @@ export function BillingWorkspace({
                   <button
                     type="button"
                     disabled={isCurrent || busyCode === pkg.code}
-                    onClick={() =>
-                      startCheckout(pkg.code as "HR_PRO" | "HR_PREMIUM")
-                    }
+                    onClick={() => setConfirmOpen(true)}
                     className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <CreditCard className="h-4 w-4" />
@@ -243,6 +249,58 @@ export function BillingWorkspace({
             );
           })}
         </div>
+
+        {confirmOpen && proPkg && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
+            role="presentation"
+            onClick={() => !busyCode && setConfirmOpen(false)}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-3 flex items-center gap-2 text-slate-900">
+                <Info className="h-5 w-5 text-[#2563EB]" />
+                <h3 className="text-base font-extrabold">Xác nhận mua HR Pro</h3>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-xs font-semibold uppercase text-slate-500">
+                  Số tiền cần thanh toán
+                </p>
+                <p className="mt-1 text-2xl font-extrabold">
+                  {formatVnd(proPkg.priceVnd)}
+                </p>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                Thanh toán sandbox {formatVnd(proPkg.priceVnd)} cho{" "}
+                {proPkg.durationDays ?? 30} ngày Pro: bỏ giới hạn 3 tin/tháng và
+                100 UV/tin; mở lọc nâng cao, dashboard và kho CV.
+              </p>
+              <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  disabled={!!busyCode}
+                  onClick={() => setConfirmOpen(false)}
+                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  disabled={!!busyCode}
+                  onClick={() => void startCheckout()}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  {busyCode ? "Đang tạo đơn..." : "Thanh toán sandbox"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

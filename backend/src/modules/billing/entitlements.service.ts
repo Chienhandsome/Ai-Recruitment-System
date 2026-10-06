@@ -2,10 +2,10 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   EntitlementStatus,
+  JobCloseReason,
   JobStatus,
   PackageAudience,
   Prisma,
@@ -13,7 +13,9 @@ import {
 import { PrismaService } from '../../database/prisma.service';
 import {
   ActiveJobQuotaExceededError,
+  ApplicantCapReachedError,
   EntitlementFeatures,
+  MonthlyJobCreateQuotaExceededError,
   PACKAGE_CODES,
   PackageFeatureDeniedError,
   PackageFeaturesSnapshot,
@@ -23,6 +25,7 @@ import {
   freeCodeForAudience,
   snapshotFromPackage,
   tierRank,
+  vietnamMonthWindow,
 } from './billing.types';
 
 const packageSelect = {
@@ -31,6 +34,8 @@ const packageSelect = {
   name: true,
   audience: true,
   maxActiveJobs: true,
+  monthlyJobCreateLimit: true,
+  maxApplicantsPerJob: true,
   cvUnlockQuota: true,
   aiRanking: true,
   advancedFilters: true,
@@ -46,6 +51,26 @@ const packageSelect = {
 } satisfies Prisma.ServicePackageSelect;
 
 type QuotaField = 'jdFitRemaining' | 'mockInterviewRemaining' | 'cvUnlockRemaining';
+
+type EntitlementRow = {
+  id: string;
+  maxActiveJobs: number | null;
+  monthlyJobCreateLimit: number | null;
+  maxApplicantsPerJob: number | null;
+  cvUnlockRemaining: number;
+  aiRanking: boolean;
+  advancedFilters: boolean;
+  recruitmentStats: boolean;
+  talentPoolAccess: boolean;
+  jdFitAnalysis: boolean;
+  cvImproveSuggestions: boolean;
+  jdFitRemaining: number;
+  aiMockInterview: boolean;
+  mockInterviewRemaining: number;
+  startsAt: Date;
+  endsAt: Date | null;
+  package: { code: string; name: string };
+};
 
 @Injectable()
 export class EntitlementsService {
@@ -104,10 +129,25 @@ export class EntitlementsService {
       audience === PackageAudience.EMPLOYER
         ? await this.countActiveJobs(userId)
         : 0;
+    const jobsCreatedThisMonth =
+      audience === PackageAudience.EMPLOYER
+        ? await this.countJobsCreatedThisMonth(userId)
+        : 0;
+    const monthlyLimit = features.monthlyJobCreateLimit;
+    const canCreateMoreJobs =
+      audience !== PackageAudience.EMPLOYER ||
+      monthlyLimit === null ||
+      jobsCreatedThisMonth < monthlyLimit;
 
     return {
       ...features,
       activeJobCount: activeJobs,
+      jobsCreatedThisMonth,
+      monthlyJobCreateRemaining:
+        monthlyLimit === null
+          ? null
+          : Math.max(0, monthlyLimit - jobsCreatedThisMonth),
+      canCreateMoreJobs,
       canPublishMoreJobs:
         features.maxActiveJobs === null || activeJobs < features.maxActiveJobs,
       disclaimer:
@@ -115,25 +155,52 @@ export class EntitlementsService {
     };
   }
 
+  /** Quota scope: single recruiter only (not company-wide). */
   async countActiveJobs(userId: string) {
     const recruiter = await this.prisma.recruiterProfile.findUnique({
       where: { userId },
-      select: { id: true, companyId: true },
+      select: { id: true },
     });
     if (!recruiter) return 0;
-
-    if (recruiter.companyId) {
-      return this.prisma.jobPosting.count({
-        where: {
-          status: JobStatus.PUBLISHED,
-          recruiter: { companyId: recruiter.companyId },
-        },
-      });
-    }
 
     return this.prisma.jobPosting.count({
       where: { status: JobStatus.PUBLISHED, recruiterId: recruiter.id },
     });
+  }
+
+  async countJobsCreatedThisMonth(userId: string, now = new Date()) {
+    const recruiter = await this.prisma.recruiterProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    if (!recruiter) return 0;
+
+    const { start, end } = vietnamMonthWindow(now);
+    return this.prisma.jobPosting.count({
+      where: {
+        recruiterId: recruiter.id,
+        createdAt: { gte: start, lt: end },
+      },
+    });
+  }
+
+  async assertCanCreateJob(userId: string) {
+    const features = await this.getEffectiveEntitlement(
+      userId,
+      PackageAudience.EMPLOYER,
+    );
+    if (features.monthlyJobCreateLimit === null) return features;
+
+    const createdThisMonth = await this.countJobsCreatedThisMonth(userId);
+    if (createdThisMonth >= features.monthlyJobCreateLimit) {
+      throw new ForbiddenException(
+        new MonthlyJobCreateQuotaExceededError(
+          features.monthlyJobCreateLimit,
+          createdThisMonth,
+        ).message,
+      );
+    }
+    return features;
   }
 
   async assertCanPublishJob(userId: string, jobIdBeingPublished?: string) {
@@ -141,21 +208,34 @@ export class EntitlementsService {
       userId,
       PackageAudience.EMPLOYER,
     );
-    if (features.maxActiveJobs === null) return features;
 
     const recruiter = await this.prisma.recruiterProfile.findUnique({
       where: { userId },
-      select: { id: true, companyId: true },
+      select: { id: true },
     });
     if (!recruiter) {
       throw new ForbiddenException('User is not a valid recruiter');
     }
 
+    if (jobIdBeingPublished && features.maxApplicantsPerJob != null) {
+      const applicantCount = await this.prisma.application.count({
+        where: { jobId: jobIdBeingPublished },
+      });
+      if (applicantCount >= features.maxApplicantsPerJob) {
+        throw new ForbiddenException(
+          new ApplicantCapReachedError(
+            features.maxApplicantsPerJob,
+            applicantCount,
+          ).message,
+        );
+      }
+    }
+
+    if (features.maxActiveJobs === null) return features;
+
     const where: Prisma.JobPostingWhereInput = {
       status: JobStatus.PUBLISHED,
-      ...(recruiter.companyId
-        ? { recruiter: { companyId: recruiter.companyId } }
-        : { recruiterId: recruiter.id }),
+      recruiterId: recruiter.id,
       ...(jobIdBeingPublished ? { NOT: { id: jobIdBeingPublished } } : {}),
     };
 
@@ -169,6 +249,42 @@ export class EntitlementsService {
       );
     }
     return features;
+  }
+
+  /**
+   * Resolve applicant cap for a job from the owning recruiter's entitlement.
+   */
+  async getApplicantCapForJobOwner(recruiterUserId: string) {
+    const features = await this.getEffectiveEntitlement(
+      recruiterUserId,
+      PackageAudience.EMPLOYER,
+    );
+    return features.maxApplicantsPerJob;
+  }
+
+  /**
+   * After a successful apply: if Free cap reached, hide job from candidates (PAUSED).
+   */
+  async hideJobIfApplicantCapReached(jobId: string, recruiterUserId: string) {
+    const cap = await this.getApplicantCapForJobOwner(recruiterUserId);
+    if (cap == null) return null;
+
+    const count = await this.prisma.application.count({ where: { jobId } });
+    if (count < cap) return null;
+
+    return this.prisma.jobPosting.update({
+      where: { id: jobId },
+      data: {
+        status: JobStatus.PAUSED,
+        closeReason: JobCloseReason.APPLICANT_CAP_REACHED,
+      },
+      select: {
+        id: true,
+        status: true,
+        closeReason: true,
+        title: true,
+      },
+    });
   }
 
   async assertEmployerFeature(
@@ -195,23 +311,19 @@ export class EntitlementsService {
   }
 
   async assertAiRanking(userId: string) {
-    return this.assertEmployerFeature(userId, 'aiRanking', 'HR Pro hoặc Premium');
+    return this.assertEmployerFeature(userId, 'aiRanking', 'HR Free hoặc Pro');
   }
 
   async assertAdvancedFilters(userId: string) {
-    return this.assertEmployerFeature(
-      userId,
-      'advancedFilters',
-      'HR Pro hoặc Premium',
-    );
+    return this.assertEmployerFeature(userId, 'advancedFilters', 'HR Pro');
   }
 
   async assertRecruitmentStats(userId: string) {
-    return this.assertEmployerFeature(userId, 'recruitmentStats', 'HR Premium');
+    return this.assertEmployerFeature(userId, 'recruitmentStats', 'HR Pro');
   }
 
   async assertTalentPool(userId: string) {
-    return this.assertEmployerFeature(userId, 'talentPoolAccess', 'HR Premium');
+    return this.assertEmployerFeature(userId, 'talentPoolAccess', 'HR Pro');
   }
 
   async assertCandidateJdFit(userId: string) {
@@ -248,8 +360,6 @@ export class EntitlementsService {
 
   /**
    * Idempotent quota consume. Returns existing usage when requestId already seen.
-   * Must only be called AFTER successful AI work, or followed by refund on failure
-   * if called as a reservation — prefer consumeAfterSuccess pattern below.
    */
   async consumeQuotaAtomically(params: {
     userId: string;
@@ -368,14 +478,12 @@ export class EntitlementsService {
   }
 
   /**
-   * Activate paid package. Expires other paid entitlements of the same audience
-   * so Pro→Premium replaces Pro immediately (single paid active entitlement).
+   * Activate paid package. Entitlement is always per-user (recruiter), not company.
    */
   async activateFromPaidOrder(params: {
     userId: string;
     packageId: string;
     orderId: string;
-    companyId?: string | null;
     audience: PackageAudience;
     featuresSnapshot?: PackageFeaturesSnapshot;
     durationDaysSnapshot?: number | null;
@@ -427,13 +535,15 @@ export class EntitlementsService {
     return this.prisma.packageEntitlement.create({
       data: {
         userId: params.userId,
-        companyId: params.companyId ?? null,
+        companyId: null,
         packageId: pkg.id,
         orderId: params.orderId,
         status: EntitlementStatus.ACTIVE,
         startsAt,
         endsAt,
         maxActiveJobs: snapshot.maxActiveJobs,
+        monthlyJobCreateLimit: snapshot.monthlyJobCreateLimit,
+        maxApplicantsPerJob: snapshot.maxApplicantsPerJob,
         cvUnlockRemaining: snapshot.cvUnlockQuota,
         aiRanking: snapshot.aiRanking,
         advancedFilters: snapshot.advancedFilters,
@@ -458,16 +568,20 @@ export class EntitlementsService {
       select: packageSelect,
     });
     if (!freePackage) {
-      // Safe defaults if seed missing
       return {
         audience,
         packageCode: code,
-        packageName: audience === PackageAudience.CANDIDATE ? 'Candidate Free' : 'HR Free',
+        packageName:
+          audience === PackageAudience.CANDIDATE ? 'Candidate Free' : 'HR Free',
         entitlementId: null,
         isVirtualFree: true,
-        maxActiveJobs: audience === PackageAudience.EMPLOYER ? 1 : null,
+        maxActiveJobs: null,
+        monthlyJobCreateLimit:
+          audience === PackageAudience.EMPLOYER ? 3 : null,
+        maxApplicantsPerJob:
+          audience === PackageAudience.EMPLOYER ? 100 : null,
         cvUnlockRemaining: 0,
-        aiRanking: false,
+        aiRanking: audience === PackageAudience.EMPLOYER,
         advancedFilters: false,
         recruitmentStats: false,
         talentPoolAccess: false,
@@ -488,6 +602,8 @@ export class EntitlementsService {
       entitlementId: null,
       isVirtualFree: true,
       maxActiveJobs: freePackage.maxActiveJobs,
+      monthlyJobCreateLimit: freePackage.monthlyJobCreateLimit,
+      maxApplicantsPerJob: freePackage.maxApplicantsPerJob,
       cvUnlockRemaining: 0,
       aiRanking: freePackage.aiRanking,
       advancedFilters: freePackage.advancedFilters,
@@ -504,23 +620,7 @@ export class EntitlementsService {
   }
 
   private toFeatures(
-    row: {
-      id: string;
-      maxActiveJobs: number | null;
-      cvUnlockRemaining: number;
-      aiRanking: boolean;
-      advancedFilters: boolean;
-      recruitmentStats: boolean;
-      talentPoolAccess: boolean;
-      jdFitAnalysis: boolean;
-      cvImproveSuggestions: boolean;
-      jdFitRemaining: number;
-      aiMockInterview: boolean;
-      mockInterviewRemaining: number;
-      startsAt: Date;
-      endsAt: Date | null;
-      package: { code: string; name: string };
-    },
+    row: EntitlementRow,
     audience: PackageAudience,
     isVirtualFree: boolean,
   ): EntitlementFeatures {
@@ -531,6 +631,8 @@ export class EntitlementsService {
       entitlementId: row.id,
       isVirtualFree,
       maxActiveJobs: row.maxActiveJobs,
+      monthlyJobCreateLimit: row.monthlyJobCreateLimit,
+      maxApplicantsPerJob: row.maxApplicantsPerJob,
       cvUnlockRemaining: row.cvUnlockRemaining,
       aiRanking: row.aiRanking,
       advancedFilters: row.advancedFilters,

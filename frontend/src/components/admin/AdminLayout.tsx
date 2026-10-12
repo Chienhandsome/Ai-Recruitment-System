@@ -14,6 +14,8 @@ import {
   Settings,
   Bell,
   CreditCard,
+  FileText,
+  ShieldAlert,
 } from "lucide-react";
 import type { AuthProfile } from "@/types/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -24,6 +26,8 @@ const MENU_ITEMS = [
   { name: "Jobs Moderation", icon: Briefcase, href: "/admin/jobs" },
   { name: "Users", icon: Users, href: "/admin/users" },
   { name: "Gói HR", icon: CreditCard, href: "/admin/packages" },
+  { name: "Điều khoản & Mẫu HĐ", icon: FileText, href: "/admin/policies" },
+  { name: "Xử lý khiếu nại", icon: ShieldAlert, href: "/admin/disputes" },
 ];
 
 export function AdminLayout({

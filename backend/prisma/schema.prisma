@@ -187,6 +187,43 @@ enum OfferStatus {
   CANCELLED
 }
 
+enum ContractStatus {
+  DRAFT
+  PENDING_REVIEW
+  REVISION_REQUESTED
+  APPROVED
+  SIGNED
+  REJECTED
+  CANCELLED
+}
+
+enum ContractType {
+  PROBATION
+  FIXED_TERM
+  INDEFINITE
+}
+
+enum ContractSigningMethod {
+  MANUAL
+  ELECTRONIC
+}
+
+enum DisputeStatus {
+  PENDING
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
+
+enum DisputeCategory {
+  SALARY_MISMATCH
+  UNAUTHORIZED_FEE
+  UNFAIR_REVOCATION
+  CONTRACT_VIOLATION
+  HARASSMENT_OR_FRAUD
+  OTHER
+}
+
 enum AiInterviewStatus {
   CREATED
   IN_PROGRESS
@@ -375,6 +412,7 @@ model User {
   cvUnlocks        CvUnlock[]
   packageUsageLogs PackageUsageLog[]
   jdFitAnalyses    CandidateJdFitAnalysis[]
+  disputes         Dispute[]
 
   @@index([email])
   @@map("users")
@@ -804,8 +842,10 @@ model Application {
   aiInterviewSessions AiInterviewSession[]
   interviewProcess    InterviewProcess?
   offer               Offer?
+  contract            Contract?
   notifications       Notification[]
   statusHistories     ApplicationStatusHistory[]
+  disputes            Dispute[]
 
   @@unique([jobId, candidateId])
   @@index([jobId])
@@ -1073,9 +1113,114 @@ model Offer {
   createdAt           DateTime     @default(now()) @map("created_at")
   updatedAt           DateTime     @updatedAt @map("updated_at")
 
+  contract            Contract?
+
   @@index([applicationId])
   @@index([status])
   @@map("offers")
+}
+
+model Contract {
+  id                    String                @id @default(uuid())
+  contractNumber        String                @unique @map("contract_number")
+  applicationId         String                @unique @map("application_id")
+  application           Application           @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  offerId               String?               @unique @map("offer_id")
+  offer                 Offer?                @relation(fields: [offerId], references: [id], onDelete: SetNull)
+
+  status                ContractStatus        @default(DRAFT)
+  contractType          ContractType          @default(FIXED_TERM) @map("contract_type")
+  signingMethod         ContractSigningMethod @default(MANUAL) @map("signing_method")
+
+  jobTitle              String                @map("job_title")
+  salary                Decimal               @db.Decimal(12, 2)
+  salaryPeriod          String                @default("MONTHLY") @map("salary_period")
+  currency              String                @default("VND")
+  startDate             DateTime              @map("start_date")
+  endDate               DateTime?             @map("end_date")
+
+  workType              String?               @map("work_type")
+  workLocation          String?               @map("work_location")
+  workingHours          String?               @map("working_hours")
+  probationPeriodMonths Int?                  @map("probation_period_months")
+  probationSalaryRate   Int?                  @default(85) @map("probation_salary_rate")
+
+  benefits              String?               @db.Text
+  customTerms           String?               @map("custom_terms") @db.Text
+
+  contractPdfUrl        String?               @map("contract_pdf_url")
+  signedPdfUrl          String?               @map("signed_pdf_url")
+
+  candidateSignatureUrl String?               @map("candidate_signature_url")
+  candidateSignedAt     DateTime?             @map("candidate_signed_at")
+  employerSignatureUrl  String?               @map("employer_signature_url")
+  employerSignedAt      DateTime?             @map("employer_signed_at")
+
+  latestRevisionNote    String?               @map("latest_revision_note") @db.Text
+  version               Int                   @default(1)
+
+  createdAt             DateTime              @default(now()) @map("created_at")
+  updatedAt             DateTime              @updatedAt @map("updated_at")
+
+  histories             ContractHistory[]
+
+  @@index([applicationId])
+  @@index([status])
+  @@map("contracts")
+}
+
+model ContractHistory {
+  id                 String    @id @default(uuid())
+  contractId         String    @map("contract_id")
+  contract           Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  action             String    @map("action")
+  performedByUserId  String?   @map("performed_by_user_id") @db.Uuid
+  note               String?   @db.Text
+  snapshot           Json?
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  @@index([contractId, createdAt])
+  @@map("contract_histories")
+}
+
+model SystemPolicy {
+  id              String   @id @default(uuid())
+  code            String   @unique
+  title           String
+  description     String?
+  content         String   @db.Text
+  version         Int      @default(1)
+  isPublished     Boolean  @default(true) @map("is_published")
+  updatedByUserId String?  @map("updated_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("system_policies")
+}
+
+model Dispute {
+  id               String          @id @default(uuid())
+  disputeNumber    String          @unique @map("dispute_number")
+  applicationId    String          @map("application_id")
+  application      Application     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  contractId       String?         @map("contract_id")
+  reportedByUserId String          @map("reported_by_user_id") @db.Uuid
+  reportedByUser   User            @relation(fields: [reportedByUserId], references: [id], onDelete: Cascade)
+  category         DisputeCategory @default(OTHER)
+  title            String
+  description      String          @db.Text
+  evidenceUrls     Json?           @map("evidence_urls")
+  status           DisputeStatus   @default(PENDING)
+  adminResolution  String?         @map("admin_resolution") @db.Text
+  resolvedByUserId String?         @map("resolved_by_user_id") @db.Uuid
+  resolvedAt       DateTime?       @map("resolved_at")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  @@index([applicationId])
+  @@index([status])
+  @@index([reportedByUserId])
+  @@map("disputes")
 }
 
 // ==========================================

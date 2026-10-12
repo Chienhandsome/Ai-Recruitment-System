@@ -29,6 +29,15 @@ import { InterviewProcessManager } from "./interviews/InterviewProcessManager";
 import { AiInterviewReviewModal } from "./interviews/AiInterviewReviewModal";
 import { CreateOrEditOfferModal } from "./offers/CreateOrEditOfferModal";
 import { revokeOffer } from "@/lib/offer-api";
+import {
+  type ContractData,
+  getContractByApplication,
+  eSignContract,
+} from "@/lib/contract-api";
+import { CreateOrEditContractModal } from "./contracts/CreateOrEditContractModal";
+import { UploadSignedScanModal } from "./contracts/UploadSignedScanModal";
+import { DigitalSignatureModal } from "@/components/common/contracts/DigitalSignatureModal";
+import { FileSignature, FileText } from "lucide-react";
 
 export type PillarDimension = "skills" | "experience" | "education" | "other";
 
@@ -78,6 +87,12 @@ export function CandidateScoringWorkspace({
     isFinalRound?: boolean;
     canDecide?: boolean;
   } | null>(null);
+
+  // Contract management states
+  const [workspaceContract, setWorkspaceContract] = useState<ContractData | null>(null);
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [showUploadScanModal, setShowUploadScanModal] = useState(false);
+  const [showRecruiterESignModal, setShowRecruiterESignModal] = useState(false);
 
   const handleRevokeOffer = async () => {
     if (!selectedApplicationDetail?.offer?.id) return;
@@ -130,6 +145,23 @@ export function CandidateScoringWorkspace({
   }, [sortedAndFilteredApps, selectedAppId]);
 
   const activeAppId = currentAppListItem?.id || null;
+
+  const loadWorkspaceContract = React.useCallback(async () => {
+    if (activeAppId && token) {
+      try {
+        const res = await getContractByApplication(token, activeAppId);
+        setWorkspaceContract(res?.contract || null);
+      } catch {
+        setWorkspaceContract(null);
+      }
+    } else {
+      setWorkspaceContract(null);
+    }
+  }, [activeAppId, token]);
+
+  useEffect(() => {
+    loadWorkspaceContract();
+  }, [loadWorkspaceContract]);
 
   // Weights configuration from Job
   const sWeight = job.skillWeight != null && !isNaN(Number(job.skillWeight)) ? Number(job.skillWeight) : 40;
@@ -856,6 +888,126 @@ export function CandidateScoringWorkspace({
                         <div>
                           <span className="text-2xs font-semibold text-slate-500 block">Hotline/Zalo:</span>
                           <span className="font-semibold text-slate-700">{detail.offer.contactPhone || '—'}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 1.6. LABOR CONTRACT MANAGEMENT CARD */}
+                {detail && (detail.currentStage === 'HIRED' || detail.offer?.status === 'ACCEPTED' || workspaceContract) && (
+                  <div className="rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50/70 via-white to-blue-50/40 p-4 space-y-3 shadow-2xs mt-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-xs">
+                          <FileSignature className="size-4" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-slate-900">
+                              Hợp Đồng Lao Động (Labor Contract)
+                            </span>
+                            {workspaceContract ? (
+                              <span
+                                className={`rounded-full px-2.5 py-0.5 text-2xs font-extrabold border ${
+                                  workspaceContract.status === 'SIGNED'
+                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                    : workspaceContract.status === 'PENDING_REVIEW'
+                                    ? 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse'
+                                    : workspaceContract.status === 'REVISION_REQUESTED'
+                                    ? 'bg-rose-100 text-rose-800 border-rose-300'
+                                    : workspaceContract.status === 'APPROVED'
+                                    ? 'bg-blue-100 text-blue-800 border-blue-300'
+                                    : 'bg-slate-100 text-slate-700 border-slate-300'
+                                }`}
+                              >
+                                {workspaceContract.status === 'SIGNED'
+                                  ? '✓ Đã hoàn tất ký kết'
+                                  : workspaceContract.status === 'PENDING_REVIEW'
+                                  ? '⏳ Đang chờ ứng viên duyệt'
+                                  : workspaceContract.status === 'REVISION_REQUESTED'
+                                  ? '⚠️ Ứng viên yêu cầu điều chỉnh'
+                                  : workspaceContract.status === 'APPROVED'
+                                  ? '🤝 Đã thống nhất - Chờ ký'
+                                  : '📝 Bản nháp hợp đồng'}
+                              </span>
+                            ) : (
+                              <span className="rounded-full bg-slate-100 border border-slate-300 px-2.5 py-0.5 text-2xs font-bold text-slate-600">
+                                Chưa khởi tạo hợp đồng
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-2xs text-slate-500 mt-0.5">
+                            {workspaceContract
+                              ? `Mã: ${workspaceContract.contractNumber} (v${workspaceContract.version}) • Hình thức: ${workspaceContract.signingMethod === 'ELECTRONIC' ? 'Ký điện tử' : 'In ký tay / scan'}`
+                              : 'Tạo bản thảo hợp đồng lao động chính thức từ thông tin offer đã chấp thuận.'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {workspaceContract && workspaceContract.signingMethod === 'MANUAL' && workspaceContract.status !== 'SIGNED' && (
+                          <button
+                            type="button"
+                            onClick={() => setShowUploadScanModal(true)}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors shadow-2xs cursor-pointer"
+                          >
+                            <FileText className="size-3.5" />
+                            Upload Bản Scan Đã Ký
+                          </button>
+                        )}
+
+                        {workspaceContract && workspaceContract.signingMethod === 'ELECTRONIC' && workspaceContract.status !== 'SIGNED' && !workspaceContract.employerSignatureUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setShowRecruiterESignModal(true)}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-300 bg-white px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-50 transition-colors shadow-2xs cursor-pointer"
+                          >
+                            <FileSignature className="size-3.5" />
+                            Ký Điện Tử (Bên A)
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => setShowContractModal(true)}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 transition-colors shadow-xs cursor-pointer"
+                        >
+                          <Edit3 className="size-3.5" />
+                          {workspaceContract ? 'Xem & Điều Chỉnh Hợp Đồng' : 'Tạo Hợp Đồng Lao Động'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {workspaceContract && (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div>
+                          <span className="text-2xs font-semibold text-slate-500 block">Lương HĐ chính thức:</span>
+                          <strong className="text-sm font-black text-indigo-700">
+                            {Number(workspaceContract.salary).toLocaleString('vi-VN')} {workspaceContract.currency}
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="text-2xs font-semibold text-slate-500 block">Loại hợp đồng:</span>
+                          <span className="font-bold text-slate-800">
+                            {workspaceContract.contractType === 'PROBATION'
+                              ? 'Thử việc'
+                              : workspaceContract.contractType === 'INDEFINITE'
+                              ? 'Không xác định thời hạn'
+                              : 'Xác định thời hạn'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-2xs font-semibold text-slate-500 block">Ngày bắt đầu:</span>
+                          <span className="font-semibold text-slate-700">
+                            {new Date(workspaceContract.startDate).toLocaleDateString('vi-VN')}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-2xs font-semibold text-slate-500 block">Chữ ký Bên B:</span>
+                          <span className="font-semibold text-slate-700">
+                            {workspaceContract.candidateSignedAt ? '✓ Đã ký' : 'Chưa ký'}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -2017,6 +2169,55 @@ export function CandidateScoringWorkspace({
             onRefresh();
           }}
         />
+      )}
+
+      {/* Contract Modals */}
+      {detail && (
+        <>
+          <CreateOrEditContractModal
+            isOpen={showContractModal}
+            onClose={() => setShowContractModal(false)}
+            token={token}
+            applicationId={detail.id}
+            candidateName={candUser?.fullName || "Ứng viên"}
+            jobTitle={job.title}
+            offerData={detail.offer}
+            existingContract={workspaceContract}
+            onSuccess={async () => {
+              await loadWorkspaceContract();
+              onRefresh();
+            }}
+          />
+
+          {workspaceContract && (
+            <>
+              <UploadSignedScanModal
+                isOpen={showUploadScanModal}
+                onClose={() => setShowUploadScanModal(false)}
+                token={token}
+                contractId={workspaceContract.id}
+                contractNumber={workspaceContract.contractNumber}
+                candidateName={candUser?.fullName || "Ứng viên"}
+                onSuccess={async () => {
+                  await loadWorkspaceContract();
+                  onRefresh();
+                }}
+              />
+
+              <DigitalSignatureModal
+                isOpen={showRecruiterESignModal}
+                onClose={() => setShowRecruiterESignModal(false)}
+                signerName="Đại diện Người sử dụng lao động"
+                title="Ký tên điện tử (Đại diện Bên A)"
+                onSignConfirmed={async (signatureDataUrl) => {
+                  await eSignContract(token, workspaceContract.id, signatureDataUrl);
+                  await loadWorkspaceContract();
+                  onRefresh();
+                }}
+              />
+            </>
+          )}
+        </>
       )}
     </div>
   );

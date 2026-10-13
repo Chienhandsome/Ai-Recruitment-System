@@ -248,13 +248,22 @@ export class BillingService {
     }
 
     const siteUrl = process.env.FRONTEND_SITE_URL ?? 'http://localhost:3000';
-    const checkout = await this.paymentProvider.createCheckout({
-      orderId: order.id,
-      orderCode: order.orderCode,
-      amountVnd: order.amountVnd,
-      returnUrl: `${siteUrl}${checkoutPath}?orderCode=${order.orderCode}&status=PAID`,
-      cancelUrl: `${siteUrl}${checkoutPath}?orderCode=${order.orderCode}&status=CANCELLED`,
-    });
+    let checkout;
+    try {
+      checkout = await this.paymentProvider.createCheckout({
+        orderId: order.id,
+        orderCode: order.orderCode,
+        amountVnd: order.amountVnd,
+        returnUrl: `${siteUrl}${checkoutPath}?orderCode=${order.orderCode}&status=PAID`,
+        cancelUrl: `${siteUrl}${checkoutPath}?orderCode=${order.orderCode}&status=CANCELLED`,
+      });
+    } catch (err: any) {
+      this.logger.error(`Checkout provider error: ${err?.message || err}`);
+      throw new BadRequestException(
+        err?.message ||
+          'Không tạo được liên kết thanh toán. Vui lòng thử lại sau.',
+      );
+    }
 
     let checkoutUrl = checkout.checkoutUrl;
     if (checkout.provider === PaymentProvider.MOCK) {

@@ -6,6 +6,7 @@ import {
 } from '@prisma/client';
 import { PayOS } from '@payos/node';
 import type { Webhook, WebhookData } from '@payos/node/lib/resources/webhooks/webhook';
+import { createIpv4PreferringFetch } from '../../../common/utils/prefer-ipv4-dns';
 import {
   PaymentCheckoutRequest,
   PaymentCheckoutResult,
@@ -31,10 +32,12 @@ export class PayosPaymentProvider implements PaymentProviderAdapter {
 
     if (clientId && apiKey && checksumKey) {
       try {
+        // Custom fetch forces IPv4 — Node/Windows getaddrinfo often hits broken IPv6 for PayOS.
         this.payOS = new PayOS({
           clientId,
           apiKey,
           checksumKey,
+          fetch: createIpv4PreferringFetch(),
         });
         this.logger.log('PayOS client initialized with real bank integration.');
       } catch (err: any) {
@@ -78,23 +81,37 @@ export class PayosPaymentProvider implements PaymentProviderAdapter {
       `Creating PayOS VietQR payment link for order ${request.orderId} (code: ${numericOrderCode}, amount: ${request.amountVnd} VND)...`,
     );
 
-    const paymentLink = await this.payOS.paymentRequests.create({
-      orderCode: numericOrderCode,
-      amount: request.amountVnd,
-      description,
-      returnUrl: request.returnUrl,
-      cancelUrl: request.cancelUrl,
-    });
+    try {
+      const paymentLink = await this.payOS.paymentRequests.create({
+        orderCode: numericOrderCode,
+        amount: request.amountVnd,
+        description,
+        returnUrl: request.returnUrl,
+        cancelUrl: request.cancelUrl,
+      });
 
-    this.logger.log(
-      `PayOS payment link created successfully! checkoutUrl: ${paymentLink.checkoutUrl}`,
-    );
+      this.logger.log(
+        `PayOS payment link created successfully! checkoutUrl: ${paymentLink.checkoutUrl}`,
+      );
 
-    return {
-      provider: this.provider,
-      checkoutUrl: paymentLink.checkoutUrl,
-      providerSessionId: paymentLink.paymentLinkId,
-    };
+      return {
+        provider: this.provider,
+        checkoutUrl: paymentLink.checkoutUrl,
+        providerSessionId: paymentLink.paymentLinkId,
+      };
+    } catch (err: any) {
+      const name = err?.name || err?.constructor?.name || 'Error';
+      const detail = err?.message || String(err);
+      this.logger.error(
+        `PayOS createCheckout failed (${name}): ${detail}`,
+        err?.stack,
+      );
+      throw new Error(
+        name === 'ConnectionError' || name === 'ConnectionTimeoutError'
+          ? 'Không kết nối được tới cổng thanh toán PayOS. Vui lòng thử lại sau hoặc kiểm tra mạng/IPv6.'
+          : `Thanh toán PayOS thất bại: ${detail}`,
+      );
+    }
   }
 
   async verifyWebhook(body: Webhook): Promise<WebhookData> {

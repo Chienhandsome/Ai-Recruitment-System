@@ -69,14 +69,17 @@ export class InterviewsController {
   @Get('processes/application/:applicationId')
   @Roles('RECRUITER')
   @ApiOperation({ summary: 'Lấy kế hoạch phỏng vấn của ứng viên' })
-  findProcessForApplication(
+  async findProcessForApplication(
     @CurrentUser() user: AuthenticatedUser,
     @Param('applicationId', ParseUUIDPipe) applicationId: string,
+    @Res() res: Response,
   ) {
-    return this.interviewProcessService.findForApplication(
+    const process = await this.interviewProcessService.findForApplication(
       user.id,
       applicationId,
     );
+    // Nest/Express omits the body when returning JS `null`; send JSON `null` explicitly.
+    return res.status(HttpStatus.OK).json(process);
   }
 
   @Post('processes/:processId/rounds')

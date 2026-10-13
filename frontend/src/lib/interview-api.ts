@@ -298,7 +298,13 @@ async function interviewRequest<T>(
       response.status,
     );
   }
-  return response.json() as Promise<T>;
+  // Nest may return 200 with an empty body when the handler returns `null`
+  // (e.g. no interview process yet). Avoid response.json() on empty input.
+  const text = await response.text();
+  if (!text.trim()) {
+    return null as T;
+  }
+  return JSON.parse(text) as T;
 }
 
 export function getInterviewProcess(token: string, applicationId: string) {

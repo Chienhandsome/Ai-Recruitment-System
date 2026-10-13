@@ -18,9 +18,18 @@ import {
   ArrowRight,
   Loader2,
   Check,
+  ShieldCheck,
+  ExternalLink,
+  Paperclip,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Scale,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { ContractDocumentView } from '@/components/common/contracts/ContractDocumentView';
 import {
   type DisputeData,
   type DisputeStatus,
@@ -43,6 +52,8 @@ export default function AdminDisputesPage() {
   const [resolutionStatus, setResolutionStatus] = useState<DisputeStatus>('RESOLVED');
   const [adminResolution, setAdminResolution] = useState<string>('');
   const [enforcementAction, setEnforcementAction] = useState<'NONE' | 'WARN' | 'LOCK_RECRUITER'>('NONE');
+  const [showContractHistory, setShowContractHistory] = useState<boolean>(true);
+  const [viewingContractDoc, setViewingContractDoc] = useState<boolean>(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -264,10 +275,22 @@ export default function AdminDisputesPage() {
 
                   {/* Right: Contract Details */}
                   <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-1.5">
-                    <span className="text-2xs font-bold text-indigo-700 block uppercase">2. Hợp đồng lao động (Contract)</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xs font-bold text-indigo-700 block uppercase">2. Hợp đồng lao động (Contract)</span>
+                      {activeDispute.application?.contract?.signingMethod === 'ELECTRONIC' ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-3xs font-extrabold text-[#2563EB]">
+                          <Lock className="size-2.5" /> Ký điện tử 2FA
+                        </span>
+                      ) : activeDispute.application?.contract?.signingMethod === 'MANUAL' ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-3xs font-extrabold text-amber-800">
+                          <Paperclip className="size-2.5" /> Ký tay / Scan giấy
+                        </span>
+                      ) : null}
+                    </div>
+
                     <div>
                       <span className="text-slate-500">Mã hợp đồng: </span>
-                      <strong>{activeDispute.application?.contract?.contractNumber || 'Chưa khởi tạo'}</strong>
+                      <strong className="font-mono text-[#2563EB]">{activeDispute.application?.contract?.contractNumber || 'Chưa khởi tạo'}</strong>
                     </div>
                     <div>
                       <span className="text-slate-500">Lương trên hợp đồng: </span>
@@ -283,8 +306,142 @@ export default function AdminDisputesPage() {
                         {activeDispute.application?.contract?.status || '—'}
                       </span>
                     </div>
+
+                    {activeDispute.application?.contract && (
+                      <button
+                        type="button"
+                        onClick={() => setViewingContractDoc(true)}
+                        className="mt-2 w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-2xs font-bold text-[#2563EB] hover:bg-blue-100 transition shadow-2xs"
+                      >
+                        <FileText className="size-3.5" />
+                        Xem toàn văn HĐ chuẩn soạn thảo trên hệ thống (Gốc)
+                      </button>
+                    )}
+
+                    {/* Discrepancy warning banner */}
+                    {activeDispute.application?.offer && activeDispute.application?.contract && (
+                      Number(activeDispute.application.offer.salary) !== Number(activeDispute.application.contract.salary) && (
+                        <div className="mt-2 rounded-lg bg-rose-50 border border-rose-200 p-2 text-2xs text-rose-800 font-extrabold flex items-center gap-1.5">
+                          <AlertTriangle className="size-3 text-rose-600 shrink-0" />
+                          <span>SAI LỆCH LƯƠNG: Offer ghi nhận {Number(activeDispute.application.offer.salary).toLocaleString('vi-VN')} đ nhưng HĐ lại ghi {Number(activeDispute.application.contract.salary).toLocaleString('vi-VN')} đ!</span>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
+
+                {/* Specific Forensic Panel for BOTH MANUAL and ELECTRONIC */}
+                {activeDispute.application?.contract && (
+                  <div className="mt-3 pt-3 border-t border-slate-200/80 space-y-2.5">
+                    <span className="text-2xs font-extrabold text-slate-700 uppercase tracking-wider block flex items-center gap-1">
+                      <Scale className="size-3.5 text-[#2563EB]" />
+                      Bằng chứng truy vết theo phương thức giao kết ({activeDispute.application.contract.signingMethod}):
+                    </span>
+
+                    {activeDispute.application.contract.signingMethod === 'MANUAL' ? (
+                      /* MANUAL SCAN INVESTIGATION */
+                      <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-3 space-y-2 text-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div>
+                            <span className="font-bold text-amber-900 block">Bản scan hợp đồng giấy có chữ ký & mộc đỏ:</span>
+                            <span className="text-3xs text-slate-500">
+                              {activeDispute.application.contract.signedPdfUrl ? 'Đã tải lên hệ thống' : 'Chưa có file scan'}
+                            </span>
+                          </div>
+                          {activeDispute.application.contract.signedPdfUrl && (
+                            <a
+                              href={activeDispute.application.contract.signedPdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-lg bg-[#2563EB] px-3 py-1.5 text-2xs font-bold text-white hover:bg-blue-700 transition"
+                            >
+                              <ExternalLink className="size-3" />
+                              Mở xem bản scan gốc (.PDF)
+                            </a>
+                          )}
+                        </div>
+
+                        {activeDispute.application.contract.pdfSha256Hash && (
+                          <div className="text-3xs font-mono bg-white p-2 rounded-lg border border-amber-200 text-slate-700 break-all">
+                            <span className="font-bold text-amber-800">Dấu băm SHA-256 bản scan: </span>
+                            {activeDispute.application.contract.pdfSha256Hash}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* ELECTRONIC SIGNING INVESTIGATION */
+                      <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-3 space-y-2 text-xs">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-2xs">
+                          <div className="bg-white p-2 rounded-lg border border-blue-100">
+                            <strong>Bên B (Ứng viên):</strong>{' '}
+                            {activeDispute.application.contract.candidateSignedAt ? (
+                              <span className="text-emerald-700 font-bold">
+                                Đã ký ({new Date(activeDispute.application.contract.candidateSignedAt).toLocaleDateString('vi-VN')})
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">Chưa ký</span>
+                            )}
+                            <div className="text-3xs text-slate-500">
+                              OTP: {activeDispute.application.contract.candidateOtpVerifiedAt ? '✅ Đã xác thực' : 'Chưa'} | IP: {activeDispute.application.contract.candidateSignerIp || '127.0.0.1'}
+                            </div>
+                          </div>
+
+                          <div className="bg-white p-2 rounded-lg border border-blue-100">
+                            <strong>Bên A (Doanh nghiệp):</strong>{' '}
+                            {activeDispute.application.contract.employerSignedAt ? (
+                              <span className="text-emerald-700 font-bold">
+                                Đã ký ({new Date(activeDispute.application.contract.employerSignedAt).toLocaleDateString('vi-VN')})
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">Chưa ký</span>
+                            )}
+                            <div className="text-3xs text-slate-500">
+                              OTP: {activeDispute.application.contract.employerOtpVerifiedAt ? '✅ Đã xác thực' : 'Chưa'} | IP: {activeDispute.application.contract.employerSignerIp || '127.0.0.1'}
+                            </div>
+                          </div>
+                        </div>
+
+                        {activeDispute.application.contract.pdfSha256Hash && (
+                          <div className="text-3xs font-mono bg-white p-2 rounded-lg border border-blue-200 text-slate-700 break-all">
+                            <span className="font-bold text-blue-800">Mã niêm phong SHA-256: </span>
+                            {activeDispute.application.contract.pdfSha256Hash}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Historical Timeline Accordion */}
+                    {activeDispute.application.contract.histories && activeDispute.application.contract.histories.length > 0 && (
+                      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => setShowContractHistory(!showContractHistory)}
+                          className="w-full flex items-center justify-between p-2.5 bg-slate-50 text-2xs font-extrabold text-slate-700 hover:bg-slate-100 transition"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="size-3 text-[#2563EB]" />
+                            Lịch sử biến động hợp đồng ({activeDispute.application.contract.histories.length} sự kiện)
+                          </span>
+                          {showContractHistory ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+                        </button>
+
+                        {showContractHistory && (
+                          <div className="p-3 space-y-2 max-h-48 overflow-y-auto divide-y divide-slate-100">
+                            {activeDispute.application.contract.histories.map((h: any) => (
+                              <div key={h.id} className="pt-2 first:pt-0 text-3xs space-y-0.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono font-bold text-[#2563EB]">{h.action}</span>
+                                  <span className="text-slate-400">{new Date(h.createdAt).toLocaleString('vi-VN')}</span>
+                                </div>
+                                <p className="text-slate-600">{h.note}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Parties info */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-2xs text-slate-600 pt-2 border-t border-slate-200">
@@ -387,6 +544,43 @@ export default function AdminDisputesPage() {
           )}
         </div>
       </div>
+
+      {/* Full Contract Document Modal */}
+      {viewingContractDoc && activeDispute?.application?.contract && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto animate-in fade-in">
+          <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-200 bg-[#EFF6FF]/60 px-6 py-4">
+              <div>
+                <h3 className="text-base font-black text-slate-900">
+                  Toàn Văn Hợp Đồng Lao Động Chuẩn (Dữ liệu soạn thảo trên hệ thống)
+                </h3>
+                <p className="text-2xs text-slate-500">
+                  Mã HĐ: {activeDispute.application.contract.contractNumber} — Bảo lưu 100% điều khoản số kể cả khi bản scan của HR bị mờ
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewingContractDoc(false)}
+                className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40">
+              <ContractDocumentView contract={activeDispute.application.contract} showPrintButton={true} />
+            </div>
+            <div className="border-t border-slate-200 bg-slate-50 px-6 py-3 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setViewingContractDoc(false)}
+                className="rounded-xl bg-white border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs"
+              >
+                Đóng văn bản
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

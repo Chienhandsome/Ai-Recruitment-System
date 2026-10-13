@@ -149,7 +149,18 @@ export class DisputesService {
             },
             candidate: { select: { id: true, fullName: true, email: true } },
             offer: true,
-            contract: true,
+            contract: {
+              include: {
+                histories: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 30,
+                },
+                signingOtps: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 10,
+                },
+              },
+            },
           },
         },
       },

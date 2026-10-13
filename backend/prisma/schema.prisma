@@ -413,6 +413,7 @@ model User {
   packageUsageLogs PackageUsageLog[]
   jdFitAnalyses    CandidateJdFitAnalysis[]
   disputes         Dispute[]
+  contractSigningOtps ContractSigningOtp[]
 
   @@index([email])
   @@map("users")
@@ -1156,6 +1157,15 @@ model Contract {
   employerSignatureUrl  String?               @map("employer_signature_url")
   employerSignedAt      DateTime?             @map("employer_signed_at")
 
+  pdfSha256Hash         String?               @map("pdf_sha256_hash")
+  candidateSignerIp     String?               @map("candidate_signer_ip")
+  candidateSignerUserAgent String?            @map("candidate_signer_user_agent")
+  candidateOtpVerifiedAt DateTime?            @map("candidate_otp_verified_at")
+  employerSignerIp      String?               @map("employer_signer_ip")
+  employerSignerUserAgent String?             @map("employer_signer_user_agent")
+  employerOtpVerifiedAt DateTime?             @map("employer_otp_verified_at")
+  auditCertificate      Json?                 @map("audit_certificate")
+
   latestRevisionNote    String?               @map("latest_revision_note") @db.Text
   version               Int                   @default(1)
 
@@ -1163,6 +1173,7 @@ model Contract {
   updatedAt             DateTime              @updatedAt @map("updated_at")
 
   histories             ContractHistory[]
+  signingOtps           ContractSigningOtp[]
 
   @@index([applicationId])
   @@index([status])
@@ -1181,6 +1192,23 @@ model ContractHistory {
 
   @@index([contractId, createdAt])
   @@map("contract_histories")
+}
+
+model ContractSigningOtp {
+  id         String   @id @default(uuid())
+  contractId String   @map("contract_id")
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id") @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email      String
+  otpCode    String   @map("otp_code")
+  attempts   Int      @default(0)
+  isUsed     Boolean  @default(false) @map("is_used")
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([contractId, userId, isUsed])
+  @@map("contract_signing_otps")
 }
 
 model SystemPolicy {

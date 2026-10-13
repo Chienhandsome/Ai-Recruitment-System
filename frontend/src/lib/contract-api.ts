@@ -47,6 +47,12 @@ export interface ContractData {
   candidateSignedAt?: string | null;
   employerSignatureUrl?: string | null;
   employerSignedAt?: string | null;
+  pdfSha256Hash?: string | null;
+  candidateSignerIp?: string | null;
+  candidateOtpVerifiedAt?: string | null;
+  employerSignerIp?: string | null;
+  employerOtpVerifiedAt?: string | null;
+  auditCertificate?: any;
   latestRevisionNote?: string | null;
   version: number;
   createdAt: string;
@@ -223,6 +229,40 @@ export async function approveContract(
   return handleResponse<ContractData>(res);
 }
 
+export interface ContractScanPage {
+  pageNumber: number;
+  fileName: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  sha256Hash: string;
+  url: string;
+  dataUrl?: string;
+}
+
+export async function uploadSignedContractFiles(
+  token: string,
+  contractId: string,
+  files: File[],
+  note?: string,
+): Promise<ContractData> {
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append('files', file);
+  }
+  if (note && note.trim()) {
+    formData.append('note', note.trim());
+  }
+
+  const res = await fetch(`${API_BASE}/contracts/${contractId}/upload-signed-scan`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+  return handleResponse<ContractData>(res);
+}
+
 export async function uploadSignedContract(
   token: string,
   contractId: string,
@@ -240,11 +280,66 @@ export async function uploadSignedContract(
   return handleResponse<ContractData>(res);
 }
 
+export interface ContractOtpResponse {
+  success: boolean;
+  message: string;
+  destinationEmail: string;
+  expiresAt: string;
+  demoOtp?: string;
+}
+
+export interface PublicContractVerification {
+  verified: boolean;
+  message?: string;
+  contractNumber?: string;
+  jobTitle?: string;
+  status?: ContractStatus;
+  isLegallyBinding?: boolean;
+  sha256Hash?: string | null;
+  candidate?: {
+    fullName: string;
+    signedAt?: string | null;
+    isSigned: boolean;
+    otpVerified: boolean;
+  };
+  employer?: {
+    companyName: string;
+    recruiterName?: string;
+    signedAt?: string | null;
+    isSigned: boolean;
+    otpVerified: boolean;
+  };
+  auditCertificate?: any;
+  legalComplianceText?: string;
+  verifiedAt?: string;
+}
+
+export async function requestContractOtp(
+  token: string,
+  contractId: string,
+  email?: string,
+): Promise<ContractOtpResponse> {
+  const res = await fetch(`${API_BASE}/contracts/${contractId}/request-otp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ email }),
+  });
+  return handleResponse<ContractOtpResponse>(res);
+}
+
 export async function eSignContract(
   token: string,
   contractId: string,
   signatureDataUrl: string,
-  note?: string,
+  otpCode: string,
+  options?: {
+    acceptedContractTerms?: boolean;
+    acceptedPlatformTerms?: boolean;
+    note?: string;
+  },
 ): Promise<ContractData> {
   const res = await fetch(`${API_BASE}/contracts/${contractId}/e-sign`, {
     method: 'POST',
@@ -252,7 +347,114 @@ export async function eSignContract(
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ signatureDataUrl, note }),
+    body: JSON.stringify({
+      signatureDataUrl,
+      otpCode,
+      acceptedContractTerms: options?.acceptedContractTerms ?? true,
+      acceptedPlatformTerms: options?.acceptedPlatformTerms ?? true,
+      note: options?.note,
+    }),
   });
   return handleResponse<ContractData>(res);
+}
+
+export async function verifyContractPublic(
+  contractNumber: string,
+): Promise<PublicContractVerification> {
+  const res = await fetch(`${API_BASE}/contracts/verify/${encodeURIComponent(contractNumber)}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return handleResponse<PublicContractVerification>(res);
+}
+
+export interface AdminContractsFilters {
+  search?: string;
+  signingMethod?: ContractSigningMethod | 'ALL';
+  status?: ContractStatus | 'ALL';
+  page?: number;
+  limit?: number;
+}
+
+export interface AdminContractsResponse {
+  items: ContractData[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ContractForensicDossier {
+  contract: ContractData;
+  isManual: boolean;
+  isElectronic: boolean;
+  enrichedHistories: Array<ContractHistoryItem & {
+    performer?: { id: string; fullName: string; email: string; role: string } | null;
+  }>;
+  sanitizedOtps: Array<{
+    id: string;
+    email: string;
+    createdAt: string;
+    expiresAt: string;
+    isUsed: boolean;
+    attempts: number;
+    maskedCode: string;
+  }>;
+  discrepancies: Array<{
+    field: string;
+    offerValue: any;
+    contractValue: any;
+    severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  }>;
+  forensicSummary: {
+    signingMethod: ContractSigningMethod;
+    isSealed: boolean;
+    sha256Hash?: string | null;
+    status: ContractStatus;
+    auditCertificate?: any;
+    candidateSigned: boolean;
+    candidateSignedAt?: string | null;
+    employerSigned: boolean;
+    employerSignedAt?: string | null;
+    signedPdfUrl?: string | null;
+    contractPdfUrl?: string | null;
+  };
+}
+
+export async function getAdminContracts(
+  token: string,
+  filters?: AdminContractsFilters,
+): Promise<AdminContractsResponse> {
+  const params = new URLSearchParams();
+  if (filters?.search) params.append('search', filters.search);
+  if (filters?.signingMethod && filters.signingMethod !== 'ALL') params.append('signingMethod', filters.signingMethod);
+  if (filters?.status && filters.status !== 'ALL') params.append('status', filters.status);
+  if (filters?.page) params.append('page', String(filters.page));
+  if (filters?.limit) params.append('limit', String(filters.limit));
+
+  const queryStr = params.toString() ? `?${params.toString()}` : '';
+  const res = await fetch(`${API_BASE}/contracts/admin/all${queryStr}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return handleResponse<AdminContractsResponse>(res);
+}
+
+export async function getContractForensics(
+  token: string,
+  contractId: string,
+): Promise<ContractForensicDossier> {
+  const res = await fetch(`${API_BASE}/contracts/admin/${contractId}/forensics`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return handleResponse<ContractForensicDossier>(res);
 }

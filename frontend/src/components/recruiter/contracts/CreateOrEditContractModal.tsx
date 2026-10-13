@@ -26,6 +26,7 @@ import {
   sendContract,
 } from '@/lib/contract-api';
 import { ContractDocumentView } from '@/components/common/contracts/ContractDocumentView';
+import { PolicyQuickViewModal } from '@/components/common/policies/PolicyQuickViewModal';
 
 interface CreateOrEditContractModalProps {
   isOpen: boolean;
@@ -53,6 +54,8 @@ export function CreateOrEditContractModal({
   const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
   const [submitting, setSubmitting] = useState(false);
   const [sending, setSending] = useState(false);
+  const [recruiterAgreedCompliance, setRecruiterAgreedCompliance] = useState(false);
+  const [viewingPolicyCode, setViewingPolicyCode] = useState<string | null>(null);
 
   // Form states
   const [contractType, setContractType] = useState<ContractType>('FIXED_TERM');
@@ -103,6 +106,8 @@ export function CreateOrEditContractModal({
         setBenefits(offerData?.benefits || '');
         setCustomTerms('');
       }
+      setRecruiterAgreedCompliance(false);
+      setViewingPolicyCode(null);
       setActiveTab('form');
     }
   }, [isOpen, existingContract, offerData]);
@@ -210,6 +215,10 @@ export function CreateOrEditContractModal({
     }
     if (!startDate) {
       toast.error('Vui lòng chọn ngày bắt đầu làm việc.');
+      return;
+    }
+    if (!recruiterAgreedCompliance) {
+      toast.error('Vui lòng tích chọn cam kết tuân thủ Bộ luật Lao động 2019 và Quy chuẩn tuyển dụng minh bạch.');
       return;
     }
 
@@ -515,44 +524,78 @@ export function CreateOrEditContractModal({
             </div>
           ) : (
             <div className="py-2">
-              <ContractDocumentView contract={previewContract} showPrintButton={false} />
+              <ContractDocumentView contract={previewContract} showDownloadButton={true} />
             </div>
           )}
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50"
-          >
-            Đóng
-          </button>
+        <div className="border-t border-slate-100 bg-white px-6 py-4 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/40 p-3">
+            <label className="flex items-start gap-2.5 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={recruiterAgreedCompliance}
+                onChange={(e) => setRecruiterAgreedCompliance(e.target.checked)}
+                className="mt-0.5 size-4 rounded border-slate-300 text-[#2563EB] focus:ring-blue-500 cursor-pointer"
+              />
+              <span className="text-xs text-slate-700 leading-snug group-hover:text-slate-900 select-none">
+                Đại diện Doanh nghiệp cam kết <strong>nội dung hợp đồng tuân thủ Bộ luật Lao động 2019</strong> và không thu phí trái phép của ứng viên theo{' '}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setViewingPolicyCode('RECRUITER_CODE_OF_CONDUCT');
+                  }}
+                  className="font-bold text-[#2563EB] underline hover:text-blue-800 cursor-pointer"
+                >
+                  Quy chuẩn Tuyển dụng Minh bạch
+                </button>.
+              </span>
+            </label>
+          </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between pt-1">
             <button
               type="button"
-              onClick={handleSaveDraft}
-              disabled={submitting || sending}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+              onClick={onClose}
+              className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
             >
-              {submitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-              Lưu bản nháp
+              Đóng
             </button>
 
-            <button
-              type="button"
-              onClick={handleSendToCandidate}
-              disabled={submitting || sending}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#2563EB] px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-50"
-            >
-              {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-              Gửi ứng viên duyệt
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                disabled={submitting || sending}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+              >
+                {submitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                Lưu bản nháp
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSendToCandidate}
+                disabled={submitting || sending || !recruiterAgreedCompliance}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#2563EB] px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+              >
+                {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                Gửi ứng viên duyệt
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Policy Quick View Modal */}
+      <PolicyQuickViewModal
+        isOpen={Boolean(viewingPolicyCode)}
+        onClose={() => setViewingPolicyCode(null)}
+        policyCode={viewingPolicyCode}
+      />
     </div>
   );
 }

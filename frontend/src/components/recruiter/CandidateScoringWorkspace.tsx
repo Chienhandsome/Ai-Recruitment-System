@@ -37,7 +37,7 @@ import {
 import { CreateOrEditContractModal } from "./contracts/CreateOrEditContractModal";
 import { UploadSignedScanModal } from "./contracts/UploadSignedScanModal";
 import { DigitalSignatureModal } from "@/components/common/contracts/DigitalSignatureModal";
-import { FileSignature, FileText } from "lucide-react";
+import { FileSignature, FileText, Download } from "lucide-react";
 
 export type PillarDimension = "skills" | "experience" | "education" | "other";
 
@@ -976,6 +976,23 @@ export function CandidateScoringWorkspace({
                           <Edit3 className="size-3.5" />
                           {workspaceContract ? 'Xem & Điều Chỉnh Hợp Đồng' : 'Tạo Hợp Đồng Lao Động'}
                         </button>
+
+                        {workspaceContract && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (workspaceContract.contractPdfUrl) {
+                                window.open(workspaceContract.contractPdfUrl, '_blank');
+                              } else {
+                                setShowContractModal(true);
+                              }
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-xs font-bold text-[#2563EB] hover:bg-blue-100 transition-colors shadow-2xs cursor-pointer"
+                          >
+                            <Download className="size-3.5" />
+                            Tải Hợp Đồng (.PDF)
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -2209,8 +2226,10 @@ export function CandidateScoringWorkspace({
                 onClose={() => setShowRecruiterESignModal(false)}
                 signerName="Đại diện Người sử dụng lao động"
                 title="Ký tên điện tử (Đại diện Bên A)"
-                onSignConfirmed={async (signatureDataUrl) => {
-                  await eSignContract(token, workspaceContract.id, signatureDataUrl);
+                contractId={workspaceContract.id}
+                token={token}
+                onSignConfirmed={async (signatureDataUrl, otpCode, options) => {
+                  await eSignContract(token, workspaceContract.id, signatureDataUrl, otpCode, options);
                   await loadWorkspaceContract();
                   onRefresh();
                 }}

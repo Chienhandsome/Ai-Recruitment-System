@@ -37,6 +37,8 @@ interface CreateOrEditContractModalProps {
   jobTitle: string;
   offerData?: any;
   existingContract?: ContractData | null;
+  /** When true (e.g. status SIGNED), only show the contract document — no edit/save/send. */
+  readOnly?: boolean;
   onSuccess: () => void | Promise<void>;
 }
 
@@ -49,6 +51,7 @@ export function CreateOrEditContractModal({
   jobTitle,
   offerData,
   existingContract,
+  readOnly = false,
   onSuccess,
 }: CreateOrEditContractModalProps) {
   const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
@@ -108,13 +111,13 @@ export function CreateOrEditContractModal({
       }
       setRecruiterAgreedCompliance(false);
       setViewingPolicyCode(null);
-      setActiveTab('form');
+      setActiveTab(readOnly ? 'preview' : 'form');
     }
-  }, [isOpen, existingContract, offerData]);
+  }, [isOpen, existingContract, offerData, readOnly]);
 
   if (!isOpen) return null;
 
-  // Mock object for live preview
+  // Live preview / view document — include signature fields so signed contracts show both parties
   const previewContract: ContractData = {
     id: existingContract?.id || 'preview-id',
     contractNumber: existingContract?.contractNumber || 'HDLD-DRAFT-XXXX',
@@ -134,6 +137,14 @@ export function CreateOrEditContractModal({
     probationSalaryRate,
     benefits,
     customTerms,
+    contractPdfUrl: existingContract?.contractPdfUrl ?? null,
+    signedPdfUrl: existingContract?.signedPdfUrl ?? null,
+    candidateSignatureUrl: existingContract?.candidateSignatureUrl ?? null,
+    candidateSignedAt: existingContract?.candidateSignedAt ?? null,
+    employerSignatureUrl: existingContract?.employerSignatureUrl ?? null,
+    employerSignedAt: existingContract?.employerSignedAt ?? null,
+    pdfSha256Hash: existingContract?.pdfSha256Hash ?? null,
+    auditCertificate: existingContract?.auditCertificate,
     version: existingContract?.version || 1,
     createdAt: existingContract?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -154,6 +165,9 @@ export function CreateOrEditContractModal({
       },
     },
   };
+
+  const documentContract: ContractData =
+    readOnly && existingContract ? existingContract : previewContract;
 
   const handleSaveDraft = async () => {
     if (!salary || isNaN(Number(salary)) || Number(salary) <= 0) {
@@ -279,41 +293,52 @@ export function CreateOrEditContractModal({
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900">
-                {existingContract ? 'Điều chỉnh hợp đồng lao động' : 'Tạo hợp đồng lao động mới'}
+                {readOnly
+                  ? 'Xem hợp đồng lao động'
+                  : existingContract
+                    ? 'Điều chỉnh hợp đồng lao động'
+                    : 'Tạo hợp đồng lao động mới'}
               </h2>
               <p className="text-xs text-slate-500">
                 Ứng viên: <strong className="text-slate-800">{candidateName}</strong> • Vị trí:{' '}
                 <strong className="text-blue-700">{jobTitle}</strong>
+                {readOnly && existingContract?.status === 'SIGNED' && (
+                  <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-2xs font-bold text-emerald-800">
+                    <CheckCircle2 className="size-3" /> Đã hoàn tất ký kết
+                  </span>
+                )}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Tab switch */}
-            <div className="flex rounded-xl bg-slate-100 p-1 text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => setActiveTab('form')}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
-                  activeTab === 'form'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <FileText className="size-3.5" /> Thiết lập điều khoản
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('preview')}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
-                  activeTab === 'preview'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <Eye className="size-3.5" /> Xem trước văn bản
-              </button>
-            </div>
+            {/* Tab switch — hidden in read-only view */}
+            {!readOnly && (
+              <div className="flex rounded-xl bg-slate-100 p-1 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('form')}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
+                    activeTab === 'form'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <FileText className="size-3.5" /> Thiết lập điều khoản
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('preview')}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
+                    activeTab === 'preview'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <Eye className="size-3.5" /> Xem trước văn bản
+                </button>
+              </div>
+            )}
 
             <button
               type="button"
@@ -326,7 +351,7 @@ export function CreateOrEditContractModal({
         </div>
 
         {/* Banner if candidate requested revision */}
-        {existingContract?.status === 'REVISION_REQUESTED' && existingContract.latestRevisionNote && (
+        {!readOnly && existingContract?.status === 'REVISION_REQUESTED' && existingContract.latestRevisionNote && (
           <div className="border-b border-amber-200 bg-amber-50 px-6 py-3">
             <div className="flex items-start gap-2 text-xs text-amber-900">
               <AlertTriangle className="size-4 shrink-0 text-amber-600 mt-0.5" />
@@ -340,7 +365,11 @@ export function CreateOrEditContractModal({
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40">
-          {activeTab === 'form' ? (
+          {readOnly || activeTab === 'preview' ? (
+            <div className="py-2">
+              <ContractDocumentView contract={documentContract} showDownloadButton={true} />
+            </div>
+          ) : activeTab === 'form' ? (
             <div className="mx-auto max-w-3xl space-y-6">
               {/* Card 1: Loại hợp đồng & Phương thức ký */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
@@ -522,71 +551,81 @@ export function CreateOrEditContractModal({
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="py-2">
-              <ContractDocumentView contract={previewContract} showDownloadButton={true} />
-            </div>
-          )}
+          ) : null}
         </div>
 
         {/* Modal Footer Actions */}
         <div className="border-t border-slate-100 bg-white px-6 py-4 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/40 p-3">
-            <label className="flex items-start gap-2.5 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={recruiterAgreedCompliance}
-                onChange={(e) => setRecruiterAgreedCompliance(e.target.checked)}
-                className="mt-0.5 size-4 rounded border-slate-300 text-[#2563EB] focus:ring-blue-500 cursor-pointer"
-              />
-              <span className="text-xs text-slate-700 leading-snug group-hover:text-slate-900 select-none">
-                Đại diện Doanh nghiệp cam kết <strong>nội dung hợp đồng tuân thủ Bộ luật Lao động 2019</strong> và không thu phí trái phép của ứng viên theo{' '}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setViewingPolicyCode('RECRUITER_CODE_OF_CONDUCT');
-                  }}
-                  className="font-bold text-[#2563EB] underline hover:text-blue-800 cursor-pointer"
-                >
-                  Quy chuẩn Tuyển dụng Minh bạch
-                </button>.
-              </span>
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
-            >
-              Đóng
-            </button>
-
-            <div className="flex items-center gap-3">
+          {readOnly ? (
+            <div className="flex items-center justify-end">
               <button
                 type="button"
-                onClick={handleSaveDraft}
-                disabled={submitting || sending}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+                onClick={onClose}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
               >
-                {submitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-                Lưu bản nháp
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSendToCandidate}
-                disabled={submitting || sending || !recruiterAgreedCompliance}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#2563EB] px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
-              >
-                {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-                Gửi ứng viên duyệt
+                Đóng
               </button>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/40 p-3">
+                <label className="flex items-start gap-2.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={recruiterAgreedCompliance}
+                    onChange={(e) => setRecruiterAgreedCompliance(e.target.checked)}
+                    className="mt-0.5 size-4 rounded border-slate-300 text-[#2563EB] focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span className="text-xs text-slate-700 leading-snug group-hover:text-slate-900 select-none">
+                    Đại diện Doanh nghiệp cam kết <strong>nội dung hợp đồng tuân thủ Bộ luật Lao động 2019</strong> và không thu phí trái phép của ứng viên theo{' '}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setViewingPolicyCode('RECRUITER_CODE_OF_CONDUCT');
+                      }}
+                      className="font-bold text-[#2563EB] underline hover:text-blue-800 cursor-pointer"
+                    >
+                      Quy chuẩn Tuyển dụng Minh bạch
+                    </button>.
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                >
+                  Đóng
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveDraft}
+                    disabled={submitting || sending}
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+                  >
+                    {submitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                    Lưu bản nháp
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSendToCandidate}
+                    disabled={submitting || sending || !recruiterAgreedCompliance}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#2563EB] px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                  >
+                    {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                    Gửi ứng viên duyệt
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

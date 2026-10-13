@@ -973,8 +973,17 @@ export function CandidateScoringWorkspace({
                           onClick={() => setShowContractModal(true)}
                           className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 transition-colors shadow-xs cursor-pointer"
                         >
-                          <Edit3 className="size-3.5" />
-                          {workspaceContract ? 'Xem & Điều Chỉnh Hợp Đồng' : 'Tạo Hợp Đồng Lao Động'}
+                          {workspaceContract?.status === 'SIGNED' ? (
+                            <>
+                              <Eye className="size-3.5" />
+                              Xem hợp đồng
+                            </>
+                          ) : (
+                            <>
+                              <Edit3 className="size-3.5" />
+                              {workspaceContract ? 'Xem & Điều Chỉnh Hợp Đồng' : 'Tạo Hợp Đồng Lao Động'}
+                            </>
+                          )}
                         </button>
 
                         {workspaceContract && (
@@ -984,6 +993,7 @@ export function CandidateScoringWorkspace({
                               if (workspaceContract.contractPdfUrl) {
                                 window.open(workspaceContract.contractPdfUrl, '_blank');
                               } else {
+                                // Open view (read-only when SIGNED) — do not imply edit
                                 setShowContractModal(true);
                               }
                             }}
@@ -2200,6 +2210,7 @@ export function CandidateScoringWorkspace({
             jobTitle={job.title}
             offerData={detail.offer}
             existingContract={workspaceContract}
+            readOnly={workspaceContract?.status === 'SIGNED'}
             onSuccess={async () => {
               await loadWorkspaceContract();
               onRefresh();

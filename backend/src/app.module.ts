@@ -24,7 +24,6 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RecruitersModule } from './modules/recruiters/recruiters.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { OffersModule } from './modules/offers/offers.module';
-import { BillingModule } from './modules/billing/billing.module';
 
 @Module({
   imports: [
@@ -55,7 +54,6 @@ import { BillingModule } from './modules/billing/billing.module';
     RecruitersModule,
     AdminModule,
     OffersModule,
-    BillingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

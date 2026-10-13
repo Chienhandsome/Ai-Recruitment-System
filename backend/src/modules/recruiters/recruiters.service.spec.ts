@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { RecruitersService } from './recruiters.service';
 import { PrismaService } from '../../database/prisma.service';
-import { EntitlementsService } from '../billing/entitlements.service';
 
 describe('RecruitersService', () => {
   let service: RecruitersService;
@@ -30,9 +29,6 @@ describe('RecruitersService', () => {
       findMany: jest.Mock;
     };
   };
-  let entitlements: {
-    assertRecruitmentStats: jest.Mock;
-  };
 
   beforeEach(async () => {
     prisma = {
@@ -59,17 +55,11 @@ describe('RecruitersService', () => {
         findMany: jest.fn(),
       },
     };
-    entitlements = {
-      assertRecruitmentStats: jest.fn().mockResolvedValue({
-        packageCode: 'HR_PREMIUM',
-      }),
-    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RecruitersService,
         { provide: PrismaService, useValue: prisma },
-        { provide: EntitlementsService, useValue: entitlements },
       ],
     }).compile();
 

@@ -7,7 +7,6 @@ import {
   Param,
   Query,
   UseGuards,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -24,8 +23,6 @@ import {
   UpdateAdminAccountStatusDto,
   UpdateAdminJobStatusDto,
 } from './dto/update-admin-status.dto';
-import { BillingService } from '../billing/billing.service';
-import { UpdatePackageDto } from '../billing/dto/update-package.dto';
 
 @ApiTags('Admin Workspace')
 @ApiBearerAuth()
@@ -33,10 +30,7 @@ import { UpdatePackageDto } from '../billing/dto/update-package.dto';
 @Roles('ADMIN')
 @Controller('admin')
 export class AdminController {
-  constructor(
-    private readonly adminService: AdminService,
-    private readonly billingService: BillingService,
-  ) {}
+  constructor(private readonly adminService: AdminService) {}
 
   @Get('stats')
   @ApiOperation({ summary: 'Get real-time Admin Dashboard statistics' })
@@ -108,22 +102,5 @@ export class AdminController {
   @ApiOperation({ summary: 'Delete a user account' })
   async deleteUser(@Param('id') id: string) {
     return this.adminService.deleteUser(id);
-  }
-
-  // --- EMPLOYER PACKAGE CONFIG ---
-
-  @Get('packages')
-  @ApiOperation({ summary: 'List all employer packages (including inactive)' })
-  listPackages() {
-    return this.billingService.listEmployerPackages(true);
-  }
-
-  @Patch('packages/:id')
-  @ApiOperation({ summary: 'Update package price and feature flags' })
-  updatePackage(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdatePackageDto,
-  ) {
-    return this.billingService.updatePackage(id, dto);
   }
 }

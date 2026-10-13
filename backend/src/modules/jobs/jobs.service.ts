@@ -15,7 +15,6 @@ import { AdjustJobQuotaDto } from './dto/adjust-job-quota.dto';
 import { ExtendJobExpiryDto } from './dto/extend-job-expiry.dto';
 import { Prisma, JobStatus, JobCloseReason, ApplicationStage } from '@prisma/client';
 import { QueryCandidateJobDto } from './dto/query-candidate-job.dto';
-import { EntitlementsService } from '../billing/entitlements.service';
 
 const candidateJobListInclude = {
   recruiter: {
@@ -61,8 +60,7 @@ export class JobsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
-    private readonly entitlements: EntitlementsService,
-  ) {}
+  ) { }
 
   private async getRecruiterProfile(userId: string) {
     const profile = await this.prisma.recruiterProfile.findUnique({
@@ -848,19 +846,17 @@ export class JobsService {
       updateData.status = dto.status;
       if (
         dto.status === JobStatus.PUBLISHED &&
-        job.status !== JobStatus.PUBLISHED
+        job.status === JobStatus.DRAFT
       ) {
-        await this.entitlements.assertCanPublishJob(userId, id);
-        updateData.publishedAt = job.publishedAt ?? new Date();
-        if (job.status === JobStatus.CLOSED) {
-          updateData.closedAt = null;
-          updateData.closeReason = null;
-        }
+        updateData.publishedAt = new Date();
       } else if (dto.status === JobStatus.CLOSED) {
         updateData.closedAt = new Date();
         if (!dto.closeReason) {
           updateData.closeReason = JobCloseReason.MANUAL_HR;
         }
+      } else if (dto.status === JobStatus.PUBLISHED && job.status === JobStatus.CLOSED) {
+        updateData.closedAt = null;
+        updateData.closeReason = null;
       }
     }
 

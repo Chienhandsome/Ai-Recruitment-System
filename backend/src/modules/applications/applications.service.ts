@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -43,7 +42,6 @@ import {
   type ApplicationProfileSnapshot,
   toPrismaJson,
 } from './application-evaluation.snapshot';
-import { EntitlementsService } from '../billing/entitlements.service';
 
 const candidateProfileInclude = {
   workExperiences: true,
@@ -163,9 +161,8 @@ export class ApplicationsService {
     private readonly prisma: PrismaService,
     private readonly evaluationService: ApplicationEvaluationService,
     private readonly accessService: ApplicationAccessService,
-    private readonly entitlements: EntitlementsService,
     private readonly notificationsService?: NotificationsService,
-  ) {}
+  ) { }
 
   async applyForJob(
     userId: string,
@@ -296,36 +293,10 @@ export class ApplicationsService {
     userId: string,
     query: QueryRecruiterApplicationsDto,
   ) {
-    const entitlement = await this.entitlements.getEffectiveEntitlement(userId);
-    const wantsAdvancedFilters =
-      query.minScore !== undefined || query.maxScore !== undefined;
-    const wantsAiSort = query.sortBy === ApplicationSortBy.AI_SCORE;
-
-    if (wantsAdvancedFilters && !entitlement.advancedFilters) {
-      throw new ForbiddenException(
-        'Bộ lọc ứng viên nâng cao (điểm AI) yêu cầu gói HR Pro hoặc Premium.',
-      );
-    }
-    if (wantsAiSort && !entitlement.aiRanking) {
-      throw new ForbiddenException(
-        'Xếp hạng CV theo AI yêu cầu gói HR Pro hoặc Premium.',
-      );
-    }
-
-    // Free plan: chronological list only (still can view applicants).
-    const effectiveQuery: QueryRecruiterApplicationsDto = !entitlement.aiRanking
-      ? {
-          ...query,
-          sortBy: ApplicationSortBy.APPLIED_AT,
-          minScore: undefined,
-          maxScore: undefined,
-        }
-      : query;
-
     if (
-      effectiveQuery.minScore !== undefined &&
-      effectiveQuery.maxScore !== undefined &&
-      effectiveQuery.minScore > effectiveQuery.maxScore
+      query.minScore !== undefined &&
+      query.maxScore !== undefined &&
+      query.minScore > query.maxScore
     ) {
       throw new BadRequestException(
         'minScore must be less than or equal to maxScore.',
@@ -336,28 +307,26 @@ export class ApplicationsService {
     const where: Prisma.ApplicationWhereInput = {
       AND: [
         scope,
-        effectiveQuery.jobId ? { jobId: effectiveQuery.jobId } : {},
-        effectiveQuery.stage ? { currentStage: effectiveQuery.stage } : {},
-        effectiveQuery.hrDecision
-          ? { hrDecision: effectiveQuery.hrDecision }
+        query.jobId ? { jobId: query.jobId } : {},
+        query.stage ? { currentStage: query.stage } : {},
+        query.hrDecision ? { hrDecision: query.hrDecision } : {},
+        query.processingStatus
+          ? { processingStatus: query.processingStatus }
           : {},
-        effectiveQuery.processingStatus
-          ? { processingStatus: effectiveQuery.processingStatus }
-          : {},
-        effectiveQuery.search?.trim()
+        query.search?.trim()
           ? {
             candidate: {
               user: {
                 OR: [
                   {
                     fullName: {
-                      contains: effectiveQuery.search.trim(),
+                      contains: query.search.trim(),
                       mode: 'insensitive',
                     },
                   },
                   {
                     email: {
-                      contains: effectiveQuery.search.trim(),
+                      contains: query.search.trim(),
                       mode: 'insensitive',
                     },
                   },
@@ -369,16 +338,13 @@ export class ApplicationsService {
       ],
     };
 
-    const hasScoreFilter =
-      effectiveQuery.minScore !== undefined ||
-      effectiveQuery.maxScore !== undefined;
-    const isScoreSort = effectiveQuery.sortBy === ApplicationSortBy.AI_SCORE;
+    const hasScoreFilter = query.minScore !== undefined || query.maxScore !== undefined;
+    const isScoreSort = query.sortBy === ApplicationSortBy.AI_SCORE;
 
     if (!hasScoreFilter && !isScoreSort) {
-      const sortDirection =
-        effectiveQuery.sortOrder === SortOrder.ASC ? 'asc' : 'desc';
+      const sortDirection = query.sortOrder === SortOrder.ASC ? 'asc' : 'desc';
       const orderBy =
-        effectiveQuery.sortBy === ApplicationSortBy.UPDATED_AT
+        query.sortBy === ApplicationSortBy.UPDATED_AT
           ? { updatedAt: sortDirection as Prisma.SortOrder }
           : { appliedAt: sortDirection as Prisma.SortOrder };
 
@@ -388,25 +354,18 @@ export class ApplicationsService {
           where,
           select: recruiterApplicationListSelect,
           orderBy,
-          skip: (effectiveQuery.page - 1) * effectiveQuery.limit,
-          take: effectiveQuery.limit,
+          skip: (query.page - 1) * query.limit,
+          take: query.limit,
         }),
       ]);
 
       return {
-        data: pageRows.map((row) =>
-          this.toRecruiterListItem(row, entitlement.aiRanking),
-        ),
+        data: pageRows.map((row) => this.toRecruiterListItem(row)),
         meta: {
           total,
-          page: effectiveQuery.page,
-          limit: effectiveQuery.limit,
-          totalPages: Math.ceil(total / effectiveQuery.limit),
-          features: {
-            aiRanking: entitlement.aiRanking,
-            advancedFilters: entitlement.advancedFilters,
-            packageCode: entitlement.packageCode,
-          },
+          page: query.page,
+          limit: query.limit,
+          totalPages: Math.ceil(total / query.limit),
         },
       };
     }
@@ -418,48 +377,30 @@ export class ApplicationsService {
 
     const filtered = rows.filter((row) => {
       const score = this.latestScore(row);
-      if (
-        effectiveQuery.minScore !== undefined &&
-        (score ?? -1) < effectiveQuery.minScore
-      ) {
+      if (query.minScore !== undefined && (score ?? -1) < query.minScore) {
         return false;
       }
-      if (
-        effectiveQuery.maxScore !== undefined &&
-        (score ?? 101) > effectiveQuery.maxScore
-      ) {
+      if (query.maxScore !== undefined && (score ?? 101) > query.maxScore) {
         return false;
       }
       return true;
     });
 
     filtered.sort((left, right) =>
-      this.compareApplicationRows(
-        left,
-        right,
-        effectiveQuery.sortBy,
-        effectiveQuery.sortOrder,
-      ),
+      this.compareApplicationRows(left, right, query.sortBy, query.sortOrder),
     );
 
     const total = filtered.length;
-    const start = (effectiveQuery.page - 1) * effectiveQuery.limit;
-    const pageRows = filtered.slice(start, start + effectiveQuery.limit);
+    const start = (query.page - 1) * query.limit;
+    const pageRows = filtered.slice(start, start + query.limit);
 
     return {
-      data: pageRows.map((row) =>
-        this.toRecruiterListItem(row, entitlement.aiRanking),
-      ),
+      data: pageRows.map((row) => this.toRecruiterListItem(row)),
       meta: {
         total,
-        page: effectiveQuery.page,
-        limit: effectiveQuery.limit,
-        totalPages: Math.ceil(total / effectiveQuery.limit),
-        features: {
-          aiRanking: entitlement.aiRanking,
-          advancedFilters: entitlement.advancedFilters,
-          packageCode: entitlement.packageCode,
-        },
+        page: query.page,
+        limit: query.limit,
+        totalPages: Math.ceil(total / query.limit),
       },
     };
   }
@@ -1071,10 +1012,7 @@ export class ApplicationsService {
     return sortOrder === SortOrder.ASC ? comparison : -comparison;
   }
 
-  private toRecruiterListItem(
-    row: RecruiterApplicationListRecord,
-    includeAiRanking = true,
-  ) {
+  private toRecruiterListItem(row: RecruiterApplicationListRecord) {
     const latest = row.aiMatchingResults[0];
     return {
       id: row.id,
@@ -1087,19 +1025,17 @@ export class ApplicationsService {
       currentStage: row.currentStage,
       hrDecision: row.hrDecision,
       processingStatus: row.processingStatus,
-      latestAiResult:
-        includeAiRanking && latest
-          ? {
-              overallScore: Number(latest.overallScore),
-              matchLevel: latest.matchLevel,
-              confidenceScore:
-                latest.confidenceScore === null
-                  ? null
-                  : Number(latest.confidenceScore),
-              version: latest.version,
-            }
-          : null,
-      aiRankingLocked: !includeAiRanking,
+      latestAiResult: latest
+        ? {
+          overallScore: Number(latest.overallScore),
+          matchLevel: latest.matchLevel,
+          confidenceScore:
+            latest.confidenceScore === null
+              ? null
+              : Number(latest.confidenceScore),
+          version: latest.version,
+        }
+        : null,
       appliedAt: row.appliedAt,
       updatedAt: row.updatedAt,
       allowedTransitions: allowedApplicationTransitions(row.currentStage),

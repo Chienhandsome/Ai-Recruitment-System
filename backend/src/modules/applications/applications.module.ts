@@ -8,10 +8,9 @@ import { RabbitMQModule } from '../../infrastructure/rabbitmq/rabbitmq.module';
 import { ApplicationEvaluationService } from './application-evaluation.service';
 import { RetryApplicationEvaluationsUseCase } from './retry-application-evaluations.use-case';
 import { ApplicationAccessService } from './application-access.service';
-import { BillingModule } from '../billing/billing.module';
 
 @Module({
-  imports: [AuthModule, RabbitMQModule, NotificationsModule, BillingModule],
+  imports: [AuthModule, RabbitMQModule, NotificationsModule],
   controllers: [ApplicationsController],
   providers: [
     ApplicationsService,

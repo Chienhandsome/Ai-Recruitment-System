@@ -3,7 +3,6 @@ import {
   DepartmentStatus,
 } from '@prisma/client';
 import { seedSkillCatalog } from './seed-skill-catalog';
-import { seedEmployerPackages } from './seed-employer-packages';
 
 const prisma = new PrismaClient();
 
@@ -73,10 +72,6 @@ async function main() {
         `${skillSeedResult.deprecatedLegacySkills} legacy composite skills.`,
     );
   }
-
-  // 5. Employer billing packages
-  const packageCount = await seedEmployerPackages(prisma);
-  console.log(`Seeded ${packageCount} employer service packages.`);
 
   console.log('Seeding finished.');
 }

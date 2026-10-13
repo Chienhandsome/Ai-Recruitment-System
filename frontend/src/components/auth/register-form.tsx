@@ -227,11 +227,11 @@ export function RegisterForm({ role }: RegisterFormProps) {
             />
             <Label htmlFor="acceptTerms" className="mt-0.5 leading-5">
               Tôi đồng ý với{" "}
-              <Link href="#" className="text-primary hover:underline">
+              <Link href="/terms" target="_blank" className="text-primary hover:underline font-semibold">
                 Điều khoản dịch vụ
               </Link>{" "}
               và{" "}
-              <Link href="#" className="text-primary hover:underline">
+              <Link href="/privacy" target="_blank" className="text-primary hover:underline font-semibold">
                 Chính sách bảo mật
               </Link>
             </Label>

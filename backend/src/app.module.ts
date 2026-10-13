@@ -26,6 +26,9 @@ import { AdminModule } from './modules/admin/admin.module';
 import { OffersModule } from './modules/offers/offers.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { CandidateInsightsModule } from './modules/candidate-insights/candidate-insights.module';
+import { ContractsModule } from './modules/contracts/contracts.module';
+import { PoliciesModule } from './modules/policies/policies.module';
+import { DisputesModule } from './modules/disputes/disputes.module';
 
 @Module({
   imports: [
@@ -58,6 +61,9 @@ import { CandidateInsightsModule } from './modules/candidate-insights/candidate-
     OffersModule,
     BillingModule,
     CandidateInsightsModule,
+    ContractsModule,
+    PoliciesModule,
+    DisputesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

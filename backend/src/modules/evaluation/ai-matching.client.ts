@@ -28,7 +28,8 @@ export class AiMatchingClientError extends Error {
   }
 }
 
-const DEFAULT_TIMEOUT_MS = 90_000;
+// P0: 25 seconds aligns with cloud edge & reverse proxy timeouts (Vercel/Cloudflare 30s)
+const DEFAULT_TIMEOUT_MS = 25_000;
 
 @Injectable()
 export class AiMatchingClient {
@@ -83,7 +84,7 @@ export class AiMatchingClient {
       const detail = [message, cause].filter(Boolean).join(' — ');
       throw new AiMatchingClientError(
         isTimeout
-          ? `AI matching timeout sau ${timeoutMs}ms (${aiServiceUrl}).`
+          ? `AI matching quá thời gian phản hồi (vượt quá ${Math.round(timeoutMs / 1000)}s từ ${aiServiceUrl}).`
           : `Không kết nối được AI matching tại ${aiServiceUrl}: ${detail}`,
         isTimeout ? 'TIMEOUT' : 'NETWORK',
       );

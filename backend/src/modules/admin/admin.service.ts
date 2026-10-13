@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { JobStatus, AccountStatus } from '@prisma/client';
+import { invalidateUserRoleCache } from '../auth/guards/roles.guard';
 
 @Injectable()
 export class AdminService {
@@ -252,10 +253,15 @@ export class AdminService {
       throw new NotFoundException('Không tìm thấy người dùng');
     }
 
-    return this.prisma.user.update({
+    const updated = await this.prisma.user.update({
       where: { id },
       data: { status },
     });
+
+    // P0: Instantly clear any cached authentication/role entries for this user
+    invalidateUserRoleCache(id);
+
+    return updated;
   }
 
   async deleteUser(id: string) {
@@ -263,6 +269,9 @@ export class AdminService {
     if (!user) {
       throw new NotFoundException('Không tìm thấy người dùng');
     }
+
+    // P0: Instantly clear cache
+    invalidateUserRoleCache(id);
 
     return this.prisma.user.delete({
       where: { id },

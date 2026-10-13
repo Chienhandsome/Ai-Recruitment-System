@@ -18,6 +18,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import {
   checkOrderStatus,
   checkoutOrder,
@@ -376,7 +377,7 @@ function BillingWorkspaceContent({
   const statusParam = searchParams.get("status");
 
   useEffect(() => {
-    if (!orderCodeParam || !token) return;
+    if (!orderCodeParam) return;
     if (statusParam === "CANCELLED") {
       setError("Giao dịch thanh toán đã bị hủy trên cổng PayOS.");
       return;
@@ -384,28 +385,53 @@ function BillingWorkspaceContent({
 
     let cancelled = false;
 
+    const sleep = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+
     const syncPayment = async () => {
       setSyncingOrder(true);
       setError(null);
       try {
-        const res = await checkOrderStatus(token, orderCodeParam);
-        if (cancelled) return;
-        if (res.isPaid) {
-          setPaymentSuccessNotice(
-            `Thanh toán đơn hàng #${orderCodeParam} thành công! Gói ${res.order.package.name} đã được kích hoạt.`,
-          );
-          setCurrentEntitlement(res.entitlement);
-          router.replace("/recruiter/billing");
-          router.refresh();
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const accessToken = session?.access_token || token;
+        if (!accessToken) {
+          setError("Vui lòng đăng nhập lại để đồng bộ trạng thái thanh toán.");
+          return;
         }
-      } catch (err) {
-        if (cancelled) return;
-        console.error("Failed to sync order status:", err);
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Không đồng bộ được trạng thái thanh toán. Nếu đã trừ tiền, hãy tải lại trang.",
-        );
+
+        // PayOS may confirm a few seconds after redirect — retry briefly.
+        let lastError: unknown = null;
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+          if (cancelled) return;
+          try {
+            const res = await checkOrderStatus(accessToken, orderCodeParam);
+            if (cancelled) return;
+            if (res.isPaid) {
+              setPaymentSuccessNotice(
+                `Thanh toán đơn hàng #${orderCodeParam} thành công! Gói ${res.order.package.name} đã được kích hoạt.`,
+              );
+              setCurrentEntitlement(res.entitlement);
+              router.replace("/recruiter/billing");
+              router.refresh();
+              return;
+            }
+          } catch (err) {
+            lastError = err;
+          }
+          await sleep(1500);
+        }
+
+        if (lastError) {
+          console.error("Failed to sync order status:", lastError);
+          setError(
+            lastError instanceof Error
+              ? lastError.message
+              : "Không đồng bộ được trạng thái thanh toán. Nếu đã trừ tiền, hãy tải lại trang.",
+          );
+        }
       } finally {
         if (!cancelled) setSyncingOrder(false);
       }

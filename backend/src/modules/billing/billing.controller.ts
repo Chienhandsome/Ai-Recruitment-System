@@ -97,6 +97,31 @@ export class BillingController {
     return this.billingService.listMyOrders(user.id, resolved);
   }
 
+  /**
+   * MUST be declared before `orders/:orderId`, otherwise Nest matches
+   * "check-status" as an orderId and ParseUUIDPipe returns 400 — PayOS
+   * return sync never activates the package.
+   */
+  @Get('orders/check-status')
+  @Roles('CANDIDATE', 'RECRUITER')
+  @ApiOperation({ summary: 'Check payment status and sync with PayOS if needed' })
+  @ApiQuery({ name: 'orderCode', required: true, description: 'orderCode or orderId' })
+  checkOrderStatus(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('orderCode') orderCode: string,
+  ) {
+    return this.billingService.checkPayosOrderStatus(user.id, orderCode);
+  }
+
+  @Post('webhook/payos')
+  @Public()
+  @ApiOperation({
+    summary: 'PayOS webhook notification for automated bank payment confirmation',
+  })
+  payosWebhook(@Body() body: any) {
+    return this.billingService.handlePayosWebhook(body);
+  }
+
   @Get('orders/:orderId')
   @Roles('CANDIDATE', 'RECRUITER')
   getOrder(
@@ -132,26 +157,6 @@ export class BillingController {
     @Param('orderId', ParseUUIDPipe) orderId: string,
   ) {
     return this.billingService.confirmMockPayment(user.id, orderId);
-  }
-
-  @Post('webhook/payos')
-  @Public()
-  @ApiOperation({
-    summary: 'PayOS webhook notification for automated bank payment confirmation',
-  })
-  payosWebhook(@Body() body: any) {
-    return this.billingService.handlePayosWebhook(body);
-  }
-
-  @Get('orders/check-status')
-  @Roles('CANDIDATE', 'RECRUITER')
-  @ApiOperation({ summary: 'Check payment status and sync with PayOS if needed' })
-  @ApiQuery({ name: 'orderCode', required: true, description: 'orderCode or orderId' })
-  checkOrderStatus(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query('orderCode') orderCode: string,
-  ) {
-    return this.billingService.checkPayosOrderStatus(user.id, orderCode);
   }
 
   @Get('transactions')

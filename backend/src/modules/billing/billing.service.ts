@@ -37,6 +37,7 @@ export class BillingService {
     private readonly entitlements: EntitlementsService,
     @Inject(PAYMENT_PROVIDER)
     private readonly paymentProvider: PaymentProviderAdapter,
+    private readonly payosProvider: PayosPaymentProvider,
   ) {}
 
   listPackages(audience: PackageAudience, includeInactive = false) {
@@ -88,8 +89,69 @@ export class BillingService {
     });
   }
 
-  getMyStatus(userId: string, audience: PackageAudience) {
+  async getMyStatus(userId: string, audience: PackageAudience) {
+    // Safety net: if PayOS webhook/return sync missed, activate on next billing load.
+    await this.syncPendingPayosOrdersForUser(userId);
     return this.entitlements.getEntitlementStatus(userId, audience);
+  }
+
+  /**
+   * Query PayOS for the caller's recent PENDING orders and activate any that are PAID.
+   */
+  async syncPendingPayosOrdersForUser(userId: string) {
+    if (!this.payosProvider.isConfigured()) return 0;
+
+    const pending = await this.prisma.packageOrder.findMany({
+      where: {
+        userId,
+        status: PackageOrderStatus.PENDING,
+        expiresAt: { gt: new Date() },
+      },
+      include: { package: true },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    });
+
+    let activated = 0;
+    const provider =
+      ((PaymentProvider as any).PAYOS as PaymentProvider) ??
+      PaymentProvider.MOCK;
+
+    for (const order of pending) {
+      try {
+        const payosInfo = await this.payosProvider.getPaymentInformation(
+          order.orderCode,
+        );
+        const paid =
+          !!payosInfo &&
+          (String(payosInfo.status).toUpperCase() === 'PAID' ||
+            (payosInfo as any).code === '00');
+        if (!paid) continue;
+
+        await this.completePaidOrder(
+          order,
+          provider,
+          String(
+            (payosInfo as any).id ??
+              (payosInfo as any).paymentLinkId ??
+              order.orderCode,
+          ),
+          payosInfo,
+        );
+        activated += 1;
+        this.logger.log(
+          `Auto-synced PayOS PAID order ${order.orderCode} for user ${userId}`,
+        );
+      } catch (err) {
+        this.logger.warn(
+          `Auto-sync failed for order ${order.orderCode}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      }
+    }
+
+    return activated;
   }
 
   async createOrder(userId: string, dto: CreateOrderDto) {
@@ -467,14 +529,15 @@ export class BillingService {
       return buildPaidResponse(order);
     }
 
-    // If still PENDING and PayOS provider is active, check PayOS API directly.
-    if (this.paymentProvider instanceof PayosPaymentProvider) {
-      const payosInfo = await this.paymentProvider.getPaymentInformation(
+    // Prefer concrete PayOS provider (injected) — do not rely on instanceof of the adapter token.
+    if (this.payosProvider.isConfigured()) {
+      const payosInfo = await this.payosProvider.getPaymentInformation(
         order.orderCode,
       );
       if (
         payosInfo &&
-        (payosInfo.status === 'PAID' || (payosInfo as any).code === '00')
+        (String(payosInfo.status).toUpperCase() === 'PAID' ||
+          (payosInfo as any).code === '00')
       ) {
         const provider =
           ((PaymentProvider as any).PAYOS as PaymentProvider) ??

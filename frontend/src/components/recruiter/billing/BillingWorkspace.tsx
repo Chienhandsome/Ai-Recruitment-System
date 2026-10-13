@@ -362,6 +362,11 @@ function BillingWorkspaceContent({
   const [paymentSuccessNotice, setPaymentSuccessNotice] = useState<string | null>(
     null,
   );
+
+  // Keep client state in sync when server props refresh after payment.
+  useEffect(() => {
+    setCurrentEntitlement(entitlement);
+  }, [entitlement]);
   const [syncingOrder, setSyncingOrder] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(false);

@@ -472,4 +472,57 @@ describe('CandidateInsightsService.analyzeJdFit', () => {
       'application-9',
     );
   });
+
+  it('reuses the application snapshot when already applied (HR-identical score)', async () => {
+    const builder = new EvaluationPayloadBuilder();
+    const snapshot = builder.buildProfileSnapshot(
+      candidateProfile as never,
+      resume as never,
+      job as never,
+      new Date('2026-10-01T00:00:00.000Z'),
+    );
+    const { service, aiMatching, prisma } = createService({
+      prisma: {
+        candidateProfile: {
+          findUnique: jest.fn().mockResolvedValue(candidateProfile),
+        },
+        resume: { findFirst: jest.fn() },
+        jobPosting: { findFirst: jest.fn() },
+        application: {
+          findFirst: jest.fn().mockResolvedValue({
+            id: 'application-9',
+            resumeId,
+            profileSnapshot: JSON.parse(JSON.stringify(snapshot)),
+          }),
+        },
+        candidateJdFitAnalysis: {
+          findUnique: jest.fn().mockResolvedValue(null),
+          create: jest.fn().mockImplementation(async ({ data }) => ({
+            id: 'analysis-1',
+            ...data,
+            createdAt: new Date(),
+          })),
+        },
+      },
+    });
+
+    const result = await service.analyzeJdFit(userId, { jobId, requestId });
+
+    const payload = aiMatching.evaluate.mock.calls[0][0];
+    expect(payload.application_id).toBe('application-9');
+    expect(payload.evaluation_date).toBe('2026-10-01T00:00:00.000Z');
+    expect(payload.candidate_profile).toEqual(
+      snapshot.evaluationInput.candidate_profile,
+    );
+    expect(payload.job).toEqual(snapshot.evaluationInput.job);
+    // Snapshot path skips rebuilding from current profile/job data.
+    expect(prisma.resume.findFirst).not.toHaveBeenCalled();
+    expect(prisma.jobPosting.findFirst).not.toHaveBeenCalled();
+    expect(prisma.candidateJdFitAnalysis.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ resumeId, jobId }),
+      }),
+    );
+    expect(result.overallScore).toBe(91);
+  });
 });

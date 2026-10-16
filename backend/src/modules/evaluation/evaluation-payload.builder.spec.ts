@@ -218,4 +218,44 @@ describe('EvaluationPayloadBuilder', () => {
       }),
     );
   });
+
+  it('rebuilds an HR-identical payload from a stored snapshot', () => {
+    const snapshot = builder.buildProfileSnapshot(
+      profile as never,
+      resume as never,
+      job as never,
+      now,
+    );
+    // Simulate the Prisma Json round-trip.
+    const stored = JSON.parse(JSON.stringify(snapshot));
+
+    const fromSnapshot = builder.buildEvaluationRequestFromSnapshot(
+      'application-9',
+      stored as never,
+    );
+    const reference = builder.buildEvaluationRequest({
+      applicationId: 'application-9',
+      profile: profile as never,
+      resume: resume as never,
+      job: job as never,
+      capturedAt: now,
+    });
+
+    expect(fromSnapshot).toEqual(reference);
+  });
+
+  it('returns null for missing or invalid snapshots', () => {
+    expect(
+      builder.buildEvaluationRequestFromSnapshot('app-1', null),
+    ).toBeNull();
+    expect(
+      builder.buildEvaluationRequestFromSnapshot('app-1', {} as never),
+    ).toBeNull();
+    expect(
+      builder.buildEvaluationRequestFromSnapshot('app-1', {
+        schemaVersion: 1,
+        evaluationInput: null,
+      } as never),
+    ).toBeNull();
+  });
 });

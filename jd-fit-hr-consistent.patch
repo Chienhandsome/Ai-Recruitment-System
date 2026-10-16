@@ -1,0 +1,332 @@
+diff --git a/backend/src/modules/candidate-insights/candidate-insights.service.spec.ts b/backend/src/modules/candidate-insights/candidate-insights.service.spec.ts
+index db67b23..62880e6 100644
+--- a/backend/src/modules/candidate-insights/candidate-insights.service.spec.ts
++++ b/backend/src/modules/candidate-insights/candidate-insights.service.spec.ts
+@@ -472,4 +472,57 @@ describe('CandidateInsightsService.analyzeJdFit', () => {
+       'application-9',
+     );
+   });
++
++  it('reuses the application snapshot when already applied (HR-identical score)', async () => {
++    const builder = new EvaluationPayloadBuilder();
++    const snapshot = builder.buildProfileSnapshot(
++      candidateProfile as never,
++      resume as never,
++      job as never,
++      new Date('2026-10-01T00:00:00.000Z'),
++    );
++    const { service, aiMatching, prisma } = createService({
++      prisma: {
++        candidateProfile: {
++          findUnique: jest.fn().mockResolvedValue(candidateProfile),
++        },
++        resume: { findFirst: jest.fn() },
++        jobPosting: { findFirst: jest.fn() },
++        application: {
++          findFirst: jest.fn().mockResolvedValue({
++            id: 'application-9',
++            resumeId,
++            profileSnapshot: JSON.parse(JSON.stringify(snapshot)),
++          }),
++        },
++        candidateJdFitAnalysis: {
++          findUnique: jest.fn().mockResolvedValue(null),
++          create: jest.fn().mockImplementation(async ({ data }) => ({
++            id: 'analysis-1',
++            ...data,
++            createdAt: new Date(),
++          })),
++        },
++      },
++    });
++
++    const result = await service.analyzeJdFit(userId, { jobId, requestId });
++
++    const payload = aiMatching.evaluate.mock.calls[0][0];
++    expect(payload.application_id).toBe('application-9');
++    expect(payload.evaluation_date).toBe('2026-10-01T00:00:00.000Z');
++    expect(payload.candidate_profile).toEqual(
++      snapshot.evaluationInput.candidate_profile,
++    );
++    expect(payload.job).toEqual(snapshot.evaluationInput.job);
++    // Snapshot path skips rebuilding from current profile/job data.
++    expect(prisma.resume.findFirst).not.toHaveBeenCalled();
++    expect(prisma.jobPosting.findFirst).not.toHaveBeenCalled();
++    expect(prisma.candidateJdFitAnalysis.create).toHaveBeenCalledWith(
++      expect.objectContaining({
++        data: expect.objectContaining({ resumeId, jobId }),
++      }),
++    );
++    expect(result.overallScore).toBe(91);
++  });
+ });
+diff --git a/backend/src/modules/candidate-insights/candidate-insights.service.ts b/backend/src/modules/candidate-insights/candidate-insights.service.ts
+index 3edbcdf..4e58676 100644
+--- a/backend/src/modules/candidate-insights/candidate-insights.service.ts
++++ b/backend/src/modules/candidate-insights/candidate-insights.service.ts
+@@ -22,6 +22,7 @@ import {
+   evaluationCandidateInclude,
+   evaluationJobInclude,
+   evaluationResumeSelect,
++  type EvaluationRequestPayload,
+ } from '../evaluation/evaluation-payload.builder';
+ import { CreateJdFitAnalysisDto } from './dto/create-jd-fit-analysis.dto';
+ import { CreateCandidateMockInterviewDto } from './dto/create-candidate-mock-interview.dto';
+@@ -63,60 +64,79 @@ export class CandidateInsightsService {
+       throw new NotFoundException('Không tìm thấy hồ sơ ứng viên.');
+     }
+ 
+-    const resumeRef = await this.resolveParsedResumeForJdFit({
+-      candidateId: candidate.id,
+-      primaryResumeId: candidate.primaryResumeId,
+-      preferredResumeId: dto.resumeId,
+-      jobId: dto.jobId,
++    // 2b) HR-consistent path: when the candidate already applied to this job
++    // and did not pick a specific CV, reuse the application's stored snapshot —
++    // the exact input the HR evaluation was computed from — so both sides score
++    // identically. Skipped when the candidate explicitly chooses another CV
++    // (dto.resumeId) or when the snapshot is missing/invalid.
++    const application = await this.prisma.application.findFirst({
++      where: { jobId: dto.jobId, candidateId: candidate.id },
++      select: { id: true, resumeId: true, profileSnapshot: true },
+     });
+ 
+-    const resume = await this.prisma.resume.findFirst({
+-      where: {
+-        id: resumeRef.id,
+-        candidateId: candidate.id,
+-        parsingStatus: ResumeParsingStatus.PARSED,
+-      },
+-      select: evaluationResumeSelect,
+-    });
+-    if (!resume) {
+-      throw new ForbiddenException(
+-        'resumeId không thuộc tài khoản của bạn hoặc chưa parse xong.',
+-      );
+-    }
++    let evaluationPayload: EvaluationRequestPayload | null = null;
++    let analysisResumeId: string;
+ 
+-    const job = await this.prisma.jobPosting.findFirst({
+-      where: {
+-        id: dto.jobId,
+-        status: JobStatus.PUBLISHED,
+-        OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
+-      },
+-      include: evaluationJobInclude,
+-    });
+-    if (!job) {
+-      throw new NotFoundException(
+-        'Tin tuyển dụng không tồn tại hoặc không còn mở.',
+-      );
++    if (!dto.resumeId && application) {
++      evaluationPayload =
++        this.payloadBuilder.buildEvaluationRequestFromSnapshot(
++          application.id,
++          application.profileSnapshot,
++        );
++      if (evaluationPayload) {
++        analysisResumeId = application.resumeId;
++      }
+     }
+ 
+-    const application = await this.prisma.application.findFirst({
+-      where: { jobId: job.id, candidateId: candidate.id },
+-      select: { id: true },
+-    });
++    if (!evaluationPayload) {
++      const resumeRef = await this.resolveParsedResumeForJdFit({
++        candidateId: candidate.id,
++        primaryResumeId: candidate.primaryResumeId,
++        preferredResumeId: dto.resumeId,
++        jobId: dto.jobId,
++      });
++
++      const resume = await this.prisma.resume.findFirst({
++        where: {
++          id: resumeRef.id,
++          candidateId: candidate.id,
++          parsingStatus: ResumeParsingStatus.PARSED,
++        },
++        select: evaluationResumeSelect,
++      });
++      if (!resume) {
++        throw new ForbiddenException(
++          'resumeId không thuộc tài khoản của bạn hoặc chưa parse xong.',
++        );
++      }
+ 
+-    const evaluationApplicationId =
+-      application?.id ?? `candidate-jd-fit:${dto.requestId}`;
++      const job = await this.prisma.jobPosting.findFirst({
++        where: {
++          id: dto.jobId,
++          status: JobStatus.PUBLISHED,
++          OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
++        },
++        include: evaluationJobInclude,
++      });
++      if (!job) {
++        throw new NotFoundException(
++          'Tin tuyển dụng không tồn tại hoặc không còn mở.',
++        );
++      }
+ 
+-    const scopedProfile = this.payloadBuilder.scopeCandidateProfileToResume(
+-      candidate,
+-      resume.id,
+-    );
++      const scopedProfile = this.payloadBuilder.scopeCandidateProfileToResume(
++        candidate,
++        resume.id,
++      );
+ 
+-    const evaluationPayload = this.payloadBuilder.buildEvaluationRequest({
+-      applicationId: evaluationApplicationId,
+-      profile: scopedProfile,
+-      resume,
+-      job,
+-    });
++      evaluationPayload = this.payloadBuilder.buildEvaluationRequest({
++        applicationId: application?.id ?? `candidate-jd-fit:${dto.requestId}`,
++        profile: scopedProfile,
++        resume,
++        job,
++      });
++      analysisResumeId = resume.id;
++    }
+ 
+     // 3) Call shared AI Matching Engine — failures must not consume quota
+     let mapped: ReturnType<typeof mapAiResultToCandidateJdFit>;
+@@ -135,7 +155,7 @@ export class CandidateInsightsService {
+       requestId: dto.requestId,
+       quotaField: 'jdFitRemaining',
+       refType: 'job',
+-      refId: job.id,
++      refId: dto.jobId,
+     });
+ 
+     if (consume.reused) {
+@@ -157,8 +177,8 @@ export class CandidateInsightsService {
+         data: {
+           userId,
+           entitlementId: entitlement.entitlementId,
+-          jobId: job.id,
+-          resumeId: resume.id,
++          jobId: dto.jobId,
++          resumeId: analysisResumeId,
+           requestId: dto.requestId,
+           overallScore: mapped.overallScore,
+           matchLevel: mapped.matchLevel,
+diff --git a/backend/src/modules/evaluation/evaluation-payload.builder.spec.ts b/backend/src/modules/evaluation/evaluation-payload.builder.spec.ts
+index e9871ef..784e34e 100644
+--- a/backend/src/modules/evaluation/evaluation-payload.builder.spec.ts
++++ b/backend/src/modules/evaluation/evaluation-payload.builder.spec.ts
+@@ -218,4 +218,44 @@ describe('EvaluationPayloadBuilder', () => {
+       }),
+     );
+   });
++
++  it('rebuilds an HR-identical payload from a stored snapshot', () => {
++    const snapshot = builder.buildProfileSnapshot(
++      profile as never,
++      resume as never,
++      job as never,
++      now,
++    );
++    // Simulate the Prisma Json round-trip.
++    const stored = JSON.parse(JSON.stringify(snapshot));
++
++    const fromSnapshot = builder.buildEvaluationRequestFromSnapshot(
++      'application-9',
++      stored as never,
++    );
++    const reference = builder.buildEvaluationRequest({
++      applicationId: 'application-9',
++      profile: profile as never,
++      resume: resume as never,
++      job: job as never,
++      capturedAt: now,
++    });
++
++    expect(fromSnapshot).toEqual(reference);
++  });
++
++  it('returns null for missing or invalid snapshots', () => {
++    expect(
++      builder.buildEvaluationRequestFromSnapshot('app-1', null),
++    ).toBeNull();
++    expect(
++      builder.buildEvaluationRequestFromSnapshot('app-1', {} as never),
++    ).toBeNull();
++    expect(
++      builder.buildEvaluationRequestFromSnapshot('app-1', {
++        schemaVersion: 1,
++        evaluationInput: null,
++      } as never),
++    ).toBeNull();
++  });
+ });
+diff --git a/backend/src/modules/evaluation/evaluation-payload.builder.ts b/backend/src/modules/evaluation/evaluation-payload.builder.ts
+index 68744b9..82b527b 100644
+--- a/backend/src/modules/evaluation/evaluation-payload.builder.ts
++++ b/backend/src/modules/evaluation/evaluation-payload.builder.ts
+@@ -1,6 +1,7 @@
+ import type { Prisma } from '@prisma/client';
+ import {
+   APPLICATION_SNAPSHOT_VERSION,
++  createEvaluationMessage,
+   type ApplicationEvaluationInput,
+   type ApplicationProfileSnapshot,
+ } from '../applications/application-evaluation.snapshot';
+@@ -129,6 +130,50 @@ export class EvaluationPayloadBuilder {
+     };
+   }
+ 
++  /**
++   * Rebuild the AI request from an application's stored profile snapshot.
++   *
++   * The snapshot is the exact input the HR evaluation was computed from, so
++   * scoring the same snapshot on the candidate side yields the same score.
++   * Returns null when the snapshot is missing or fails validation — callers
++   * should fall back to building a fresh payload from current data.
++   */
++  buildEvaluationRequestFromSnapshot(
++    applicationId: string,
++    snapshotValue: Prisma.JsonValue | null | undefined,
++  ): EvaluationRequestPayload | null {
++    const message = createEvaluationMessage(
++      applicationId,
++      snapshotValue ?? null,
++    );
++    if (!message || typeof message.evaluation_date !== 'string') {
++      return null;
++    }
++    const weights = message.weights as Record<string, unknown>;
++    const num = (value: unknown): number | null =>
++      typeof value === 'number' && Number.isFinite(value) ? value : null;
++    const skills = num(weights.skills);
++    const experience = num(weights.experience);
++    const education = num(weights.education);
++    const other = num(weights.other);
++    if (
++      skills === null ||
++      experience === null ||
++      education === null ||
++      other === null
++    ) {
++      return null;
++    }
++    return {
++      application_id: applicationId,
++      schema_version: Number(message.schema_version),
++      evaluation_date: message.evaluation_date,
++      candidate_profile: message.candidate_profile as Record<string, unknown>,
++      job: message.job as Record<string, unknown>,
++      weights: { skills, experience, education, other },
++    };
++  }
++
+   /**
+    * Keep rows for the selected resume and candidate-level rows without resumeId.
+    * Drops rows stamped with a different resumeId to avoid mixing CVs.

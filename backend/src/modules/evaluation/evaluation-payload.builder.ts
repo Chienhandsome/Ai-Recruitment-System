@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import {
   APPLICATION_SNAPSHOT_VERSION,
+  createEvaluationMessage,
   type ApplicationEvaluationInput,
   type ApplicationProfileSnapshot,
 } from '../applications/application-evaluation.snapshot';
@@ -126,6 +127,50 @@ export class EvaluationPayloadBuilder {
       candidate_profile: evaluationInput.candidate_profile,
       job: evaluationInput.job,
       weights: evaluationInput.weights as EvaluationRequestPayload['weights'],
+    };
+  }
+
+  /**
+   * Rebuild the AI request from an application's stored profile snapshot.
+   *
+   * The snapshot is the exact input the HR evaluation was computed from, so
+   * scoring the same snapshot on the candidate side yields the same score.
+   * Returns null when the snapshot is missing or fails validation — callers
+   * should fall back to building a fresh payload from current data.
+   */
+  buildEvaluationRequestFromSnapshot(
+    applicationId: string,
+    snapshotValue: Prisma.JsonValue | null | undefined,
+  ): EvaluationRequestPayload | null {
+    const message = createEvaluationMessage(
+      applicationId,
+      snapshotValue ?? null,
+    );
+    if (!message || typeof message.evaluation_date !== 'string') {
+      return null;
+    }
+    const weights = message.weights as Record<string, unknown>;
+    const num = (value: unknown): number | null =>
+      typeof value === 'number' && Number.isFinite(value) ? value : null;
+    const skills = num(weights.skills);
+    const experience = num(weights.experience);
+    const education = num(weights.education);
+    const other = num(weights.other);
+    if (
+      skills === null ||
+      experience === null ||
+      education === null ||
+      other === null
+    ) {
+      return null;
+    }
+    return {
+      application_id: applicationId,
+      schema_version: Number(message.schema_version),
+      evaluation_date: message.evaluation_date,
+      candidate_profile: message.candidate_profile as Record<string, unknown>,
+      job: message.job as Record<string, unknown>,
+      weights: { skills, experience, education, other },
     };
   }
 

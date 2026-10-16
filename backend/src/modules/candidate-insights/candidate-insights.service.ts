@@ -22,6 +22,7 @@ import {
   evaluationCandidateInclude,
   evaluationJobInclude,
   evaluationResumeSelect,
+  type EvaluationRequestPayload,
 } from '../evaluation/evaluation-payload.builder';
 import { CreateJdFitAnalysisDto } from './dto/create-jd-fit-analysis.dto';
 import { CreateCandidateMockInterviewDto } from './dto/create-candidate-mock-interview.dto';
@@ -63,60 +64,79 @@ export class CandidateInsightsService {
       throw new NotFoundException('Không tìm thấy hồ sơ ứng viên.');
     }
 
-    const resumeRef = await this.resolveParsedResumeForJdFit({
-      candidateId: candidate.id,
-      primaryResumeId: candidate.primaryResumeId,
-      preferredResumeId: dto.resumeId,
-      jobId: dto.jobId,
-    });
-
-    const resume = await this.prisma.resume.findFirst({
-      where: {
-        id: resumeRef.id,
-        candidateId: candidate.id,
-        parsingStatus: ResumeParsingStatus.PARSED,
-      },
-      select: evaluationResumeSelect,
-    });
-    if (!resume) {
-      throw new ForbiddenException(
-        'resumeId không thuộc tài khoản của bạn hoặc chưa parse xong.',
-      );
-    }
-
-    const job = await this.prisma.jobPosting.findFirst({
-      where: {
-        id: dto.jobId,
-        status: JobStatus.PUBLISHED,
-        OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
-      },
-      include: evaluationJobInclude,
-    });
-    if (!job) {
-      throw new NotFoundException(
-        'Tin tuyển dụng không tồn tại hoặc không còn mở.',
-      );
-    }
-
+    // 2b) HR-consistent path: when the candidate already applied to this job
+    // and did not pick a specific CV, reuse the application's stored snapshot —
+    // the exact input the HR evaluation was computed from — so both sides score
+    // identically. Skipped when the candidate explicitly chooses another CV
+    // (dto.resumeId) or when the snapshot is missing/invalid.
     const application = await this.prisma.application.findFirst({
-      where: { jobId: job.id, candidateId: candidate.id },
-      select: { id: true },
+      where: { jobId: dto.jobId, candidateId: candidate.id },
+      select: { id: true, resumeId: true, profileSnapshot: true },
     });
 
-    const evaluationApplicationId =
-      application?.id ?? `candidate-jd-fit:${dto.requestId}`;
+    let evaluationPayload: EvaluationRequestPayload | null = null;
+    let analysisResumeId: string;
 
-    const scopedProfile = this.payloadBuilder.scopeCandidateProfileToResume(
-      candidate,
-      resume.id,
-    );
+    if (!dto.resumeId && application) {
+      evaluationPayload =
+        this.payloadBuilder.buildEvaluationRequestFromSnapshot(
+          application.id,
+          application.profileSnapshot,
+        );
+      if (evaluationPayload) {
+        analysisResumeId = application.resumeId;
+      }
+    }
 
-    const evaluationPayload = this.payloadBuilder.buildEvaluationRequest({
-      applicationId: evaluationApplicationId,
-      profile: scopedProfile,
-      resume,
-      job,
-    });
+    if (!evaluationPayload) {
+      const resumeRef = await this.resolveParsedResumeForJdFit({
+        candidateId: candidate.id,
+        primaryResumeId: candidate.primaryResumeId,
+        preferredResumeId: dto.resumeId,
+        jobId: dto.jobId,
+      });
+
+      const resume = await this.prisma.resume.findFirst({
+        where: {
+          id: resumeRef.id,
+          candidateId: candidate.id,
+          parsingStatus: ResumeParsingStatus.PARSED,
+        },
+        select: evaluationResumeSelect,
+      });
+      if (!resume) {
+        throw new ForbiddenException(
+          'resumeId không thuộc tài khoản của bạn hoặc chưa parse xong.',
+        );
+      }
+
+      const job = await this.prisma.jobPosting.findFirst({
+        where: {
+          id: dto.jobId,
+          status: JobStatus.PUBLISHED,
+          OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
+        },
+        include: evaluationJobInclude,
+      });
+      if (!job) {
+        throw new NotFoundException(
+          'Tin tuyển dụng không tồn tại hoặc không còn mở.',
+        );
+      }
+
+      const scopedProfile = this.payloadBuilder.scopeCandidateProfileToResume(
+        candidate,
+        resume.id,
+      );
+
+      evaluationPayload = this.payloadBuilder.buildEvaluationRequest({
+        applicationId: application?.id ?? `candidate-jd-fit:${dto.requestId}`,
+        profile: scopedProfile,
+        resume,
+        job,
+      });
+      analysisResumeId = resume.id;
+    }
 
     // 3) Call shared AI Matching Engine — failures must not consume quota
     let mapped: ReturnType<typeof mapAiResultToCandidateJdFit>;
@@ -135,7 +155,7 @@ export class CandidateInsightsService {
       requestId: dto.requestId,
       quotaField: 'jdFitRemaining',
       refType: 'job',
-      refId: job.id,
+      refId: dto.jobId,
     });
 
     if (consume.reused) {
@@ -157,8 +177,8 @@ export class CandidateInsightsService {
         data: {
           userId,
           entitlementId: entitlement.entitlementId,
-          jobId: job.id,
-          resumeId: resume.id,
+          jobId: dto.jobId,
+          resumeId: analysisResumeId,
           requestId: dto.requestId,
           overallScore: mapped.overallScore,
           matchLevel: mapped.matchLevel,

@@ -10,8 +10,16 @@ import { PrismaService } from '../../../database/prisma.service';
 import { PUBLIC_ROUTE_KEY, REQUIRED_ROLES_KEY, type AuthRole } from '../auth.constants';
 import type { AuthenticatedRequest } from '../auth.types';
 
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL_MS = 15 * 1000; // 15 seconds (prevents DB flooding while ensuring near-instant revocation)
 const roleCache = new Map<string, { assignedRoles: string[], status: string, expiresAt: number }>();
+
+export function invalidateUserRoleCache(userId: string): void {
+  roleCache.delete(userId);
+}
+
+export function clearAllUserRoleCache(): void {
+  roleCache.clear();
+}
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -30,18 +38,15 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const requiredRoles = this.reflector.getAllAndOverride<AuthRole[]>(
-      REQUIRED_ROLES_KEY,
-      [context.getHandler(), context.getClass()],
-    );
-
-    if (!requiredRoles?.length) {
-      return true;
-    }
-
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     if (!request.authUser) {
       throw new UnauthorizedException('Authenticated user is unavailable.');
+    }
+
+    const routeUrl = request.url ?? '';
+    // Allow initial bootstrap to execute without requiring pre-existing DB user record
+    if (routeUrl.includes('/auth/bootstrap')) {
+      return true;
     }
 
     const userId = request.authUser.id;
@@ -65,7 +70,7 @@ export class RolesGuard implements CanActivate {
       });
 
       if (!user) {
-        throw new ForbiddenException('The application profile has not been initialized.');
+        throw new ForbiddenException('Hồ sơ người dùng chưa được khởi tạo trên hệ thống.');
       }
 
       cacheEntry = {
@@ -77,15 +82,29 @@ export class RolesGuard implements CanActivate {
       roleCache.set(userId, cacheEntry);
     }
 
+    // CRITICAL P0 SECURITY ENFORCEMENT:
+    // Block any locked or suspended user on ANY authenticated endpoint!
     if (cacheEntry.status !== 'ACTIVE') {
-      throw new ForbiddenException(`This account is ${cacheEntry.status.toLowerCase()}.`);
+      throw new ForbiddenException(
+        `Tài khoản của bạn đang ở trạng thái ${cacheEntry.status.toLowerCase()} (bị khóa hoặc tạm ngưng hoạt động).`,
+      );
+    }
+
+    const requiredRoles = this.reflector.getAllAndOverride<AuthRole[]>(
+      REQUIRED_ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    // If no specific role is required, passing active status check is sufficient
+    if (!requiredRoles?.length) {
+      return true;
     }
 
     const assignedRoles = new Set(cacheEntry.assignedRoles);
 
     if (!requiredRoles.some((role) => assignedRoles.has(role))) {
       throw new ForbiddenException(
-        'You do not have permission to access this resource.',
+        'Bạn không có quyền truy cập tài nguyên này.',
       );
     }
 

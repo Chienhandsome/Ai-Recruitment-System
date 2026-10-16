@@ -7,6 +7,7 @@ import {
 } from '@prisma/client';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
+import { EvaluationPayloadBuilder } from '../evaluation/evaluation-payload.builder';
 import {
   ApplicationSortBy,
   SortOrder,
@@ -59,6 +60,14 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.updateStage(
@@ -107,6 +116,14 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -124,6 +141,14 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -176,6 +201,14 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.findAllForRecruiter('user-1', {
@@ -191,6 +224,11 @@ describe('ApplicationsService decision workflow', () => {
       page: 2,
       limit: 2,
       totalPages: 2,
+      features: {
+        advancedFilters: true,
+        aiRanking: true,
+        packageCode: 'HR_PREMIUM',
+      },
     });
   });
 
@@ -224,6 +262,14 @@ describe('ApplicationsService decision workflow', () => {
       prisma as never,
       {} as never,
       access as never,
+      {
+        getEffectiveEntitlement: jest.fn().mockResolvedValue({
+          packageCode: 'HR_PREMIUM',
+          aiRanking: true,
+          advancedFilters: true,
+        }),
+      } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.findMine('candidate-user-1', {

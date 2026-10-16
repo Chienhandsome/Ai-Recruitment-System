@@ -404,13 +404,24 @@ export function JobsWorkspace({
                             <option value="PAUSED">Tạm dừng</option>
                             <option value="CLOSED">Đóng</option>
                           </select>
+                          {job.status === "PAUSED" &&
+                            job.closeReason === "APPLICANT_CAP_REACHED" && (
+                              <div className="mt-1 flex items-start gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] font-semibold leading-snug text-amber-900">
+                                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                Đã đủ 100 ứng viên (gói Free) — tin đang ẩn với
+                                ứng viên. Nâng cấp HR Pro để mở lại không giới
+                                hạn.
+                              </div>
+                            )}
                           {job.status === 'CLOSED' && job.closeReason && (
                             <span className="text-[10px] font-bold text-slate-500">
                               {job.closeReason === 'QUOTA_REACHED'
                                 ? '• Đủ chỉ tiêu'
                                 : job.closeReason === 'EXPIRED'
                                   ? '• Hết hạn'
-                                  : '• Đóng thủ công'}
+                                  : job.closeReason === 'APPLICANT_CAP_REACHED'
+                                    ? '• Đủ giới hạn ứng viên Free'
+                                    : '• Đóng thủ công'}
                             </span>
                           )}
                         </div>

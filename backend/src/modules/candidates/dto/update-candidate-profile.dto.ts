@@ -162,6 +162,14 @@ export class UpdateCandidateProfileDto {
   @MaxLength(500)
   portfolioUrl?: string | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Cho phép hồ sơ xuất hiện trong kho CV công khai (Premium talent pool). Liên hệ vẫn bị ẩn cho đến khi HR mở khóa.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  isProfilePublic?: boolean;
+
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

@@ -6,7 +6,7 @@ import type {
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://ai-recruitment-system-test-deploy.onrender.com/api";
+  "http://localhost:3001/api";
 
 // Simple logger that only outputs in development
 const log = {

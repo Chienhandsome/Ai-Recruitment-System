@@ -2,10 +2,14 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../../database/prisma.service';
 import { UpdateRecruiterProfileDto } from './dto/update-recruiter-profile.dto';
 import { Prisma } from '@prisma/client';
+import { EntitlementsService } from '../billing/entitlements.service';
 
 @Injectable()
 export class RecruitersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly entitlements: EntitlementsService,
+  ) {}
 
   async getProfile(userId: string) {
     let profile = await this.prisma.recruiterProfile.findUnique({
@@ -184,6 +188,8 @@ export class RecruitersService {
   }
 
   async getDashboardAnalytics(userId: string, jobId?: string) {
+    await this.entitlements.assertRecruitmentStats(userId);
+
     const profile = await this.prisma.recruiterProfile.findUnique({
       where: { userId },
       select: { id: true, companyId: true },

@@ -13,6 +13,8 @@ import {
   LogOut,
   LogIn,
   UserPlus,
+  Crown,
+  Sparkles,
 } from 'lucide-react';
 import { CandidateNav } from '@/components/candidate/candidate-nav';
 import { UserMenu } from '@/components/candidate/user-menu';
@@ -24,12 +26,14 @@ interface CandidateHeaderProps {
   fullName: string | null;
   avatarUrl: string | null;
   isAuthenticated?: boolean;
+  packageCode?: string | null;
 }
 
 export function CandidateHeader({
   fullName,
   avatarUrl,
   isAuthenticated = false,
+  packageCode = null,
 }: CandidateHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const router = useRouter();
@@ -85,7 +89,11 @@ export function CandidateHeader({
             {isAuthenticated && fullName ? (
               <>
                 <NotificationBell />
-                <UserMenu fullName={fullName} avatarUrl={avatarUrl} />
+                <UserMenu
+                  fullName={fullName}
+                  avatarUrl={avatarUrl}
+                  packageCode={packageCode}
+                />
               </>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
@@ -116,12 +124,35 @@ export function CandidateHeader({
         <div className="border-t bg-surface px-4 py-4 sm:hidden animate-in slide-in-from-top-2 duration-200 shadow-xl">
           {isAuthenticated && fullName && (
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-slate-50 p-3 border border-slate-100">
-              <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
-                {fullName.charAt(0).toUpperCase()}
+              <div className="relative shrink-0">
+                <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                  {fullName.charAt(0).toUpperCase()}
+                </div>
+                {packageCode === 'CANDIDATE_PREMIUM' ? (
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-amber-500 text-white ring-2 ring-white"
+                    title="Gói Premium"
+                  >
+                    <Crown className="size-2.5" strokeWidth={2.5} />
+                  </span>
+                ) : packageCode === 'CANDIDATE_PRO' ? (
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-sky-500 text-white ring-2 ring-white"
+                    title="Gói Pro"
+                  >
+                    <Sparkles className="size-2.5" strokeWidth={2.5} />
+                  </span>
+                ) : null}
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold text-slate-900">{fullName}</p>
-                <p className="text-xs text-slate-500">Ứng viên</p>
+                <p className="text-xs text-slate-500">
+                  {packageCode === 'CANDIDATE_PREMIUM'
+                    ? 'Ứng viên · Premium'
+                    : packageCode === 'CANDIDATE_PRO'
+                      ? 'Ứng viên · Pro'
+                      : 'Ứng viên'}
+                </p>
               </div>
             </div>
           )}

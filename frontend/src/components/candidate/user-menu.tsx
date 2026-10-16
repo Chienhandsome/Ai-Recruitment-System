@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { User, LogOut } from "lucide-react"
+import { Crown, LogOut, Sparkles, User } from "lucide-react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/client"
 interface UserMenuProps {
   fullName: string
   avatarUrl: string | null
+  packageCode?: string | null
 }
 
 function getInitials(name: string): string {
@@ -30,9 +31,29 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
-export function UserMenu({ fullName, avatarUrl }: UserMenuProps) {
+function packageBadge(packageCode?: string | null) {
+  if (packageCode === "CANDIDATE_PREMIUM") {
+    return {
+      label: "Premium",
+      icon: Crown,
+      className: "bg-amber-500 text-white ring-amber-200",
+    }
+  }
+  if (packageCode === "CANDIDATE_PRO") {
+    return {
+      label: "Pro",
+      icon: Sparkles,
+      className: "bg-sky-500 text-white ring-sky-200",
+    }
+  }
+  return null
+}
+
+export function UserMenu({ fullName, avatarUrl, packageCode }: UserMenuProps) {
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = React.useState(false)
+  const badge = packageBadge(packageCode)
+  const BadgeIcon = badge?.icon
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -49,12 +70,23 @@ export function UserMenu({ fullName, avatarUrl }: UserMenuProps) {
           className="flex items-center gap-2 rounded-full p-1 hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           aria-label="Menu người dùng"
         >
-          <Avatar className="h-9 w-9">
-            {avatarUrl ? (
-              <AvatarImage src={avatarUrl} alt={fullName} />
-            ) : null}
-            <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
-          </Avatar>
+          <span className="relative inline-flex">
+            <Avatar className="h-9 w-9">
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt={fullName} />
+              ) : null}
+              <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
+            </Avatar>
+            {badge && BadgeIcon && (
+              <span
+                className={`absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full ring-2 ring-white ${badge.className}`}
+                title={`Gói ${badge.label}`}
+                aria-hidden
+              >
+                <BadgeIcon className="size-2.5" strokeWidth={2.5} />
+              </span>
+            )}
+          </span>
           <span className="text-sm font-medium text-foreground hidden sm:inline-block max-w-[150px] truncate">
             {fullName}
           </span>
@@ -65,7 +97,9 @@ export function UserMenu({ fullName, avatarUrl }: UserMenuProps) {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{fullName}</p>
-            <p className="text-xs text-muted-foreground">Ứng viên</p>
+            <p className="text-xs text-muted-foreground">
+              {badge ? `Ứng viên · ${badge.label}` : "Ứng viên"}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -73,6 +107,16 @@ export function UserMenu({ fullName, avatarUrl }: UserMenuProps) {
           <Link href="/candidate/profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             Hồ sơ
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/candidate/billing" className="flex items-center gap-2">
+            {BadgeIcon ? (
+              <BadgeIcon className="h-4 w-4" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            Gói dịch vụ
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

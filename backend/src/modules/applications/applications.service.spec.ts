@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ApplicationsService } from './applications.service';
+import { EvaluationPayloadBuilder } from '../evaluation/evaluation-payload.builder';
 
 const now = new Date('2026-08-09T10:00:00.000Z');
 
@@ -146,23 +147,40 @@ function createDependencies() {
     application: {
       findUnique: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockResolvedValue({ id: 'application-1' }),
+      count: jest.fn().mockResolvedValue(0),
     },
-    jobPosting: { findFirst: jest.fn().mockResolvedValue(job) },
+    jobPosting: {
+      findFirst: jest.fn().mockResolvedValue({
+        ...job,
+        recruiter: { userId: 'recruiter-user-1' },
+      }),
+    },
   };
   const evaluationService = {
     dispatchNewApplication: jest.fn().mockResolvedValue(true),
     markForRetry: jest.fn().mockResolvedValue(undefined),
   };
-  return { prisma, evaluationService };
+  const entitlements = {
+    getEffectiveEntitlement: jest.fn().mockResolvedValue({
+      packageCode: 'HR_PRO',
+      aiRanking: true,
+      advancedFilters: true,
+    }),
+    getApplicantCapForJobOwner: jest.fn().mockResolvedValue(null),
+    hideJobIfApplicantCapReached: jest.fn().mockResolvedValue(null),
+  };
+  return { prisma, evaluationService, entitlements };
 }
 
 describe('ApplicationsService', () => {
   it('creates an application from an owned parsed resume and immutable snapshot', async () => {
-    const { prisma, evaluationService } = createDependencies();
+    const { prisma, evaluationService, entitlements } = createDependencies();
     const service = new ApplicationsService(
       prisma as never,
       evaluationService as never,
       {} as never,
+      entitlements as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.applyForJob(
@@ -241,12 +259,14 @@ describe('ApplicationsService', () => {
   });
 
   it('rejects a resume that is not owned by the current candidate', async () => {
-    const { prisma, evaluationService } = createDependencies();
+    const { prisma, evaluationService, entitlements } = createDependencies();
     prisma.resume.findFirst.mockResolvedValue(null);
     const service = new ApplicationsService(
       prisma as never,
       evaluationService as never,
       {} as never,
+      entitlements as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -260,12 +280,14 @@ describe('ApplicationsService', () => {
   });
 
   it('rejects jobs that are not published or are expired', async () => {
-    const { prisma, evaluationService } = createDependencies();
+    const { prisma, evaluationService, entitlements } = createDependencies();
     prisma.jobPosting.findFirst.mockResolvedValue(null);
     const service = new ApplicationsService(
       prisma as never,
       evaluationService as never,
       {} as never,
+      entitlements as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -275,7 +297,7 @@ describe('ApplicationsService', () => {
   });
 
   it('maps a concurrent unique-constraint race to HTTP 409', async () => {
-    const { prisma, evaluationService } = createDependencies();
+    const { prisma, evaluationService, entitlements } = createDependencies();
     prisma.application.create.mockRejectedValue(
       new Prisma.PrismaClientKnownRequestError('duplicate application', {
         code: 'P2002',
@@ -286,6 +308,8 @@ describe('ApplicationsService', () => {
       prisma as never,
       evaluationService as never,
       {} as never,
+      entitlements as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -295,12 +319,14 @@ describe('ApplicationsService', () => {
   });
 
   it('returns a truthful retry status when the first publish fails', async () => {
-    const { prisma, evaluationService } = createDependencies();
+    const { prisma, evaluationService, entitlements } = createDependencies();
     evaluationService.dispatchNewApplication.mockResolvedValue(false);
     const service = new ApplicationsService(
       prisma as never,
       evaluationService as never,
       {} as never,
+      entitlements as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     const result = await service.applyForJob(
@@ -338,6 +364,10 @@ describe('ApplicationsService', () => {
       prisma as never,
       {} as never,
       accessService as never,
+      {
+        getEffectiveEntitlement: jest.fn(),
+      } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(
@@ -383,6 +413,10 @@ describe('ApplicationsService', () => {
       prisma as never,
       {} as never,
       accessService as never,
+      {
+        getEffectiveEntitlement: jest.fn(),
+      } as never,
+      new EvaluationPayloadBuilder() as never,
     );
 
     await expect(

@@ -17,6 +17,11 @@ import {
   Sparkles,
   AlertTriangle,
   Loader2,
+  FileText,
+  FileCheck,
+  ArrowRight,
+  ShieldAlert,
+  ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -24,6 +29,12 @@ import {
   acceptOffer,
   declineOffer,
 } from '@/lib/offer-api';
+import {
+  type ContractData,
+  getContractByApplication,
+} from '@/lib/contract-api';
+import { CandidateContractReviewModal } from '@/components/candidate/contracts/CandidateContractReviewModal';
+import { ReportDisputeModal } from '@/components/common/disputes/ReportDisputeModal';
 
 interface CandidateOfferCardProps {
   offer: OfferData;
@@ -46,6 +57,31 @@ export function CandidateOfferCard({
   const [declineReason, setDeclineReason] = useState('SALARY_NOT_MATCH');
   const [declineNote, setDeclineNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const [contract, setContract] = useState<ContractData | null>(null);
+  const [loadingContract, setLoadingContract] = useState(false);
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+
+  const loadContract = React.useCallback(async () => {
+    if (offer.status === 'ACCEPTED' && offer.applicationId && token) {
+      setLoadingContract(true);
+      try {
+        const res = await getContractByApplication(token, offer.applicationId);
+        if (res?.contract) {
+          setContract(res.contract);
+        }
+      } catch {
+        // silent fail
+      } finally {
+        setLoadingContract(false);
+      }
+    }
+  }, [offer.status, offer.applicationId, token]);
+
+  React.useEffect(() => {
+    loadContract();
+  }, [loadContract]);
 
   const isExpired = new Date() > new Date(offer.expiresAt);
   const startDateStr = new Date(offer.startDate).toLocaleDateString('vi-VN', {
@@ -120,8 +156,121 @@ export function CandidateOfferCard({
               <span>•</span>
               <span>Ngày onboard: <strong>{startDateStr}</strong></span>
             </div>
+
+            {/* Contract Section */}
+            <div className="mt-4 pt-4 border-t border-emerald-200/60">
+              {contract ? (
+                <div className="rounded-xl border border-blue-200 bg-white p-4 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                        <FileText className="size-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xs font-bold text-slate-900">
+                            Hợp đồng lao động: {contract.contractNumber}
+                          </h4>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-2xs font-bold ${
+                              contract.status === 'SIGNED'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : contract.status === 'PENDING_REVIEW'
+                                ? 'bg-amber-100 text-amber-800 animate-pulse'
+                                : contract.status === 'REVISION_REQUESTED'
+                                ? 'bg-rose-100 text-rose-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }`}
+                          >
+                            {contract.status === 'SIGNED'
+                              ? 'ĐÃ KÝ KẾT'
+                              : contract.status === 'PENDING_REVIEW'
+                              ? 'CHỜ BẠN DUYỆT'
+                              : contract.status === 'REVISION_REQUESTED'
+                              ? 'ĐANG YÊU CẦU SỬA'
+                              : contract.status === 'APPROVED'
+                              ? 'ĐÃ THỐNG NHẤT'
+                              : 'BẢN NHÁP'}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-2xs text-slate-500">
+                          {contract.status === 'PENDING_REVIEW'
+                            ? 'Nhà tuyển dụng đã gửi bản dự thảo hợp đồng. Vui lòng xem xét các điều khoản.'
+                            : contract.status === 'SIGNED'
+                            ? 'Hợp đồng lao động đã có hiệu lực chính thức.'
+                            : contract.status === 'REVISION_REQUESTED'
+                            ? `Bạn đã gửi phản hồi: "${contract.latestRevisionNote || 'Đang chờ HR cập nhật'}"`
+                            : 'Điều khoản đã được ghi nhận trên hệ thống.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowContractModal(true)}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 shrink-0"
+                    >
+                      <FileCheck className="size-3.5" />
+                      {contract.status === 'PENDING_REVIEW'
+                        ? 'Xem xét & Ký hợp đồng'
+                        : 'Xem chi tiết hợp đồng'}
+                      <ArrowRight className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between rounded-xl border border-dashed border-emerald-300 bg-emerald-100/30 p-3 text-xs text-emerald-900">
+                  <span className="flex items-center gap-2">
+                    <FileText className="size-4 text-emerald-700" />
+                    Nhà tuyển dụng đang soạn thảo bản Hợp đồng lao động chính thức cho bạn...
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Transparency & Dispute Action */}
+            <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-3 border-t border-emerald-200/60 text-2xs text-slate-500">
+              <span className="flex items-center gap-1.5 text-emerald-800">
+                <ShieldCheck className="size-3.5 text-blue-600 shrink-0" />
+                Hợp đồng & cam kết tuân thủ Bộ luật Lao động 2019 và Tiêu chuẩn tuyển dụng minh bạch.
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowDisputeModal(true)}
+                className="inline-flex items-center gap-1 font-bold text-rose-600 hover:text-rose-700 hover:underline shrink-0"
+              >
+                <ShieldAlert className="size-3.5" />
+                Khiếu nại / Báo cáo vi phạm
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Contract Review Modal */}
+        {contract && (
+          <CandidateContractReviewModal
+            isOpen={showContractModal}
+            onClose={() => setShowContractModal(false)}
+            token={token}
+            contract={contract}
+            candidateName={offer.contactName || 'Ứng viên'}
+            onSuccess={async () => {
+              await loadContract();
+              if (onOfferResponded) await onOfferResponded();
+            }}
+          />
+        )}
+
+        {/* Dispute Modal */}
+        <ReportDisputeModal
+          isOpen={showDisputeModal}
+          onClose={() => setShowDisputeModal(false)}
+          token={token}
+          applicationId={offer.applicationId}
+          contractId={contract?.id}
+          jobTitle={jobTitle}
+          companyName={companyName}
+        />
       </div>
     );
   }
@@ -481,6 +630,32 @@ export function CandidateOfferCard({
           </div>
         </div>
       )}
+      {/* Additional transparency footer in pending state */}
+      <div className="mt-3 flex items-center justify-between text-2xs text-slate-400">
+        <span className="flex items-center gap-1">
+          <ShieldCheck className="size-3.5 text-blue-500" />
+          Mọi quyết định và tiến trình offer đều được lưu vết bảo vệ hai bên.
+        </span>
+        <button
+          type="button"
+          onClick={() => setShowDisputeModal(true)}
+          className="inline-flex items-center gap-1 font-semibold text-slate-500 hover:text-rose-600 transition-colors"
+        >
+          <ShieldAlert className="size-3.5" />
+          Khiếu nại offer này
+        </button>
+      </div>
+
+      {/* Dispute Modal for pending state */}
+      <ReportDisputeModal
+        isOpen={showDisputeModal}
+        onClose={() => setShowDisputeModal(false)}
+        token={token}
+        applicationId={offer.applicationId}
+        contractId={contract?.id}
+        jobTitle={jobTitle}
+        companyName={companyName}
+      />
     </div>
   );
 }

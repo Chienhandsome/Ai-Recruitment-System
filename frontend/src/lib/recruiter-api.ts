@@ -48,7 +48,7 @@ export interface JobPostingData {
   expiryDate?: string;
   targetHires?: number;
   autoCloseOnQuota?: boolean;
-  closeReason?: 'QUOTA_REACHED' | 'EXPIRED' | 'MANUAL_HR' | null;
+  closeReason?: 'QUOTA_REACHED' | 'EXPIRED' | 'MANUAL_HR' | 'APPLICANT_CAP_REACHED' | null;
   closedAt?: string | null;
   hiredCount?: number;
   createdAt: string;

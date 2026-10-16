@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -38,39 +39,20 @@ import {
 import { QueryMyApplicationsDto } from './dto/query-my-applications.dto';
 import { UpdateApplicationStageDto } from './dto/update-application-stage.dto';
 import {
-  APPLICATION_SNAPSHOT_VERSION,
-  type ApplicationProfileSnapshot,
   toPrismaJson,
 } from './application-evaluation.snapshot';
+import { EntitlementsService } from '../billing/entitlements.service';
+import { PackageAudience } from '@prisma/client';
+import { EvaluationPayloadBuilderService } from '../evaluation/evaluation-payload.builder.service';
+import {
+  evaluationCandidateInclude,
+  evaluationJobInclude,
+  evaluationResumeSelect,
+} from '../evaluation/evaluation-payload.builder';
 
-const candidateProfileInclude = {
-  workExperiences: true,
-  educations: true,
-  projects: true,
-  certificates: true,
-  candidateSkills: { include: { skill: true } },
-} satisfies Prisma.CandidateProfileInclude;
-
-const jobEvaluationInclude = {
-  jobSkills: { include: { skill: true } },
-  jobCertificates: true,
-} satisfies Prisma.JobPostingInclude;
-
-const resumeSnapshotSelect = {
-  id: true,
-  candidateId: true,
-  source: true,
-  originalFileName: true,
-  mimeType: true,
-  fileSizeBytes: true,
-  parsingStatus: true,
-  createdAt: true,
-  parsedData: {
-    select: {
-      languageData: true,
-    },
-  },
-} satisfies Prisma.ResumeSelect;
+const candidateProfileInclude = evaluationCandidateInclude;
+const jobEvaluationInclude = evaluationJobInclude;
+const resumeSnapshotSelect = evaluationResumeSelect;
 
 const latestAiResultSelect = {
   id: true,
@@ -161,8 +143,10 @@ export class ApplicationsService {
     private readonly prisma: PrismaService,
     private readonly evaluationService: ApplicationEvaluationService,
     private readonly accessService: ApplicationAccessService,
+    private readonly entitlements: EntitlementsService,
+    private readonly payloadBuilder: EvaluationPayloadBuilderService,
     private readonly notificationsService?: NotificationsService,
-  ) { }
+  ) {}
 
   async applyForJob(
     userId: string,
@@ -221,12 +205,32 @@ export class ApplicationsService {
         status: JobStatus.PUBLISHED,
         OR: [{ expiryDate: null }, { expiryDate: { gt: now } }],
       },
-      include: jobEvaluationInclude,
+      include: {
+        ...jobEvaluationInclude,
+        recruiter: { select: { userId: true } },
+      },
     });
     if (!job) {
       throw new NotFoundException(
         'Job posting is not published or is no longer accepting applications.',
       );
+    }
+
+    const applicantCap =
+      await this.entitlements.getApplicantCapForJobOwner(job.recruiter.userId);
+    if (applicantCap != null) {
+      const currentApplicants = await this.prisma.application.count({
+        where: { jobId: job.id },
+      });
+      if (currentApplicants >= applicantCap) {
+        await this.entitlements.hideJobIfApplicantCapReached(
+          job.id,
+          job.recruiter.userId,
+        );
+        throw new ForbiddenException(
+          `Tin tuyển dụng đã đạt giới hạn ${applicantCap} ứng viên và tạm ẩn với ứng viên.`,
+        );
+      }
     }
 
     const profileSnapshot = this.buildProfileSnapshot(
@@ -280,12 +284,18 @@ export class ApplicationsService {
       );
     }
 
+    const capped = await this.entitlements.hideJobIfApplicantCapReached(
+      job.id,
+      job.recruiter.userId,
+    );
+
     return {
       message: published
         ? 'Ứng tuyển thành công. Đang phân tích hồ sơ...'
         : 'Ứng tuyển thành công. Đánh giá AI đã được lên lịch thử lại.',
       applicationId: application.id,
       evaluationStatus: published ? 'QUEUED' : 'RETRY_SCHEDULED',
+      ...(capped ? { jobHiddenDueToApplicantCap: true as const } : {}),
     };
   }
 
@@ -293,10 +303,39 @@ export class ApplicationsService {
     userId: string,
     query: QueryRecruiterApplicationsDto,
   ) {
+    const entitlement = await this.entitlements.getEffectiveEntitlement(
+      userId,
+      PackageAudience.EMPLOYER,
+    );
+    const wantsAdvancedFilters =
+      query.minScore !== undefined || query.maxScore !== undefined;
+    const wantsAiSort = query.sortBy === ApplicationSortBy.AI_SCORE;
+
+    if (wantsAdvancedFilters && !entitlement.advancedFilters) {
+      throw new ForbiddenException(
+        'Bộ lọc ứng viên nâng cao (điểm AI) yêu cầu gói HR Pro hoặc Premium.',
+      );
+    }
+    if (wantsAiSort && !entitlement.aiRanking) {
+      throw new ForbiddenException(
+        'Xếp hạng CV theo AI yêu cầu gói HR Pro hoặc Premium.',
+      );
+    }
+
+    // Free plan: chronological list only (still can view applicants).
+    const effectiveQuery: QueryRecruiterApplicationsDto = !entitlement.aiRanking
+      ? {
+          ...query,
+          sortBy: ApplicationSortBy.APPLIED_AT,
+          minScore: undefined,
+          maxScore: undefined,
+        }
+      : query;
+
     if (
-      query.minScore !== undefined &&
-      query.maxScore !== undefined &&
-      query.minScore > query.maxScore
+      effectiveQuery.minScore !== undefined &&
+      effectiveQuery.maxScore !== undefined &&
+      effectiveQuery.minScore > effectiveQuery.maxScore
     ) {
       throw new BadRequestException(
         'minScore must be less than or equal to maxScore.',
@@ -307,26 +346,28 @@ export class ApplicationsService {
     const where: Prisma.ApplicationWhereInput = {
       AND: [
         scope,
-        query.jobId ? { jobId: query.jobId } : {},
-        query.stage ? { currentStage: query.stage } : {},
-        query.hrDecision ? { hrDecision: query.hrDecision } : {},
-        query.processingStatus
-          ? { processingStatus: query.processingStatus }
+        effectiveQuery.jobId ? { jobId: effectiveQuery.jobId } : {},
+        effectiveQuery.stage ? { currentStage: effectiveQuery.stage } : {},
+        effectiveQuery.hrDecision
+          ? { hrDecision: effectiveQuery.hrDecision }
           : {},
-        query.search?.trim()
+        effectiveQuery.processingStatus
+          ? { processingStatus: effectiveQuery.processingStatus }
+          : {},
+        effectiveQuery.search?.trim()
           ? {
             candidate: {
               user: {
                 OR: [
                   {
                     fullName: {
-                      contains: query.search.trim(),
+                      contains: effectiveQuery.search.trim(),
                       mode: 'insensitive',
                     },
                   },
                   {
                     email: {
-                      contains: query.search.trim(),
+                      contains: effectiveQuery.search.trim(),
                       mode: 'insensitive',
                     },
                   },
@@ -338,13 +379,16 @@ export class ApplicationsService {
       ],
     };
 
-    const hasScoreFilter = query.minScore !== undefined || query.maxScore !== undefined;
-    const isScoreSort = query.sortBy === ApplicationSortBy.AI_SCORE;
+    const hasScoreFilter =
+      effectiveQuery.minScore !== undefined ||
+      effectiveQuery.maxScore !== undefined;
+    const isScoreSort = effectiveQuery.sortBy === ApplicationSortBy.AI_SCORE;
 
     if (!hasScoreFilter && !isScoreSort) {
-      const sortDirection = query.sortOrder === SortOrder.ASC ? 'asc' : 'desc';
+      const sortDirection =
+        effectiveQuery.sortOrder === SortOrder.ASC ? 'asc' : 'desc';
       const orderBy =
-        query.sortBy === ApplicationSortBy.UPDATED_AT
+        effectiveQuery.sortBy === ApplicationSortBy.UPDATED_AT
           ? { updatedAt: sortDirection as Prisma.SortOrder }
           : { appliedAt: sortDirection as Prisma.SortOrder };
 
@@ -354,18 +398,25 @@ export class ApplicationsService {
           where,
           select: recruiterApplicationListSelect,
           orderBy,
-          skip: (query.page - 1) * query.limit,
-          take: query.limit,
+          skip: (effectiveQuery.page - 1) * effectiveQuery.limit,
+          take: effectiveQuery.limit,
         }),
       ]);
 
       return {
-        data: pageRows.map((row) => this.toRecruiterListItem(row)),
+        data: pageRows.map((row) =>
+          this.toRecruiterListItem(row, entitlement.aiRanking),
+        ),
         meta: {
           total,
-          page: query.page,
-          limit: query.limit,
-          totalPages: Math.ceil(total / query.limit),
+          page: effectiveQuery.page,
+          limit: effectiveQuery.limit,
+          totalPages: Math.ceil(total / effectiveQuery.limit),
+          features: {
+            aiRanking: entitlement.aiRanking,
+            advancedFilters: entitlement.advancedFilters,
+            packageCode: entitlement.packageCode,
+          },
         },
       };
     }
@@ -377,30 +428,48 @@ export class ApplicationsService {
 
     const filtered = rows.filter((row) => {
       const score = this.latestScore(row);
-      if (query.minScore !== undefined && (score ?? -1) < query.minScore) {
+      if (
+        effectiveQuery.minScore !== undefined &&
+        (score ?? -1) < effectiveQuery.minScore
+      ) {
         return false;
       }
-      if (query.maxScore !== undefined && (score ?? 101) > query.maxScore) {
+      if (
+        effectiveQuery.maxScore !== undefined &&
+        (score ?? 101) > effectiveQuery.maxScore
+      ) {
         return false;
       }
       return true;
     });
 
     filtered.sort((left, right) =>
-      this.compareApplicationRows(left, right, query.sortBy, query.sortOrder),
+      this.compareApplicationRows(
+        left,
+        right,
+        effectiveQuery.sortBy,
+        effectiveQuery.sortOrder,
+      ),
     );
 
     const total = filtered.length;
-    const start = (query.page - 1) * query.limit;
-    const pageRows = filtered.slice(start, start + query.limit);
+    const start = (effectiveQuery.page - 1) * effectiveQuery.limit;
+    const pageRows = filtered.slice(start, start + effectiveQuery.limit);
 
     return {
-      data: pageRows.map((row) => this.toRecruiterListItem(row)),
+      data: pageRows.map((row) =>
+        this.toRecruiterListItem(row, entitlement.aiRanking),
+      ),
       meta: {
         total,
-        page: query.page,
-        limit: query.limit,
-        totalPages: Math.ceil(total / query.limit),
+        page: effectiveQuery.page,
+        limit: effectiveQuery.limit,
+        totalPages: Math.ceil(total / effectiveQuery.limit),
+        features: {
+          aiRanking: entitlement.aiRanking,
+          advancedFilters: entitlement.advancedFilters,
+          packageCode: entitlement.packageCode,
+        },
       },
     };
   }
@@ -1012,7 +1081,10 @@ export class ApplicationsService {
     return sortOrder === SortOrder.ASC ? comparison : -comparison;
   }
 
-  private toRecruiterListItem(row: RecruiterApplicationListRecord) {
+  private toRecruiterListItem(
+    row: RecruiterApplicationListRecord,
+    includeAiRanking = true,
+  ) {
     const latest = row.aiMatchingResults[0];
     return {
       id: row.id,
@@ -1025,17 +1097,19 @@ export class ApplicationsService {
       currentStage: row.currentStage,
       hrDecision: row.hrDecision,
       processingStatus: row.processingStatus,
-      latestAiResult: latest
-        ? {
-          overallScore: Number(latest.overallScore),
-          matchLevel: latest.matchLevel,
-          confidenceScore:
-            latest.confidenceScore === null
-              ? null
-              : Number(latest.confidenceScore),
-          version: latest.version,
-        }
-        : null,
+      latestAiResult:
+        includeAiRanking && latest
+          ? {
+              overallScore: Number(latest.overallScore),
+              matchLevel: latest.matchLevel,
+              confidenceScore:
+                latest.confidenceScore === null
+                  ? null
+                  : Number(latest.confidenceScore),
+              version: latest.version,
+            }
+          : null,
+      aiRankingLocked: !includeAiRanking,
       appliedAt: row.appliedAt,
       updatedAt: row.updatedAt,
       allowedTransitions: allowedApplicationTransitions(row.currentStage),
@@ -1065,164 +1139,13 @@ export class ApplicationsService {
     resume: ResumeForApplication,
     job: JobForApplication,
     capturedAt: Date,
-  ): ApplicationProfileSnapshot {
-    const parseWeight = (val: unknown, fallback: number): number => {
-      if (val !== null && val !== undefined && !Number.isNaN(Number(val))) {
-        const num = Number(val);
-        if (num >= 0 && num <= 100) return num;
-      }
-      return fallback;
-    };
-    const weights = {
-      skills: parseWeight(job.skillWeight, 40),
-      experience: parseWeight(job.experienceWeight, 30),
-      education: parseWeight(job.educationWeight, 15),
-      other: parseWeight(job.otherWeight, 15),
-    };
-
-    return {
-      schemaVersion: APPLICATION_SNAPSHOT_VERSION,
-      capturedAt: capturedAt.toISOString(),
-      candidateIdentity: {
-        id: profile.id,
-        userId: profile.userId,
-        fullName: profile.fullName,
-        email: profile.email,
-        phone: profile.phone,
-      },
-      resume: {
-        id: resume.id,
-        source: resume.source,
-        originalFileName: resume.originalFileName,
-        mimeType: resume.mimeType,
-        fileSizeBytes: resume.fileSizeBytes,
-        parsingStatus: resume.parsingStatus,
-        createdAt: resume.createdAt.toISOString(),
-      },
-      evaluationInput: {
-        candidate_profile: {
-          profile: {
-            id: profile.id,
-            candidate_user_id: profile.userId,
-            desired_title: profile.desiredTitle,
-            professional_summary: profile.professionalSummary,
-            github_url: profile.githubUrl,
-            linkedin_url: profile.linkedinUrl,
-            portfolio_url: profile.portfolioUrl,
-            address: profile.address,
-            created_at: profile.createdAt.toISOString(),
-            updated_at: profile.updatedAt.toISOString(),
-          },
-          work_experiences: profile.workExperiences.map((experience) => ({
-            id: experience.id,
-            candidate_profile_id: profile.id,
-            company_name: experience.companyName,
-            position_title: experience.positionTitle,
-            start_date: experience.startDate.toISOString(),
-            end_date: experience.endDate?.toISOString() ?? null,
-            is_current: experience.isCurrent,
-            description: experience.description,
-            achievements: experience.achievements,
-          })),
-          educations: profile.educations.map((education) => ({
-            id: education.id,
-            candidate_profile_id: profile.id,
-            school_name: education.schoolName,
-            major: education.major,
-            degree: education.degree,
-            start_date: education.startDate?.toISOString() ?? null,
-            end_date: education.endDate?.toISOString() ?? null,
-            description: education.description,
-          })),
-          projects: profile.projects.map((project) => ({
-            id: project.id,
-            candidate_profile_id: profile.id,
-            project_name: project.projectName,
-            project_role: project.projectRole,
-            description: project.description,
-            technologies: this.toStringArray(project.technologies),
-            project_url: project.projectUrl,
-            start_date: project.startDate?.toISOString() ?? null,
-            end_date: project.endDate?.toISOString() ?? null,
-          })),
-          certificates: profile.certificates.map((certificate) => ({
-            certificate_name: certificate.certificateName,
-            issuing_organization: certificate.issuingOrganization,
-            issue_date: certificate.issueDate?.toISOString() ?? null,
-            expiry_date: certificate.expiryDate?.toISOString() ?? null,
-            credential_url: certificate.credentialUrl,
-          })),
-          skills: profile.candidateSkills.map((candidateSkill) => ({
-            candidate_profile_id: profile.id,
-            skill_id: candidateSkill.skillId,
-            skill_name: candidateSkill.skill.name,
-            normalized_name: candidateSkill.skill.normalizedName,
-            proficiency_level: candidateSkill.proficiencyLevel,
-            is_primary: candidateSkill.isPrimary,
-            source: candidateSkill.source,
-          })),
-          languages: Array.isArray(resume.parsedData?.languageData)
-            ? (
-              resume.parsedData.languageData as Array<{
-                language?: string;
-                proficiency?: string;
-              }>
-            ).map((l) => ({
-              language: l.language ?? '',
-              proficiency: l.proficiency ?? null,
-            }))
-            : [],
-        },
-        job: {
-          id: job.id,
-          title: job.title,
-          employment_type: job.employmentType,
-          work_mode: job.workingModel,
-          salary_min: job.minSalary === null ? null : Number(job.minSalary),
-          salary_max: job.maxSalary === null ? null : Number(job.maxSalary),
-          location: job.location,
-          required_experience_years: job.requiredExperienceYears ?? 0,
-          experience_level: job.experienceLevel,
-          level_requirement_mode: job.levelRequirementMode,
-          evaluation_date: capturedAt.toISOString(),
-          description: job.description,
-          requirements: job.requirements,
-          benefits: job.benefits,
-          status: job.status,
-          published_at: job.publishedAt?.toISOString() ?? null,
-          created_at: job.createdAt.toISOString(),
-          updated_at: job.updatedAt.toISOString(),
-          closed_at: job.closedAt?.toISOString() ?? null,
-          required_skills: job.jobSkills.map((jobSkill) => ({
-            job_id: job.id,
-            skill_id: jobSkill.skillId,
-            skill_name: jobSkill.skill.name,
-            normalized_name: jobSkill.skill.normalizedName,
-            is_mandatory: jobSkill.requirementType === 'MANDATORY',
-            minimum_level: jobSkill.minimumProficiency ?? 'BEGINNER',
-          })),
-          required_certificates: job.jobCertificates.map((certificate) => ({
-            certificate_name: certificate.certificateName,
-            is_mandatory: certificate.requirementType === 'MANDATORY',
-          })),
-          ai_weights_config: weights,
-        },
-        weights,
-      },
-    };
-  }
-
-  private toStringArray(value: Prisma.JsonValue | null): string[] {
-    if (Array.isArray(value)) {
-      return value.filter((item): item is string => typeof item === 'string');
-    }
-    if (typeof value === 'string') {
-      return value
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean);
-    }
-    return [];
+  ) {
+    return this.payloadBuilder.buildProfileSnapshot(
+      profile,
+      resume,
+      job,
+      capturedAt,
+    );
   }
 
   private errorMessage(error: unknown): string {

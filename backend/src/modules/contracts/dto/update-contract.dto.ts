@@ -66,16 +66,16 @@ export class UpdateContractDto {
   @IsOptional()
   workingHours?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Probation period in months (Max 6 months per Art. 25 Labor Code 2019)' })
   @IsInt()
   @Min(0)
-  @Max(12)
+  @Max(6)
   @IsOptional()
   probationPeriodMonths?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Probation salary rate (percentage min 85% per Art. 26 Labor Code 2019)' })
   @IsInt()
-  @Min(50)
+  @Min(85)
   @Max(100)
   @IsOptional()
   probationSalaryRate?: number;

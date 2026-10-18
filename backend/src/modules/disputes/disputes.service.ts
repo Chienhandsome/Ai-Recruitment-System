@@ -19,7 +19,7 @@ export class DisputesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   private generateDisputeNumber(): string {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');

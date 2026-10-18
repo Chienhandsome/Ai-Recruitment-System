@@ -203,14 +203,15 @@ export class ContractsController {
   }
 
   @Get(':id/scan-page/:pageNumber')
-  @Public()
+  @Roles('RECRUITER', 'CANDIDATE', 'ADMIN')
   @ApiOperation({ summary: 'Serve an individual page image of a scanned contract' })
   getScanPage(
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Param('pageNumber', ParseIntPipe) pageNumber: number,
     @Res() res: Response,
   ) {
-    return this.contractsService.streamScanPage(id, pageNumber, res);
+    return this.contractsService.streamScanPage(user.id, id, pageNumber, res);
   }
 
   @Post(':id/request-otp')

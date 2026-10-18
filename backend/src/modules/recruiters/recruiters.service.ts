@@ -560,6 +560,7 @@ export class RecruitersService {
       todayInterviewsRaw,
       upcomingInterviewsRaw,
       actionJobsRaw,
+      pendingCandidatesRaw,
     ] = await Promise.all([
       // 1. Open Jobs Count
       this.prisma.jobPosting.count({
@@ -704,6 +705,67 @@ export class RecruitersService {
         },
         orderBy: { createdAt: 'desc' },
       }),
+
+      // Pending Candidate Actions for Work Queue
+      this.prisma.application.findMany({
+        where: {
+          job: jobWhere,
+          OR: [
+            {
+              aiInterviewSessions: {
+                some: { status: 'COMPLETED' },
+              },
+              hrDecision: 'PENDING',
+            },
+            {
+              interviews: {
+                some: {
+                  candidateResponse: 'RESCHEDULE_REQUESTED',
+                  status: 'SCHEDULED',
+                },
+              },
+            },
+            {
+              currentStage: { in: ['RECEIVED', 'SCREENING', 'SHORTLISTED'] },
+              hrDecision: 'PENDING',
+            },
+          ],
+        },
+        take: 10,
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          job: { select: { id: true, title: true, jobCode: true } },
+          candidate: {
+            select: {
+              id: true,
+              fullName: true,
+              user: {
+                select: {
+                  fullName: true,
+                  avatarUrl: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          aiMatchingResults: {
+            orderBy: { version: 'desc' },
+            take: 1,
+            select: { overallScore: true, matchLevel: true },
+          },
+          aiInterviewSessions: {
+            where: { status: 'COMPLETED' },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+            select: { id: true, transcript: true, completedAt: true },
+          },
+          interviews: {
+            where: { candidateResponse: 'RESCHEDULE_REQUESTED', status: 'SCHEDULED' },
+            take: 1,
+            select: { id: true, scheduledAt: true, candidateNotes: true },
+          },
+        },
+      }),
     ]);
 
     // Format action queue
@@ -808,6 +870,51 @@ export class RecruitersService {
       };
     };
 
+    const pendingCandidateActions = pendingCandidatesRaw.map((app) => {
+      const candUser = app.candidate?.user;
+      const latestAi = app.aiMatchingResults?.[0];
+      const aiScore = latestAi ? Math.round(Number(latestAi.overallScore || 0)) : null;
+      const completedAiSession = app.aiInterviewSessions?.[0];
+      const rescheduleInterview = app.interviews?.[0];
+
+      let actionType: 'AI_INTERVIEW_REVIEW' | 'RESCHEDULE_REQUEST' | 'NEW_APPLICATION' | 'PENDING_REVIEW' = 'PENDING_REVIEW';
+      let actionLabel = 'Chờ HR duyệt';
+
+      if (completedAiSession) {
+        actionType = 'AI_INTERVIEW_REVIEW';
+        const turns = Array.isArray(completedAiSession.transcript) ? completedAiSession.transcript : [];
+        const questionCount = turns.length || 5;
+        actionLabel = `ĐÃ PHỎNG VẤN AI (${questionCount} CÂU)`;
+      } else if (rescheduleInterview) {
+        actionType = 'RESCHEDULE_REQUEST';
+        actionLabel = 'XIN ĐỔI LỊCH';
+      } else if (aiScore && aiScore >= 80) {
+        actionType = 'NEW_APPLICATION';
+        actionLabel = `${aiScore}% AI MATCH`;
+      } else if (app.currentStage === 'RECEIVED') {
+        actionType = 'NEW_APPLICATION';
+        actionLabel = 'HỒ SƠ MỚI';
+      }
+
+      return {
+        applicationId: app.id,
+        candidateId: app.candidate.id,
+        candidateName: candUser?.fullName || app.candidate.fullName || 'Ứng viên',
+        avatarUrl: candUser?.avatarUrl || null,
+        jobId: app.job.id,
+        jobTitle: app.job.title,
+        jobCode: app.job.jobCode,
+        currentStage: app.currentStage,
+        actionType,
+        actionLabel,
+        aiScore,
+        appliedAt: app.appliedAt,
+        updatedAt: app.updatedAt,
+        rescheduleNote: rescheduleInterview?.candidateNotes || null,
+        rescheduleDate: rescheduleInterview?.scheduledAt || null,
+      };
+    });
+
     return {
       kpis: {
         openJobs: openJobsCount,
@@ -818,6 +925,7 @@ export class RecruitersService {
       todayInterviews: todayInterviewsRaw.map(formatInterviewItem),
       upcomingInterviews: upcomingInterviewsRaw.map(formatInterviewItem),
       actionQueue,
+      pendingCandidateActions,
     };
   }
 }

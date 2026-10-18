@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import {
@@ -386,21 +387,32 @@ export class BillingService {
   async handlePayosWebhook(body: any) {
     let webhookData: any = body;
     if (this.paymentProvider instanceof PayosPaymentProvider) {
-      try {
-        webhookData = await this.paymentProvider.verifyWebhook(body);
-      } catch (err: any) {
-        this.logger.warn(`PayOS webhook signature verification error: ${err.message}`);
-        // If verify fails, fall back to body.data
+      if (this.paymentProvider.isConfigured()) {
+        try {
+          webhookData = await this.paymentProvider.verifyWebhook(body);
+        } catch (err: any) {
+          this.logger.error(`PayOS webhook signature verification failed: ${err.message}`);
+          throw new BadRequestException('Chữ ký Webhook PayOS không hợp lệ hoặc dữ liệu bị giả mạo.');
+        }
+      } else {
+        // When running in production, missing PayOS config is a fatal security condition
+        if (process.env.NODE_ENV === 'production') {
+          throw new UnauthorizedException('PayOS chưa được cấu hình khóa bảo mật trên môi trường Production.');
+        }
+        this.logger.warn('PayOS keys not configured, accepting unverified payload in development sandbox only.');
         webhookData = body?.data ?? body;
       }
     } else {
+      if (process.env.NODE_ENV === 'production') {
+        throw new BadRequestException('Phương thức thanh toán không hợp lệ.');
+      }
       webhookData = body?.data ?? body;
     }
 
     const orderCode = webhookData?.orderCode ?? body?.data?.orderCode;
     if (!orderCode) {
       this.logger.warn('PayOS webhook missing orderCode.');
-      return { success: false, message: 'Missing orderCode' };
+      throw new BadRequestException('Webhook payload thiếu orderCode.');
     }
 
     const orderCodeStr = String(orderCode);
@@ -413,7 +425,15 @@ export class BillingService {
 
     if (!order) {
       this.logger.warn(`PayOS webhook: Order not found for orderCode ${orderCodeStr}`);
-      return { success: false, message: 'Order not found' };
+      throw new NotFoundException(`Không tìm thấy đơn hàng với mã ${orderCodeStr}`);
+    }
+
+    // Verify payment amount matches order to prevent underpayment attacks
+    if (webhookData?.amount !== undefined && order.amountVnd !== Number(webhookData.amount)) {
+      this.logger.error(
+        `PayOS webhook amount mismatch for order ${order.orderCode}: expected ${order.amountVnd}, received ${webhookData.amount}`,
+      );
+      throw new BadRequestException('Số tiền thanh toán không khớp với đơn hàng.');
     }
 
     const isSuccess =

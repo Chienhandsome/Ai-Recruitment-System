@@ -2,12 +2,16 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { JobStatus, AccountStatus } from '@prisma/client';
 import { invalidateUserRoleCache } from '../auth/guards/roles.guard';
+import { SupabaseAuthService } from '../auth/supabase-auth.service';
 
 @Injectable()
 export class AdminService {
   private readonly logger = new Logger(AdminService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly supabaseAuthService: SupabaseAuthService,
+  ) {}
 
   async getDashboardStats() {
     this.logger.log('Fetching real-time Admin Dashboard statistics from database...');
@@ -270,8 +274,17 @@ export class AdminService {
       throw new NotFoundException('Không tìm thấy người dùng');
     }
 
-    // P0: Instantly clear cache
+    // P0: Instantly clear role/auth cache
     invalidateUserRoleCache(id);
+
+    // P2 Issue 3: Purge user from Supabase Auth identity provider (auth.users)
+    // to prevent ghost logins, stale JWT sessions, or dangling identity credentials.
+    try {
+      await this.supabaseAuthService.deleteAuthUser(id);
+      this.logger.log(`Purged Supabase Auth user identity for: ${id} (${user.email})`);
+    } catch (err: any) {
+      this.logger.error(`Failed to delete Supabase Auth user for ${id}: ${err.message}`);
+    }
 
     return this.prisma.user.delete({
       where: { id },

@@ -7,7 +7,7 @@ export type ContractStatus =
   | 'REJECTED'
   | 'CANCELLED';
 
-export type ContractType = 'PROBATION' | 'FIXED_TERM' | 'INDEFINITE';
+export type ContractType = 'PROBATION' | 'FIXED_TERM' | 'INDEFINITE' | 'INTERNSHIP';
 export type ContractSigningMethod = 'MANUAL' | 'ELECTRONIC';
 
 export interface ContractHistoryItem {

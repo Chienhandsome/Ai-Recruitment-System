@@ -664,6 +664,24 @@ export interface ActionQueueItem {
   autoShortlistThreshold: number;
 }
 
+export interface PendingCandidateActionItem {
+  applicationId: string;
+  candidateId: string;
+  candidateName: string;
+  avatarUrl?: string | null;
+  jobId: string;
+  jobTitle: string;
+  jobCode: string;
+  currentStage: ApplicationStage;
+  actionType: 'AI_INTERVIEW_REVIEW' | 'RESCHEDULE_REQUEST' | 'NEW_APPLICATION' | 'PENDING_REVIEW';
+  actionLabel: string;
+  aiScore?: number | null;
+  appliedAt: string;
+  updatedAt: string;
+  rescheduleNote?: string | null;
+  rescheduleDate?: string | null;
+}
+
 export interface RecruiterActionHubData {
   kpis: {
     openJobs: number;
@@ -674,6 +692,7 @@ export interface RecruiterActionHubData {
   todayInterviews: UpcomingInterviewItem[];
   upcomingInterviews: UpcomingInterviewItem[];
   actionQueue: ActionQueueItem[];
+  pendingCandidateActions?: PendingCandidateActionItem[];
 }
 
 export async function getRecruiterActionHub(
@@ -706,6 +725,14 @@ export async function getRecruiterAnalytics(
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
   });
+
+  if (res.status === 403) {
+    const errBody = await res.json().catch(() => null);
+    const message = errBody?.message || 'Feature recruitmentStats is not included in current plan';
+    const err = new Error(message);
+    (err as any).status = 403;
+    throw err;
+  }
 
   if (!res.ok) {
     throw new Error('Failed to load recruiter analytics');

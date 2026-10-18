@@ -51,6 +51,10 @@ export function ContractDocumentView({
   const recruiter = application?.job?.recruiter;
   const candidate = application?.candidate;
 
+  const isInternship = contract.contractType === 'INTERNSHIP';
+  const isProbation = contract.contractType === 'PROBATION';
+  const isStandardLabor = !isInternship && !isProbation;
+
   const startDateFormatted = new Date(contract.startDate).toLocaleDateString('vi-VN', {
     day: '2-digit',
     month: '2-digit',
@@ -59,10 +63,10 @@ export function ContractDocumentView({
 
   const endDateFormatted = contract.endDate
     ? new Date(contract.endDate).toLocaleDateString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      })
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
     : 'Không xác định thời hạn';
 
   const formatSalary = (val: number | string) => {
@@ -73,11 +77,26 @@ export function ContractDocumentView({
     switch (type) {
       case 'PROBATION':
         return 'HỢP ĐỒNG THỬ VIỆC';
+      case 'INTERNSHIP':
+        return 'THỎA THUẬN THỰC TẬP VÀ ĐÀO TẠO NGHỀ';
       case 'INDEFINITE':
         return 'HỢP ĐỒNG LAO ĐỘNG KHÔNG XÁC ĐỊNH THỜI HẠN';
       case 'FIXED_TERM':
       default:
         return 'HỢP ĐỒNG LAO ĐỘNG XÁC ĐỊNH THỜI HẠN';
+    }
+  };
+
+  const getLegalPreamble = (type: string) => {
+    switch (type) {
+      case 'PROBATION':
+        return 'Căn cứ Điều 24, Điều 25, Điều 26 Bộ luật Lao động số 45/2019/QH14 được Quốc hội nước CHXHCN Việt Nam thông qua ngày 20/11/2019 và nhu cầu thử việc của các bên.';
+      case 'INTERNSHIP':
+        return 'Căn cứ Bộ luật Dân sự số 91/2015/QH13, Luật Giáo dục đại học, Luật Giáo dục nghề nghiệp và nhu cầu tiếp nhận, hướng dẫn kỹ năng thực tế cho thực tập sinh tại doanh nghiệp.';
+      case 'INDEFINITE':
+      case 'FIXED_TERM':
+      default:
+        return 'Căn cứ Bộ luật Lao động nước Cộng hòa Xã hội Chủ nghĩa Việt Nam số 45/2019/QH14 và các văn bản quy định chi tiết thi hành hiện hành.';
     }
   };
 
@@ -128,8 +147,8 @@ export function ContractDocumentView({
       </div>
 
       <p className="mt-6 text-xs italic leading-relaxed text-slate-600 text-justify">
-        Căn cứ Bộ luật Lao động nước Cộng hòa Xã hội Chủ nghĩa Việt Nam số 45/2019/QH14 và các văn bản hướng dẫn thi hành hiện hành.
-        Hôm nay, ngày {new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}, chúng tôi gồm các bên dưới đây thống nhất ký kết hợp đồng:
+        {getLegalPreamble(contract.contractType)}
+        {' '}Hôm nay, ngày {new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}, chúng tôi gồm các bên dưới đây thống nhất ký kết {isInternship ? 'thỏa thuận thực tập' : 'hợp đồng'}:
       </p>
 
       {/* Bên A & Bên B */}
@@ -137,7 +156,7 @@ export function ContractDocumentView({
         {/* Bên A */}
         <div className="rounded-xl border border-slate-100 bg-[#EFF6FF]/40 p-4">
           <h2 className="mb-2 font-bold uppercase tracking-wide text-slate-900">
-            BÊN A: NGƯỜI SỬ DỤNG LAO ĐỘNG
+            {isInternship ? 'BÊN A: ĐƠN VỊ TIẾP NHẬN THỰC TẬP (DOANH NGHIỆP)' : 'BÊN A: NGƯỜI SỬ DỤNG LAO ĐỘNG'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-700">
             <div>
@@ -162,7 +181,11 @@ export function ContractDocumentView({
         {/* Bên B */}
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
           <h2 className="mb-2 font-bold uppercase tracking-wide text-slate-900">
-            BÊN B: NGƯỜI LAO ĐỘNG
+            {isInternship
+              ? 'BÊN B: THỰC TẬP SINH / HỌC VIÊN NGHỀ'
+              : isProbation
+                ? 'BÊN B: NGƯỜI LAO ĐỘNG (NGƯỜI THỬ VIỆC)'
+                : 'BÊN B: NGƯỜI LAO ĐỘNG'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-700">
             <div>
@@ -182,90 +205,369 @@ export function ContractDocumentView({
           </div>
         </div>
 
-        {/* Các điều khoản */}
+        {/* ==================== CÁC ĐIỀU KHOẢN HỢP ĐỒNG ==================== */}
         <div className="space-y-4 pt-2">
-          {/* Điều 1 */}
-          <div>
-            <h3 className="font-bold text-slate-900 uppercase">
-              Điều 1: Vị trí công tác và thời hạn hợp đồng
-            </h3>
-            <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
-              <li>
-                <strong>Vị trí đảm nhiệm:</strong> {contract.jobTitle}
-              </li>
-              <li>
-                <strong>Hình thức làm việc:</strong> {contract.workType || 'Toàn thời gian'}
-              </li>
-              <li>
-                <strong>Ngày bắt đầu làm việc:</strong> {startDateFormatted}
-              </li>
-              <li>
-                <strong>Thời hạn hợp đồng:</strong> Từ {startDateFormatted} đến {endDateFormatted}
-              </li>
-              <li>
-                <strong>Địa điểm làm việc:</strong> {contract.workLocation || 'Tại văn phòng công ty'}
-              </li>
-              <li>
-                <strong>Thời giờ làm việc:</strong> {contract.workingHours || 'Thứ 2 - Thứ 6 (8h30 - 17h30)'}
-              </li>
-            </ul>
-          </div>
+          {/* 1. MẪU HỢP ĐỒNG LAO ĐỘNG CHÍNH THỨC (ĐẦY ĐỦ 10 NỘI DUNG ĐIỀU 21 BLLĐ 2019) */}
+          {isStandardLabor && (
+            <>
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 1: Vị trí công tác, công việc phải làm và địa điểm làm việc (Khoản 1a Điều 21 BLLĐ 2019)
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Vị trí / Chức danh chuyên môn:</strong> {contract.jobTitle}
+                  </li>
+                  <li>
+                    <strong>Hình thức làm việc:</strong> {contract.workType || 'Toàn thời gian (Tại văn phòng)'}
+                  </li>
+                  <li>
+                    <strong>Địa điểm làm việc:</strong> {contract.workLocation || 'Tại trụ sở / cơ sở hoạt động của Bên A'}
+                  </li>
+                  <li>
+                    <strong>Nhiệm vụ công việc:</strong> Thực hiện các công việc chuyên môn theo bản mô tả công việc (JD) của vị trí và các nhiệm vụ hợp pháp do người quản lý trực tiếp phân công.
+                  </li>
+                </ul>
+              </div>
 
-          {/* Điều 2 */}
-          <div>
-            <h3 className="font-bold text-slate-900 uppercase">
-              Điều 2: Chế độ thử việc (Nếu áp dụng)
-            </h3>
-            <p className="mt-1 text-slate-700 pl-2">
-              Thời gian thử việc là <strong>{contract.probationPeriodMonths ?? 2} tháng</strong> kể từ ngày bắt đầu nhận việc.
-              Trong thời gian thử việc, Người lao động được hưởng <strong>{contract.probationSalaryRate ?? 85}%</strong> mức lương chính thức và các quyền lợi theo quy định hiện hành.
-            </p>
-          </div>
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 2: Thời hạn hợp đồng lao động (Khoản 1b Điều 21 BLLĐ 2019)
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Loại hợp đồng:</strong>{' '}
+                    {contract.contractType === 'INDEFINITE'
+                      ? 'Hợp đồng lao động không xác định thời hạn (Căn cứ Điểm a Khoản 1 Điều 20 BLLĐ 2019)'
+                      : 'Hợp đồng lao động xác định thời hạn (Căn cứ Điểm b Khoản 1 Điều 20 BLLĐ 2019)'}
+                  </li>
+                  <li>
+                    <strong>Thời điểm bắt đầu làm việc:</strong> Ngày {startDateFormatted}
+                  </li>
+                  <li>
+                    <strong>Thời điểm kết thúc hợp đồng:</strong> {endDateFormatted}
+                  </li>
+                </ul>
+              </div>
 
-          {/* Điều 3 */}
-          <div>
-            <h3 className="font-bold text-slate-900 uppercase">
-              Điều 3: Tiền lương và chế độ đãi ngộ
-            </h3>
-            <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
-              <li>
-                <strong>Mức lương chính thức:</strong>{' '}
-                <span className="font-bold text-blue-700">
-                  {formatSalary(contract.salary)} {contract.currency}
-                </span>{' '}
-                / {contract.salaryPeriod === 'MONTHLY' ? 'tháng' : contract.salaryPeriod}
-              </li>
-              <li>
-                <strong>Hình thức chi trả:</strong> Chuyển khoản ngân hàng định kỳ hàng tháng.
-              </li>
-              {contract.benefits && (
-                <li>
-                  <strong>Chế độ đãi ngộ & phụ cấp:</strong> {contract.benefits}
-                </li>
-              )}
-            </ul>
-          </div>
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 3: Chế độ thử việc (Nếu áp dụng) (Khoản 2 Điều 21 & Điều 24 BLLĐ 2019)
+                </h3>
+                <div className="mt-1 text-slate-700 pl-2 leading-relaxed">
+                  {contract.probationPeriodMonths && contract.probationPeriodMonths > 0 ? (
+                    <p>
+                      Thời gian thử việc được thỏa thuận tích hợp là <strong>{contract.probationPeriodMonths} tháng</strong> kể từ ngày bắt đầu nhận việc.
+                      Trong thời gian thử việc, Người lao động được hưởng <strong>{contract.probationSalaryRate ?? 85}%</strong> mức lương chính thức (bảo đảm tuân thủ Điều 26 BLLĐ 2019 không thấp hơn 85%). Hết thời gian thử việc đạt yêu cầu, hợp đồng tiếp tục thực hiện với mức lương chính thức.
+                    </p>
+                  ) : (
+                    <p>Hai bên thống nhất tiếp nhận Người lao động vào làm việc chính thức không áp dụng thời gian thử việc.</p>
+                  )}
+                </div>
+              </div>
 
-          {/* Điều 4 */}
-          <div>
-            <h3 className="font-bold text-slate-900 uppercase">
-              Điều 4: Quyền và nghĩa vụ của các bên
-            </h3>
-            <div className="mt-1 space-y-1 text-slate-700 pl-2">
-              <p>
-                <strong>1. Quyền và nghĩa vụ Người lao động:</strong> Hoàn thành tốt nhiệm vụ được giao, tuân thủ nội quy lao động, quy chế an toàn và bảo mật thông tin nội bộ của Bên A. Được hưởng đầy đủ quyền lợi BHXH, BHYT, BHTN theo pháp luật lao động.
-              </p>
-              <p>
-                <strong>2. Quyền và nghĩa vụ Người sử dụng lao động:</strong> Bảo đảm việc làm, trang bị thiết bị làm việc, thanh toán đầy đủ và đúng hạn tiền lương cũng như các chế độ theo thỏa thuận.
-              </p>
-            </div>
-          </div>
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 4: Thời giờ làm việc và thời giờ nghỉ ngơi (Khoản 1d Điều 21 BLLĐ 2019)
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Thời giờ làm việc tiêu chuẩn:</strong> {contract.workingHours || 'Thứ 2 - Thứ 6 (8h30 - 17h30)'}, không quá 08 giờ/ngày và 48 giờ/tuần theo Điều 105 BLLĐ 2019.
+                  </li>
+                  <li>
+                    <strong>Nghỉ hàng tuần:</strong> Thứ Bảy và Chủ nhật (hoặc theo lịch phân công làm việc của bộ phận).
+                  </li>
+                  <li>
+                    <strong>Nghỉ lễ, tết và phép năm:</strong> Người lao động được nghỉ làm việc hưởng nguyên lương các ngày Lễ, Tết theo Điều 112 BLLĐ 2019 và được hưởng 12 ngày phép năm khi làm việc đủ 12 tháng theo Điều 113 BLLĐ 2019.
+                  </li>
+                </ul>
+              </div>
 
-          {/* Điều 5 (Custom Terms) */}
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 5: Tiền lương, phụ cấp lương và các khoản bổ sung khác (Khoản 1c Điều 21 BLLĐ 2019)
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Mức lương chính thức:</strong>{' '}
+                    <span className="font-bold text-blue-700">
+                      {formatSalary(contract.salary)} {contract.currency}
+                    </span>{' '}
+                    / {contract.salaryPeriod === 'MONTHLY' ? 'tháng' : contract.salaryPeriod}
+                  </li>
+                  <li>
+                    <strong>Hình thức và kỳ hạn trả lương:</strong> Chuyển khoản ngân hàng định kỳ 01 lần/tháng vào tài khoản của Bên B theo lịch thanh toán của doanh nghiệp.
+                  </li>
+                  {contract.benefits && (
+                    <li>
+                      <strong>Chế độ đãi ngộ & phụ cấp:</strong> {contract.benefits}
+                    </li>
+                  )}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 6: Chế độ nâng bậc, nâng lương (Khoản 1đ Điều 21 BLLĐ 2019)
+                </h3>
+                <p className="mt-1 text-slate-700 pl-2 leading-relaxed">
+                  Bên A xem xét định kỳ nâng lương tối thiểu 01 năm/lần hoặc xét nâng lương trước thời hạn dựa trên năng lực hoàn thành xuất sắc công việc và kết quả đánh giá KPI hàng kỳ của Bên B theo Quy chế quản trị nhân sự nội bộ.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 7: Trang bị bảo hộ lao động, an toàn và vệ sinh lao động (Khoản 1e Điều 21 BLLĐ 2019)
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>Bên A trang bị đầy đủ máy móc, thiết bị kỹ thuật, phương tiện làm việc và đồ bảo hộ cần thiết đáp ứng điều kiện an toàn tại nơi làm việc.</li>
+                  <li>Bên B có nghĩa vụ sử dụng đúng mục đích, bảo quản tài sản được giao và chấp hành nghiêm túc quy định về an toàn lao động, phòng cháy chữa cháy.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 8: Bảo hiểm xã hội, bảo hiểm y tế và bảo hiểm thất nghiệp (Khoản 1g Điều 21 BLLĐ 2019)
+                </h3>
+                <p className="mt-1 text-slate-700 pl-2 leading-relaxed">
+                  Hai bên cùng tham gia và đóng BHXH, BHYT, BHTN bắt buộc theo đúng quy định của Luật Bảo hiểm xã hội và Luật Việc làm hiện hành. Người sử dụng lao động có trách nhiệm trích nộp phần đóng của Người lao động vào tiền lương tháng và nộp cùng phần đóng của doanh nghiệp cho cơ quan Bảo hiểm xã hội theo luật định.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 9: Đào tạo, bồi dưỡng, nâng cao trình độ kỹ năng nghề (Khoản 1h Điều 21 BLLĐ 2019)
+                </h3>
+                <p className="mt-1 text-slate-700 pl-2 leading-relaxed">
+                  Bên B được quyền tham gia các chương trình đào tạo, bồi dưỡng chuyên môn kỹ thuật do Bên A tổ chức hoặc cử đi học. Trường hợp có phát sinh chi phí đào tạo lớn do Bên A tài trợ, hai bên sẽ giao kết Hợp đồng đào tạo nghề riêng biệt theo quy định tại Điều 62 BLLĐ 2019.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 10: Quyền và nghĩa vụ của các bên
+                </h3>
+                <div className="mt-1 space-y-1.5 text-slate-700 pl-2">
+                  <p>
+                    <strong>1. Quyền và nghĩa vụ Người lao động:</strong> Hoàn thành tốt nhiệm vụ được giao, tuân thủ nội quy lao động, quy chế làm việc và cam kết bảo mật thông tin, bí mật công nghệ của Bên A. Được quyền đơn phương chấm dứt hợp đồng lao động theo Điều 35 BLLĐ 2019 khi báo trước theo luật định.
+                  </p>
+                  <p>
+                    <strong>2. Quyền và nghĩa vụ Người sử dụng lao động:</strong> Bảo đảm việc làm, trang bị đầy đủ điều kiện làm việc, thanh toán tiền lương và các chế độ đúng hạn. Được quyền quản lý, đánh giá năng suất và xử lý kỷ luật hoặc đơn phương chấm dứt hợp đồng theo đúng Điều 36 BLLĐ 2019.
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* 2. MẪU HỢP ĐỒNG THỬ VIỆC RIÊNG BIỆT (CĂN CỨ ĐIỀU 24, 25, 26, 27 BLLĐ 2019) */}
+          {isProbation && (
+            <>
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 1: Vị trí thử việc, công việc và địa điểm làm việc (Khoản 2 Điều 24 BLLĐ 2019)
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Vị trí thử việc:</strong> {contract.jobTitle}
+                  </li>
+                  <li>
+                    <strong>Hình thức làm việc:</strong> {contract.workType || 'Toàn thời gian (Tại văn phòng)'}
+                  </li>
+                  <li>
+                    <strong>Địa điểm làm việc:</strong> {contract.workLocation || 'Tại văn phòng / cơ sở của Bên A'}
+                  </li>
+                  <li>
+                    <strong>Mục đích thử việc:</strong> Đánh giá mức độ phù hợp về năng lực chuyên môn, tác phong, tinh thần kỷ luật và hiệu suất thực tế của Bên B đối với tiêu chuẩn công việc của Bên A.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 2: Thời hạn thử việc (Điều 25 BLLĐ 2019)
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Thời gian thử việc:</strong> <strong>{contract.probationPeriodMonths || 2} tháng</strong>, từ ngày {startDateFormatted} đến ngày {endDateFormatted}.
+                  </li>
+                  <li>
+                    <strong>Tuân thủ giới hạn luật định:</strong> Thời gian thử việc bảo đảm không vượt quá 60 ngày đối với công việc có chức danh nghề nghiệp cần trình độ chuyên môn kỹ thuật từ cao đẳng trở lên (hoặc không quá 180 ngày đối với người quản lý doanh nghiệp) theo Điều 25 BLLĐ 2019.
+                  </li>
+                  <li>
+                    Chỉ được thực hiện thử việc 01 lần duy nhất đối với một vị trí công việc theo Khoản 1 Điều 25 BLLĐ 2019.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 3: Thời giờ làm việc và thời giờ nghỉ ngơi
+                </h3>
+                <p className="mt-1 text-slate-700 pl-2 leading-relaxed">
+                  Thời giờ làm việc tiêu chuẩn: {contract.workingHours || 'Thứ 2 - Thứ 6 (8h30 - 17h30)'}, 08 giờ/ngày, không quá 48 giờ/tuần. Bên B được nghỉ các ngày nghỉ hàng tuần và các ngày Lễ, Tết theo quy định chung của Bên A và Bộ luật Lao động.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 4: Tiền lương thử việc (Điều 26 BLLĐ 2019)
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Tỷ lệ lương thử việc:</strong> <strong>{contract.probationSalaryRate ?? 85}%</strong> mức lương chính thức (Cam kết không thấp hơn 85% theo đúng Điều 26 BLLĐ 2019).
+                  </li>
+                  <li>
+                    <strong>Mức lương thử việc thực hưởng:</strong>{' '}
+                    <span className="font-bold text-blue-700">
+                      {((Number(contract.salary) * (contract.probationSalaryRate ?? 85)) / 100).toLocaleString('vi-VN')} {contract.currency}
+                    </span>{' '}
+                    / {contract.salaryPeriod === 'MONTHLY' ? 'tháng' : contract.salaryPeriod}
+                  </li>
+                  <li>
+                    <strong>Mức lương chính thức cơ sở:</strong> {formatSalary(contract.salary)} {contract.currency} / tháng (làm căn cứ giao kết hợp đồng chính thức khi hoàn thành thử việc).
+                  </li>
+                  <li>
+                    <strong>Hình thức chi trả:</strong> Chuyển khoản ngân hàng định kỳ hàng tháng.
+                  </li>
+                  {contract.benefits && (
+                    <li>
+                      <strong>Phụ cấp và hỗ trợ trong thời gian thử việc:</strong> {contract.benefits}
+                    </li>
+                  )}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 5: Quy định về Bảo hiểm xã hội đối với hợp đồng thử việc riêng biệt
+                </h3>
+                <p className="mt-1 text-slate-700 pl-2 leading-relaxed">
+                  Căn cứ Khoản 1 Điều 2 Luật Bảo hiểm xã hội 2014 và Điều 24 Bộ luật Lao động 2019, Hợp đồng thử việc ký kết độc lập <strong>không thuộc đối tượng tham gia BHXH, BHYT, BHTN bắt buộc</strong>. Tiền lương thử việc chi trả cho Bên B là thu nhập trực tiếp; Bên A thực hiện khấu trừ và kê khai Thuế thu nhập cá nhân (TNCN) theo quy định của pháp luật thuế hiện hành.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 6: Đánh giá kết quả và Giao kết hợp đồng lao động chính thức (Điều 27 BLLĐ 2019)
+                </h3>
+                <p className="mt-1 text-slate-700 pl-2 leading-relaxed">
+                  Khi kết thúc thời gian thử việc, Bên A thông báo kết quả thử việc cho Bên B. Trường hợp thử việc đạt yêu cầu, Bên A tiến hành giao kết Hợp đồng lao động chính thức với Bên B theo mức lương và điều kiện đã thỏa thuận. Trường hợp không đạt yêu cầu, hợp đồng thử việc đương nhiên chấm dứt hiệu lực.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 7: Quyền hủy bỏ thỏa thuận thử việc (Khoản 2 Điều 27 BLLĐ 2019)
+                </h3>
+                <p className="mt-1 text-slate-700 pl-2 leading-relaxed">
+                  Trong thời gian thử việc, mỗi bên có quyền hủy bỏ hợp đồng thử việc mà <strong>không cần báo trước và không phải bồi thường</strong> nếu việc làm thử không đạt yêu cầu mà hai bên đã thỏa thuận.
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* 3. MẪU THỎA THUẬN THỰC TẬP VÀ ĐÀO TẠO NGHỀ (CĂN CỨ BỘ LUẬT DÂN SỰ 2015, LUẬT GDĐH & GDNN) */}
+          {isInternship && (
+            <>
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 1: Mục tiêu thực tập, vị trí tiếp nhận và địa điểm
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Vị trí / Lĩnh vực thực tập:</strong> {contract.jobTitle}
+                  </li>
+                  <li>
+                    <strong>Hình thức thực tập:</strong> {contract.workType || 'Toàn thời gian / Linh hoạt kết hợp'}
+                  </li>
+                  <li>
+                    <strong>Địa điểm thực tập:</strong> {contract.workLocation || 'Tại văn phòng Bên A hoặc kết hợp từ xa'}
+                  </li>
+                  <li>
+                    <strong>Mục tiêu:</strong> Tạo điều kiện cho Bên B cọ xát thực tế, rèn luyện kỹ năng chuyên môn, tiếp cận quy trình phát triển sản phẩm công nghệ thực tế và hoàn thành báo cáo thực tập / đồ án tốt nghiệp đại học.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 2: Thời hạn thực tập và lịch trình tham gia
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Thời hạn thực tập:</strong> Từ ngày {startDateFormatted} đến hết ngày {endDateFormatted}.
+                  </li>
+                  <li>
+                    <strong>Lịch trình làm việc:</strong> {contract.workingHours || 'Thứ 2 - Thứ 6 (Linh hoạt theo lịch học của trường)'}. Bên A tạo điều kiện thuận lợi về thời gian để Bên B tham gia các buổi học, thi tại Trường Đại học / Cơ sở đào tạo.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 3: Phân công Người hướng dẫn chuyên môn (Mentor)
+                </h3>
+                <p className="mt-1 text-slate-700 pl-2 leading-relaxed">
+                  Bên A phân công cán bộ kỹ thuật / chuyên gia có kinh nghiệm đóng vai trò Người hướng dẫn (Mentor) trực tiếp giao nhiệm vụ đào tạo, hỗ trợ kỹ năng, theo dõi tiến độ và đánh giá kết quả thực hành của Bên B trong suốt thời gian thực tập.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 4: Phụ cấp thực tập (Allowance) và Quyền lợi hỗ trợ
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    <strong>Mức phụ cấp thực tập:</strong>{' '}
+                    <span className="font-bold text-blue-700">
+                      {formatSalary(contract.salary)} {contract.currency}
+                    </span>{' '}
+                    / {contract.salaryPeriod === 'MONTHLY' ? 'tháng' : contract.salaryPeriod}
+                  </li>
+                  <li>
+                    <strong>Tính chất khoản phụ cấp:</strong> Khoản tiền nêu trên là phụ cấp hỗ trợ chi phí đi lại, ăn trưa và sinh hoạt thực tế trong quá trình học tập thực tế tại doanh nghiệp, không phải tiền lương theo quan hệ lao động hợp đồng và không thuộc diện đóng BHXH bắt buộc.
+                  </li>
+                  <li>
+                    <strong>Quyền lợi đãi ngộ khác:</strong> {contract.benefits || 'Được cấp máy tính/trang thiết bị thực hành, tham gia các buổi đào tạo công nghệ nội bộ miễn phí, phụ cấp gửi xe và tham gia hoạt động văn hóa tại doanh nghiệp.'}
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 5: Đánh giá, Xác nhận kết quả thực tập và Cơ hội tuyển dụng
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    Khi hoàn thành kỳ thực tập, Bên A có trách nhiệm nhận xét khách quan về thái độ, năng lực chuyên môn và ký, đóng dấu xác nhận Báo cáo thực tập tốt nghiệp / Luận văn cho Bên B gửi nộp cơ sở đào tạo.
+                  </li>
+                  <li>
+                    Bên B được ưu tiên đặc cách xem xét tuyển dụng chính thức (Junior/Fresher) sau khi tốt nghiệp nếu đạt kết quả thực tập xuất sắc và đáp ứng nhu cầu nhân sự của Bên A.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-slate-900 uppercase">
+                  Điều 6: Bảo mật thông tin (NDA) và Quyền sở hữu trí tuệ
+                </h3>
+                <ul className="mt-1 list-disc list-inside space-y-1 text-slate-700 pl-2">
+                  <li>
+                    Bên B cam kết tuyệt đối giữ bí mật mã nguồn (source code), tài liệu dự án, dữ liệu khách hàng và bí quyết công nghệ của Bên A được tiếp cận trong quá trình thực tập.
+                  </li>
+                  <li>
+                    Mọi sản phẩm phần mềm, tài liệu nghiên cứu hoặc giải pháp kỹ thuật do Bên B tạo ra trong thời gian thực tập theo phân công của Bên A thuộc toàn quyền sở hữu của Bên A.
+                  </li>
+                </ul>
+              </div>
+            </>
+          )}
+
+          {/* ĐIỀU KHOẢN BỔ SUNG NẾU CÓ */}
           {contract.customTerms && (
             <div>
               <h3 className="font-bold text-slate-900 uppercase">
-                Điều 5: Các điều khoản bổ sung đặc biệt
+                Điều {isStandardLabor ? 11 : isProbation ? 8 : 7}: Các điều khoản thỏa thuận bổ sung đặc biệt
               </h3>
               <p className="mt-1 whitespace-pre-line text-slate-700 pl-2">
                 {contract.customTerms}
@@ -273,13 +575,14 @@ export function ContractDocumentView({
             </div>
           )}
 
-          {/* Điều cuối */}
+          {/* ĐIỀU CUỐI: HIỆU LỰC & GIẢI QUYẾT TRANH CHẤP */}
           <div>
             <h3 className="font-bold text-slate-900 uppercase">
-              Điều {contract.customTerms ? 6 : 5}: Hiệu lực thi hành & Giải quyết tranh chấp
+              Điều {contract.customTerms ? (isStandardLabor ? 12 : isProbation ? 9 : 8) : (isStandardLabor ? 11 : isProbation ? 8 : 7)}: Hiệu lực giao kết & Giải quyết tranh chấp
             </h3>
             <p className="mt-1 text-slate-700 pl-2 leading-relaxed">
-              Hợp đồng này được phát hành và giao kết dưới dạng văn bản điện tử có giá trị pháp lý tương đương văn bản giấy theo <strong>Điều 14 Bộ luật Lao động 2019</strong> và <strong>Luật Giao dịch điện tử 2023</strong>. Các bên xác nhận đã đọc kỹ, hiểu rõ toàn bộ quyền lợi và nghĩa vụ. Trường hợp phát sinh bất đồng hoặc khiếu nại, hai bên cam kết ưu tiên thương lượng và giải quyết theo Quy chế Tiếp nhận & Giải quyết Khiếu nại của nền tảng SmartRecruit AI trước khi yêu cầu cơ quan có thẩm quyền giải quyết.
+              Văn bản này được phát hành, lưu trữ và giao kết dưới dạng văn bản điện tử có giá trị pháp lý tương đương văn bản giấy theo quy định tại <strong>{isInternship ? 'Bộ luật Dân sự 2015' : 'Điều 14 Bộ luật Lao động 2019'}</strong> và <strong>Luật Giao dịch điện tử 2023</strong>.
+              Các bên xác nhận đã đọc kỹ, hiểu rõ toàn bộ quyền lợi và nghĩa vụ. Mọi tranh chấp hoặc bất đồng phát sinh sẽ được hai bên ưu tiên thương lượng, giải quyết thông qua Quy chế Tiếp nhận & Giải quyết Khiếu nại của nền tảng SmartRecruit AI trước khi yêu cầu cơ quan có thẩm quyền phân xử theo pháp luật Việt Nam.
             </p>
           </div>
         </div>
@@ -291,8 +594,10 @@ export function ContractDocumentView({
           {/* Đại diện Bên A */}
           <div>
             <h4 className="font-extrabold uppercase text-slate-900">ĐẠI DIỆN BÊN A</h4>
-            <p className="text-2xs text-slate-500 italic mt-0.5">(Ký, đóng dấu, ghi rõ họ tên)</p>
-            
+            <p className="text-2xs text-slate-500 italic mt-0.5">
+              {isInternship ? '(Đơn vị tiếp nhận thực tập)' : '(Người sử dụng lao động)'}
+            </p>
+
             <div className="mt-4 flex min-h-[90px] items-center justify-center">
               {contract.employerSignatureUrl ? (
                 <div className="text-center">
@@ -328,7 +633,9 @@ export function ContractDocumentView({
           {/* Đại diện Bên B */}
           <div>
             <h4 className="font-extrabold uppercase text-slate-900">ĐẠI DIỆN BÊN B</h4>
-            <p className="text-2xs text-slate-500 italic mt-0.5">(Ký, ghi rõ họ tên)</p>
+            <p className="text-2xs text-slate-500 italic mt-0.5">
+              {isInternship ? '(Thực tập sinh / Học viên)' : '(Người lao động)'}
+            </p>
 
             <div className="mt-4 flex min-h-[90px] items-center justify-center">
               {contract.candidateSignatureUrl ? (
@@ -336,7 +643,7 @@ export function ContractDocumentView({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={contract.candidateSignatureUrl}
-                    alt="Chữ ký Người lao động"
+                    alt={isInternship ? 'Chữ ký Thực tập sinh' : 'Chữ ký Người lao động'}
                     className="mx-auto max-h-16 object-contain"
                   />
                   <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-2xs font-bold text-emerald-700 mt-1">
@@ -353,7 +660,7 @@ export function ContractDocumentView({
             </div>
 
             <p className="font-bold text-slate-900 mt-2">
-              {candidate?.fullName || 'Người lao động'}
+              {candidate?.fullName || (isInternship ? 'Thực tập sinh' : 'Người lao động')}
             </p>
             {contract.candidateSignedAt && (
               <p className="text-2xs text-slate-500">

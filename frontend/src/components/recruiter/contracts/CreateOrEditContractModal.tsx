@@ -294,22 +294,20 @@ export function CreateOrEditContractModal({
               <button
                 type="button"
                 onClick={() => setActiveTab('form')}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
-                  activeTab === 'form'
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${activeTab === 'form'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-500 hover:text-slate-800'
-                }`}
+                  }`}
               >
                 <FileText className="size-3.5" /> Thiết lập điều khoản
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('preview')}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
-                  activeTab === 'preview'
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${activeTab === 'preview'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-500 hover:text-slate-800'
-                }`}
+                  }`}
               >
                 <Eye className="size-3.5" /> Xem trước văn bản
               </button>
@@ -359,9 +357,10 @@ export function CreateOrEditContractModal({
                       onChange={(e) => setContractType(e.target.value as ContractType)}
                       className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     >
-                      <option value="FIXED_TERM">Hợp đồng xác định thời hạn (1 - 3 năm)</option>
-                      <option value="PROBATION">Hợp đồng thử việc riêng</option>
-                      <option value="INDEFINITE">Hợp đồng không xác định thời hạn</option>
+                      <option value="FIXED_TERM">Hợp đồng lao động xác định thời hạn (1 - 3 năm)</option>
+                      <option value="INDEFINITE">Hợp đồng lao động không xác định thời hạn</option>
+                      <option value="PROBATION">Hợp đồng thử việc riêng biệt (Điều 24 BLLĐ)</option>
+                      <option value="INTERNSHIP">Thỏa thuận thực tập sinh & đào tạo nghề</option>
                     </select>
                   </div>
 
@@ -385,19 +384,19 @@ export function CreateOrEditContractModal({
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <DollarSign className="size-4 text-emerald-600" />
-                  Mức lương & Thời gian hiệu lực
+                  {contractType === 'INTERNSHIP' ? 'Phụ cấp thực tập & Thời hạn' : 'Mức lương & Thời gian hiệu lực'}
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Mức lương chính thức (VND/tháng) *
+                      {contractType === 'INTERNSHIP' ? 'Mức phụ cấp thực tập (VND/tháng) *' : 'Mức lương chính thức (VND/tháng) *'}
                     </label>
                     <input
                       type="number"
                       value={salary}
                       onChange={(e) => setSalary(e.target.value)}
-                      placeholder="VD: 25000000"
+                      placeholder={contractType === 'INTERNSHIP' ? 'VD: 5000000' : 'VD: 25000000'}
                       className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-blue-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
                   </div>
@@ -430,34 +429,47 @@ export function CreateOrEditContractModal({
                 </div>
 
                 {/* Chế độ thử việc */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Thời gian thử việc (tháng)
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={12}
-                      value={probationMonths}
-                      onChange={(e) => setProbationMonths(Number(e.target.value))}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
+                {contractType === 'INTERNSHIP' ? (
+                  <div className="pt-2 border-t border-slate-100 text-xs text-slate-500 italic flex items-center gap-1.5">
+                    <HelpCircle className="size-3.5 text-blue-500 shrink-0" />
+                    Vị trí thực tập sinh hưởng phụ cấp hỗ trợ và tích lũy kỹ năng nghề, không áp dụng chế độ thử việc lồng ghép.
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Hưởng lương thử việc (%)
-                    </label>
-                    <input
-                      type="number"
-                      min={50}
-                      max={100}
-                      value={probationSalaryRate}
-                      onChange={(e) => setProbationSalaryRate(Number(e.target.value))}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Thời gian thử việc (tháng)
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={contractType === 'PROBATION' ? 2 : 6}
+                        value={probationMonths}
+                        onChange={(e) => setProbationMonths(Number(e.target.value))}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                      <p className="text-2xs text-slate-500 mt-1">
+                        * Tối đa 60 ngày cho trình độ CĐ/ĐH trở lên (Điều 25 BLLĐ 2019).
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Hưởng lương thử việc (%)
+                      </label>
+                      <input
+                        type="number"
+                        min={85}
+                        max={100}
+                        value={probationSalaryRate}
+                        onChange={(e) => setProbationSalaryRate(Number(e.target.value))}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                      <p className="text-2xs text-slate-500 mt-1">
+                        * Mức hưởng tối thiểu 85% lương chính thức (Điều 26 BLLĐ 2019).
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Card 3: Địa điểm & Thời giờ & Phúc lợi */}

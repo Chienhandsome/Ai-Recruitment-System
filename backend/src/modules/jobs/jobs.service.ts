@@ -745,29 +745,13 @@ export class JobsService {
           include: { skill: true },
         },
         jobCertificates: true,
+        _count: {
+          select: { applications: true },
+        },
         applications: {
-          include: {
-            aiMatchingResults: { take: 1, orderBy: { version: 'desc' } },
-            candidate: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    email: true,
-                    fullName: true,
-                    avatarUrl: true,
-                    phone: true,
-                  },
-                },
-                workExperiences: { orderBy: { startDate: 'desc' } },
-                educations: { orderBy: { startDate: 'desc' } },
-                projects: true,
-                candidateSkills: { include: { skill: true } },
-              },
-            },
-          },
-          orderBy: {
-            appliedAt: 'desc',
+          select: {
+            id: true,
+            currentStage: true,
           },
         },
       },

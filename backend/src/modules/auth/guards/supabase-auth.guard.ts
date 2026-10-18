@@ -33,16 +33,17 @@ export class SupabaseAuthGuard implements CanActivate {
       return true;
     }
 
+    let accessToken: string | undefined;
     const authorization = request.headers.authorization;
 
-    if (!authorization?.startsWith('Bearer ')) {
-      this.logger.warn(`[${route}] Missing or malformed Authorization header`);
-      throw new UnauthorizedException('A bearer access token is required.');
+    if (authorization?.startsWith('Bearer ')) {
+      accessToken = authorization.slice('Bearer '.length).trim();
+    } else if (typeof request.query?.token === 'string' && request.query.token.trim()) {
+      accessToken = request.query.token.trim();
     }
 
-    const accessToken = authorization.slice('Bearer '.length).trim();
     if (!accessToken) {
-      this.logger.warn(`[${route}] Empty bearer token`);
+      this.logger.warn(`[${route}] Missing or malformed Authorization header or token query parameter`);
       throw new UnauthorizedException('A bearer access token is required.');
     }
 

@@ -21,6 +21,8 @@ import {
   Prisma,
 } from '@prisma/client';
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { Readable } from 'node:stream';
+import type { Response as ExpressResponse } from 'express';
 import { PrismaService } from '../../database/prisma.service';
 import { ApplicationAccessService } from '../applications/application-access.service';
 import {
@@ -565,6 +567,64 @@ export class AiInterviewsService {
       contentType,
       contentDisposition,
     };
+  }
+
+  async pipeVideo(
+    userId: string,
+    id: string,
+    videoId: string,
+    inline: boolean,
+    res: ExpressResponse,
+  ): Promise<void> {
+    const session = await this.findAuthorizedSession(userId, id);
+    const serviceUrl = (
+      process.env.INTERVIEW_SERVICE_URL ?? 'http://127.0.0.1:8010'
+    ).replace(/\/$/, '');
+    const systemKey =
+      process.env.INTERVIEW_SYSTEM_API_KEY ?? 'dev-interview-system-key';
+
+    let upstreamRes: Response;
+    try {
+      upstreamRes = await fetch(
+        `${serviceUrl}/v1/internal/interviews/${session.interviewServiceId}/videos/${videoId}`,
+        {
+          headers: { 'X-Interview-System-Key': systemKey },
+          signal: AbortSignal.timeout(60_000),
+        },
+      );
+    } catch (error) {
+      this.logger.error(`Video proxy stream failed: ${String(error)}`);
+      throw new ServiceUnavailableException(
+        'Không thể kết nối Interview Service.',
+      );
+    }
+
+    if (!upstreamRes.ok) {
+      throw new BadGatewayException('Không thể tải video phỏng vấn.');
+    }
+
+    const contentType = upstreamRes.headers.get('content-type') ?? 'video/webm';
+    const contentDisposition = inline
+      ? 'inline'
+      : (upstreamRes.headers.get('content-disposition') ??
+        `attachment; filename="interview-${id}-${videoId}.webm"`);
+    const contentLength = upstreamRes.headers.get('content-length');
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', contentDisposition);
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'private, no-store');
+    if (contentLength) {
+      res.setHeader('Content-Length', contentLength);
+    }
+
+    if (!upstreamRes.body) {
+      res.end();
+      return;
+    }
+
+    const nodeStream = Readable.fromWeb(upstreamRes.body as any);
+    nodeStream.pipe(res);
   }
 
   async getVideoPlayback(userId: string, id: string, videoId: string) {

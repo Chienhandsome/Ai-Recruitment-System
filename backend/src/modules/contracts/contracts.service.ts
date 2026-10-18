@@ -18,6 +18,7 @@ import {
 import { PrismaService } from '../../database/prisma.service';
 import { ApplicationAccessService } from '../applications/application-access.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../../infrastructure/email/email.service';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractDto } from './dto/update-contract.dto';
 import { CandidateFeedbackDto } from './dto/candidate-feedback.dto';
@@ -31,6 +32,7 @@ export class ContractsService {
     private readonly prisma: PrismaService,
     private readonly accessService: ApplicationAccessService,
     private readonly notificationsService: NotificationsService,
+    private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -154,11 +156,45 @@ export class ContractsService {
     const salaryPeriod = dto.salaryPeriod || offer?.salaryPeriod || 'MONTHLY';
     const currency = dto.currency || offer?.currency || 'VND';
     const startDate = dto.startDate ? new Date(dto.startDate) : (offer ? offer.startDate : new Date());
-    const endDate = dto.endDate ? new Date(dto.endDate) : null;
-    const workType = dto.workType || offer?.workType || 'HYBRID';
+    const rawWorkType = dto.workType || offer?.workType;
+    let workType = rawWorkType || 'Toàn thời gian (Tại văn phòng)';
+    if (rawWorkType === 'HYBRID') workType = 'Toàn thời gian (Linh hoạt kết hợp)';
+    else if (rawWorkType === 'REMOTE') workType = 'Toàn thời gian (Làm việc từ xa)';
+    else if (rawWorkType === 'ON_SITE') workType = 'Toàn thời gian (Tại văn phòng)';
+
+    const contractType = dto.contractType || ContractType.FIXED_TERM;
+    let endDate: Date | null = null;
+    if (contractType !== ContractType.INDEFINITE) {
+      if (dto.endDate) {
+        endDate = new Date(dto.endDate);
+      } else if (contractType === ContractType.PROBATION) {
+        // Default probation 60 days
+        endDate = new Date(startDate.getTime() + 60 * 24 * 60 * 60 * 1000);
+      } else if (contractType === ContractType.INTERNSHIP) {
+        // Default internship 3 months
+        endDate = new Date(startDate.getTime() + 90 * 24 * 60 * 60 * 1000);
+      } else {
+        // Default fixed-term 1 year
+        endDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
+      }
+    }
+
     const workLocation = dto.workLocation || offer?.workLocation || null;
     const benefits = dto.benefits || offer?.benefits || null;
     const contractNumber = this.generateContractNumber();
+
+    // Determine legal probation months:
+    // - INTERNSHIP: 0 months
+    // - PROBATION: 2 months default (max 2 for specialists, max 6 for managers)
+    // - FIXED_TERM / INDEFINITE: per DTO or 2 months
+    let probationMonths = 0;
+    if (contractType === ContractType.PROBATION) {
+      probationMonths = dto.probationPeriodMonths ?? 2;
+    } else if (contractType === ContractType.INTERNSHIP) {
+      probationMonths = 0;
+    } else {
+      probationMonths = dto.probationPeriodMonths !== undefined ? dto.probationPeriodMonths : 2;
+    }
 
     const created = await this.prisma.$transaction(async (tx) => {
       const contract = await tx.contract.create({
@@ -167,7 +203,7 @@ export class ContractsService {
           applicationId: application.id,
           offerId: offer?.id || dto.offerId || null,
           status: ContractStatus.DRAFT,
-          contractType: dto.contractType || ContractType.FIXED_TERM,
+          contractType,
           signingMethod: dto.signingMethod || ContractSigningMethod.MANUAL,
           jobTitle,
           salary,
@@ -178,7 +214,7 @@ export class ContractsService {
           workType,
           workLocation,
           workingHours: dto.workingHours || 'Thứ 2 - Thứ 6 (8h30 - 17h30)',
-          probationPeriodMonths: dto.probationPeriodMonths ?? (dto.contractType === ContractType.PROBATION ? 2 : 2),
+          probationPeriodMonths: probationMonths,
           probationSalaryRate: dto.probationSalaryRate ?? 85,
           benefits,
           customTerms: dto.customTerms || null,
@@ -268,7 +304,21 @@ export class ContractsService {
       return { contract: null };
     }
 
-    const isRecruiter = contract.application.job.recruiter?.userId === userId;
+    let isRecruiter = contract.application.job.recruiter?.userId === userId;
+    if (!isRecruiter) {
+      const actingRecruiter = await this.prisma.recruiterProfile.findUnique({
+        where: { userId },
+        select: { companyId: true },
+      });
+      if (
+        actingRecruiter?.companyId &&
+        contract.application.job.recruiter?.company?.id &&
+        actingRecruiter.companyId === contract.application.job.recruiter.company.id
+      ) {
+        isRecruiter = true;
+      }
+    }
+
     const isCandidate = contract.application.candidate.userId === userId;
 
     let isAdmin = false;
@@ -315,14 +365,25 @@ export class ContractsService {
     }
 
     const data: Prisma.ContractUpdateInput = {};
-    if (dto.contractType !== undefined) data.contractType = dto.contractType;
+    if (dto.contractType !== undefined) {
+      data.contractType = dto.contractType;
+      if (dto.contractType === ContractType.INDEFINITE) {
+        data.endDate = null;
+      }
+      if (dto.contractType === ContractType.INTERNSHIP) {
+        data.probationPeriodMonths = 0;
+      }
+    }
     if (dto.signingMethod !== undefined) data.signingMethod = dto.signingMethod;
     if (dto.jobTitle !== undefined) data.jobTitle = dto.jobTitle;
     if (dto.salary !== undefined) data.salary = new Prisma.Decimal(dto.salary);
     if (dto.salaryPeriod !== undefined) data.salaryPeriod = dto.salaryPeriod;
     if (dto.currency !== undefined) data.currency = dto.currency;
     if (dto.startDate !== undefined) data.startDate = new Date(dto.startDate);
-    if (dto.endDate !== undefined) data.endDate = dto.endDate ? new Date(dto.endDate) : null;
+    if (dto.endDate !== undefined) {
+      const activeContractType = dto.contractType ?? contract.contractType;
+      data.endDate = activeContractType === ContractType.INDEFINITE ? null : (dto.endDate ? new Date(dto.endDate) : null);
+    }
     if (dto.workType !== undefined) data.workType = dto.workType;
     if (dto.workLocation !== undefined) data.workLocation = dto.workLocation;
     if (dto.workingHours !== undefined) data.workingHours = dto.workingHours;
@@ -787,16 +848,13 @@ export class ContractsService {
   }
 
   /**
-   * Stream a specific page image/file of a scanned contract
+   * Stream a specific page image/file of a scanned contract (Authorized users only)
    */
-  async streamScanPage(contractId: string, pageNumber: number, res: Response) {
-    const contract = await this.prisma.contract.findUnique({
-      where: { id: contractId },
-      select: { auditCertificate: true },
-    });
+  async streamScanPage(userId: string, contractId: string, pageNumber: number, res: Response) {
+    const { contract, isRecruiter, isCandidate, isAdmin } = await this.findContractWithAccess(userId, contractId);
 
-    if (!contract) {
-      throw new NotFoundException('Hợp đồng không tồn tại');
+    if (!contract || (!isRecruiter && !isCandidate && !isAdmin)) {
+      throw new ForbiddenException('Bạn không có quyền truy cập trang scan của hợp đồng này.');
     }
 
     const audit = contract.auditCertificate as any;
@@ -906,26 +964,40 @@ export class ContractsService {
       },
     });
 
-    // Notify user via in-app notification system
-    try {
-      await this.notificationsService.createNotification({
-        recipientUserId: userId,
-        applicationId: contract.application.id,
-        title: `Mã xác thực OTP ký Hợp đồng (${contract.contractNumber})`,
-        message: `Mã OTP xác thực ký điện tử của bạn là: ${otpCode}. Mã có hiệu lực trong 5 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.`,
-        payload: { contractId: contract.id, otpCode },
-      });
-    } catch (err) {
-      this.logger.warn(`Failed to dispatch in-app OTP notification: ${err}`);
-    }
-
-    this.logger.log(`[P1.1 Signature OTP] Generated OTP for user ${userId} on contract ${contract.contractNumber}: ${otpCode}`);
+    const jobTitle = contract.jobTitle || contract.application?.job?.title || 'Vị trí công việc';
 
     // Mask email for privacy (e.g., c***e@example.com)
     const emailParts = targetEmail.split('@');
     const maskedEmail = emailParts[0].length > 2
       ? `${emailParts[0][0]}***${emailParts[0].slice(-1)}@${emailParts[1]}`
       : `***@${emailParts[1]}`;
+
+    // P2 Issue 2: Send out-of-band OTP code securely via Email (DocuSign 2FA standard)
+    try {
+      await this.emailService.sendContractSigningOtp(
+        targetEmail,
+        contract.contractNumber,
+        otpCode,
+        jobTitle,
+      );
+    } catch (err) {
+      this.logger.error(`Failed to dispatch OTP email to ${targetEmail}: ${err}`);
+    }
+
+    // Notify user via in-app notification system (OUT-OF-BAND: never leak plaintext OTP in in-app alerts)
+    try {
+      await this.notificationsService.createNotification({
+        recipientUserId: userId,
+        applicationId: contract.application.id,
+        title: `Mã xác thực OTP ký Hợp đồng (${contract.contractNumber})`,
+        message: `Mã OTP xác thực ký số gồm 6 chữ số đã được gửi đến email ${maskedEmail}. Vui lòng kiểm tra hộp thư để lấy mã hoàn tất ký hợp đồng.`,
+        payload: { contractId: contract.id },
+      });
+    } catch (err) {
+      this.logger.warn(`Failed to dispatch in-app OTP notification: ${err}`);
+    }
+
+    this.logger.log(`[P2.2 Contract 2FA OTP] Generated and dispatched out-of-band OTP for contract ${contract.contractNumber} to ${maskedEmail}`);
 
     return {
       success: true,

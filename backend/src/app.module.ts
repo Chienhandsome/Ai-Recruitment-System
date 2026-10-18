@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './database/prisma.module';
 import { SupabaseModule } from './infrastructure/supabase/supabase.module';
 import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
+import { EmailModule } from './infrastructure/email/email.module';
 import { CacheModule } from '@nestjs/cache-manager';
 
 import { CompaniesModule } from './modules/companies/companies.module';
@@ -43,6 +44,7 @@ import { DisputesModule } from './modules/disputes/disputes.module';
     PrismaModule,
     SupabaseModule,
     RabbitMQModule,
+    EmailModule,
     CompaniesModule,
     DepartmentsModule,
     UsersModule,

@@ -218,20 +218,6 @@ export class ApplicationsService {
 
     const applicantCap =
       await this.entitlements.getApplicantCapForJobOwner(job.recruiter.userId);
-    if (applicantCap != null) {
-      const currentApplicants = await this.prisma.application.count({
-        where: { jobId: job.id },
-      });
-      if (currentApplicants >= applicantCap) {
-        await this.entitlements.hideJobIfApplicantCapReached(
-          job.id,
-          job.recruiter.userId,
-        );
-        throw new ForbiddenException(
-          `Tin tuyển dụng đã đạt giới hạn ${applicantCap} ứng viên và tạm ẩn với ứng viên.`,
-        );
-      }
-    }
 
     const profileSnapshot = this.buildProfileSnapshot(
       candidateProfile,
@@ -242,17 +228,34 @@ export class ApplicationsService {
 
     let application: { id: string };
     try {
-      application = await this.prisma.application.create({
-        data: {
-          jobId: job.id,
-          candidateId: candidateProfile.id,
-          resumeId: resume.id,
-          source: 'DIRECT_APPLY',
-          currentStage: ApplicationStage.RECEIVED,
-          processingStatus: ApplicationProcessingStatus.QUEUED,
-          profileSnapshot: toPrismaJson(profileSnapshot),
-        },
-        select: { id: true },
+      const executeTx = this.prisma.$transaction
+        ? (fn: any) => this.prisma.$transaction(fn)
+        : async (fn: any) => fn(this.prisma);
+
+      application = await executeTx(async (tx: any) => {
+        if (applicantCap != null) {
+          const currentApplicants = await tx.application.count({
+            where: { jobId: job.id },
+          });
+          if (currentApplicants >= applicantCap) {
+            throw new ForbiddenException(
+              `Tin tuyển dụng đã đạt giới hạn ${applicantCap} ứng viên và tạm ẩn với ứng viên.`,
+            );
+          }
+        }
+
+        return tx.application.create({
+          data: {
+            jobId: job.id,
+            candidateId: candidateProfile.id,
+            resumeId: resume.id,
+            source: 'DIRECT_APPLY',
+            currentStage: ApplicationStage.RECEIVED,
+            processingStatus: ApplicationProcessingStatus.QUEUED,
+            profileSnapshot: toPrismaJson(profileSnapshot),
+          },
+          select: { id: true },
+        });
       });
     } catch (error) {
       // The unique constraint is the final authority under concurrent POSTs;
@@ -262,6 +265,12 @@ export class ApplicationsService {
         error.code === 'P2002'
       ) {
         throw new ConflictException('You have already applied for this job.');
+      }
+      if (error instanceof ForbiddenException) {
+        await this.entitlements.hideJobIfApplicantCapReached(
+          job.id,
+          job.recruiter.userId,
+        );
       }
       throw error;
     }
@@ -399,9 +408,23 @@ export class ApplicationsService {
     const hasScoreFilter =
       effectiveQuery.minScore !== undefined ||
       effectiveQuery.maxScore !== undefined;
+
+    if (hasScoreFilter) {
+      where.aiMatchingResults = {
+        some: {
+          ...(effectiveQuery.minScore !== undefined
+            ? { overallScore: { gte: effectiveQuery.minScore } }
+            : {}),
+          ...(effectiveQuery.maxScore !== undefined
+            ? { overallScore: { lte: effectiveQuery.maxScore } }
+            : {}),
+        },
+      };
+    }
+
     const isScoreSort = effectiveQuery.sortBy === ApplicationSortBy.AI_SCORE;
 
-    if (!hasScoreFilter && !isScoreSort) {
+    if (!isScoreSort) {
       const sortDirection =
         effectiveQuery.sortOrder === SortOrder.ASC ? 'asc' : 'desc';
       const orderBy =

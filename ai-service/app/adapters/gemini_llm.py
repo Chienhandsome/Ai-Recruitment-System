@@ -35,6 +35,9 @@ Rules:
 TRANSIENT_STATUS_CODES = frozenset({408, 429, 500, 502, 503, 504})
 
 
+MAX_RESUME_INPUT_CHARS = 25_000
+
+
 class GeminiLLMAdapter:
     def __init__(self, api_key: str, model_name: str, client=None) -> None:
         if not api_key and client is None:
@@ -51,7 +54,19 @@ class GeminiLLMAdapter:
         return self._model_name
 
     def extract(self, resume_text: str) -> LLMResumeExtraction:
-        contents = f"{EXTRACTION_PROMPT}\n\n---BEGIN CV---\n{resume_text}\n---END CV---"
+        sanitized_text = (resume_text or "").strip()
+        if len(sanitized_text) > MAX_RESUME_INPUT_CHARS:
+            logger.warning(
+                "Resume input text length (%d chars) exceeds threshold (%d chars). Truncating to prevent token exhaustion.",
+                len(sanitized_text),
+                MAX_RESUME_INPUT_CHARS,
+            )
+            sanitized_text = (
+                sanitized_text[:MAX_RESUME_INPUT_CHARS]
+                + "\n...[TRUNCATED FOR SYSTEM RESOURCE SAFETY]..."
+            )
+
+        contents = f"{EXTRACTION_PROMPT}\n\n---BEGIN CV---\n{sanitized_text}\n---END CV---"
 
         try:
             response = self._client.models.generate_content(

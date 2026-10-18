@@ -201,6 +201,7 @@ enum ContractType {
   PROBATION
   FIXED_TERM
   INDEFINITE
+  INTERNSHIP
 }
 
 enum ContractSigningMethod {

@@ -230,7 +230,7 @@ export class InterviewsController {
 
   @Get('ai/:id/videos/:videoId')
   @Roles('RECRUITER')
-  @ApiOperation({ summary: 'Tải hoặc phát video phỏng vấn AI qua proxy bảo mật' })
+  @ApiOperation({ summary: 'Tải hoặc phát video phỏng vấn AI qua proxy bảo mật (zero-copy stream)' })
   async downloadAiInterviewVideo(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
@@ -239,17 +239,13 @@ export class InterviewsController {
     @Res() response: Response,
   ) {
     const isInline = inline === 'true' || inline === '1';
-    const video = await this.aiInterviewsService.downloadVideo(
+    return this.aiInterviewsService.pipeVideo(
       user.id,
       id,
       videoId,
       isInline,
+      response,
     );
-    response.setHeader('Content-Type', video.contentType);
-    response.setHeader('Content-Disposition', video.contentDisposition);
-    response.setHeader('Accept-Ranges', 'bytes');
-    response.setHeader('Cache-Control', 'private, no-store');
-    response.send(video.body);
   }
 
   @Post('ai/:id/decision')

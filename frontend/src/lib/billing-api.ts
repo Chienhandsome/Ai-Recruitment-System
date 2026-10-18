@@ -18,6 +18,7 @@ export type ServicePackage = {
   advancedFilters: boolean;
   recruitmentStats: boolean;
   talentPoolAccess: boolean;
+  jobSeekingAccess: boolean;
   jdFitAnalysis?: boolean;
   cvImproveSuggestions?: boolean;
   jdFitQuota?: number;
@@ -41,6 +42,7 @@ export type EntitlementStatus = {
   advancedFilters: boolean;
   recruitmentStats: boolean;
   talentPoolAccess: boolean;
+  jobSeekingAccess: boolean;
   jdFitAnalysis?: boolean;
   cvImproveSuggestions?: boolean;
   jdFitRemaining?: number;
@@ -284,6 +286,8 @@ export type TalentPoolCard = {
   desiredTitle: string | null;
   professionalSummary: string | null;
   locationHint: string | null;
+  workExperiences?: Array<{ companyName: string; positionTitle: string; startDate: string; endDate: string | null; isCurrent: boolean; description?: string | null }>;
+  educations?: Array<{ schoolName: string; major: string | null; degree: string | null }>;
   skills: Array<{
     skill: { id: string; name: string };
     proficiencyLevel: string;
@@ -303,11 +307,12 @@ export type TalentPoolCard = {
 
 export function searchTalentPool(
   accessToken: string,
-  params: { search?: string; skill?: string; page?: number },
+  params: { search?: string; skill?: string; desiredTitle?: string; page?: number },
 ) {
   const qs = new URLSearchParams();
   if (params.search) qs.set("search", params.search);
   if (params.skill) qs.set("skill", params.skill);
+  if (params.desiredTitle) qs.set("desiredTitle", params.desiredTitle);
   if (params.page) qs.set("page", String(params.page));
   const query = qs.toString();
   return billingRequest<{
@@ -325,6 +330,10 @@ export function unlockTalentProfile(
     accessToken,
     { method: "POST" },
   );
+}
+
+export function getTalentProfile(accessToken: string, candidateProfileId: string) {
+  return billingRequest<TalentPoolCard>(`/billing/talent-pool/${candidateProfileId}`, accessToken);
 }
 
 export function formatVnd(amount: number) {

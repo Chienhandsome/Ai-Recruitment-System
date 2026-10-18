@@ -114,4 +114,57 @@ describe('ApplicationEvaluationService', () => {
       }),
     );
   });
+
+  it('notifies the recruiter when retries are exhausted', async () => {
+    const prisma = {
+      application: {
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        findUnique: jest.fn().mockResolvedValue({
+          processingStatus: 'FAILED',
+          candidate: { fullName: 'Nguyen Van A' },
+          job: {
+            title: 'Backend Engineer',
+            recruiter: { userId: 'rec-user-1' },
+          },
+        }),
+      },
+    };
+    const notificationsService = {
+      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
+    };
+    const service = new ApplicationEvaluationService(
+      prisma as never,
+      { publish: jest.fn() } as never,
+      notificationsService as never,
+    );
+
+    await service.markForRetry('application-1', 'AI failed', 5, now);
+
+    expect(notificationsService.createNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientUserId: 'rec-user-1',
+        type: 'SYSTEM_ALERT',
+        applicationId: 'application-1',
+        title: expect.stringContaining('Nguyen Van A'),
+      }),
+    );
+  });
+
+  it('does not notify when retries remain', async () => {
+    const notificationsService = { createNotification: jest.fn() };
+    const prisma = {
+      application: {
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+    };
+    const service = new ApplicationEvaluationService(
+      prisma as never,
+      { publish: jest.fn() } as never,
+      notificationsService as never,
+    );
+
+    await service.markForRetry('application-1', 'AI failed', 2, now);
+
+    expect(notificationsService.createNotification).not.toHaveBeenCalled();
+  });
 });

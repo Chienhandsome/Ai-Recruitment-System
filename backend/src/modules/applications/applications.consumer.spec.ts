@@ -251,4 +251,119 @@ describe('ApplicationsConsumer experience-level persistence', () => {
     });
     expect(tx.applicationStatusHistory.create).not.toHaveBeenCalled();
   });
+
+  it('notifies recruiter and candidate when evaluation completes', async () => {
+    const tx = {
+      aiMatchingResult: {
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+        create: jest.fn().mockResolvedValue({ id: 'result-1' }),
+      },
+      application: {
+        update: jest.fn().mockResolvedValue({ id: 'application-1' }),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+      applicationStatusHistory: {
+        create: jest.fn().mockResolvedValue({ id: 'history-1' }),
+      },
+    };
+    const prisma = {
+      $transaction: jest.fn(
+        async (callback: (client: typeof tx) => Promise<unknown>) =>
+          callback(tx),
+      ),
+      application: {
+        findUnique: jest.fn().mockResolvedValue({
+          candidate: { userId: 'cand-user-1', fullName: 'Nguyen Van A' },
+          job: {
+            title: 'Backend Engineer',
+            recruiter: { userId: 'rec-user-1' },
+          },
+        }),
+      },
+    };
+    const notificationsService = {
+      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
+    };
+    const consumer = new ApplicationsConsumer(
+      prisma as never,
+      { subscribe: jest.fn() } as never,
+      { markForRetry: jest.fn() } as never,
+      notificationsService as never,
+    );
+
+    await consumer.handleMessage({
+      applicationId: 'application-1',
+      status: 'COMPLETED',
+      result: { overall_score: 81.4 },
+    });
+
+    expect(notificationsService.createNotification).toHaveBeenCalledTimes(2);
+    expect(notificationsService.createNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientUserId: 'rec-user-1',
+        type: 'MATCHING_COMPLETED',
+        applicationId: 'application-1',
+        title: expect.stringContaining('Nguyen Van A'),
+      }),
+    );
+    expect(notificationsService.createNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientUserId: 'cand-user-1',
+        type: 'APPLICATION_STATUS_CHANGED',
+        applicationId: 'application-1',
+      }),
+    );
+  });
+
+  it('notifies only the recruiter when the stage was already changed', async () => {
+    const tx = {
+      aiMatchingResult: {
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+        create: jest.fn().mockResolvedValue({ id: 'result-1' }),
+      },
+      application: {
+        update: jest.fn().mockResolvedValue({ id: 'application-1' }),
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
+      applicationStatusHistory: { create: jest.fn() },
+    };
+    const prisma = {
+      $transaction: jest.fn(
+        async (callback: (client: typeof tx) => Promise<unknown>) =>
+          callback(tx),
+      ),
+      application: {
+        findUnique: jest.fn().mockResolvedValue({
+          candidate: { userId: 'cand-user-1', fullName: 'Nguyen Van A' },
+          job: {
+            title: 'Backend Engineer',
+            recruiter: { userId: 'rec-user-1' },
+          },
+        }),
+      },
+    };
+    const notificationsService = {
+      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
+    };
+    const consumer = new ApplicationsConsumer(
+      prisma as never,
+      { subscribe: jest.fn() } as never,
+      { markForRetry: jest.fn() } as never,
+      notificationsService as never,
+    );
+
+    await consumer.handleMessage({
+      applicationId: 'application-1',
+      status: 'COMPLETED',
+      result: { overall_score: 70 },
+    });
+
+    expect(notificationsService.createNotification).toHaveBeenCalledTimes(1);
+    expect(notificationsService.createNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientUserId: 'rec-user-1',
+        type: 'MATCHING_COMPLETED',
+      }),
+    );
+  });
 });

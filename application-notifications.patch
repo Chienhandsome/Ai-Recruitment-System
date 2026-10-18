@@ -1,0 +1,627 @@
+diff --git a/backend/src/modules/applications/application-evaluation.service.spec.ts b/backend/src/modules/applications/application-evaluation.service.spec.ts
+index 895cec6..72d6080 100644
+--- a/backend/src/modules/applications/application-evaluation.service.spec.ts
++++ b/backend/src/modules/applications/application-evaluation.service.spec.ts
+@@ -114,4 +114,57 @@ describe('ApplicationEvaluationService', () => {
+       }),
+     );
+   });
++
++  it('notifies the recruiter when retries are exhausted', async () => {
++    const prisma = {
++      application: {
++        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
++        findUnique: jest.fn().mockResolvedValue({
++          processingStatus: 'FAILED',
++          candidate: { fullName: 'Nguyen Van A' },
++          job: {
++            title: 'Backend Engineer',
++            recruiter: { userId: 'rec-user-1' },
++          },
++        }),
++      },
++    };
++    const notificationsService = {
++      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
++    };
++    const service = new ApplicationEvaluationService(
++      prisma as never,
++      { publish: jest.fn() } as never,
++      notificationsService as never,
++    );
++
++    await service.markForRetry('application-1', 'AI failed', 5, now);
++
++    expect(notificationsService.createNotification).toHaveBeenCalledWith(
++      expect.objectContaining({
++        recipientUserId: 'rec-user-1',
++        type: 'SYSTEM_ALERT',
++        applicationId: 'application-1',
++        title: expect.stringContaining('Nguyen Van A'),
++      }),
++    );
++  });
++
++  it('does not notify when retries remain', async () => {
++    const notificationsService = { createNotification: jest.fn() };
++    const prisma = {
++      application: {
++        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
++      },
++    };
++    const service = new ApplicationEvaluationService(
++      prisma as never,
++      { publish: jest.fn() } as never,
++      notificationsService as never,
++    );
++
++    await service.markForRetry('application-1', 'AI failed', 2, now);
++
++    expect(notificationsService.createNotification).not.toHaveBeenCalled();
++  });
+ });
+diff --git a/backend/src/modules/applications/application-evaluation.service.ts b/backend/src/modules/applications/application-evaluation.service.ts
+index 563aa04..9f2174e 100644
+--- a/backend/src/modules/applications/application-evaluation.service.ts
++++ b/backend/src/modules/applications/application-evaluation.service.ts
+@@ -1,9 +1,14 @@
+ import { Injectable, Logger } from '@nestjs/common';
+-import { ApplicationProcessingStatus, type Prisma } from '@prisma/client';
++import {
++  ApplicationProcessingStatus,
++  NotificationType,
++  type Prisma,
++} from '@prisma/client';
+ import { PrismaService } from '../../database/prisma.service';
+ import { RabbitMQService } from '../../infrastructure/rabbitmq/rabbitmq.service';
+ import { RABBITMQ_ROUTING_KEYS } from '../../infrastructure/rabbitmq/rabbitmq.constants';
+ import { createEvaluationMessage } from './application-evaluation.snapshot';
++import { NotificationsService } from '../notifications/notifications.service';
+ 
+ export const MAX_EVALUATION_ATTEMPTS = 5;
+ export const EVALUATION_RETRY_BASE_DELAY_MS = 60_000;
+@@ -16,6 +21,7 @@ export class ApplicationEvaluationService {
+   constructor(
+     private readonly prisma: PrismaService,
+     private readonly rabbitMQService: RabbitMQService,
++    private readonly notificationsService?: NotificationsService,
+   ) {}
+ 
+   async dispatchNewApplication(
+@@ -96,22 +102,12 @@ export class ApplicationEvaluationService {
+     knownAttempts?: number,
+     now = new Date(),
+   ): Promise<void> {
+-    let attempts = knownAttempts;
++    const attempts = await this.resolveAttemptCount(
++      applicationId,
++      knownAttempts,
++    );
+     if (attempts === undefined) {
+-      const application = await this.prisma.application.findUnique({
+-        where: { id: applicationId },
+-        select: {
+-          evaluationAttempts: true,
+-          processingStatus: true,
+-        },
+-      });
+-      if (
+-        !application ||
+-        application.processingStatus === ApplicationProcessingStatus.COMPLETED
+-      ) {
+-        return;
+-      }
+-      attempts = application.evaluationAttempts;
++      return;
+     }
+ 
+     const exhausted = attempts >= MAX_EVALUATION_ATTEMPTS;
+@@ -134,6 +130,86 @@ export class ApplicationEvaluationService {
+         updatedAt: now,
+       },
+     });
++
++    if (exhausted) {
++      await this.notifyEvaluationExhausted(applicationId, attempts);
++    }
++  }
++
++  /**
++   * Tell the recruiter that AI scoring failed permanently so they can score
++   * the application manually. Never throws — notification is best-effort.
++   */
++  async notifyEvaluationExhausted(
++    applicationId: string,
++    attempts: number,
++  ): Promise<void> {
++    if (!this.notificationsService) {
++      return;
++    }
++    try {
++      const app = await this.prisma.application.findUnique({
++        where: { id: applicationId },
++        select: {
++          processingStatus: true,
++          candidate: { select: { fullName: true } },
++          job: {
++            select: {
++              title: true,
++              recruiter: { select: { userId: true } },
++            },
++          },
++        },
++      });
++      if (
++        !app ||
++        app.processingStatus !== ApplicationProcessingStatus.FAILED ||
++        !app.job?.recruiter?.userId
++      ) {
++        return;
++      }
++      const candidateName = app.candidate?.fullName ?? 'Ứng viên';
++      await this.notificationsService.createNotification({
++        recipientUserId: app.job.recruiter.userId,
++        applicationId,
++        type: NotificationType.SYSTEM_ALERT,
++        title: `AI chấm thất bại: ${candidateName}`,
++        message: `Hệ thống không thể chấm điểm hồ sơ của ${candidateName} cho vị trí "${app.job.title}" sau ${attempts} lần thử. Vui lòng chấm thủ công.`,
++        payload: {
++          applicationId,
++          attempts,
++          candidateName,
++          jobTitle: app.job.title,
++        },
++      });
++    } catch (error) {
++      this.logger.error(
++        `Failed to send evaluation-exhausted notification for application ${applicationId}: ${this.errorMessage(error)}`,
++      );
++    }
++  }
++
++  private async resolveAttemptCount(
++    applicationId: string,
++    knownAttempts?: number,
++  ): Promise<number | undefined> {
++    if (knownAttempts !== undefined) {
++      return knownAttempts;
++    }
++    const application = await this.prisma.application.findUnique({
++      where: { id: applicationId },
++      select: {
++        evaluationAttempts: true,
++        processingStatus: true,
++      },
++    });
++    if (
++      !application ||
++      application.processingStatus === ApplicationProcessingStatus.COMPLETED
++    ) {
++      return undefined;
++    }
++    return application.evaluationAttempts;
+   }
+ 
+   private retryDelayMs(attempts: number): number {
+diff --git a/backend/src/modules/applications/applications.consumer.spec.ts b/backend/src/modules/applications/applications.consumer.spec.ts
+index 235b1e8..f79e7f8 100644
+--- a/backend/src/modules/applications/applications.consumer.spec.ts
++++ b/backend/src/modules/applications/applications.consumer.spec.ts
+@@ -251,4 +251,119 @@ describe('ApplicationsConsumer experience-level persistence', () => {
+     });
+     expect(tx.applicationStatusHistory.create).not.toHaveBeenCalled();
+   });
++
++  it('notifies recruiter and candidate when evaluation completes', async () => {
++    const tx = {
++      aiMatchingResult: {
++        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
++        create: jest.fn().mockResolvedValue({ id: 'result-1' }),
++      },
++      application: {
++        update: jest.fn().mockResolvedValue({ id: 'application-1' }),
++        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
++      },
++      applicationStatusHistory: {
++        create: jest.fn().mockResolvedValue({ id: 'history-1' }),
++      },
++    };
++    const prisma = {
++      $transaction: jest.fn(
++        async (callback: (client: typeof tx) => Promise<unknown>) =>
++          callback(tx),
++      ),
++      application: {
++        findUnique: jest.fn().mockResolvedValue({
++          candidate: { userId: 'cand-user-1', fullName: 'Nguyen Van A' },
++          job: {
++            title: 'Backend Engineer',
++            recruiter: { userId: 'rec-user-1' },
++          },
++        }),
++      },
++    };
++    const notificationsService = {
++      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
++    };
++    const consumer = new ApplicationsConsumer(
++      prisma as never,
++      { subscribe: jest.fn() } as never,
++      { markForRetry: jest.fn() } as never,
++      notificationsService as never,
++    );
++
++    await consumer.handleMessage({
++      applicationId: 'application-1',
++      status: 'COMPLETED',
++      result: { overall_score: 81.4 },
++    });
++
++    expect(notificationsService.createNotification).toHaveBeenCalledTimes(2);
++    expect(notificationsService.createNotification).toHaveBeenCalledWith(
++      expect.objectContaining({
++        recipientUserId: 'rec-user-1',
++        type: 'MATCHING_COMPLETED',
++        applicationId: 'application-1',
++        title: expect.stringContaining('Nguyen Van A'),
++      }),
++    );
++    expect(notificationsService.createNotification).toHaveBeenCalledWith(
++      expect.objectContaining({
++        recipientUserId: 'cand-user-1',
++        type: 'APPLICATION_STATUS_CHANGED',
++        applicationId: 'application-1',
++      }),
++    );
++  });
++
++  it('notifies only the recruiter when the stage was already changed', async () => {
++    const tx = {
++      aiMatchingResult: {
++        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
++        create: jest.fn().mockResolvedValue({ id: 'result-1' }),
++      },
++      application: {
++        update: jest.fn().mockResolvedValue({ id: 'application-1' }),
++        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
++      },
++      applicationStatusHistory: { create: jest.fn() },
++    };
++    const prisma = {
++      $transaction: jest.fn(
++        async (callback: (client: typeof tx) => Promise<unknown>) =>
++          callback(tx),
++      ),
++      application: {
++        findUnique: jest.fn().mockResolvedValue({
++          candidate: { userId: 'cand-user-1', fullName: 'Nguyen Van A' },
++          job: {
++            title: 'Backend Engineer',
++            recruiter: { userId: 'rec-user-1' },
++          },
++        }),
++      },
++    };
++    const notificationsService = {
++      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
++    };
++    const consumer = new ApplicationsConsumer(
++      prisma as never,
++      { subscribe: jest.fn() } as never,
++      { markForRetry: jest.fn() } as never,
++      notificationsService as never,
++    );
++
++    await consumer.handleMessage({
++      applicationId: 'application-1',
++      status: 'COMPLETED',
++      result: { overall_score: 70 },
++    });
++
++    expect(notificationsService.createNotification).toHaveBeenCalledTimes(1);
++    expect(notificationsService.createNotification).toHaveBeenCalledWith(
++      expect.objectContaining({
++        recipientUserId: 'rec-user-1',
++        type: 'MATCHING_COMPLETED',
++      }),
++    );
++  });
+ });
+diff --git a/backend/src/modules/applications/applications.consumer.ts b/backend/src/modules/applications/applications.consumer.ts
+index fbe7c41..733fe6a 100644
+--- a/backend/src/modules/applications/applications.consumer.ts
++++ b/backend/src/modules/applications/applications.consumer.ts
+@@ -4,6 +4,7 @@ import {
+   ApplicationProcessingStatus,
+   HrDecision,
+   MatchLevel,
++  NotificationType,
+ } from '@prisma/client';
+ import { z } from 'zod';
+ import { PrismaService } from '../../database/prisma.service';
+@@ -13,6 +14,7 @@ import {
+   RABBITMQ_ROUTING_KEYS,
+ } from '../../infrastructure/rabbitmq/rabbitmq.constants';
+ import { ApplicationEvaluationService } from './application-evaluation.service';
++import { NotificationsService } from '../notifications/notifications.service';
+ import { AiResultSchema } from './dto/ai-result.dto';
+ 
+ const EvaluationResultMessageSchema = z.object({
+@@ -30,6 +32,7 @@ export class ApplicationsConsumer implements OnModuleInit {
+     private readonly prisma: PrismaService,
+     private readonly rabbitMQService: RabbitMQService,
+     private readonly evaluationService: ApplicationEvaluationService,
++    private readonly notificationsService?: NotificationsService,
+   ) {}
+ 
+   onModuleInit(): void {
+@@ -71,11 +74,10 @@ export class ApplicationsConsumer implements OnModuleInit {
+         ) as MatchLevel;
+         const experienceAssessment = validatedResult.experience_assessment;
+ 
+-        await this.prisma.$transaction(async (prisma) => {
++        const { promoted } = await this.prisma.$transaction(async (prisma) => {
+           await prisma.aiMatchingResult.deleteMany({
+             where: { applicationId },
+           });
+-
+           await prisma.aiMatchingResult.create({
+             data: {
+               applicationId,
+@@ -165,7 +167,15 @@ export class ApplicationsConsumer implements OnModuleInit {
+               },
+             });
+           }
++
++          return { promoted: promoted.count === 1 };
+         });
++
++        await this.notifyEvaluationCompleted(
++          applicationId,
++          validatedResult.overall_score,
++          promoted,
++        );
+         if (experienceAssessment) {
+           this.logger.log(
+             JSON.stringify({
+@@ -209,6 +219,74 @@ export class ApplicationsConsumer implements OnModuleInit {
+     }
+   }
+ 
++  /**
++   * Notify the recruiter that AI scoring finished and — when the application
++   * was auto-promoted RECEIVED → SCREENING — notify the candidate too.
++   * Failures here must never break evaluation persistence (already committed).
++   */
++  private async notifyEvaluationCompleted(
++    applicationId: string,
++    overallScore: number,
++    promoted: boolean,
++  ): Promise<void> {
++    if (!this.notificationsService) {
++      return;
++    }
++    try {
++      const app = await this.prisma.application.findUnique({
++        where: { id: applicationId },
++        select: {
++          candidate: { select: { userId: true, fullName: true } },
++          job: {
++            select: {
++              title: true,
++              recruiter: { select: { userId: true } },
++            },
++          },
++        },
++      });
++      const candidateName = app?.candidate?.fullName ?? 'Ứng viên';
++      const jobTitle = app?.job?.title ?? '';
++      const score = Math.round(Number(overallScore));
++
++      if (app?.job?.recruiter?.userId) {
++        await this.notificationsService.createNotification({
++          recipientUserId: app.job.recruiter.userId,
++          applicationId,
++          type: NotificationType.MATCHING_COMPLETED,
++          title: `AI đã chấm xong: ${candidateName}`,
++          message: `Hồ sơ của ${candidateName} cho vị trí "${jobTitle}" đạt ${score} điểm.`,
++          payload: {
++            applicationId,
++            candidateName,
++            jobTitle,
++            overallScore: score,
++          },
++        });
++      }
++
++      if (promoted && app?.candidate?.userId) {
++        await this.notificationsService.createNotification({
++          recipientUserId: app.candidate.userId,
++          applicationId,
++          type: NotificationType.APPLICATION_STATUS_CHANGED,
++          title: `Cập nhật trạng thái hồ sơ: ${jobTitle}`,
++          message: `Hồ sơ ứng tuyển của bạn đã được chuyển sang giai đoạn "Sơ loại hồ sơ".`,
++          payload: {
++            applicationId,
++            previousStage: ApplicationStage.RECEIVED,
++            newStage: ApplicationStage.SCREENING,
++            jobTitle,
++          },
++        });
++      }
++    } catch (error) {
++      this.logger.error(
++        `Failed to send evaluation-completed notifications for application ${applicationId}: ${this.errorMessage(error)}`,
++      );
++    }
++  }
++
+   private errorMessage(error: unknown): string {
+     return error instanceof Error ? error.message : 'Unknown error';
+   }
+diff --git a/backend/src/modules/applications/applications.service.spec.ts b/backend/src/modules/applications/applications.service.spec.ts
+index 5890c7c..62f4fe8 100644
+--- a/backend/src/modules/applications/applications.service.spec.ts
++++ b/backend/src/modules/applications/applications.service.spec.ts
+@@ -258,6 +258,38 @@ describe('ApplicationsService', () => {
+     );
+   });
+ 
++  it('notifies the recruiter when a candidate applies', async () => {
++    const { prisma, evaluationService, entitlements } = createDependencies();
++    const notificationsService = {
++      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
++    };
++    const service = new ApplicationsService(
++      prisma as never,
++      evaluationService as never,
++      {} as never,
++      entitlements as never,
++      new EvaluationPayloadBuilder() as never,
++      notificationsService as never,
++    );
++
++    const result = await service.applyForJob(
++      candidateProfile.userId,
++      { jobId: job.id },
++      now,
++    );
++
++    expect(result.applicationId).toBe('application-1');
++    expect(notificationsService.createNotification).toHaveBeenCalledWith(
++      expect.objectContaining({
++        recipientUserId: 'recruiter-user-1',
++        type: 'APPLICATION_STATUS_CHANGED',
++        applicationId: 'application-1',
++        title: expect.stringContaining('Backend Engineer'),
++        message: expect.stringContaining('Nguyen Van A'),
++      }),
++    );
++  });
++
+   it('rejects a resume that is not owned by the current candidate', async () => {
+     const { prisma, evaluationService, entitlements } = createDependencies();
+     prisma.resume.findFirst.mockResolvedValue(null);
+diff --git a/backend/src/modules/applications/applications.service.ts b/backend/src/modules/applications/applications.service.ts
+index 4ee7b44..944a79b 100644
+--- a/backend/src/modules/applications/applications.service.ts
++++ b/backend/src/modules/applications/applications.service.ts
+@@ -289,6 +289,23 @@ export class ApplicationsService {
+       job.recruiter.userId,
+     );
+ 
++    if (this.notificationsService && job.recruiter?.userId) {
++      await this.notificationsService.createNotification({
++        recipientUserId: job.recruiter.userId,
++        applicationId: application.id,
++        type: NotificationType.APPLICATION_STATUS_CHANGED,
++        title: `Hồ sơ ứng tuyển mới: ${job.title}`,
++        message: `${candidateProfile.fullName} vừa ứng tuyển vào vị trí "${job.title}".`,
++        payload: {
++          applicationId: application.id,
++          candidateId: candidateProfile.id,
++          candidateName: candidateProfile.fullName,
++          jobId: job.id,
++          jobTitle: job.title,
++        },
++      });
++    }
++
+     return {
+       message: published
+         ? 'Ứng tuyển thành công. Đang phân tích hồ sơ...'
+diff --git a/backend/src/modules/applications/retry-application-evaluations.use-case.spec.ts b/backend/src/modules/applications/retry-application-evaluations.use-case.spec.ts
+index 709c061..fbdedc0 100644
+--- a/backend/src/modules/applications/retry-application-evaluations.use-case.spec.ts
++++ b/backend/src/modules/applications/retry-application-evaluations.use-case.spec.ts
+@@ -17,11 +17,15 @@ describe('RetryApplicationEvaluationsUseCase', () => {
+           .fn()
+           .mockResolvedValueOnce({ count: 0 })
+           .mockResolvedValueOnce({ count: 1 }),
+-        findMany: jest.fn().mockResolvedValue([application]),
++        findMany: jest
++          .fn()
++          .mockResolvedValueOnce([]) // stuck-exhausted scan
++          .mockResolvedValue([application]), // retry-eligible scan
+       },
+     };
+     const evaluationService = {
+       publishClaimedApplication: jest.fn().mockResolvedValue(true),
++      notifyEvaluationExhausted: jest.fn().mockResolvedValue(undefined),
+     };
+     const useCase = new RetryApplicationEvaluationsUseCase(
+       prisma as never,
+@@ -53,5 +57,36 @@ describe('RetryApplicationEvaluationsUseCase', () => {
+       2,
+       now,
+     );
++    expect(evaluationService.notifyEvaluationExhausted).not.toHaveBeenCalled();
++  });
++
++  it('notifies the recruiter when stuck evaluations exhaust retries', async () => {
++    const now = new Date('2026-08-09T10:00:00.000Z');
++    const stuck = { id: 'application-9', evaluationAttempts: 5 };
++    const prisma = {
++      application: {
++        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
++        findMany: jest
++          .fn()
++          .mockResolvedValueOnce([stuck]) // stuck-exhausted scan
++          .mockResolvedValue([]), // retry-eligible scan
++      },
++    };
++    const evaluationService = {
++      publishClaimedApplication: jest.fn(),
++      notifyEvaluationExhausted: jest.fn().mockResolvedValue(undefined),
++    };
++    const useCase = new RetryApplicationEvaluationsUseCase(
++      prisma as never,
++      evaluationService as never,
++    );
++
++    await useCase.execute(now);
++
++    expect(evaluationService.notifyEvaluationExhausted).toHaveBeenCalledWith(
++      'application-9',
++      5,
++    );
++    expect(evaluationService.publishClaimedApplication).not.toHaveBeenCalled();
+   });
+ });
+diff --git a/backend/src/modules/applications/retry-application-evaluations.use-case.ts b/backend/src/modules/applications/retry-application-evaluations.use-case.ts
+index f5b9951..d69f058 100644
+--- a/backend/src/modules/applications/retry-application-evaluations.use-case.ts
++++ b/backend/src/modules/applications/retry-application-evaluations.use-case.ts
+@@ -27,6 +27,18 @@ export class RetryApplicationEvaluationsUseCase {
+   async execute(now = new Date()): Promise<number> {
+     const stuckCutoff = new Date(now.getTime() - STUCK_EVALUATION_AFTER_MS);
+ 
++    // Stuck + attempts exhausted → FAILED. Notify the recruiter for each one
++    // (notifyEvaluationExhausted re-checks the FAILED status, so a concurrent
++    // completion between the find and the update cannot cause a wrong alert).
++    const stuckExhausted = await this.prisma.application.findMany({
++      where: {
++        processingStatus: ApplicationProcessingStatus.MATCHING,
++        evaluationAttempts: { gte: MAX_EVALUATION_ATTEMPTS },
++        updatedAt: { lte: stuckCutoff },
++      },
++      select: { id: true, evaluationAttempts: true },
++    });
++
+     await this.prisma.application.updateMany({
+       where: {
+         processingStatus: ApplicationProcessingStatus.MATCHING,
+@@ -41,6 +53,13 @@ export class RetryApplicationEvaluationsUseCase {
+       },
+     });
+ 
++    for (const stuck of stuckExhausted) {
++      await this.evaluationService.notifyEvaluationExhausted(
++        stuck.id,
++        stuck.evaluationAttempts,
++      );
++    }
++
+     const applications = await this.prisma.application.findMany({
+       where: {
+         evaluationAttempts: { lt: MAX_EVALUATION_ATTEMPTS },

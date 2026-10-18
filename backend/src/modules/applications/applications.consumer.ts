@@ -4,6 +4,7 @@ import {
   ApplicationProcessingStatus,
   HrDecision,
   MatchLevel,
+  NotificationType,
 } from '@prisma/client';
 import { z } from 'zod';
 import { PrismaService } from '../../database/prisma.service';
@@ -13,6 +14,7 @@ import {
   RABBITMQ_ROUTING_KEYS,
 } from '../../infrastructure/rabbitmq/rabbitmq.constants';
 import { ApplicationEvaluationService } from './application-evaluation.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { AiResultSchema } from './dto/ai-result.dto';
 
 const EvaluationResultMessageSchema = z.object({
@@ -30,6 +32,7 @@ export class ApplicationsConsumer implements OnModuleInit {
     private readonly prisma: PrismaService,
     private readonly rabbitMQService: RabbitMQService,
     private readonly evaluationService: ApplicationEvaluationService,
+    private readonly notificationsService?: NotificationsService,
   ) {}
 
   onModuleInit(): void {
@@ -71,11 +74,10 @@ export class ApplicationsConsumer implements OnModuleInit {
         ) as MatchLevel;
         const experienceAssessment = validatedResult.experience_assessment;
 
-        await this.prisma.$transaction(async (prisma) => {
+        const { promoted } = await this.prisma.$transaction(async (prisma) => {
           await prisma.aiMatchingResult.deleteMany({
             where: { applicationId },
           });
-
           await prisma.aiMatchingResult.create({
             data: {
               applicationId,
@@ -165,7 +167,15 @@ export class ApplicationsConsumer implements OnModuleInit {
               },
             });
           }
+
+          return { promoted: promoted.count === 1 };
         });
+
+        await this.notifyEvaluationCompleted(
+          applicationId,
+          validatedResult.overall_score,
+          promoted,
+        );
         if (experienceAssessment) {
           this.logger.log(
             JSON.stringify({
@@ -205,6 +215,74 @@ export class ApplicationsConsumer implements OnModuleInit {
     } catch (caughtError: unknown) {
       this.logger.error(
         `Failed to schedule retry for application ${applicationId}: ${this.errorMessage(caughtError)}`,
+      );
+    }
+  }
+
+  /**
+   * Notify the recruiter that AI scoring finished and — when the application
+   * was auto-promoted RECEIVED → SCREENING — notify the candidate too.
+   * Failures here must never break evaluation persistence (already committed).
+   */
+  private async notifyEvaluationCompleted(
+    applicationId: string,
+    overallScore: number,
+    promoted: boolean,
+  ): Promise<void> {
+    if (!this.notificationsService) {
+      return;
+    }
+    try {
+      const app = await this.prisma.application.findUnique({
+        where: { id: applicationId },
+        select: {
+          candidate: { select: { userId: true, fullName: true } },
+          job: {
+            select: {
+              title: true,
+              recruiter: { select: { userId: true } },
+            },
+          },
+        },
+      });
+      const candidateName = app?.candidate?.fullName ?? 'Ứng viên';
+      const jobTitle = app?.job?.title ?? '';
+      const score = Math.round(Number(overallScore));
+
+      if (app?.job?.recruiter?.userId) {
+        await this.notificationsService.createNotification({
+          recipientUserId: app.job.recruiter.userId,
+          applicationId,
+          type: NotificationType.MATCHING_COMPLETED,
+          title: `AI đã chấm xong: ${candidateName}`,
+          message: `Hồ sơ của ${candidateName} cho vị trí "${jobTitle}" đạt ${score} điểm.`,
+          payload: {
+            applicationId,
+            candidateName,
+            jobTitle,
+            overallScore: score,
+          },
+        });
+      }
+
+      if (promoted && app?.candidate?.userId) {
+        await this.notificationsService.createNotification({
+          recipientUserId: app.candidate.userId,
+          applicationId,
+          type: NotificationType.APPLICATION_STATUS_CHANGED,
+          title: `Cập nhật trạng thái hồ sơ: ${jobTitle}`,
+          message: `Hồ sơ ứng tuyển của bạn đã được chuyển sang giai đoạn "Sơ loại hồ sơ".`,
+          payload: {
+            applicationId,
+            previousStage: ApplicationStage.RECEIVED,
+            newStage: ApplicationStage.SCREENING,
+            jobTitle,
+          },
+        });
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to send evaluation-completed notifications for application ${applicationId}: ${this.errorMessage(error)}`,
       );
     }
   }

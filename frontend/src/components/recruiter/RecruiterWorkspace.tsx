@@ -322,6 +322,9 @@ export function RecruiterWorkspace({
                           <CreditCard className="size-4 text-[#64748B]" />
                           Gói dịch vụ & Hạn mức
                         </Link>
+                        <Link href="/recruiter/talent-pool" className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#0F172A] hover:bg-[#F8FAFC] rounded-lg">
+                          <User className="size-4 text-[#64748B]" /> Ứng viên đang tìm việc
+                        </Link>
                         <button 
                           onClick={handleLogout}
                           className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors mt-1"

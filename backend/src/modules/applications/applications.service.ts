@@ -289,6 +289,23 @@ export class ApplicationsService {
       job.recruiter.userId,
     );
 
+    if (this.notificationsService && job.recruiter?.userId) {
+      await this.notificationsService.createNotification({
+        recipientUserId: job.recruiter.userId,
+        applicationId: application.id,
+        type: NotificationType.APPLICATION_STATUS_CHANGED,
+        title: `Hồ sơ ứng tuyển mới: ${job.title}`,
+        message: `${candidateProfile.fullName} vừa ứng tuyển vào vị trí "${job.title}".`,
+        payload: {
+          applicationId: application.id,
+          candidateId: candidateProfile.id,
+          candidateName: candidateProfile.fullName,
+          jobId: job.id,
+          jobTitle: job.title,
+        },
+      });
+    }
+
     return {
       message: published
         ? 'Ứng tuyển thành công. Đang phân tích hồ sơ...'

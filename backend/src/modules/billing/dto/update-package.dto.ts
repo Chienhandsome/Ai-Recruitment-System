@@ -95,6 +95,11 @@ export class UpdatePackageDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsBoolean()
+  jobSeekingAccess?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
   jdFitAnalysis?: boolean;
 
   @ApiPropertyOptional()

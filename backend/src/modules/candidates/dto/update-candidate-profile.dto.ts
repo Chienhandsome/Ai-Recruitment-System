@@ -164,7 +164,7 @@ export class UpdateCandidateProfileDto {
 
   @ApiPropertyOptional({
     description:
-      'Cho phép hồ sơ xuất hiện trong kho CV công khai (Premium talent pool). Liên hệ vẫn bị ẩn cho đến khi HR mở khóa.',
+      'Chỉ cho phép false để ngừng chia sẻ. Muốn bật, dùng PATCH /candidates/me/job-seeking với xác nhận đồng ý.',
   })
   @IsOptional()
   @IsBoolean()

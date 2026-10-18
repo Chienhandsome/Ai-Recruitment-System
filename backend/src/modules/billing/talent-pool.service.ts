@@ -4,13 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
-  CandidateProfileStatus,
   EntitlementStatus,
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { EntitlementsService } from './entitlements.service';
 import { QueryTalentPoolDto } from './dto/query-talent-pool.dto';
+import { talentPoolVisibilityWhere } from './talent-pool-visibility';
 
 @Injectable()
 export class TalentPoolService {
@@ -23,10 +23,7 @@ export class TalentPoolService {
     await this.entitlements.assertTalentPool(userId);
 
     const where: Prisma.CandidateProfileWhereInput = {
-      isProfilePublic: true,
-      status: {
-        in: [CandidateProfileStatus.READY, CandidateProfileStatus.NEEDS_REVIEW],
-      },
+      ...talentPoolVisibilityWhere(),
       ...(query.search?.trim()
         ? {
             OR: [
@@ -142,7 +139,7 @@ export class TalentPoolService {
     const profile = await this.prisma.candidateProfile.findFirst({
       where: {
         id: candidateProfileId,
-        isProfilePublic: true,
+        ...talentPoolVisibilityWhere(),
       },
       select: {
         id: true,
@@ -211,7 +208,7 @@ export class TalentPoolService {
     const profile = await this.prisma.candidateProfile.findFirst({
       where: {
         id: candidateProfileId,
-        isProfilePublic: true,
+        ...talentPoolVisibilityWhere(),
       },
       select: { id: true },
     });
@@ -248,10 +245,19 @@ export class TalentPoolService {
 
     try {
       await this.prisma.$transaction(async (tx) => {
+        const now = new Date();
+        const stillVisible = await tx.candidateProfile.findFirst({
+          where: { id: candidateProfileId, ...talentPoolVisibilityWhere(now) },
+          select: { id: true },
+        });
+        if (!stillVisible) throw new NotFoundException('Ứng viên đã ngừng hiển thị hồ sơ.');
         const updated = await tx.packageEntitlement.updateMany({
           where: {
             id: entitlementId,
             status: EntitlementStatus.ACTIVE,
+            startsAt: { lte: now },
+            endsAt: { gt: now },
+            talentPoolAccess: true,
             cvUnlockRemaining: { gt: 0 },
           },
           data: { cvUnlockRemaining: { decrement: 1 } },

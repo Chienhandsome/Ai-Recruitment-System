@@ -27,6 +27,18 @@ export class RetryApplicationEvaluationsUseCase {
   async execute(now = new Date()): Promise<number> {
     const stuckCutoff = new Date(now.getTime() - STUCK_EVALUATION_AFTER_MS);
 
+    // Stuck + attempts exhausted → FAILED. Notify the recruiter for each one
+    // (notifyEvaluationExhausted re-checks the FAILED status, so a concurrent
+    // completion between the find and the update cannot cause a wrong alert).
+    const stuckExhausted = await this.prisma.application.findMany({
+      where: {
+        processingStatus: ApplicationProcessingStatus.MATCHING,
+        evaluationAttempts: { gte: MAX_EVALUATION_ATTEMPTS },
+        updatedAt: { lte: stuckCutoff },
+      },
+      select: { id: true, evaluationAttempts: true },
+    });
+
     await this.prisma.application.updateMany({
       where: {
         processingStatus: ApplicationProcessingStatus.MATCHING,
@@ -40,6 +52,13 @@ export class RetryApplicationEvaluationsUseCase {
         updatedAt: now,
       },
     });
+
+    for (const stuck of stuckExhausted) {
+      await this.evaluationService.notifyEvaluationExhausted(
+        stuck.id,
+        stuck.evaluationAttempts,
+      );
+    }
 
     const applications = await this.prisma.application.findMany({
       where: {

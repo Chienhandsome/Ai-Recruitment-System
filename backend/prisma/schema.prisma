@@ -619,6 +619,11 @@ model CandidateProfile {
   portfolioUrl        String?                @map("portfolio_url")
   /// When true, profile may appear in the Premium talent pool (contact still gated by unlock).
   isProfilePublic     Boolean                @default(false) @map("is_profile_public")
+  jobSeekingEnabled   Boolean                @default(false) @map("job_seeking_enabled")
+  jobSeekingConfirmedAt DateTime?            @map("job_seeking_confirmed_at")
+  jobSeekingUntil     DateTime?              @map("job_seeking_until")
+  jobSeekingEntitlementId String?            @map("job_seeking_entitlement_id")
+  jobSeekingEntitlement PackageEntitlement?  @relation("JobSeekingEntitlement", fields: [jobSeekingEntitlementId], references: [id], onDelete: SetNull)
   primaryResumeId     String?                @unique @map("primary_resume_id")
   primaryResume       Resume?                @relation("PrimaryResume", fields: [primaryResumeId], references: [id], onDelete: SetNull)
   createdAt           DateTime               @default(now()) @map("created_at")
@@ -642,6 +647,7 @@ model CandidateProfile {
   @@index([phone])
   @@index([status])
   @@index([isProfilePublic, status])
+  @@index([jobSeekingEnabled, jobSeekingUntil])
   @@map("candidate_profiles")
 }
 
@@ -1273,6 +1279,7 @@ model ServicePackage {
   advancedFilters  Boolean         @default(false) @map("advanced_filters")
   recruitmentStats Boolean         @default(false) @map("recruitment_stats")
   talentPoolAccess Boolean         @default(false) @map("talent_pool_access")
+  jobSeekingAccess Boolean         @default(false) @map("job_seeking_access")
   /// Candidate Pro: CV–JD fit analysis
   jdFitAnalysis         Boolean @default(false) @map("jd_fit_analysis")
   cvImproveSuggestions  Boolean @default(false) @map("cv_improve_suggestions")
@@ -1359,6 +1366,7 @@ model PackageEntitlement {
   advancedFilters   Boolean            @default(false) @map("advanced_filters")
   recruitmentStats  Boolean            @default(false) @map("recruitment_stats")
   talentPoolAccess  Boolean            @default(false) @map("talent_pool_access")
+  jobSeekingAccess Boolean             @default(false) @map("job_seeking_access")
   jdFitAnalysis         Boolean @default(false) @map("jd_fit_analysis")
   cvImproveSuggestions  Boolean @default(false) @map("cv_improve_suggestions")
   jdFitRemaining        Int     @default(0) @map("jd_fit_remaining")
@@ -1368,6 +1376,7 @@ model PackageEntitlement {
   updatedAt         DateTime           @updatedAt @map("updated_at")
 
   cvUnlocks  CvUnlock[]
+  jobSeekingCandidates CandidateProfile[] @relation("JobSeekingEntitlement")
   usageLogs  PackageUsageLog[]
   jdFitAnalyses CandidateJdFitAnalysis[]
 

@@ -38,6 +38,7 @@ export type EntitlementFeatures = {
   advancedFilters: boolean;
   recruitmentStats: boolean;
   talentPoolAccess: boolean;
+  jobSeekingAccess: boolean;
   jdFitAnalysis: boolean;
   cvImproveSuggestions: boolean;
   jdFitRemaining: number;
@@ -56,6 +57,7 @@ export type PackageFeaturesSnapshot = {
   advancedFilters: boolean;
   recruitmentStats: boolean;
   talentPoolAccess: boolean;
+  jobSeekingAccess?: boolean;
   jdFitAnalysis: boolean;
   cvImproveSuggestions: boolean;
   jdFitQuota: number;
@@ -186,6 +188,7 @@ export function snapshotFromPackage(pkg: {
   advancedFilters: boolean;
   recruitmentStats: boolean;
   talentPoolAccess: boolean;
+  jobSeekingAccess?: boolean;
   jdFitAnalysis: boolean;
   cvImproveSuggestions: boolean;
   jdFitQuota: number;
@@ -201,6 +204,7 @@ export function snapshotFromPackage(pkg: {
     advancedFilters: pkg.advancedFilters,
     recruitmentStats: pkg.recruitmentStats,
     talentPoolAccess: pkg.talentPoolAccess,
+    jobSeekingAccess: pkg.jobSeekingAccess ?? false,
     jdFitAnalysis: pkg.jdFitAnalysis,
     cvImproveSuggestions: pkg.cvImproveSuggestions,
     jdFitQuota: pkg.jdFitQuota,

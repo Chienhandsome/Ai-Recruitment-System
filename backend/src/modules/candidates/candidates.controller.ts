@@ -20,6 +20,10 @@ import { UpdateCandidateSkillsDto } from './dto/update-candidate-skills.dto';
 import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { CandidateJobSeekingService } from './candidate-job-seeking.service';
+import { UpdateJobSeekingDto } from './dto/update-job-seeking.dto';
 import type { AuthenticatedUser } from '../auth/auth.types';
 
 @ApiTags('Candidates')
@@ -27,7 +31,26 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 @UseGuards(SupabaseAuthGuard)
 @Controller('candidates')
 export class CandidatesController {
-  constructor(private readonly candidatesService: CandidatesService) {}
+  constructor(
+    private readonly candidatesService: CandidatesService,
+    private readonly jobSeeking: CandidateJobSeekingService,
+  ) {}
+
+  @Get('me/job-seeking')
+  @UseGuards(RolesGuard)
+  @Roles('CANDIDATE')
+  @ApiOperation({ summary: 'Get current job-seeking visibility and eligibility' })
+  getJobSeeking(@CurrentUser() user: AuthenticatedUser) {
+    return this.jobSeeking.getStatus(user.id);
+  }
+
+  @Patch('me/job-seeking')
+  @UseGuards(RolesGuard)
+  @Roles('CANDIDATE')
+  @ApiOperation({ summary: 'Opt in to paid talent-pool visibility or withdraw consent' })
+  updateJobSeeking(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateJobSeekingDto) {
+    return this.jobSeeking.update(user.id, dto);
+  }
 
   // ─── Profile ────────────────────────────────────────────────────────
 

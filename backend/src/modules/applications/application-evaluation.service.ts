@@ -1,9 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ApplicationProcessingStatus, type Prisma } from '@prisma/client';
+import {
+  ApplicationProcessingStatus,
+  NotificationType,
+  type Prisma,
+} from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { RabbitMQService } from '../../infrastructure/rabbitmq/rabbitmq.service';
 import { RABBITMQ_ROUTING_KEYS } from '../../infrastructure/rabbitmq/rabbitmq.constants';
 import { createEvaluationMessage } from './application-evaluation.snapshot';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export const MAX_EVALUATION_ATTEMPTS = 5;
 export const EVALUATION_RETRY_BASE_DELAY_MS = 60_000;
@@ -16,6 +21,7 @@ export class ApplicationEvaluationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly rabbitMQService: RabbitMQService,
+    private readonly notificationsService?: NotificationsService,
   ) {}
 
   async dispatchNewApplication(
@@ -96,22 +102,12 @@ export class ApplicationEvaluationService {
     knownAttempts?: number,
     now = new Date(),
   ): Promise<void> {
-    let attempts = knownAttempts;
+    const attempts = await this.resolveAttemptCount(
+      applicationId,
+      knownAttempts,
+    );
     if (attempts === undefined) {
-      const application = await this.prisma.application.findUnique({
-        where: { id: applicationId },
-        select: {
-          evaluationAttempts: true,
-          processingStatus: true,
-        },
-      });
-      if (
-        !application ||
-        application.processingStatus === ApplicationProcessingStatus.COMPLETED
-      ) {
-        return;
-      }
-      attempts = application.evaluationAttempts;
+      return;
     }
 
     const exhausted = attempts >= MAX_EVALUATION_ATTEMPTS;
@@ -134,6 +130,86 @@ export class ApplicationEvaluationService {
         updatedAt: now,
       },
     });
+
+    if (exhausted) {
+      await this.notifyEvaluationExhausted(applicationId, attempts);
+    }
+  }
+
+  /**
+   * Tell the recruiter that AI scoring failed permanently so they can score
+   * the application manually. Never throws — notification is best-effort.
+   */
+  async notifyEvaluationExhausted(
+    applicationId: string,
+    attempts: number,
+  ): Promise<void> {
+    if (!this.notificationsService) {
+      return;
+    }
+    try {
+      const app = await this.prisma.application.findUnique({
+        where: { id: applicationId },
+        select: {
+          processingStatus: true,
+          candidate: { select: { fullName: true } },
+          job: {
+            select: {
+              title: true,
+              recruiter: { select: { userId: true } },
+            },
+          },
+        },
+      });
+      if (
+        !app ||
+        app.processingStatus !== ApplicationProcessingStatus.FAILED ||
+        !app.job?.recruiter?.userId
+      ) {
+        return;
+      }
+      const candidateName = app.candidate?.fullName ?? 'Ứng viên';
+      await this.notificationsService.createNotification({
+        recipientUserId: app.job.recruiter.userId,
+        applicationId,
+        type: NotificationType.SYSTEM_ALERT,
+        title: `AI chấm thất bại: ${candidateName}`,
+        message: `Hệ thống không thể chấm điểm hồ sơ của ${candidateName} cho vị trí "${app.job.title}" sau ${attempts} lần thử. Vui lòng chấm thủ công.`,
+        payload: {
+          applicationId,
+          attempts,
+          candidateName,
+          jobTitle: app.job.title,
+        },
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to send evaluation-exhausted notification for application ${applicationId}: ${this.errorMessage(error)}`,
+      );
+    }
+  }
+
+  private async resolveAttemptCount(
+    applicationId: string,
+    knownAttempts?: number,
+  ): Promise<number | undefined> {
+    if (knownAttempts !== undefined) {
+      return knownAttempts;
+    }
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      select: {
+        evaluationAttempts: true,
+        processingStatus: true,
+      },
+    });
+    if (
+      !application ||
+      application.processingStatus === ApplicationProcessingStatus.COMPLETED
+    ) {
+      return undefined;
+    }
+    return application.evaluationAttempts;
   }
 
   private retryDelayMs(attempts: number): number {

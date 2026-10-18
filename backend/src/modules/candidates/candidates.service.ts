@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   Logger,
@@ -138,6 +139,9 @@ export class CandidatesService {
    * Update candidate profile info and optionally the linked User's name/phone.
    */
   async updateProfile(userId: string, dto: UpdateCandidateProfileDto) {
+    if (dto.isProfilePublic === true) {
+      throw new BadRequestException('Vui lòng bật tìm việc trong mục Tìm việc chủ động để xác nhận quyền lợi gói và đồng ý chia sẻ hồ sơ.');
+    }
     const profile = await this.prisma.candidateProfile.findUnique({
       where: { userId },
     });
@@ -175,8 +179,12 @@ export class CandidatesService {
       profileData.githubUrl = dto.githubUrl || null;
     if (dto.portfolioUrl !== undefined)
       profileData.portfolioUrl = dto.portfolioUrl || null;
-    if (dto.isProfilePublic !== undefined)
-      profileData.isProfilePublic = dto.isProfilePublic;
+    if (dto.isProfilePublic === false || dto.desiredTitle?.trim() === '' || dto.professionalSummary?.trim() === '') {
+      profileData.isProfilePublic = false;
+      profileData.jobSeekingEnabled = false;
+      profileData.jobSeekingUntil = null;
+      profileData.jobSeekingEntitlementId = null;
+    }
 
     const updated = await this.prisma.$transaction(async (tx) => {
       // 1. Update Profile scalars

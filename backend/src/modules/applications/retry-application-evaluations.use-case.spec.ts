@@ -17,11 +17,15 @@ describe('RetryApplicationEvaluationsUseCase', () => {
           .fn()
           .mockResolvedValueOnce({ count: 0 })
           .mockResolvedValueOnce({ count: 1 }),
-        findMany: jest.fn().mockResolvedValue([application]),
+        findMany: jest
+          .fn()
+          .mockResolvedValueOnce([]) // stuck-exhausted scan
+          .mockResolvedValue([application]), // retry-eligible scan
       },
     };
     const evaluationService = {
       publishClaimedApplication: jest.fn().mockResolvedValue(true),
+      notifyEvaluationExhausted: jest.fn().mockResolvedValue(undefined),
     };
     const useCase = new RetryApplicationEvaluationsUseCase(
       prisma as never,
@@ -53,5 +57,36 @@ describe('RetryApplicationEvaluationsUseCase', () => {
       2,
       now,
     );
+    expect(evaluationService.notifyEvaluationExhausted).not.toHaveBeenCalled();
+  });
+
+  it('notifies the recruiter when stuck evaluations exhaust retries', async () => {
+    const now = new Date('2026-08-09T10:00:00.000Z');
+    const stuck = { id: 'application-9', evaluationAttempts: 5 };
+    const prisma = {
+      application: {
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        findMany: jest
+          .fn()
+          .mockResolvedValueOnce([stuck]) // stuck-exhausted scan
+          .mockResolvedValue([]), // retry-eligible scan
+      },
+    };
+    const evaluationService = {
+      publishClaimedApplication: jest.fn(),
+      notifyEvaluationExhausted: jest.fn().mockResolvedValue(undefined),
+    };
+    const useCase = new RetryApplicationEvaluationsUseCase(
+      prisma as never,
+      evaluationService as never,
+    );
+
+    await useCase.execute(now);
+
+    expect(evaluationService.notifyEvaluationExhausted).toHaveBeenCalledWith(
+      'application-9',
+      5,
+    );
+    expect(evaluationService.publishClaimedApplication).not.toHaveBeenCalled();
   });
 });

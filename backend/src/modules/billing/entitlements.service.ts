@@ -41,6 +41,7 @@ const packageSelect = {
   advancedFilters: true,
   recruitmentStats: true,
   talentPoolAccess: true,
+  jobSeekingAccess: true,
   jdFitAnalysis: true,
   cvImproveSuggestions: true,
   jdFitQuota: true,
@@ -62,6 +63,7 @@ type EntitlementRow = {
   advancedFilters: boolean;
   recruitmentStats: boolean;
   talentPoolAccess: boolean;
+  jobSeekingAccess: boolean;
   jdFitAnalysis: boolean;
   cvImproveSuggestions: boolean;
   jdFitRemaining: number;
@@ -100,6 +102,7 @@ export class EntitlementsService {
       where: {
         userId,
         status: EntitlementStatus.ACTIVE,
+        startsAt: { lte: new Date() },
         package: { audience },
         OR: [{ endsAt: null }, { endsAt: { gt: new Date() } }],
       },
@@ -559,6 +562,7 @@ export class EntitlementsService {
           advancedFilters: snapshot.advancedFilters,
           recruitmentStats: snapshot.recruitmentStats,
           talentPoolAccess: snapshot.talentPoolAccess,
+          jobSeekingAccess: snapshot.jobSeekingAccess ?? pkg.jobSeekingAccess,
           jdFitAnalysis: snapshot.jdFitAnalysis,
           cvImproveSuggestions: snapshot.cvImproveSuggestions,
           jdFitRemaining: snapshot.jdFitQuota,
@@ -609,6 +613,7 @@ export class EntitlementsService {
         advancedFilters: false,
         recruitmentStats: false,
         talentPoolAccess: false,
+        jobSeekingAccess: false,
         jdFitAnalysis: false,
         cvImproveSuggestions: false,
         jdFitRemaining: 0,
@@ -633,6 +638,7 @@ export class EntitlementsService {
       advancedFilters: freePackage.advancedFilters,
       recruitmentStats: freePackage.recruitmentStats,
       talentPoolAccess: freePackage.talentPoolAccess,
+      jobSeekingAccess: false,
       jdFitAnalysis: freePackage.jdFitAnalysis,
       cvImproveSuggestions: freePackage.cvImproveSuggestions,
       jdFitRemaining: 0,
@@ -662,6 +668,7 @@ export class EntitlementsService {
       advancedFilters: row.advancedFilters,
       recruitmentStats: row.recruitmentStats,
       talentPoolAccess: row.talentPoolAccess,
+      jobSeekingAccess: row.jobSeekingAccess ?? false,
       jdFitAnalysis: row.jdFitAnalysis,
       cvImproveSuggestions: row.cvImproveSuggestions,
       jdFitRemaining: row.jdFitRemaining,

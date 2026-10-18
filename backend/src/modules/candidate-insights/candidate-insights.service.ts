@@ -75,7 +75,7 @@ export class CandidateInsightsService {
     });
 
     let evaluationPayload: EvaluationRequestPayload | null = null;
-    let analysisResumeId: string;
+    let analysisResumeId: string | undefined;
 
     if (!dto.resumeId && application) {
       evaluationPayload =
@@ -136,6 +136,10 @@ export class CandidateInsightsService {
         job,
       });
       analysisResumeId = resume.id;
+    }
+
+    if (!analysisResumeId) {
+      throw new BadRequestException('Không xác định được CV để phân tích. Vui lòng chọn lại CV.');
     }
 
     // 3) Call shared AI Matching Engine — failures must not consume quota

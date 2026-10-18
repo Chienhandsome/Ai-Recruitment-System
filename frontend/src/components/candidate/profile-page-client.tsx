@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { ProfileView } from "@/components/candidate/profile-view"
 import { ProfileForm } from "@/components/candidate/profile-form"
 import { SkillsEditor } from "@/components/candidate/skills-editor"
+import { JobSeekingCard } from "@/components/candidate/JobSeekingCard"
 import type { CandidateSkillData } from "@/lib/candidate-api"
 import type { WorkExperienceData, EducationData, ProjectData, CertificateData } from "@/types/auth"
 
@@ -147,6 +148,7 @@ export function ProfilePageClient({
   return (
     <div className="space-y-6">
       {reviewNotice}
+      <JobSeekingCard onEditProfile={() => setIsEditing(true)} />
       <ProfileView
         fullName={fullName}
         email={email}

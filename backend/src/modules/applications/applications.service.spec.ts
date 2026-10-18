@@ -258,6 +258,38 @@ describe('ApplicationsService', () => {
     );
   });
 
+  it('notifies the recruiter when a candidate applies', async () => {
+    const { prisma, evaluationService, entitlements } = createDependencies();
+    const notificationsService = {
+      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
+    };
+    const service = new ApplicationsService(
+      prisma as never,
+      evaluationService as never,
+      {} as never,
+      entitlements as never,
+      new EvaluationPayloadBuilder() as never,
+      notificationsService as never,
+    );
+
+    const result = await service.applyForJob(
+      candidateProfile.userId,
+      { jobId: job.id },
+      now,
+    );
+
+    expect(result.applicationId).toBe('application-1');
+    expect(notificationsService.createNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientUserId: 'recruiter-user-1',
+        type: 'APPLICATION_STATUS_CHANGED',
+        applicationId: 'application-1',
+        title: expect.stringContaining('Backend Engineer'),
+        message: expect.stringContaining('Nguyen Van A'),
+      }),
+    );
+  });
+
   it('rejects a resume that is not owned by the current candidate', async () => {
     const { prisma, evaluationService, entitlements } = createDependencies();
     prisma.resume.findFirst.mockResolvedValue(null);

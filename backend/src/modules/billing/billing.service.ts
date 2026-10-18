@@ -78,6 +78,7 @@ export class BillingService {
         advancedFilters: dto.advancedFilters,
         recruitmentStats: dto.recruitmentStats,
         talentPoolAccess: dto.talentPoolAccess,
+        jobSeekingAccess: dto.jobSeekingAccess,
         jdFitAnalysis: dto.jdFitAnalysis,
         cvImproveSuggestions: dto.cvImproveSuggestions,
         jdFitQuota: dto.jdFitQuota,

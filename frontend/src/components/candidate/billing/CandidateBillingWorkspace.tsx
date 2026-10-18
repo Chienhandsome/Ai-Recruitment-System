@@ -83,6 +83,9 @@ function featuresOf(pkg: ServicePackage) {
   if (pkg.aiMockInterview) {
     items.push(`Mock interview AI (${pkg.mockInterviewQuota ?? 0} lượt)`);
   }
+  if (pkg.jobSeekingAccess) {
+    items.push("Tìm việc chủ động · HR có thể tìm thấy hồ sơ khi bạn bật");
+  }
   return items;
 }
 
@@ -524,6 +527,7 @@ function CandidateBillingWorkspaceContent({
             Gói hiện tại
           </p>
           <h2 className="mt-1 text-xl font-semibold">{entitlement.packageName}</h2>
+          {entitlement.jobSeekingAccess && <a href="/candidate/profile" className="mt-2 inline-block text-sm font-medium text-blue-600 underline">Quản lý trạng thái tìm việc trong hồ sơ</a>}
           <p className="mt-1 text-sm text-slate-600">
             {entitlement.endsAt
               ? `Hết hạn ${new Date(entitlement.endsAt).toLocaleDateString("vi-VN")}`

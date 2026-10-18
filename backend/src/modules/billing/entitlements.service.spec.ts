@@ -20,6 +20,7 @@ describe('EntitlementsService (candidate + shared core)', () => {
     advancedFilters: false,
     recruitmentStats: false,
     talentPoolAccess: false,
+    jobSeekingAccess: false,
     jdFitAnalysis: false,
     cvImproveSuggestions: false,
     jdFitQuota: 0,
@@ -36,6 +37,7 @@ describe('EntitlementsService (candidate + shared core)', () => {
     name: 'Candidate Pro',
     priceVnd: 69000,
     durationDays: 30,
+    jobSeekingAccess: true,
     jdFitAnalysis: true,
     cvImproveSuggestions: true,
     jdFitQuota: 10,
@@ -233,6 +235,7 @@ describe('EntitlementsService (candidate + shared core)', () => {
           aiMockInterview: true,
           mockInterviewRemaining: 5,
           jdFitRemaining: 10,
+          jobSeekingAccess: true,
         }),
       }),
     );

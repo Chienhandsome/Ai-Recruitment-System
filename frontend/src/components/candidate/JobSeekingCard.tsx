@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { BriefcaseBusiness, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -24,20 +24,28 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const requestVersion = useRef(0);
+  const mutationPending = useRef(false);
 
   const load = useCallback(async () => {
+    if (mutationPending.current) return;
+    const version = ++requestVersion.current;
     try {
       const nextStatus = await getJobSeekingStatus(await getToken());
+      if (version !== requestVersion.current) return;
       setStatus(nextStatus);
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Không tải được trạng thái tìm việc.');
+      if (version === requestVersion.current) {
+        setError(e instanceof Error ? e.message : 'Không tải được trạng thái tìm việc.');
+      }
     } finally {
-      setLoading(false);
+      if (version === requestVersion.current) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    const requests = requestVersion;
     const initialLoad = setTimeout(() => { void load(); }, 0);
     const refresh = () => {
       void load();
@@ -46,6 +54,7 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
     return () => {
       clearTimeout(initialLoad);
       window.removeEventListener('focus', refresh);
+      requests.current++;
     };
   }, [load]);
 
@@ -63,15 +72,27 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
   }, [status, load]);
 
   const update = async (enabled: boolean) => {
+    if (mutationPending.current) return;
+    mutationPending.current = true;
+    // Invalidate reads started before the mutation and pause new background reads.
+    const version = ++requestVersion.current;
     setSaving(true);
     setError(null);
     try {
-      setStatus(await updateJobSeekingStatus(await getToken(), enabled, consent));
+      const nextStatus = await updateJobSeekingStatus(await getToken(), enabled, consent);
+      if (version !== requestVersion.current) return;
+      setStatus(nextStatus);
       setConsent(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Không cập nhật được trạng thái tìm việc.');
+      if (version === requestVersion.current) {
+        setError(e instanceof Error ? e.message : 'Không cập nhật được trạng thái tìm việc.');
+      }
     } finally {
-      setSaving(false);
+      mutationPending.current = false;
+      if (version === requestVersion.current) {
+        setSaving(false);
+        setLoading(false);
+      }
     }
   };
 

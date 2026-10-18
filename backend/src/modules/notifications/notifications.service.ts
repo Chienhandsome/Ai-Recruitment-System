@@ -17,6 +17,29 @@ export class NotificationsService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Persist with the business transaction; failures must roll it back. */
+  async createNotificationOnce(
+    client: Prisma.TransactionClient,
+    eventKey: string,
+    input: CreateNotificationInput,
+  ) {
+    // ON CONFLICT DO NOTHING also handles concurrent consumers without
+    // changing an existing notification's read status or publishing an UPDATE.
+    return client.notification.createMany({
+      data: {
+        eventKey,
+        recipientUserId: input.recipientUserId,
+        applicationId: input.applicationId,
+        type: input.type ?? NotificationType.APPLICATION_STATUS_CHANGED,
+        status: NotificationStatus.UNREAD,
+        title: input.title,
+        message: input.message,
+        payload: input.payload,
+      },
+      skipDuplicates: true,
+    });
+  }
+
   async createNotification(input: CreateNotificationInput) {
     try {
       const notification = await this.prisma.notification.create({
@@ -37,7 +60,7 @@ export class NotificationsService {
       return notification;
     } catch (error) {
       this.logger.error(
-        `Failed to create notification for user ${input.recipientUserId}: ${error}`,
+        `Failed to create notification for user ${input.recipientUserId}: ${String(error)}`,
       );
       return null;
     }

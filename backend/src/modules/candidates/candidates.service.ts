@@ -179,7 +179,10 @@ export class CandidatesService {
       profileData.githubUrl = dto.githubUrl || null;
     if (dto.portfolioUrl !== undefined)
       profileData.portfolioUrl = dto.portfolioUrl || null;
-    if (dto.isProfilePublic === false || dto.desiredTitle?.trim() === '' || dto.professionalSummary?.trim() === '') {
+    const clearsRequiredField = [dto.desiredTitle, dto.professionalSummary].some(
+      (value) => value !== undefined && !value?.trim(),
+    );
+    if (dto.isProfilePublic === false || clearsRequiredField) {
       profileData.isProfilePublic = false;
       profileData.jobSeekingEnabled = false;
       profileData.jobSeekingUntil = null;

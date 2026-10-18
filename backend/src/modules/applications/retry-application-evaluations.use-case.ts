@@ -27,9 +27,8 @@ export class RetryApplicationEvaluationsUseCase {
   async execute(now = new Date()): Promise<number> {
     const stuckCutoff = new Date(now.getTime() - STUCK_EVALUATION_AFTER_MS);
 
-    // Stuck + attempts exhausted → FAILED. Notify the recruiter for each one
-    // (notifyEvaluationExhausted re-checks the FAILED status, so a concurrent
-    // completion between the find and the update cannot cause a wrong alert).
+    // Each transition to FAILED and its alert commit together. A failed write
+    // leaves MATCHING intact so the next scheduler run can try again.
     const stuckExhausted = await this.prisma.application.findMany({
       where: {
         processingStatus: ApplicationProcessingStatus.MATCHING,
@@ -37,27 +36,23 @@ export class RetryApplicationEvaluationsUseCase {
         updatedAt: { lte: stuckCutoff },
       },
       select: { id: true, evaluationAttempts: true },
-    });
-
-    await this.prisma.application.updateMany({
-      where: {
-        processingStatus: ApplicationProcessingStatus.MATCHING,
-        evaluationAttempts: { gte: MAX_EVALUATION_ATTEMPTS },
-        updatedAt: { lte: stuckCutoff },
-      },
-      data: {
-        processingStatus: ApplicationProcessingStatus.FAILED,
-        nextEvaluationRetryAt: null,
-        evaluationError: `Evaluation retry limit reached after ${MAX_EVALUATION_ATTEMPTS} attempts without a result.`,
-        updatedAt: now,
-      },
+      orderBy: { updatedAt: 'asc' },
+      take: MAX_RETRY_BATCH_SIZE,
     });
 
     for (const stuck of stuckExhausted) {
-      await this.evaluationService.notifyEvaluationExhausted(
-        stuck.id,
-        stuck.evaluationAttempts,
-      );
+      try {
+        await this.evaluationService.failStuckEvaluation(
+          stuck.id,
+          stuck.evaluationAttempts,
+          stuckCutoff,
+          now,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to persist exhausted evaluation ${stuck.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
     }
 
     const applications = await this.prisma.application.findMany({

@@ -151,4 +151,61 @@ describe('TalentPoolService paid visibility and contact privacy', () => {
     );
     expect(prisma.cvUnlock.create).not.toHaveBeenCalled();
   });
+
+  it('returns the contact read inside the transaction without a fallible post-commit read', async () => {
+    const tx = {
+      candidateProfile: { findFirst: jest.fn().mockResolvedValue(profile) },
+      packageEntitlement: prisma.packageEntitlement,
+      cvUnlock: {
+        create: jest.fn().mockResolvedValue({ id: 'unlock' }),
+        findUnique: jest.fn().mockResolvedValue({ id: 'unlock' }),
+      },
+    };
+    // The candidate withdraws as the transaction commits. The authorized
+    // response must already exist; a new read would return 404 after charging.
+    prisma.candidateProfile.findFirst
+      .mockResolvedValueOnce(profile)
+      .mockResolvedValue(null);
+    prisma.$transaction.mockImplementation(
+      async (fn: (client: typeof tx) => unknown) => fn(tx),
+    );
+
+    const result = await service.unlock('hr', 'candidate');
+
+    expect(result.contact?.email).toBe(profile.email);
+    expect(prisma.candidateProfile.findFirst).toHaveBeenCalledTimes(1);
+    expect(tx.cvUnlock.create).toHaveBeenCalledTimes(1);
+    expect(entitlements.assertTalentPool).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['withdrawn', 'read failure'])(
+    'aborts the quota transaction if the final contact read fails: %s',
+    async (failure) => {
+      const tx = {
+        candidateProfile: {
+          findFirst: jest.fn().mockResolvedValueOnce(profile),
+        },
+        packageEntitlement: prisma.packageEntitlement,
+        cvUnlock: prisma.cvUnlock,
+      };
+      const error = new Error('Contact read unavailable');
+      if (failure === 'withdrawn')
+        tx.candidateProfile.findFirst.mockResolvedValueOnce(null);
+      else tx.candidateProfile.findFirst.mockRejectedValueOnce(error);
+      let committed = false;
+      prisma.$transaction.mockImplementation(
+        async (fn: (client: typeof tx) => unknown) => {
+          const response = await fn(tx);
+          committed = true;
+          return response;
+        },
+      );
+
+      await expect(service.unlock('hr', 'candidate')).rejects.toThrow(
+        failure === 'withdrawn' ? NotFoundException : error,
+      );
+      expect(committed).toBe(false);
+      expect(prisma.packageEntitlement.updateMany).toHaveBeenCalledTimes(1);
+    },
+  );
 });

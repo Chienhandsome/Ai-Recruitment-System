@@ -3,6 +3,81 @@ import { ForbiddenException } from '@nestjs/common';
 import type { PrismaService } from '../../database/prisma.service';
 import type { UpdateCandidateSkillsDto } from './dto/update-candidate-skills.dto';
 
+describe('CandidatesService job-seeking consent', () => {
+  it.each([
+    ['desiredTitle', null],
+    ['desiredTitle', ''],
+    ['desiredTitle', ' \t '],
+    ['professionalSummary', null],
+    ['professionalSummary', ''],
+    ['professionalSummary', ' \t '],
+  ] as const)(
+    'withdraws sharing when %s is cleared to %p and stays off when refilled',
+    async (field, value) => {
+      const profile = {
+        id: 'candidate',
+        desiredTitle: 'Engineer',
+        professionalSummary: 'Backend engineer',
+        isProfilePublic: true,
+        jobSeekingEnabled: true,
+        jobSeekingUntil: new Date('2026-11-18'),
+        jobSeekingEntitlementId: 'paid-entitlement',
+      };
+      const candidateProfile = {
+        findUnique: jest.fn().mockImplementation(async () => ({ ...profile })),
+        update: jest.fn().mockImplementation(async ({ data }) => {
+          Object.assign(profile, data);
+          return { ...profile };
+        }),
+      };
+      const tx = { candidateProfile };
+      const prisma = {
+        candidateProfile,
+        $transaction: jest.fn((fn: (client: typeof tx) => unknown) => fn(tx)),
+      };
+      const service = new CandidatesService(prisma as unknown as PrismaService);
+
+      await service.updateProfile('user', { [field]: value });
+      expect(profile).toMatchObject({
+        isProfilePublic: false,
+        jobSeekingEnabled: false,
+        jobSeekingUntil: null,
+        jobSeekingEntitlementId: null,
+      });
+
+      await service.updateProfile('user', {
+        [field]: 'Updated professional info',
+      });
+      expect(profile.isProfilePublic).toBe(false);
+      expect(profile.jobSeekingEnabled).toBe(false);
+      expect(profile.jobSeekingEntitlementId).toBeNull();
+    },
+  );
+
+  it('preserves sharing when required fields are omitted or updated with nonempty text', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'candidate' });
+    const tx = { candidateProfile: { update } };
+    const prisma = {
+      candidateProfile: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'candidate' }),
+      },
+      $transaction: jest.fn((fn: (client: typeof tx) => unknown) => fn(tx)),
+    };
+    const service = new CandidatesService(prisma as unknown as PrismaService);
+
+    await service.updateProfile('user', { address: 'HCM' });
+    await service.updateProfile('user', {
+      desiredTitle: 'Senior Engineer',
+      professionalSummary: 'Updated summary',
+    });
+    for (const [args] of update.mock.calls) {
+      expect(args.data).not.toHaveProperty('jobSeekingEnabled');
+      expect(args.data).not.toHaveProperty('jobSeekingEntitlementId');
+      expect(args.data).not.toHaveProperty('isProfilePublic');
+    }
+  });
+});
+
 describe('CandidatesService profile provenance', () => {
   it('preserves unchanged extracted records and saves edited records as manual', async () => {
     const workExperience = {

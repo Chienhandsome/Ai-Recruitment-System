@@ -31,6 +31,7 @@ const profileSnapshot = {
 describe('ApplicationEvaluationService', () => {
   it('persists the first attempt and publishes the stored snapshot', async () => {
     const prisma = {
+      $transaction: jest.fn(),
       application: {
         update: jest.fn().mockResolvedValue({
           evaluationAttempts: 1,
@@ -40,6 +41,10 @@ describe('ApplicationEvaluationService', () => {
       },
     };
     const rabbitMQ = { publish: jest.fn().mockResolvedValue(true) };
+    prisma.$transaction.mockImplementation(
+      async (callback: (client: typeof prisma) => Promise<unknown>) =>
+        callback(prisma),
+    );
     const service = new ApplicationEvaluationService(
       prisma as never,
       rabbitMQ as never,
@@ -64,6 +69,7 @@ describe('ApplicationEvaluationService', () => {
 
   it('stores exponential retry state when RabbitMQ is unavailable', async () => {
     const prisma = {
+      $transaction: jest.fn(),
       application: {
         update: jest.fn().mockResolvedValue({
           evaluationAttempts: 1,
@@ -73,6 +79,10 @@ describe('ApplicationEvaluationService', () => {
       },
     };
     const rabbitMQ = { publish: jest.fn().mockResolvedValue(false) };
+    prisma.$transaction.mockImplementation(
+      async (callback: (client: typeof prisma) => Promise<unknown>) =>
+        callback(prisma),
+    );
     const service = new ApplicationEvaluationService(
       prisma as never,
       rabbitMQ as never,
@@ -94,10 +104,15 @@ describe('ApplicationEvaluationService', () => {
 
   it('stops scheduling after the maximum number of attempts', async () => {
     const prisma = {
+      $transaction: jest.fn(),
       application: {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
     };
+    prisma.$transaction.mockImplementation(
+      async (callback: (client: typeof prisma) => Promise<unknown>) =>
+        callback(prisma),
+    );
     const service = new ApplicationEvaluationService(
       prisma as never,
       { publish: jest.fn() } as never,
@@ -117,6 +132,7 @@ describe('ApplicationEvaluationService', () => {
 
   it('notifies the recruiter when retries are exhausted', async () => {
     const prisma = {
+      $transaction: jest.fn(),
       application: {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         findUnique: jest.fn().mockResolvedValue({
@@ -130,8 +146,12 @@ describe('ApplicationEvaluationService', () => {
       },
     };
     const notificationsService = {
-      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
+      createNotificationOnce: jest.fn().mockResolvedValue({ id: 'notif-1' }),
     };
+    prisma.$transaction.mockImplementation(
+      async (callback: (client: typeof prisma) => Promise<unknown>) =>
+        callback(prisma),
+    );
     const service = new ApplicationEvaluationService(
       prisma as never,
       { publish: jest.fn() } as never,
@@ -140,7 +160,9 @@ describe('ApplicationEvaluationService', () => {
 
     await service.markForRetry('application-1', 'AI failed', 5, now);
 
-    expect(notificationsService.createNotification).toHaveBeenCalledWith(
+    expect(notificationsService.createNotificationOnce).toHaveBeenCalledWith(
+      prisma,
+      'evaluation:application-1:5:exhausted:recruiter',
       expect.objectContaining({
         recipientUserId: 'rec-user-1',
         type: 'SYSTEM_ALERT',
@@ -151,12 +173,17 @@ describe('ApplicationEvaluationService', () => {
   });
 
   it('does not notify when retries remain', async () => {
-    const notificationsService = { createNotification: jest.fn() };
+    const notificationsService = { createNotificationOnce: jest.fn() };
     const prisma = {
+      $transaction: jest.fn(),
       application: {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
     };
+    prisma.$transaction.mockImplementation(
+      async (callback: (client: typeof prisma) => Promise<unknown>) =>
+        callback(prisma),
+    );
     const service = new ApplicationEvaluationService(
       prisma as never,
       { publish: jest.fn() } as never,
@@ -165,6 +192,6 @@ describe('ApplicationEvaluationService', () => {
 
     await service.markForRetry('application-1', 'AI failed', 2, now);
 
-    expect(notificationsService.createNotification).not.toHaveBeenCalled();
+    expect(notificationsService.createNotificationOnce).not.toHaveBeenCalled();
   });
 });

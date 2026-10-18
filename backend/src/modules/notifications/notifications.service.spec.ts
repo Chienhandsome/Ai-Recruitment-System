@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment -- Jest asymmetric matchers return any. */
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotificationsService } from './notifications.service';
 import { PrismaService } from '../../database/prisma.service';
-import { NotificationStatus, NotificationType } from '@prisma/client';
+import {
+  NotificationStatus,
+  NotificationType,
+  type Prisma,
+} from '@prisma/client';
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
@@ -71,6 +76,46 @@ describe('NotificationsService', () => {
         title: 'Cập nhật trạng thái',
       }),
     });
+  });
+
+  it('uses the business transaction and ignores duplicate event keys without updating read status', async () => {
+    const createMany = jest.fn().mockResolvedValue({ count: 0 });
+    const client = {
+      notification: { createMany },
+    } as unknown as Prisma.TransactionClient;
+    const result = await service.createNotificationOnce(client, 'event-1', {
+      recipientUserId: 'user-1',
+      applicationId: 'app-1',
+      title: 'AI completed',
+      message: 'Score ready',
+    });
+
+    expect(result).toEqual({ count: 0 });
+    expect(createMany).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        eventKey: 'event-1',
+        recipientUserId: 'user-1',
+        status: 'UNREAD',
+      }),
+      skipDuplicates: true,
+    });
+    expect(prisma.notification.create).not.toHaveBeenCalled();
+    expect(prisma.notification.update).not.toHaveBeenCalled();
+  });
+
+  it('propagates transactional notification failures so the business change can roll back', async () => {
+    const client = {
+      notification: {
+        createMany: jest.fn().mockRejectedValue(new Error('DB unavailable')),
+      },
+    } as unknown as Prisma.TransactionClient;
+    await expect(
+      service.createNotificationOnce(client, 'event-1', {
+        recipientUserId: 'user-1',
+        title: 'AI completed',
+        message: 'Score ready',
+      }),
+    ).rejects.toThrow('DB unavailable');
   });
 
   it('returns unread count for a user', async () => {

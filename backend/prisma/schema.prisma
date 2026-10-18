@@ -1018,6 +1018,7 @@ model AiInterviewCallbackEvent {
 
 model Notification {
   id              String             @id @default(uuid())
+  eventKey        String?            @unique @map("event_key")
   applicationId   String?            @map("application_id")
   application     Application?       @relation(fields: [applicationId], references: [id])
   recipientUserId String?            @map("recipient_user_id") @db.Uuid

@@ -13,10 +13,7 @@ describe('RetryApplicationEvaluationsUseCase', () => {
     };
     const prisma = {
       application: {
-        updateMany: jest
-          .fn()
-          .mockResolvedValueOnce({ count: 0 })
-          .mockResolvedValueOnce({ count: 1 }),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         findMany: jest
           .fn()
           .mockResolvedValueOnce([]) // stuck-exhausted scan
@@ -25,7 +22,7 @@ describe('RetryApplicationEvaluationsUseCase', () => {
     };
     const evaluationService = {
       publishClaimedApplication: jest.fn().mockResolvedValue(true),
-      notifyEvaluationExhausted: jest.fn().mockResolvedValue(undefined),
+      failStuckEvaluation: jest.fn().mockResolvedValue(undefined),
     };
     const useCase = new RetryApplicationEvaluationsUseCase(
       prisma as never,
@@ -40,7 +37,7 @@ describe('RetryApplicationEvaluationsUseCase', () => {
       }),
     );
     expect(prisma.application.updateMany).toHaveBeenNthCalledWith(
-      2,
+      1,
       expect.objectContaining({
         where: expect.objectContaining({
           id: application.id,
@@ -57,7 +54,7 @@ describe('RetryApplicationEvaluationsUseCase', () => {
       2,
       now,
     );
-    expect(evaluationService.notifyEvaluationExhausted).not.toHaveBeenCalled();
+    expect(evaluationService.failStuckEvaluation).not.toHaveBeenCalled();
   });
 
   it('notifies the recruiter when stuck evaluations exhaust retries', async () => {
@@ -74,7 +71,7 @@ describe('RetryApplicationEvaluationsUseCase', () => {
     };
     const evaluationService = {
       publishClaimedApplication: jest.fn(),
-      notifyEvaluationExhausted: jest.fn().mockResolvedValue(undefined),
+      failStuckEvaluation: jest.fn().mockResolvedValue(undefined),
     };
     const useCase = new RetryApplicationEvaluationsUseCase(
       prisma as never,
@@ -83,9 +80,11 @@ describe('RetryApplicationEvaluationsUseCase', () => {
 
     await useCase.execute(now);
 
-    expect(evaluationService.notifyEvaluationExhausted).toHaveBeenCalledWith(
+    expect(evaluationService.failStuckEvaluation).toHaveBeenCalledWith(
       'application-9',
       5,
+      new Date('2026-08-09T09:50:00.000Z'),
+      now,
     );
     expect(evaluationService.publishClaimedApplication).not.toHaveBeenCalled();
   });

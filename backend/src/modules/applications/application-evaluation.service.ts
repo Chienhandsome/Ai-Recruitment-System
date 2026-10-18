@@ -110,6 +110,35 @@ export class ApplicationEvaluationService {
       return;
     }
 
+    await this.persistFailure(applicationId, error, attempts, now);
+  }
+
+  async failStuckEvaluation(
+    applicationId: string,
+    attempts: number,
+    stuckCutoff: Date,
+    now = new Date(),
+  ): Promise<void> {
+    if (attempts < MAX_EVALUATION_ATTEMPTS) return;
+    await this.persistFailure(
+      applicationId,
+      'No evaluation result received before timeout.',
+      attempts,
+      now,
+      {
+        processingStatus: ApplicationProcessingStatus.MATCHING,
+        updatedAt: { lte: stuckCutoff },
+      },
+    );
+  }
+
+  private async persistFailure(
+    applicationId: string,
+    error: string,
+    attempts: number,
+    now: Date,
+    expected: Prisma.ApplicationWhereInput = {},
+  ): Promise<void> {
     const exhausted = attempts >= MAX_EVALUATION_ATTEMPTS;
     const nextRetryAt = exhausted
       ? null
@@ -118,58 +147,65 @@ export class ApplicationEvaluationService {
       ? `Evaluation retry limit reached after ${attempts} attempts: ${error}`
       : error;
 
-    await this.prisma.application.updateMany({
-      where: {
-        id: applicationId,
-        processingStatus: { not: ApplicationProcessingStatus.COMPLETED },
-      },
-      data: {
-        processingStatus: ApplicationProcessingStatus.FAILED,
-        nextEvaluationRetryAt: nextRetryAt,
-        evaluationError: errorMessage,
-        updatedAt: now,
-      },
-    });
+    await this.prisma.$transaction(async (client) => {
+      const changed = await client.application.updateMany({
+        where: {
+          id: applicationId,
+          evaluationAttempts: attempts,
+          processingStatus: { not: ApplicationProcessingStatus.COMPLETED },
+          ...expected,
+        },
+        data: {
+          processingStatus: ApplicationProcessingStatus.FAILED,
+          nextEvaluationRetryAt: nextRetryAt,
+          evaluationError: errorMessage,
+          updatedAt: now,
+        },
+      });
 
-    if (exhausted) {
-      await this.notifyEvaluationExhausted(applicationId, attempts);
-    }
+      if (exhausted && changed.count > 0) {
+        await this.notifyEvaluationExhausted(client, applicationId, attempts);
+      }
+    });
   }
 
   /**
    * Tell the recruiter that AI scoring failed permanently so they can score
-   * the application manually. Never throws — notification is best-effort.
+   * the application manually. Runs in the same transaction as FAILED.
    */
-  async notifyEvaluationExhausted(
+  private async notifyEvaluationExhausted(
+    client: Prisma.TransactionClient,
     applicationId: string,
     attempts: number,
   ): Promise<void> {
     if (!this.notificationsService) {
       return;
     }
-    try {
-      const app = await this.prisma.application.findUnique({
-        where: { id: applicationId },
-        select: {
-          processingStatus: true,
-          candidate: { select: { fullName: true } },
-          job: {
-            select: {
-              title: true,
-              recruiter: { select: { userId: true } },
-            },
+    const app = await client.application.findUnique({
+      where: { id: applicationId },
+      select: {
+        processingStatus: true,
+        candidate: { select: { fullName: true } },
+        job: {
+          select: {
+            title: true,
+            recruiter: { select: { userId: true } },
           },
         },
-      });
-      if (
-        !app ||
-        app.processingStatus !== ApplicationProcessingStatus.FAILED ||
-        !app.job?.recruiter?.userId
-      ) {
-        return;
-      }
-      const candidateName = app.candidate?.fullName ?? 'Ứng viên';
-      await this.notificationsService.createNotification({
+      },
+    });
+    if (
+      !app ||
+      app.processingStatus !== ApplicationProcessingStatus.FAILED ||
+      !app.job?.recruiter?.userId
+    ) {
+      return;
+    }
+    const candidateName = app.candidate?.fullName ?? 'Ứng viên';
+    await this.notificationsService.createNotificationOnce(
+      client,
+      `evaluation:${applicationId}:${attempts}:exhausted:recruiter`,
+      {
         recipientUserId: app.job.recruiter.userId,
         applicationId,
         type: NotificationType.SYSTEM_ALERT,
@@ -181,12 +217,8 @@ export class ApplicationEvaluationService {
           candidateName,
           jobTitle: app.job.title,
         },
-      });
-    } catch (error) {
-      this.logger.error(
-        `Failed to send evaluation-exhausted notification for application ${applicationId}: ${this.errorMessage(error)}`,
-      );
-    }
+      },
+    );
   }
 
   private async resolveAttemptCount(

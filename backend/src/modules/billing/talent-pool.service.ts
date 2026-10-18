@@ -135,8 +135,15 @@ export class TalentPoolService {
 
   async getCandidate(userId: string, candidateProfileId: string) {
     await this.entitlements.assertTalentPool(userId);
+    return this.getCandidateCard(userId, candidateProfileId, this.prisma);
+  }
 
-    const profile = await this.prisma.candidateProfile.findFirst({
+  private async getCandidateCard(
+    userId: string,
+    candidateProfileId: string,
+    client: Prisma.TransactionClient,
+  ) {
+    const profile = await client.candidateProfile.findFirst({
       where: {
         id: candidateProfileId,
         ...talentPoolVisibilityWhere(),
@@ -190,7 +197,7 @@ export class TalentPoolService {
       );
     }
 
-    const unlocked = await this.prisma.cvUnlock.findUnique({
+    const unlocked = await client.cvUnlock.findUnique({
       where: {
         unlockedByUserId_candidateProfileId: {
           unlockedByUserId: userId,
@@ -244,7 +251,7 @@ export class TalentPoolService {
     const entitlementId = entitlement.entitlementId;
 
     try {
-      await this.prisma.$transaction(async (tx) => {
+      return await this.prisma.$transaction(async (tx) => {
         const now = new Date();
         const stillVisible = await tx.candidateProfile.findFirst({
           where: { id: candidateProfileId, ...talentPoolVisibilityWhere(now) },
@@ -273,6 +280,10 @@ export class TalentPoolService {
             candidateProfileId,
           },
         });
+
+        // Read the response before commit so a visibility/read failure rolls
+        // back both the quota debit and the unlock record.
+        return this.getCandidateCard(userId, candidateProfileId, tx);
       });
     } catch (error) {
       if (
@@ -283,8 +294,6 @@ export class TalentPoolService {
       }
       throw error;
     }
-
-    return this.getCandidate(userId, candidateProfileId);
   }
 
   private toPublicCard(

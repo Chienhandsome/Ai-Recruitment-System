@@ -5,6 +5,7 @@ import {
   HrDecision,
   MatchLevel,
   NotificationType,
+  type Prisma,
 } from '@prisma/client';
 import { z } from 'zod';
 import { PrismaService } from '../../database/prisma.service';
@@ -65,8 +66,16 @@ export class ApplicationsConsumer implements OnModuleInit {
     );
 
     if (status === 'COMPLETED' && result) {
+      const parsedResult = AiResultSchema.safeParse(result);
+      if (!parsedResult.success) {
+        await this.evaluationService.markForRetry(
+          applicationId,
+          parsedResult.error.message,
+        );
+        return;
+      }
       try {
-        const validatedResult = AiResultSchema.parse(result);
+        const validatedResult = parsedResult.data;
         const matchLevel = (
           ['HIGH', 'MEDIUM', 'LOW'].includes(validatedResult.match_level)
             ? validatedResult.match_level
@@ -74,7 +83,18 @@ export class ApplicationsConsumer implements OnModuleInit {
         ) as MatchLevel;
         const experienceAssessment = validatedResult.experience_assessment;
 
-        const { promoted } = await this.prisma.$transaction(async (prisma) => {
+        await this.prisma.$transaction(async (prisma) => {
+          // Lock the application before replacing its result so duplicate
+          // deliveries serialize, including when there was no previous result.
+          const evaluated = await prisma.application.update({
+            where: { id: applicationId },
+            data: {
+              processingStatus: ApplicationProcessingStatus.COMPLETED,
+              nextEvaluationRetryAt: null,
+              evaluationError: null,
+            },
+            select: { evaluationAttempts: true },
+          });
           await prisma.aiMatchingResult.deleteMany({
             where: { applicationId },
           });
@@ -136,15 +156,6 @@ export class ApplicationsConsumer implements OnModuleInit {
             },
           });
 
-          await prisma.application.update({
-            where: { id: applicationId },
-            data: {
-              processingStatus: ApplicationProcessingStatus.COMPLETED,
-              nextEvaluationRetryAt: null,
-              evaluationError: null,
-            },
-          });
-
           const promoted = await prisma.application.updateMany({
             where: {
               id: applicationId,
@@ -168,14 +179,14 @@ export class ApplicationsConsumer implements OnModuleInit {
             });
           }
 
-          return { promoted: promoted.count === 1 };
+          await this.notifyEvaluationCompleted(
+            prisma,
+            applicationId,
+            validatedResult.overall_score,
+            evaluated.evaluationAttempts,
+            promoted.count === 1,
+          );
         });
-
-        await this.notifyEvaluationCompleted(
-          applicationId,
-          validatedResult.overall_score,
-          promoted,
-        );
         if (experienceAssessment) {
           this.logger.log(
             JSON.stringify({
@@ -198,10 +209,9 @@ export class ApplicationsConsumer implements OnModuleInit {
           `Failed to persist AI evaluation for application ${applicationId}: ${this.errorMessage(caughtError)}`,
           caughtError instanceof Error ? caughtError.stack : undefined,
         );
-        await this.evaluationService.markForRetry(
-          applicationId,
-          this.errorMessage(caughtError),
-        );
+        // Persistence errors must reach RabbitMQ so it retries this result.
+        // The transaction rolled back the stage and every notification.
+        throw caughtError;
       }
       return;
     }
@@ -216,41 +226,46 @@ export class ApplicationsConsumer implements OnModuleInit {
       this.logger.error(
         `Failed to schedule retry for application ${applicationId}: ${this.errorMessage(caughtError)}`,
       );
+      throw caughtError;
     }
   }
 
   /**
    * Notify the recruiter that AI scoring finished and — when the application
    * was auto-promoted RECEIVED → SCREENING — notify the candidate too.
-   * Failures here must never break evaluation persistence (already committed).
+   * Persist with the result and stage; failures roll back the entire change.
    */
   private async notifyEvaluationCompleted(
+    client: Prisma.TransactionClient,
     applicationId: string,
     overallScore: number,
+    attempts: number,
     promoted: boolean,
   ): Promise<void> {
     if (!this.notificationsService) {
       return;
     }
-    try {
-      const app = await this.prisma.application.findUnique({
-        where: { id: applicationId },
-        select: {
-          candidate: { select: { userId: true, fullName: true } },
-          job: {
-            select: {
-              title: true,
-              recruiter: { select: { userId: true } },
-            },
+    const app = await client.application.findUnique({
+      where: { id: applicationId },
+      select: {
+        candidate: { select: { userId: true, fullName: true } },
+        job: {
+          select: {
+            title: true,
+            recruiter: { select: { userId: true } },
           },
         },
-      });
-      const candidateName = app?.candidate?.fullName ?? 'Ứng viên';
-      const jobTitle = app?.job?.title ?? '';
-      const score = Math.round(Number(overallScore));
+      },
+    });
+    const candidateName = app?.candidate?.fullName ?? 'Ứng viên';
+    const jobTitle = app?.job?.title ?? '';
+    const score = Math.round(Number(overallScore));
 
-      if (app?.job?.recruiter?.userId) {
-        await this.notificationsService.createNotification({
+    if (app?.job?.recruiter?.userId) {
+      await this.notificationsService.createNotificationOnce(
+        client,
+        `evaluation:${applicationId}:${attempts}:completed:recruiter`,
+        {
           recipientUserId: app.job.recruiter.userId,
           applicationId,
           type: NotificationType.MATCHING_COMPLETED,
@@ -262,11 +277,15 @@ export class ApplicationsConsumer implements OnModuleInit {
             jobTitle,
             overallScore: score,
           },
-        });
-      }
+        },
+      );
+    }
 
-      if (promoted && app?.candidate?.userId) {
-        await this.notificationsService.createNotification({
+    if (promoted && app?.candidate?.userId) {
+      await this.notificationsService.createNotificationOnce(
+        client,
+        `evaluation:${applicationId}:${attempts}:screening:candidate`,
+        {
           recipientUserId: app.candidate.userId,
           applicationId,
           type: NotificationType.APPLICATION_STATUS_CHANGED,
@@ -278,11 +297,7 @@ export class ApplicationsConsumer implements OnModuleInit {
             newStage: ApplicationStage.SCREENING,
             jobTitle,
           },
-        });
-      }
-    } catch (error) {
-      this.logger.error(
-        `Failed to send evaluation-completed notifications for application ${applicationId}: ${this.errorMessage(error)}`,
+        },
       );
     }
   }

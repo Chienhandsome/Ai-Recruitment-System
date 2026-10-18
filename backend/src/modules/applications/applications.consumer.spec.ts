@@ -9,7 +9,16 @@ describe('ApplicationsConsumer experience-level persistence', () => {
         create: jest.fn().mockResolvedValue({ id: 'result-1' }),
       },
       application: {
-        update: jest.fn().mockResolvedValue({ id: 'application-1' }),
+        update: jest
+          .fn()
+          .mockResolvedValue({ id: 'application-1', evaluationAttempts: 1 }),
+        findUnique: jest.fn().mockResolvedValue({
+          candidate: { userId: 'cand-user-1', fullName: 'Nguyen Van A' },
+          job: {
+            title: 'Backend Engineer',
+            recruiter: { userId: 'rec-user-1' },
+          },
+        }),
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
       applicationStatusHistory: {
@@ -221,7 +230,16 @@ describe('ApplicationsConsumer experience-level persistence', () => {
         create: jest.fn().mockResolvedValue({ id: 'result-1' }),
       },
       application: {
-        update: jest.fn().mockResolvedValue({ id: 'application-1' }),
+        update: jest
+          .fn()
+          .mockResolvedValue({ id: 'application-1', evaluationAttempts: 1 }),
+        findUnique: jest.fn().mockResolvedValue({
+          candidate: { userId: 'cand-user-1', fullName: 'Nguyen Van A' },
+          job: {
+            title: 'Backend Engineer',
+            recruiter: { userId: 'rec-user-1' },
+          },
+        }),
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
       applicationStatusHistory: {
@@ -259,7 +277,16 @@ describe('ApplicationsConsumer experience-level persistence', () => {
         create: jest.fn().mockResolvedValue({ id: 'result-1' }),
       },
       application: {
-        update: jest.fn().mockResolvedValue({ id: 'application-1' }),
+        update: jest
+          .fn()
+          .mockResolvedValue({ id: 'application-1', evaluationAttempts: 1 }),
+        findUnique: jest.fn().mockResolvedValue({
+          candidate: { userId: 'cand-user-1', fullName: 'Nguyen Van A' },
+          job: {
+            title: 'Backend Engineer',
+            recruiter: { userId: 'rec-user-1' },
+          },
+        }),
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
       applicationStatusHistory: {
@@ -282,7 +309,7 @@ describe('ApplicationsConsumer experience-level persistence', () => {
       },
     };
     const notificationsService = {
-      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
+      createNotificationOnce: jest.fn().mockResolvedValue({ id: 'notif-1' }),
     };
     const consumer = new ApplicationsConsumer(
       prisma as never,
@@ -297,8 +324,12 @@ describe('ApplicationsConsumer experience-level persistence', () => {
       result: { overall_score: 81.4 },
     });
 
-    expect(notificationsService.createNotification).toHaveBeenCalledTimes(2);
-    expect(notificationsService.createNotification).toHaveBeenCalledWith(
+    expect(notificationsService.createNotificationOnce).toHaveBeenCalledTimes(
+      2,
+    );
+    expect(notificationsService.createNotificationOnce).toHaveBeenCalledWith(
+      tx,
+      expect.any(String),
       expect.objectContaining({
         recipientUserId: 'rec-user-1',
         type: 'MATCHING_COMPLETED',
@@ -306,7 +337,9 @@ describe('ApplicationsConsumer experience-level persistence', () => {
         title: expect.stringContaining('Nguyen Van A'),
       }),
     );
-    expect(notificationsService.createNotification).toHaveBeenCalledWith(
+    expect(notificationsService.createNotificationOnce).toHaveBeenCalledWith(
+      tx,
+      expect.any(String),
       expect.objectContaining({
         recipientUserId: 'cand-user-1',
         type: 'APPLICATION_STATUS_CHANGED',
@@ -322,7 +355,16 @@ describe('ApplicationsConsumer experience-level persistence', () => {
         create: jest.fn().mockResolvedValue({ id: 'result-1' }),
       },
       application: {
-        update: jest.fn().mockResolvedValue({ id: 'application-1' }),
+        update: jest
+          .fn()
+          .mockResolvedValue({ id: 'application-1', evaluationAttempts: 1 }),
+        findUnique: jest.fn().mockResolvedValue({
+          candidate: { userId: 'cand-user-1', fullName: 'Nguyen Van A' },
+          job: {
+            title: 'Backend Engineer',
+            recruiter: { userId: 'rec-user-1' },
+          },
+        }),
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
       applicationStatusHistory: { create: jest.fn() },
@@ -343,7 +385,7 @@ describe('ApplicationsConsumer experience-level persistence', () => {
       },
     };
     const notificationsService = {
-      createNotification: jest.fn().mockResolvedValue({ id: 'notif-1' }),
+      createNotificationOnce: jest.fn().mockResolvedValue({ id: 'notif-1' }),
     };
     const consumer = new ApplicationsConsumer(
       prisma as never,
@@ -358,8 +400,12 @@ describe('ApplicationsConsumer experience-level persistence', () => {
       result: { overall_score: 70 },
     });
 
-    expect(notificationsService.createNotification).toHaveBeenCalledTimes(1);
-    expect(notificationsService.createNotification).toHaveBeenCalledWith(
+    expect(notificationsService.createNotificationOnce).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(notificationsService.createNotificationOnce).toHaveBeenCalledWith(
+      tx,
+      expect.any(String),
       expect.objectContaining({
         recipientUserId: 'rec-user-1',
         type: 'MATCHING_COMPLETED',

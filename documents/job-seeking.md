@@ -16,6 +16,8 @@ Một hồ sơ chỉ xuất hiện khi đồng thời bật `isProfilePublic`, b
 
 Ứng viên luôn được tắt chia sẻ kể cả khi hết gói. Việc tắt không thay đổi đơn ứng tuyển đã gửi. Những thông tin HR đã đọc hoặc lưu bên ngoài trước đó không thể thu hồi bằng việc tắt.
 
+Xóa vị trí mong muốn hoặc giới thiệu nghề nghiệp (null, chuỗi rỗng hoặc chỉ có khoảng trắng) cũng thu hồi chia sẻ. Bổ sung lại thông tin không tự bật tìm việc; ứng viên cần xác nhận bật lại.
+
 ## API
 
 - `GET /api/candidates/me/job-seeking`: trạng thái hiển thị thực tế, quyền bật, độ đầy đủ hồ sơ, thời hạn gói.
@@ -43,3 +45,10 @@ Migration `20261018100000_add_candidate_job_seeking` bổ sung quyền cho các 
 5. Ứng viên tắt: tìm kiếm, chi tiết bằng ID cũ và mở khóa đều không trả hồ sơ.
 6. Hết hạn hoặc entitlement bị thay thế/thu hồi: hồ sơ bị ẩn; mua gói mới vẫn cần xác nhận lại.
 7. HR hết quyền: mọi API talent pool bị chặn; quản lý đơn ứng tuyển vẫn giữ nguyên.
+8. Ứng viên đang hiển thị xóa vị trí/giới thiệu rồi lưu: chia sẻ bị tắt; điền lại thông tin vẫn tắt cho đến khi chủ động bật lại.
+
+Test thứ tự phản hồi mạng của công tắc tìm việc, trong thư mục `frontend`:
+
+```powershell
+npm run test:job-seeking
+```

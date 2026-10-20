@@ -348,10 +348,10 @@ export class OffersService {
         },
       });
 
+      // Keep stage as OFFERED, mark hrDecision as ACCEPTED
       await tx.application.update({
         where: { id: offer.applicationId },
         data: {
-          currentStage: ApplicationStage.HIRED,
           hrDecision: HrDecision.ACCEPTED,
         },
       });
@@ -360,9 +360,9 @@ export class OffersService {
         data: {
           applicationId: offer.applicationId,
           previousStage: ApplicationStage.OFFERED,
-          newStage: ApplicationStage.HIRED,
+          newStage: ApplicationStage.OFFERED,
           changedByUserId: candidateUserId,
-          note: 'Ứng viên đã chính thức chấp thuận Thư mời nhận việc (Accept Offer).',
+          note: 'Ứng viên đã chính thức đồng ý Thư mời nhận việc (Accept Offer). Chờ hai bên hoàn tất ký kết Hợp đồng lao động.',
         },
       });
 
@@ -378,34 +378,7 @@ export class OffersService {
         },
       });
 
-      // Count total hired applications for this job
-      const hiredCount = await tx.application.count({
-        where: {
-          jobId: offer.application.jobId,
-          currentStage: ApplicationStage.HIRED,
-        },
-      });
-
-      let jobClosedDueToQuota = false;
-      const job = offer.application.job;
-      if (
-        job &&
-        job.autoCloseOnQuota &&
-        job.status === JobStatus.PUBLISHED &&
-        hiredCount >= job.targetHires
-      ) {
-        await tx.jobPosting.update({
-          where: { id: job.id },
-          data: {
-            status: JobStatus.CLOSED,
-            closeReason: JobCloseReason.QUOTA_REACHED,
-            closedAt: new Date(),
-          },
-        });
-        jobClosedDueToQuota = true;
-      }
-
-      return { accepted, hiredCount, jobClosedDueToQuota, job };
+      return { accepted, job: offer.application.job };
     });
 
     // Notify Recruiter
@@ -416,19 +389,9 @@ export class OffersService {
           recipientUserId: recruiterUserId,
           applicationId: offer.applicationId,
           title: `Ứng viên đã chấp nhận Offer: ${offer.application.job.title}`,
-          message: `Tuyệt vời! Ứng viên ${offer.application.candidate.user?.fullName || 'Ứng viên'} đã đồng ý nhận việc. Hồ sơ đã chuyển sang giai đoạn ĐÃ TUYỂN DỤNG (HIRED).`,
+          message: `Ứng viên ${offer.application.candidate.user?.fullName || 'Ứng viên'} đã đồng ý với Thư mời nhận việc (Offer). Vui lòng chuẩn bị và gửi Hợp đồng lao động để hoàn tất thủ tục tuyển dụng.`,
           payload: { offerId: updatedOffer.accepted.id },
         });
-
-        // If quota is reached, notify HR that job has auto-closed and remaining candidates are preserved in Talent Pool (Option A)
-        if (updatedOffer.jobClosedDueToQuota && updatedOffer.job) {
-          await this.notificationsService.createNotification({
-            recipientUserId: recruiterUserId,
-            title: `Đã tuyển đủ chỉ tiêu: ${updatedOffer.job.title}`,
-            message: `Vị trí tuyển dụng '${updatedOffer.job.title}' đã đạt đủ chỉ tiêu (${updatedOffer.hiredCount}/${updatedOffer.job.targetHires}) và đã được tự động đóng. Toàn bộ ứng viên còn lại trong quy trình được bảo lưu an toàn trong Talent Pool để bạn có thể xem xét tăng chỉ tiêu hoặc bổ sung khi cần.`,
-            payload: { jobId: updatedOffer.job.id, type: 'QUOTA_REACHED' },
-          });
-        }
       }
     } catch (err) {
       this.logger.warn(`Failed to notify recruiter about accepted offer: ${err}`);

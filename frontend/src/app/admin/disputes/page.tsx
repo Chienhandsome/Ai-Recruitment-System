@@ -30,6 +30,7 @@ import {
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { ContractDocumentView } from '@/components/common/contracts/ContractDocumentView';
+import { DisputeDetailModal } from '@/components/common/disputes/DisputeDetailModal';
 import {
   type DisputeData,
   type DisputeStatus,
@@ -39,6 +40,12 @@ import {
   getAdminDisputes,
   resolveAdminDispute,
 } from '@/lib/dispute-api';
+import {
+  getAdminWarrantyClaims,
+  type WarrantyClaimInfo,
+  type WarrantyClaimStatus,
+} from '@/lib/contract-api';
+import { AdminWarrantyReviewModal } from '@/components/admin/contracts/AdminWarrantyReviewModal';
 
 export default function AdminDisputesPage() {
   const [token, setToken] = useState<string>('');
@@ -52,8 +59,25 @@ export default function AdminDisputesPage() {
   const [resolutionStatus, setResolutionStatus] = useState<DisputeStatus>('RESOLVED');
   const [adminResolution, setAdminResolution] = useState<string>('');
   const [enforcementAction, setEnforcementAction] = useState<'NONE' | 'WARN' | 'LOCK_RECRUITER'>('NONE');
+  const [penaltyNotes, setPenaltyNotes] = useState<string>('');
+  const [penaltyAmount, setPenaltyAmount] = useState<string>('');
+  const [compensationAmount, setCompensationAmount] = useState<string>('');
   const [showContractHistory, setShowContractHistory] = useState<boolean>(true);
   const [viewingContractDoc, setViewingContractDoc] = useState<boolean>(false);
+  const [showDisputeDetailModal, setShowDisputeDetailModal] = useState<boolean>(false);
+
+  // Warranty claims state
+  const [activeMainTab, setActiveMainTab] = useState<'DISPUTES' | 'WARRANTY'>('DISPUTES');
+  const [warrantyClaims, setWarrantyClaims] = useState<WarrantyClaimInfo[]>([]);
+  const [warrantyMetrics, setWarrantyMetrics] = useState<{ pending: number; approved: number; rejected: number }>({
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  });
+  const [warrantyStatusFilter, setWarrantyStatusFilter] = useState<WarrantyClaimStatus | 'ALL'>('ALL');
+  const [warrantyLoading, setWarrantyLoading] = useState(false);
+  const [selectedWarrantyClaimId, setSelectedWarrantyClaimId] = useState<string | null>(null);
+  const [showWarrantyReviewModal, setShowWarrantyReviewModal] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -62,9 +86,26 @@ export default function AdminDisputesPage() {
       if (session) {
         setToken(session.access_token);
         loadDisputes(session.access_token);
+        loadWarrantyClaims(session.access_token);
       }
     });
   }, []);
+
+  const loadWarrantyClaims = async (t: string, status: WarrantyClaimStatus | 'ALL' = warrantyStatusFilter) => {
+    setWarrantyLoading(true);
+    try {
+      const res = await getAdminWarrantyClaims(t, {
+        status: status === 'ALL' ? undefined : status,
+        limit: 50,
+      });
+      setWarrantyClaims(res.items);
+      setWarrantyMetrics(res.metrics);
+    } catch {
+      toast.error('Không thể tải danh sách yêu cầu bảo hành');
+    } finally {
+      setWarrantyLoading(false);
+    }
+  };
 
   const loadDisputes = async (t: string, status?: DisputeStatus) => {
     setLoading(true);
@@ -100,10 +141,16 @@ export default function AdminDisputesPage() {
         status: resolutionStatus,
         adminResolution: adminResolution.trim(),
         enforcementAction,
+        penaltyNotes: penaltyNotes.trim() || undefined,
+        penaltyAmount: penaltyAmount ? Number(penaltyAmount) : undefined,
+        compensationAmount: compensationAmount ? Number(compensationAmount) : undefined,
       });
 
       toast.success('Đã cập nhật phán quyết giải quyết khiếu nại thành công!');
       setAdminResolution('');
+      setPenaltyNotes('');
+      setPenaltyAmount('');
+      setCompensationAmount('');
       await loadDisputes(token, statusFilter === 'ALL' ? undefined : (statusFilter as DisputeStatus));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Lỗi khi xử lý khiếu nại');
@@ -129,36 +176,88 @@ export default function AdminDisputesPage() {
             Tiếp nhận tố cáo của Ứng viên, đối chiếu lịch sử Offer vs Hợp đồng và áp dụng chế tài bảo vệ môi trường tuyển dụng minh bạch.
           </p>
         </div>
-
-        {/* Filter */}
-        <div className="flex items-center gap-2">
-          {['ALL', 'PENDING', 'INVESTIGATING', 'RESOLVED', 'DISMISSED'].map((st) => (
-            <button
-              key={st}
-              type="button"
-              onClick={() => handleFilterChange(st)}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                statusFilter === st
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              {st === 'ALL'
-                ? 'Tất cả'
-                : st === 'PENDING'
-                ? 'Chờ duyệt'
-                : st === 'INVESTIGATING'
-                ? 'Đang xác minh'
-                : st === 'RESOLVED'
-                ? 'Đã xử lý'
-                : 'Bác đơn'}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* Main Split Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Category Tabs: Disputes vs Warranty Claims */}
+      <div className="flex border-b border-slate-200 gap-6">
+        <button
+          type="button"
+          onClick={() => setActiveMainTab('DISPUTES')}
+          className={`pb-3 px-2 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            activeMainTab === 'DISPUTES'
+              ? 'border-[#2563EB] text-[#2563EB]'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Scale className="size-4" />
+          Khiếu nại hợp đồng & Tranh chấp ({disputes.length})
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveMainTab('WARRANTY')}
+          className={`pb-3 px-2 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            activeMainTab === 'WARRANTY'
+              ? 'border-[#2563EB] text-[#2563EB]'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <ShieldAlert className="size-4" />
+          Yêu cầu bảo hành tuyển dụng (30N)
+          {warrantyMetrics.pending > 0 && (
+            <span className="rounded-full bg-amber-500 text-white px-2 py-0.5 text-3xs font-extrabold animate-pulse">
+              {warrantyMetrics.pending} chờ duyệt
+            </span>
+          )}
+        </button>
+      </div>
+
+      {activeMainTab === 'DISPUTES' ? (
+        <>
+          {warrantyMetrics.pending > 0 && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 flex items-center justify-between shadow-2xs">
+              <div className="flex items-center gap-2.5 text-xs text-amber-900 font-semibold">
+                <AlertTriangle className="size-4 text-amber-600 shrink-0" />
+                <span>Hệ thống ghi nhận <strong>{warrantyMetrics.pending}</strong> yêu cầu bảo hành sự cố tuyển dụng từ Nhà tuyển dụng đang chờ duyệt bồi hoàn.</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveMainTab('WARRANTY')}
+                className="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer shrink-0"
+              >
+                Xem danh sách bảo hành →
+              </button>
+            </div>
+          )}
+
+          {/* Filter */}
+          <div className="flex items-center gap-2">
+            {['ALL', 'PENDING', 'INVESTIGATING', 'RESOLVED', 'DISMISSED'].map((st) => (
+              <button
+                key={st}
+                type="button"
+                onClick={() => handleFilterChange(st)}
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  statusFilter === st
+                    ? 'bg-[#2563EB] text-white shadow-xs'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {st === 'ALL'
+                  ? 'Tất cả'
+                  : st === 'PENDING'
+                  ? 'Chờ duyệt'
+                  : st === 'INVESTIGATING'
+                  ? 'Đang xác minh'
+                  : st === 'RESOLVED'
+                  ? 'Đã xử lý'
+                  : 'Bác đơn'}
+              </button>
+            ))}
+          </div>
+
+          {/* Main Split Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Disputes List */}
         <div className="lg:col-span-1 space-y-2">
           <h2 className="text-xs font-black uppercase tracking-wider text-slate-500 px-1 mb-2">
@@ -462,15 +561,74 @@ export default function AdminDisputesPage() {
                 </div>
               </div>
 
-              {/* Previous Admin Resolution (if any) */}
-              {activeDispute.adminResolution && (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 space-y-1">
-                  <span className="text-2xs font-black text-emerald-800 uppercase flex items-center gap-1">
-                    <CheckCircle2 className="size-3.5" /> Phán quyết trước đó của Ban Quản Trị
-                  </span>
-                  <p className="text-xs text-slate-800 whitespace-pre-line">{activeDispute.adminResolution}</p>
+              {/* Discussion & Appeals Timeline Section */}
+              <div className="rounded-2xl border border-blue-200 bg-blue-50/40 p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                      <Scale className="size-4 text-[#2563EB]" />
+                      Lịch Sử Đối Thoại & Đơn Kháng Nghị 3 Bên ({activeDispute.timeline?.length || 1})
+                    </h3>
+                    <p className="text-2xs text-slate-500">
+                      Theo dõi toàn bộ ý kiến của Ứng viên, văn bản giải trình của HR và phán quyết Admin
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowDisputeDetailModal(true)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#2563EB] text-white hover:bg-blue-700 shadow-xs transition-colors shrink-0 cursor-pointer"
+                  >
+                    <Scale className="size-3.5" />
+                    Mở Phòng Đối Thoại & Phản Hồi
+                    <ArrowRight className="size-3.5" />
+                  </button>
                 </div>
-              )}
+
+                {/* Appeal Alert if any */}
+                {activeDispute.timeline?.some((t) => t.isAppeal || t.type === 'APPEAL') && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-300 text-xs text-rose-900 font-bold flex items-center gap-2">
+                    <AlertTriangle className="size-4 text-rose-600 shrink-0" />
+                    <span>⚠️ ĐÃ CÓ ĐƠN KHÁNG NGHỊ MỚI: Một trong 2 bên không đồng ý với kết luận trước đó và yêu cầu xem xét lại.</span>
+                  </div>
+                )}
+
+                {/* Timeline items brief */}
+                {activeDispute.timeline && activeDispute.timeline.length > 0 && (
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {activeDispute.timeline.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`p-2.5 rounded-xl border text-xs ${
+                          item.type === 'ADMIN_RESOLUTION'
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                            : item.isAppeal || item.type === 'APPEAL'
+                            ? 'bg-rose-50 border-rose-200 text-rose-950 font-medium'
+                            : item.senderRole === 'RECRUITER'
+                            ? 'bg-indigo-50 border-indigo-200 text-indigo-950'
+                            : 'bg-white border-slate-200 text-slate-800'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2 text-3xs font-extrabold pb-1">
+                          <span className="flex items-center gap-1.5">
+                            <span className="uppercase text-slate-600">[{item.senderRole}]</span>
+                            <strong>{item.senderName}</strong>
+                            {item.isAppeal && (
+                              <span className="bg-rose-600 text-white px-1.5 py-0.2 rounded text-3xs">
+                                KHÁNG NGHỊ
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-slate-400 font-normal">
+                            {new Date(item.createdAt).toLocaleString('vi-VN')}
+                          </span>
+                        </div>
+                        <p className="line-clamp-2 text-2xs text-slate-700">{item.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Resolution Form */}
               <form onSubmit={handleResolve} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
@@ -513,6 +671,19 @@ export default function AdminDisputesPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Ghi chú thi hành / Yêu cầu khắc phục (nếu có)
+                  </label>
+                  <input
+                    type="text"
+                    value={penaltyNotes}
+                    onChange={(e) => setPenaltyNotes(e.target.value)}
+                    placeholder="Ví dụ: Yêu cầu Nhà tuyển dụng đối chiếu lại thỏa thuận hoặc hoàn trả tài liệu trước ngày..."
+                    className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-800 outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
                     Nội dung thông báo phán quyết (Gửi cho cả 2 bên) *
                   </label>
                   <textarea
@@ -544,6 +715,119 @@ export default function AdminDisputesPage() {
           )}
         </div>
       </div>
+        </>
+      ) : (
+        /* WARRANTY CLAIMS TAB */
+        <div className="space-y-4">
+          {/* Warranty Filters */}
+          <div className="flex items-center gap-2">
+            {[
+              { id: 'ALL', label: `Tất cả (${warrantyClaims.length})` },
+              { id: 'PENDING', label: `Chờ duyệt (${warrantyMetrics.pending})` },
+              { id: 'APPROVED', label: `Đã duyệt bồi hoàn (${warrantyMetrics.approved})` },
+              { id: 'REJECTED', label: `Bị từ chối (${warrantyMetrics.rejected})` },
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => {
+                  setWarrantyStatusFilter(f.id as any);
+                  loadWarrantyClaims(token, f.id as any);
+                }}
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  warrantyStatusFilter === f.id
+                    ? 'bg-[#2563EB] text-white shadow-xs'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Warranty Claims List Table */}
+          {warrantyLoading ? (
+            <div className="flex items-center justify-center p-12 text-slate-400">
+              <Loader2 className="size-6 animate-spin text-[#2563EB]" />
+              <span className="ml-2 text-xs">Đang tải danh sách bảo hành...</span>
+            </div>
+          ) : warrantyClaims.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-xs text-slate-400">
+              Không có yêu cầu bảo hành nào phù hợp bộ lọc.
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+              <table className="w-full text-left text-xs">
+                <thead className="border-b border-slate-200 bg-slate-50 text-2xs font-extrabold uppercase text-slate-500">
+                  <tr>
+                    <th className="py-3 px-4">Mã bảo hành</th>
+                    <th className="py-3 px-4">Vị trí & Hợp đồng</th>
+                    <th className="py-3 px-4">Lý do bảo hành</th>
+                    <th className="py-3 px-4">Diễn giải sự cố từ NTD</th>
+                    <th className="py-3 px-4">Ngày gửi</th>
+                    <th className="py-3 px-4 text-center">Trạng thái</th>
+                    <th className="py-3 px-4 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {warrantyClaims.map((claim) => (
+                    <tr key={claim.id} className="hover:bg-slate-50/70 transition">
+                      <td className="py-3 px-4 font-mono font-bold text-[#2563EB]">
+                        {claim.claimNumber}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-slate-900">{claim.contract?.jobTitle || 'Hợp đồng tuyển dụng'}</div>
+                        <div className="text-2xs text-slate-500">HĐ: {claim.contract?.contractNumber || claim.contractId}</div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="rounded-lg bg-rose-50 border border-rose-200 px-2.5 py-1 text-2xs font-bold text-rose-700">
+                          {claim.reason === 'NO_SHOW' ? 'Ứng viên không đến nhận việc' : 'Nghỉ việc ngang (dưới 30N)'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 max-w-xs truncate text-slate-600 font-medium">
+                        {claim.note || 'Không có ghi chú'}
+                      </td>
+                      <td className="py-3 px-4 text-slate-500">
+                        {new Date(claim.createdAt).toLocaleDateString('vi-VN')}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-2xs font-extrabold ${
+                            claim.status === 'APPROVED'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : claim.status === 'PENDING'
+                              ? 'bg-amber-100 text-amber-800 animate-pulse'
+                              : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          {claim.status === 'APPROVED'
+                            ? 'Đã bồi hoàn'
+                            : claim.status === 'PENDING'
+                            ? 'Chờ duyệt'
+                            : 'Từ chối'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedWarrantyClaimId(claim.id);
+                            setShowWarrantyReviewModal(true);
+                          }}
+                          className="inline-flex items-center gap-1 rounded-xl bg-[#2563EB] px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition shadow-2xs cursor-pointer"
+                        >
+                          <ShieldCheck className="size-3.5" />
+                          Thẩm định hồ sơ
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Full Contract Document Modal */}
       {viewingContractDoc && activeDispute?.application?.contract && (
@@ -561,7 +845,7 @@ export default function AdminDisputesPage() {
               <button
                 type="button"
                 onClick={() => setViewingContractDoc(false)}
-                className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
               >
                 <X className="size-5" />
               </button>
@@ -573,7 +857,7 @@ export default function AdminDisputesPage() {
               <button
                 type="button"
                 onClick={() => setViewingContractDoc(false)}
-                className="rounded-xl bg-white border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs"
+                className="rounded-xl bg-white border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs cursor-pointer"
               >
                 Đóng văn bản
               </button>
@@ -581,6 +865,36 @@ export default function AdminDisputesPage() {
           </div>
         </div>
       )}
+
+      {/* Dispute Detail Modal for Admin */}
+      <DisputeDetailModal
+        isOpen={showDisputeDetailModal}
+        onClose={() => setShowDisputeDetailModal(false)}
+        disputeId={selectedDisputeId}
+        token={token}
+        currentUserRole="ADMIN"
+        onDisputeUpdated={() => loadDisputes(token, statusFilter === 'ALL' ? undefined : (statusFilter as DisputeStatus))}
+      />
+
+      {/* Admin Warranty Review Modal */}
+      {showWarrantyReviewModal && selectedWarrantyClaimId && (
+        <AdminWarrantyReviewModal
+          isOpen={showWarrantyReviewModal}
+          onClose={() => {
+            setShowWarrantyReviewModal(false);
+            setSelectedWarrantyClaimId(null);
+          }}
+          token={token}
+          claimId={selectedWarrantyClaimId}
+          onResolved={async () => {
+            setShowWarrantyReviewModal(false);
+            setSelectedWarrantyClaimId(null);
+            await loadWarrantyClaims(token, warrantyStatusFilter);
+          }}
+        />
+      )}
     </div>
   );
 }
+
+

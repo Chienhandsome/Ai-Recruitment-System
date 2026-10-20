@@ -13,7 +13,9 @@ import {
   SortOrder,
 } from './dto/query-recruiter-applications.dto';
 
-function createStageDependencies(stage = ApplicationStage.SCREENING) {
+function createStageDependencies(
+  stage: ApplicationStage = ApplicationStage.SCREENING,
+) {
   const application = {
     id: 'application-1',
     currentStage: stage,

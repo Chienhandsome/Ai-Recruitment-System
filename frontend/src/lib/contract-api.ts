@@ -560,6 +560,7 @@ export async function candidateRespondWarranty(
   token: string,
   contractId: string,
   feedback: string,
+  evidenceUrl?: string,
 ): Promise<WarrantyClaimInfo> {
   const res = await fetch(`${API_BASE}/contracts/${contractId}/warranty/candidate-feedback`, {
     method: 'POST',
@@ -567,7 +568,7 @@ export async function candidateRespondWarranty(
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ feedback }),
+    body: JSON.stringify({ feedback, evidenceUrl }),
   });
   return handleResponse<WarrantyClaimInfo>(res);
 }

@@ -246,10 +246,19 @@ describe('JobsService candidate browsing', () => {
     expect(result.data.find((j) => j.id === 'job-accountant')).toBeUndefined();
 
     // Mobile job should rank first with higher matchScore than FE job
-    expect(result.data[0].id).toBe('job-mobile');
-    expect(result.data[0].matchScore).toBeGreaterThan(result.data[1].matchScore || 0);
-    expect(result.data[0].matchedSkills).toContain('React Native');
-    expect(result.data[0].matchedSkills).toContain('TypeScript');
+    const recommendedMobileJob = result.data[0] as (typeof result.data)[0] & {
+      matchScore: number;
+      matchedSkills: string[];
+    };
+    const recommendedFeJob = result.data[1] as (typeof result.data)[1] & {
+      matchScore?: number;
+    };
+    expect(recommendedMobileJob.id).toBe('job-mobile');
+    expect(recommendedMobileJob.matchScore).toBeGreaterThan(
+      recommendedFeJob.matchScore || 0,
+    );
+    expect(recommendedMobileJob.matchedSkills).toContain('React Native');
+    expect(recommendedMobileJob.matchedSkills).toContain('TypeScript');
   });
 
   it('falls back to findCandidateJobs when candidate has an empty profile', async () => {

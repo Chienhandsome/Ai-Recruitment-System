@@ -542,7 +542,7 @@ export function JobDetailView({
                 {/* Progress bar */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-600">Ứng viên đã nhận việc (HIRED): <strong className="text-[#2563EB]">{hired}</strong></span>
+                    <span className="text-slate-600">Đã hoàn tất tuyển dụng (HIRED): <strong className="text-[#2563EB]">{hired}</strong></span>
                     <span className={hired >= quota ? "text-emerald-600 font-extrabold" : "text-slate-600"}>
                       {hired >= quota ? "✓ ĐÃ ĐẠT CHỈ TIÊU (100%)" : `Còn thiếu ${quota - hired} vị trí`}
                     </span>

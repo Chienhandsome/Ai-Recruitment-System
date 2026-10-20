@@ -20,4 +20,18 @@ export class ResolveDisputeDto {
   @IsString()
   @IsOptional()
   enforcementAction?: 'NONE' | 'WARN' | 'LOCK_RECRUITER';
+
+  @ApiPropertyOptional({ description: 'Notes on penalty or remedial requirements' })
+  @IsString()
+  @IsOptional()
+  penaltyNotes?: string;
+
+  @ApiPropertyOptional({ description: 'Penalty amount in VND' })
+  @IsOptional()
+  penaltyAmount?: number;
+
+  @ApiPropertyOptional({ description: 'Compensation amount to candidate in VND' })
+  @IsOptional()
+  compensationAmount?: number;
 }
+

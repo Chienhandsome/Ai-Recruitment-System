@@ -174,9 +174,15 @@ export default async function CandidateApplicationsPage({
                             {application.job.title}
                           </h2>
                           <span
-                            className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${applicationStageStyles[application.currentStage]}`}
+                            className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
+                              application.currentStage === 'OFFERED' && application.offer?.status === 'ACCEPTED'
+                                ? 'border-blue-300 bg-blue-50 text-blue-700'
+                                : applicationStageStyles[application.currentStage]
+                            }`}
                           >
-                            {applicationStageLabels[application.currentStage]}
+                            {application.currentStage === 'OFFERED' && application.offer?.status === 'ACCEPTED'
+                              ? 'Đã đồng ý Offer (Chờ ký HĐ)'
+                              : applicationStageLabels[application.currentStage]}
                           </span>
                           {unread && (
                             <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-extrabold text-rose-700">

@@ -743,7 +743,7 @@ export class ApplicationsService {
     }
     if (dto.targetStage === ApplicationStage.HIRED) {
       throw new BadRequestException(
-        'Giai đoạn Đã tuyển dụng (HIRED) được xác nhận tự động khi ứng viên chấp thuận Thư mời nhận việc (Offer).',
+        'Giai đoạn Đã tuyển dụng (HIRED) được xác nhận tự động khi hoàn tất ký kết Hợp đồng lao động.',
       );
     }
 

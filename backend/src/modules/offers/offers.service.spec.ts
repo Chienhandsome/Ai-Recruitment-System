@@ -243,7 +243,6 @@ describe('OffersService', () => {
       expect(prisma.application.update).toHaveBeenCalledWith({
         where: { id: 'app-1' },
         data: {
-          currentStage: ApplicationStage.HIRED,
           hrDecision: 'ACCEPTED',
         },
       });

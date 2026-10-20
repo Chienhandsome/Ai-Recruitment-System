@@ -74,7 +74,8 @@ function setup(attempts = 1) {
                 typeof where.updatedAt === 'object' &&
                 'lte' in where.updatedAt &&
                 where.updatedAt.lte &&
-                draft.application.updatedAt > new Date(where.updatedAt.lte)
+                draft.application.updatedAt >
+                new Date(where.updatedAt.lte as Date | string)
               )
                 return { count: 0 };
               Object.assign(draft.application, data);

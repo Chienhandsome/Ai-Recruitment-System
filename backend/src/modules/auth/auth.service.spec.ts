@@ -18,11 +18,9 @@ describe('AuthService', () => {
     } as unknown as PrismaService;
     const service = new AuthService(prisma);
 
-    await expect(service.bootstrap(authUser, {})).rejects.toMatchObject<
-      Partial<BadRequestException>
-    >({
-      status: 400,
-    });
+    await expect(service.bootstrap(authUser, {})).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('does not change the role of an existing user', async () => {

@@ -92,18 +92,18 @@ export function DigitalSignatureModal({
 
   if (!isOpen) return null;
 
+  // Custom email override state
+  const [customEmail, setCustomEmail] = useState('');
+  const [showEmailInput, setShowEmailInput] = useState(false);
+
   const handleRequestOtp = async () => {
     if (countdown > 0) return;
     setIsSendingOtp(true);
     try {
-      const res = await requestContractOtp(token, contractId);
+      const res = await requestContractOtp(token, contractId, customEmail.trim() || undefined);
       setOtpSent(true);
       setDestinationEmail(res.destinationEmail);
       setCountdown(60);
-      if (res.demoOtp) {
-        setDemoOtp(res.demoOtp);
-        setOtpCode(res.demoOtp); // Auto-fill for seamless user testing
-      }
       toast.success(res.message || 'Đã gửi mã xác thực OTP.');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Không thể gửi mã OTP.');
@@ -237,28 +237,56 @@ export function DigitalSignatureModal({
                 <span className="text-xs font-bold text-slate-900 block">
                   Bước 1: Xác thực OTP qua Email (Chuẩn DocuSign)
                 </span>
-                <span className="text-2xs text-slate-500">
-                  {otpSent
-                    ? `Mã 6 số đã được gửi đến: ${destinationEmail}`
-                    : 'Bấm nút để nhận mã OTP xác thực danh tính vào email'}
+                <span className="text-2xs text-slate-600">
+                  {otpSent ? (
+                    <>
+                      Mã 6 số đã được gửi đến: <strong className="text-blue-700 underline">{destinationEmail}</strong>
+                    </>
+                  ) : (
+                    'Bấm nút để nhận mã OTP xác thực danh tính vào hộp thư Gmail'
+                  )}
                 </span>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleRequestOtp}
-              disabled={isSendingOtp || countdown > 0 || isSubmitting}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white border border-blue-300 px-3 py-1.5 text-xs font-semibold text-[#2563EB] hover:bg-blue-50 disabled:opacity-50 transition shrink-0"
-            >
-              {isSendingOtp ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <Send className="size-3.5" />
+            <div className="flex items-center gap-2 shrink-0">
+              {!otpSent && (
+                <button
+                  type="button"
+                  onClick={() => setShowEmailInput(!showEmailInput)}
+                  className="text-3xs text-slate-500 hover:text-[#2563EB] underline cursor-pointer"
+                >
+                  {showEmailInput ? 'Mặc định' : 'Đổi Gmail nhận OTP'}
+                </button>
               )}
-              {countdown > 0 ? `Gửi lại (${countdown}s)` : otpSent ? 'Gửi lại OTP' : 'Gửi mã OTP'}
-            </button>
+              <button
+                type="button"
+                onClick={handleRequestOtp}
+                disabled={isSendingOtp || countdown > 0 || isSubmitting}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white border border-blue-300 px-3 py-1.5 text-xs font-semibold text-[#2563EB] hover:bg-blue-50 disabled:opacity-50 transition shrink-0 shadow-2xs cursor-pointer"
+              >
+                {isSendingOtp ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Send className="size-3.5" />
+                )}
+                {countdown > 0 ? `Gửi lại (${countdown}s)` : otpSent ? 'Gửi lại OTP' : 'Gửi mã OTP'}
+              </button>
+            </div>
           </div>
+
+          {showEmailInput && !otpSent && (
+            <div className="mt-2.5 pt-2.5 border-t border-blue-200/60 flex items-center gap-2">
+              <span className="text-2xs font-semibold text-slate-600 shrink-0">Nhận mã tại:</span>
+              <input
+                type="email"
+                value={customEmail}
+                onChange={(e) => setCustomEmail(e.target.value)}
+                placeholder="Nhập email nếu muốn nhận OTP tại hộp thư khác (VD: cerkvena291@gmail.com)"
+                className="flex-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs text-slate-800 outline-none focus:border-[#2563EB]"
+              />
+            </div>
+          )}
 
           {/* OTP input & demo helper */}
           {otpSent && (
@@ -274,12 +302,9 @@ export function DigitalSignatureModal({
                 placeholder="Ví dụ: 123456"
                 className="w-36 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-center text-sm font-bold tracking-widest text-slate-900 outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
               />
-              {demoOtp && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-amber-100 px-2 py-0.5 text-2xs font-bold text-amber-800">
-                  <AlertCircle className="size-3" />
-                  Mã thử nghiệm (Dev): {demoOtp}
-                </span>
-              )}
+              <span className="text-2xs font-medium text-slate-600">
+                (Đã gửi mã đến <strong className="text-blue-700">{destinationEmail}</strong>. Vui lòng mở hộp thư Gmail để lấy mã)
+              </span>
             </div>
           )}
         </div>

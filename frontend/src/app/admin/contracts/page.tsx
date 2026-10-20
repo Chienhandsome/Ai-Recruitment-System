@@ -40,9 +40,13 @@ import {
   type ContractSigningMethod,
   type ContractStatus,
   type ContractForensicDossier,
+  type WarrantyClaimInfo,
+  type WarrantyClaimStatus,
   getAdminContracts,
   getContractForensics,
+  getAdminWarrantyClaims,
 } from '@/lib/contract-api';
+import { AdminWarrantyReviewModal } from '@/components/admin/contracts/AdminWarrantyReviewModal';
 
 export default function AdminContractsPage() {
   const [token, setToken] = useState<string>('');
@@ -53,12 +57,46 @@ export default function AdminContractsPage() {
   const [statusFilter, setStatusFilter] = useState<ContractStatus | 'ALL'>('ALL');
   const [totalCount, setTotalCount] = useState<number>(0);
 
+  // Tab State: Contracts vs Warranty Claims
+  const [activeAdminTab, setActiveAdminTab] = useState<'CONTRACTS' | 'WARRANTY_CLAIMS'>('CONTRACTS');
+  const [warrantyClaims, setWarrantyClaims] = useState<WarrantyClaimInfo[]>([]);
+  const [warrantyLoading, setWarrantyLoading] = useState<boolean>(false);
+  const [warrantyMetrics, setWarrantyMetrics] = useState<{ pending: number; approved: number; rejected: number }>({
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  });
+  const [warrantyStatusFilter, setWarrantyStatusFilter] = useState<WarrantyClaimStatus | 'ALL'>('ALL');
+  const [warrantySearch, setWarrantySearch] = useState<string>('');
+  const [selectedWarrantyClaimId, setSelectedWarrantyClaimId] = useState<string | null>(null);
+
   // Forensic modal state
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [dossierLoading, setDossierLoading] = useState<boolean>(false);
   const [dossier, setDossier] = useState<ContractForensicDossier | null>(null);
   const [copiedHash, setCopiedHash] = useState<boolean>(false);
   const [modalTab, setModalTab] = useState<'FORENSIC' | 'FULL_TEXT'>('FORENSIC');
+
+  const loadWarrantyClaims = async (
+    t: string,
+    status: WarrantyClaimStatus | 'ALL' = warrantyStatusFilter,
+    search: string = warrantySearch,
+  ) => {
+    setWarrantyLoading(true);
+    try {
+      const res = await getAdminWarrantyClaims(t, {
+        status,
+        search: search.trim() || undefined,
+        limit: 50,
+      });
+      setWarrantyClaims(res.items);
+      setWarrantyMetrics(res.metrics);
+    } catch {
+      toast.error('Không thể tải danh sách yêu cầu bảo hành');
+    } finally {
+      setWarrantyLoading(false);
+    }
+  };
 
   useEffect(() => {
     const supabase = createClient();
@@ -67,6 +105,7 @@ export default function AdminContractsPage() {
       if (session) {
         setToken(session.access_token);
         loadContracts(session.access_token, methodFilter, statusFilter, searchTerm);
+        loadWarrantyClaims(session.access_token, warrantyStatusFilter, warrantySearch);
       }
     });
   }, []);
@@ -108,6 +147,17 @@ export default function AdminContractsPage() {
   const handleStatusChange = (s: ContractStatus | 'ALL') => {
     setStatusFilter(s);
     if (token) loadContracts(token, methodFilter, s, searchTerm);
+  };
+
+  const handleWarrantyStatusChange = (s: WarrantyClaimStatus | 'ALL') => {
+    setWarrantyStatusFilter(s);
+    if (token) loadWarrantyClaims(token, s, warrantySearch);
+  };
+
+  const handleWarrantySearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+    loadWarrantyClaims(token, warrantyStatusFilter, warrantySearch);
   };
 
   const openForensicDossier = async (contractId: string) => {
@@ -164,15 +214,61 @@ export default function AdminContractsPage() {
 
         <button
           type="button"
-          onClick={() => loadContracts(token)}
+          onClick={() => {
+            if (token) {
+              if (activeAdminTab === 'CONTRACTS') loadContracts(token);
+              else loadWarrantyClaims(token);
+            }
+          }}
           className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 transition"
         >
-          <RefreshCw className={`size-3.5 ${loading ? 'animate-spin text-[#2563EB]' : ''}`} />
+          <RefreshCw
+            className={`size-3.5 ${
+              (activeAdminTab === 'CONTRACTS' ? loading : warrantyLoading)
+                ? 'animate-spin text-[#2563EB]'
+                : ''
+            }`}
+          />
           Làm mới
         </button>
       </div>
 
-      {/* KPI Stats Cards */}
+      {/* Primary Tab Navigation */}
+      <div className="flex items-center gap-2 border-b border-slate-200">
+        <button
+          type="button"
+          onClick={() => setActiveAdminTab('CONTRACTS')}
+          className={`pb-3.5 px-4 text-xs font-bold transition flex items-center gap-2 border-b-2 ${
+            activeAdminTab === 'CONTRACTS'
+              ? 'border-[#2563EB] text-[#2563EB]'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Scale className="size-4" />
+          Hồ sơ giám sát hợp đồng ({stats.total})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveAdminTab('WARRANTY_CLAIMS')}
+          className={`pb-3.5 px-4 text-xs font-bold transition flex items-center gap-2 border-b-2 ${
+            activeAdminTab === 'WARRANTY_CLAIMS'
+              ? 'border-[#2563EB] text-[#2563EB]'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <ShieldAlert className="size-4" />
+          Yêu cầu bảo hành tuyển dụng
+          {warrantyMetrics.pending > 0 && (
+            <span className="rounded-full bg-amber-500 text-white px-2 py-0.5 text-3xs font-extrabold animate-pulse">
+              {warrantyMetrics.pending} chờ duyệt
+            </span>
+          )}
+        </button>
+      </div>
+
+      {activeAdminTab === 'CONTRACTS' ? (
+        <>
+          {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs">
           <span className="text-2xs font-bold text-slate-400 uppercase block">Tổng hợp đồng</span>
@@ -396,6 +492,200 @@ export default function AdminContractsPage() {
           </div>
         )}
       </div>
+        </>
+      ) : (
+        <div className="space-y-6">
+          {/* Warranty KPI Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-2xs">
+              <span className="text-2xs font-bold text-amber-800 uppercase block">Chờ thẩm định</span>
+              <div className="mt-1 flex items-baseline justify-between">
+                <span className="text-2xl font-black text-amber-900">{warrantyMetrics.pending}</span>
+                <Clock className="size-5 text-amber-600" />
+              </div>
+              <span className="text-3xs text-amber-700 mt-1 block">Yêu cầu bảo hành cần Admin giải quyết</span>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 shadow-2xs">
+              <span className="text-2xs font-bold text-emerald-800 uppercase block">Đã chấp thuận (+1 Credit)</span>
+              <div className="mt-1 flex items-baseline justify-between">
+                <span className="text-2xl font-black text-emerald-900">{warrantyMetrics.approved}</span>
+                <CheckCircle2 className="size-5 text-emerald-600" />
+              </div>
+              <span className="text-3xs text-emerald-700 mt-1 block">Đã bồi hoàn & gia hạn tin đăng</span>
+            </div>
+
+            <div className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4 shadow-2xs">
+              <span className="text-2xs font-bold text-rose-800 uppercase block">Bác bỏ / Từ chối</span>
+              <div className="mt-1 flex items-baseline justify-between">
+                <span className="text-2xl font-black text-rose-900">{warrantyMetrics.rejected}</span>
+                <AlertTriangle className="size-5 text-rose-600" />
+              </div>
+              <span className="text-3xs text-rose-700 mt-1 block">Hồ sơ không đủ căn cứ bồi thường</span>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs">
+              <span className="text-2xs font-bold text-slate-400 uppercase block">Tổng hồ sơ bảo hành</span>
+              <div className="mt-1 flex items-baseline justify-between">
+                <span className="text-2xl font-black text-[#1F2937]">{warrantyClaims.length}</span>
+                <ShieldAlert className="size-5 text-slate-400" />
+              </div>
+              <span className="text-3xs text-slate-500 mt-1 block">Toàn bộ khiếu nại phát sinh</span>
+            </div>
+          </div>
+
+          {/* Filter and Search Bar for Warranty */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+              {(['ALL', 'PENDING', 'APPROVED', 'REJECTED'] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => handleWarrantyStatusChange(s)}
+                  className={`rounded-xl px-3 py-1.5 text-xs font-bold transition whitespace-nowrap ${
+                    warrantyStatusFilter === s
+                      ? 'bg-[#2563EB] text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {s === 'ALL'
+                    ? 'Tất cả'
+                    : s === 'PENDING'
+                    ? `⏳ Chờ xử lý (${warrantyMetrics.pending})`
+                    : s === 'APPROVED'
+                    ? '✓ Đã bồi hoàn'
+                    : '✕ Đã từ chối'}
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={handleWarrantySearchSubmit} className="relative flex-1 md:w-80">
+              <Search className="absolute left-3 top-2.5 size-3.5 text-slate-400" />
+              <input
+                type="text"
+                value={warrantySearch}
+                onChange={(e) => setWarrantySearch(e.target.value)}
+                placeholder="Mã hồ sơ, HĐ, tên ứng viên, HR..."
+                className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-[#2563EB]"
+              />
+            </form>
+          </div>
+
+          {/* Warranty Claims Table */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
+            {warrantyLoading ? (
+              <div className="flex flex-col items-center justify-center p-12 text-slate-400 space-y-2">
+                <RefreshCw className="size-6 animate-spin text-[#2563EB]" />
+                <span className="text-xs">Đang tải danh sách khiếu nại bảo hành...</span>
+              </div>
+            ) : warrantyClaims.length === 0 ? (
+              <div className="p-12 text-center text-xs text-slate-400">
+                Không có yêu cầu bảo hành nào phù hợp bộ lọc.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50/75 text-2xs font-extrabold uppercase text-slate-500">
+                      <th className="py-3 px-4">Mã hồ sơ & HĐ</th>
+                      <th className="py-3 px-4">Doanh nghiệp (HR)</th>
+                      <th className="py-3 px-4">Ứng viên & Vị trí</th>
+                      <th className="py-3 px-4">Lý do bảo hành</th>
+                      <th className="py-3 px-4">Giải trình ứng viên</th>
+                      <th className="py-3 px-4">Trạng thái</th>
+                      <th className="py-3 px-4 text-right">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {warrantyClaims.map((claim) => (
+                      <tr key={claim.id} className="hover:bg-slate-50/60 transition">
+                        <td className="py-3.5 px-4">
+                          <div className="font-mono text-xs font-bold text-[#2563EB]">
+                            BH-{claim.id.slice(0, 8).toUpperCase()}
+                          </div>
+                          <div className="text-3xs text-slate-500 mt-0.5">
+                            HĐ: {claim.contract?.contractNumber || 'HĐLĐ'}
+                          </div>
+                          <div className="text-3xs text-slate-400">
+                            {new Date(claim.createdAt).toLocaleDateString('vi-VN')}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="font-semibold text-slate-900">
+                            {claim.recruiterUser?.fullName || claim.contract?.employerName || 'Doanh nghiệp'}
+                          </div>
+                          <div className="text-3xs text-slate-500">
+                            {claim.recruiterUser?.email}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="font-semibold text-slate-900">
+                            {claim.contract?.candidateUser?.fullName || claim.contract?.candidateName || 'Ứng viên'}
+                          </div>
+                          <div className="text-3xs text-slate-500">
+                            {claim.contract?.jobTitle || 'Nhân sự đã ký hợp đồng'}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-2xs font-bold text-slate-800">
+                            {claim.reason === 'NO_SHOW' ? '🚫 Không nhận việc' : '🏃 Nghỉ việc ≤30 ngày'}
+                          </span>
+                          {claim.note && (
+                            <p className="mt-1 text-3xs text-slate-500 line-clamp-1 max-w-xs italic">
+                              &quot;{claim.note}&quot;
+                            </p>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          {claim.candidateResponse ? (
+                            <div>
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-3xs font-extrabold text-emerald-700">
+                                <CheckCircle2 className="size-3" /> Đã nộp giải trình
+                              </span>
+                              <p className="mt-1 text-3xs text-slate-500 line-clamp-1 max-w-xs italic">
+                                &quot;{claim.candidateResponse}&quot;
+                              </p>
+                            </div>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-3xs font-bold text-slate-500">
+                              <Clock className="size-3" /> Chưa phản hồi (48h)
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          {claim.status === 'PENDING' ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-2xs font-extrabold text-amber-700">
+                              <Clock className="size-3" /> Chờ Admin duyệt
+                            </span>
+                          ) : claim.status === 'APPROVED' ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-2xs font-extrabold text-emerald-700">
+                              <CheckCircle2 className="size-3" /> Đã bồi hoàn (+1)
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200 px-2.5 py-1 text-2xs font-extrabold text-rose-700">
+                              <AlertTriangle className="size-3" /> Đã từ chối
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedWarrantyClaimId(claim.id)}
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 border border-blue-200 px-3 py-1.5 text-2xs font-extrabold text-[#2563EB] hover:bg-[#2563EB] hover:text-white transition shadow-2xs"
+                          >
+                            <Eye className="size-3" />
+                            Thẩm định hồ sơ
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Forensic Dossier Modal */}
       {selectedContractId && (
@@ -817,6 +1107,23 @@ export default function AdminContractsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Admin Warranty Review Modal */}
+      {selectedWarrantyClaimId && (
+        <AdminWarrantyReviewModal
+          isOpen={true}
+          claimId={selectedWarrantyClaimId}
+          token={token}
+          onClose={() => setSelectedWarrantyClaimId(null)}
+          onResolved={() => {
+            setSelectedWarrantyClaimId(null);
+            if (token) {
+              loadWarrantyClaims(token, warrantyStatusFilter, warrantySearch);
+              loadContracts(token, methodFilter, statusFilter, searchTerm);
+            }
+          }}
+        />
       )}
     </div>
   );

@@ -14,6 +14,9 @@ import {
   ContractStatus,
   ContractType,
   Prisma,
+  WarrantyClaimStatus,
+  WarrantyCompensationType,
+  WarrantyReason,
 } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { ApplicationAccessService } from '../applications/application-access.service';
@@ -23,6 +26,11 @@ import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractDto } from './dto/update-contract.dto';
 import { CandidateFeedbackDto } from './dto/candidate-feedback.dto';
 import { ESignContractDto, UploadSignedContractDto } from './dto/sign-contract.dto';
+import {
+  ClaimWarrantyDto,
+  CandidateWarrantyFeedbackDto,
+  AdminResolveWarrantyDto,
+} from './dto/claim-warranty.dto';
 
 @Injectable()
 export class ContractsService {
@@ -57,6 +65,7 @@ export class ContractsService {
               select: {
                 id: true,
                 title: true,
+                expiryDate: true,
                 recruiterId: true,
                 recruiter: {
                   select: {
@@ -81,6 +90,7 @@ export class ContractsService {
           },
         },
         offer: true,
+        warrantyClaim: true,
         histories: {
           orderBy: { createdAt: 'desc' },
           take: 20,
@@ -1390,6 +1400,7 @@ export class ContractsService {
               select: {
                 id: true,
                 title: true,
+                expiryDate: true,
                 recruiter: {
                   select: {
                     userId: true,
@@ -1543,4 +1554,614 @@ export class ContractsService {
       },
     };
   }
+
+  /**
+   * Mechanism 4: Get recruitment warranty status and eligibility (30-day policy)
+   */
+  async getWarrantyStatus(userId: string, contractId: string) {
+    const { contract, isRecruiter, isCandidate, isAdmin } = await this.findContractWithAccess(userId, contractId);
+    if (!isRecruiter && !isCandidate && !isAdmin) {
+      throw new ForbiddenException('Bạn không có quyền kiểm tra bảo hành hợp đồng này.');
+    }
+
+    const startDate = new Date(contract.startDate);
+    const now = new Date();
+    // 30 days warranty period from startDate
+    const warrantyEnd = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const daysRemaining = Math.max(0, Math.ceil((warrantyEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    const isWithinWindow = now >= new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000) && now <= warrantyEnd;
+
+    const existingClaim = await this.prisma.warrantyClaim.findUnique({
+      where: { contractId },
+    });
+
+    // Eligible for a new claim only if recruiter, contract is signed, no existing active claim, and within window
+    const isEligible = isRecruiter && contract.status === ContractStatus.SIGNED && !existingClaim && isWithinWindow;
+
+    return {
+      contractId: contract.id,
+      contractNumber: contract.contractNumber,
+      jobTitle: contract.jobTitle,
+      candidateName: contract.application.candidate.fullName,
+      candidateUserId: contract.application.candidate.userId,
+      startDate: contract.startDate,
+      warrantyEnd,
+      daysRemaining,
+      isWithinWindow,
+      isSigned: contract.status === ContractStatus.SIGNED,
+      isWarrantyClaimed: contract.isWarrantyClaimed,
+      isEligible,
+      existingClaim,
+    };
+  }
+
+  /**
+   * Mechanism 4 (Recruiter): Submit B2B recruitment warranty claim (Status -> PENDING)
+   * Note: Does NOT automatically refund. Requires Admin review and approval.
+   */
+  async claimWarranty(recruiterUserId: string, contractId: string, dto: ClaimWarrantyDto) {
+    const { contract, isRecruiter } = await this.findContractWithAccess(recruiterUserId, contractId);
+    if (!isRecruiter) {
+      throw new ForbiddenException('Chỉ nhà tuyển dụng của vị trí này mới có quyền yêu cầu bảo hành.');
+    }
+
+    if (contract.status !== ContractStatus.SIGNED) {
+      throw new BadRequestException('Chỉ có thể kích hoạt bảo hành cho hợp đồng đã ký kết thành công.');
+    }
+
+    const existingClaim = await this.prisma.warrantyClaim.findUnique({
+      where: { contractId },
+    });
+
+    if (existingClaim && (existingClaim.status === WarrantyClaimStatus.PENDING || existingClaim.status === WarrantyClaimStatus.APPROVED)) {
+      throw new BadRequestException('Hợp đồng này đã có yêu cầu bảo hành đang chờ xét duyệt hoặc đã được phê duyệt.');
+    }
+
+    const startDate = new Date(contract.startDate);
+    const now = new Date();
+    const warrantyEnd = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    if (now > warrantyEnd) {
+      throw new BadRequestException('Hợp đồng đã quá thời hạn bảo hành 30 ngày kể từ ngày bắt đầu nhận việc.');
+    }
+
+    const claimNumber = `WAR-${now.getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const compensationType = dto.compensationType || WarrantyCompensationType.CREDIT_REFUND;
+
+    const claim = await this.prisma.$transaction(async (tx) => {
+      // 1. Create WarrantyClaim in PENDING state
+      const createdClaim = await tx.warrantyClaim.create({
+        data: {
+          claimNumber,
+          contractId,
+          recruiterUserId,
+          companyId: contract.application.job.recruiter?.company?.id || null,
+          reason: dto.reason,
+          compensationType,
+          note: dto.note?.trim() || null,
+          evidenceUrl: dto.evidenceUrl || null,
+          status: WarrantyClaimStatus.PENDING,
+          creditRefunded: 0,
+          daysExtended: 0,
+          resolvedAt: null,
+        },
+      });
+
+      // 2. Log to contract history
+      const reasonLabel = dto.reason === WarrantyReason.NO_SHOW
+        ? 'Ứng viên không đến nhận việc ngày đầu (First-day No-Show)'
+        : 'Ứng viên tự ý nghỉ việc trong vòng 30 ngày thử việc (Early Resignation)';
+
+      await tx.contractHistory.create({
+        data: {
+          contractId,
+          action: 'WARRANTY_CLAIM_SUBMITTED',
+          performedByUserId: recruiterUserId,
+          note: `Doanh nghiệp gửi yêu cầu bảo hành tuyển dụng (${claimNumber}): Lý do "${reasonLabel}". Hồ sơ đang chờ Ban Quản trị sàn (Admin) thẩm định và phê duyệt bồi hoàn.`,
+          snapshot: {
+            claimId: createdClaim.id,
+            claimNumber,
+            reason: dto.reason,
+            compensationType,
+            note: dto.note || null,
+            evidenceUrl: dto.evidenceUrl || null,
+          },
+        },
+      });
+
+      return createdClaim;
+    });
+
+    // 3. Notifications to Recruiter & Candidate
+    try {
+      await this.notificationsService.createNotification({
+        recipientUserId: recruiterUserId,
+        applicationId: contract.application.id,
+        title: `Đã tiếp nhận yêu cầu bảo hành (${claimNumber})`,
+        message: `Yêu cầu bảo hành cho vị trí "${contract.jobTitle}" đã được gửi lên hệ thống và đang chờ Ban Quản trị thẩm định đối soát trong 24h làm việc.`,
+        payload: { contractId, claimNumber, compensationType, status: 'PENDING' },
+      });
+    } catch (err) {
+      this.logger.warn(`Failed to notify recruiter about warranty submission: ${err}`);
+    }
+
+    if (contract.application.candidate.userId) {
+      try {
+        await this.notificationsService.createNotification({
+          recipientUserId: contract.application.candidate.userId,
+          applicationId: contract.application.id,
+          title: `Thông báo cập nhật nhận việc vị trí ${contract.jobTitle}`,
+          message: `Nhà tuyển dụng đã gửi yêu cầu bảo hành do ghi nhận sự cố tiếp nhận công việc. Bạn có thể xem chi tiết hoặc gửi ý kiến phản hồi trong vòng 48h.`,
+          payload: { contractId, claimNumber, status: 'PENDING' },
+        });
+      } catch (err) {
+        this.logger.warn(`Failed to notify candidate about warranty submission: ${err}`);
+      }
+    }
+
+    return claim;
+  }
+
+  /**
+   * Mechanism 4 (Candidate): Candidate provides counter-explanation or confirmation
+   */
+  async candidateRespondWarranty(candidateUserId: string, contractId: string, dto: CandidateWarrantyFeedbackDto) {
+    const { contract, isCandidate } = await this.findContractWithAccess(candidateUserId, contractId);
+    if (!isCandidate) {
+      throw new ForbiddenException('Chỉ ứng viên của hợp đồng này mới có quyền gửi phản hồi.');
+    }
+
+    const claim = await this.prisma.warrantyClaim.findUnique({
+      where: { contractId },
+    });
+
+    if (!claim) {
+      throw new NotFoundException('Không tìm thấy hồ sơ yêu cầu bảo hành cho hợp đồng này.');
+    }
+
+    if (claim.status !== WarrantyClaimStatus.PENDING) {
+      throw new BadRequestException('Hồ sơ bảo hành đã được xử lý hoặc đóng, không thể gửi thêm phản hồi.');
+    }
+
+    const updatedClaim = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.warrantyClaim.update({
+        where: { id: claim.id },
+        data: {
+          candidateResponse: dto.feedback.trim(),
+          candidateRespondedAt: new Date(),
+        },
+      });
+
+      await tx.contractHistory.create({
+        data: {
+          contractId,
+          action: 'WARRANTY_CANDIDATE_FEEDBACK',
+          performedByUserId: candidateUserId,
+          note: `Ứng viên gửi phản hồi đối chất về yêu cầu bảo hành (${claim.claimNumber}): "${dto.feedback.trim()}".`,
+          snapshot: {
+            claimId: claim.id,
+            candidateResponse: dto.feedback.trim(),
+          },
+        },
+      });
+
+      return updated;
+    });
+
+    // Notify Recruiter
+    const recruiterUserId = contract.application.job.recruiter?.userId;
+    if (recruiterUserId) {
+      try {
+        await this.notificationsService.createNotification({
+          recipientUserId: recruiterUserId,
+          applicationId: contract.application.id,
+          title: `Ứng viên đã phản hồi yêu cầu bảo hành (${claim.claimNumber})`,
+          message: `Ứng viên ${contract.application.candidate.fullName} đã gửi văn bản đối chất / giải trình. Ban Quản trị sẽ tổng hợp để ra quyết định thẩm định.`,
+          payload: { contractId, claimNumber: claim.claimNumber },
+        });
+      } catch (err) {
+        this.logger.warn(`Failed to notify recruiter about candidate feedback: ${err}`);
+      }
+    }
+
+    return updatedClaim;
+  }
+
+  /**
+   * Mechanism 4 (Admin): Get all warranty claims with filters and metrics
+   */
+  async getAdminWarrantyClaims(query?: {
+    status?: WarrantyClaimStatus;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const page = Math.max(1, Number(query?.page) || 1);
+    const limit = Math.min(50, Math.max(1, Number(query?.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.WarrantyClaimWhereInput = {};
+
+    if (query?.status) {
+      where.status = query.status;
+    }
+
+    if (query?.search?.trim()) {
+      const s = query.search.trim();
+      where.OR = [
+        { claimNumber: { contains: s, mode: 'insensitive' } },
+        { contract: { contractNumber: { contains: s, mode: 'insensitive' } } },
+        { contract: { jobTitle: { contains: s, mode: 'insensitive' } } },
+        { contract: { application: { candidate: { fullName: { contains: s, mode: 'insensitive' } } } } },
+        { company: { name: { contains: s, mode: 'insensitive' } } },
+      ];
+    }
+
+    const [items, total, pendingCount, approvedCount, rejectedCount] = await Promise.all([
+      this.prisma.warrantyClaim.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          contract: {
+            select: {
+              id: true,
+              contractNumber: true,
+              jobTitle: true,
+              salary: true,
+              currency: true,
+              startDate: true,
+              status: true,
+              signingMethod: true,
+              candidateSignedAt: true,
+              employerSignedAt: true,
+              pdfSha256Hash: true,
+              application: {
+                select: {
+                  id: true,
+                  candidate: {
+                    select: {
+                      id: true,
+                      fullName: true,
+                      email: true,
+                      phone: true,
+                      userId: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          recruiterUser: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              phone: true,
+            },
+          },
+          company: {
+            select: {
+              id: true,
+              name: true,
+              logoUrl: true,
+            },
+          },
+        },
+      }),
+      this.prisma.warrantyClaim.count({ where }),
+      this.prisma.warrantyClaim.count({ where: { status: WarrantyClaimStatus.PENDING } }),
+      this.prisma.warrantyClaim.count({ where: { status: WarrantyClaimStatus.APPROVED } }),
+      this.prisma.warrantyClaim.count({ where: { status: WarrantyClaimStatus.REJECTED } }),
+    ]);
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      metrics: {
+        pending: pendingCount,
+        approved: approvedCount,
+        rejected: rejectedCount,
+      },
+    };
+  }
+
+  /**
+   * Mechanism 4 (Admin): Get single warranty claim detail with forensic audit
+   */
+  async getAdminWarrantyClaimDetail(claimId: string) {
+    const claim = await this.prisma.warrantyClaim.findUnique({
+      where: { id: claimId },
+      include: {
+        contract: {
+          include: {
+            application: {
+              include: {
+                job: {
+                  select: {
+                    id: true,
+                    title: true,
+                    expiryDate: true,
+                    recruiter: {
+                      select: {
+                        userId: true,
+                        user: { select: { fullName: true, email: true, phone: true } },
+                        company: { select: { id: true, name: true, logoUrl: true, address: true } },
+                      },
+                    },
+                  },
+                },
+                candidate: {
+                  select: {
+                    id: true,
+                    userId: true,
+                    fullName: true,
+                    email: true,
+                    phone: true,
+                    address: true,
+                  },
+                },
+              },
+            },
+            histories: {
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        },
+        recruiterUser: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+          },
+        },
+        company: {
+          select: {
+            id: true,
+            name: true,
+            logoUrl: true,
+            address: true,
+          },
+        },
+      },
+    });
+
+    if (!claim) {
+      throw new NotFoundException('Hồ sơ bảo hành không tồn tại.');
+    }
+
+    return claim;
+  }
+
+  /**
+   * Mechanism 4 (Admin): Approve warranty claim & trigger credit refund + job extension
+   */
+  async adminApproveWarranty(adminUserId: string, claimId: string, dto: AdminResolveWarrantyDto) {
+    const claim = await this.prisma.warrantyClaim.findUnique({
+      where: { id: claimId },
+      include: {
+        contract: {
+          include: {
+            application: {
+              include: {
+                job: {
+                  select: {
+                    id: true,
+                    title: true,
+                    expiryDate: true,
+                    recruiter: {
+                      select: {
+                        userId: true,
+                        company: { select: { id: true } },
+                      },
+                    },
+                  },
+                },
+                candidate: {
+                  select: { id: true, userId: true, fullName: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!claim) {
+      throw new NotFoundException('Hồ sơ bảo hành không tồn tại.');
+    }
+
+    if (claim.status !== WarrantyClaimStatus.PENDING) {
+      throw new BadRequestException('Chỉ có thể phê duyệt hồ sơ đang ở trạng thái Chờ xét duyệt (PENDING).');
+    }
+
+    const now = new Date();
+    const contract = claim.contract;
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 1. Update claim to APPROVED
+      const approvedClaim = await tx.warrantyClaim.update({
+        where: { id: claimId },
+        data: {
+          status: WarrantyClaimStatus.APPROVED,
+          creditRefunded: 1,
+          daysExtended: 30,
+          adminNote: dto.adminNote?.trim() || null,
+          resolvedByUserId: adminUserId,
+          resolvedAt: now,
+        },
+      });
+
+      // 2. Mark contract as claimed
+      await tx.contract.update({
+        where: { id: contract.id },
+        data: { isWarrantyClaimed: true },
+      });
+
+      // 3. Compensate: Refund 1 CV Unlock credit & extend job posting by 30 days
+      let entitlement = await tx.packageEntitlement.findFirst({
+        where: { userId: claim.recruiterUserId, status: 'ACTIVE' },
+      });
+      if (!entitlement && contract.application.job.recruiter?.company?.id) {
+        entitlement = await tx.packageEntitlement.findFirst({
+          where: { companyId: contract.application.job.recruiter.company.id, status: 'ACTIVE' },
+        });
+      }
+
+      if (entitlement) {
+        await tx.packageEntitlement.update({
+          where: { id: entitlement.id },
+          data: { cvUnlockRemaining: entitlement.cvUnlockRemaining + 1 },
+        });
+
+        await tx.packageUsageLog.create({
+          data: {
+            userId: claim.recruiterUserId,
+            entitlementId: entitlement.id,
+            featureCode: 'WARRANTY_REFUND',
+            requestId: crypto.randomUUID(),
+            refType: 'WARRANTY_CLAIM',
+            refId: claim.id,
+            status: 'REFUNDED',
+          },
+        });
+      }
+
+      // Extend job posting by 30 days
+      const currentExpiry = contract.application.job.expiryDate || new Date();
+      const newExpiry = new Date(currentExpiry.getTime() + 30 * 24 * 60 * 60 * 1000);
+      await tx.jobPosting.update({
+        where: { id: contract.application.job.id },
+        data: { expiryDate: newExpiry },
+      });
+
+      // 4. Log to contract history
+      await tx.contractHistory.create({
+        data: {
+          contractId: contract.id,
+          action: 'WARRANTY_APPROVED_BY_ADMIN',
+          performedByUserId: adminUserId,
+          note: `Quản trị viên (Admin) đã phê duyệt yêu cầu bảo hành (${claim.claimNumber}). Hệ thống đã bồi hoàn +1 CV Unlock Credit và gia hạn tin tuyển dụng 30 ngày. Ghi chú Admin: ${dto.adminNote || 'Hồ sơ hợp lệ'}`,
+          snapshot: {
+            claimId: claim.id,
+            claimNumber: claim.claimNumber,
+            adminNote: dto.adminNote || null,
+            creditRefunded: 1,
+            daysExtended: 30,
+          },
+        },
+      });
+
+      return approvedClaim;
+    });
+
+    // 5. Notifications
+    try {
+      await this.notificationsService.createNotification({
+        recipientUserId: claim.recruiterUserId,
+        applicationId: contract.application.id,
+        title: `Bảo hành tuyển dụng được PHÊ DUYỆT (${claim.claimNumber})`,
+        message: `Ban Quản trị đã duyệt bồi hoàn bảo hành cho vị trí "${contract.jobTitle}". Tài khoản của bạn đã được cộng +1 CV Unlock Credit và tin tuyển dụng được gia hạn thêm 30 ngày.`,
+        payload: { contractId: contract.id, claimNumber: claim.claimNumber, status: 'APPROVED' },
+      });
+    } catch (err) {
+      this.logger.warn(`Failed to notify recruiter about approval: ${err}`);
+    }
+
+    if (contract.application.candidate.userId) {
+      try {
+        await this.notificationsService.createNotification({
+          recipientUserId: contract.application.candidate.userId,
+          applicationId: contract.application.id,
+          title: `Cập nhật kết quả tuyển dụng vị trí ${contract.jobTitle}`,
+          message: `Hồ sơ bảo hành tuyển dụng đã được Ban Quản trị xác nhận xử lý thành công.`,
+          payload: { contractId: contract.id, claimNumber: claim.claimNumber, status: 'APPROVED' },
+        });
+      } catch (err) {
+        this.logger.warn(`Failed to notify candidate about approval: ${err}`);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Mechanism 4 (Admin): Reject warranty claim with reason
+   */
+  async adminRejectWarranty(adminUserId: string, claimId: string, dto: AdminResolveWarrantyDto) {
+    const claim = await this.prisma.warrantyClaim.findUnique({
+      where: { id: claimId },
+      include: {
+        contract: {
+          include: {
+            application: {
+              include: {
+                candidate: { select: { fullName: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!claim) {
+      throw new NotFoundException('Hồ sơ bảo hành không tồn tại.');
+    }
+
+    if (claim.status !== WarrantyClaimStatus.PENDING) {
+      throw new BadRequestException('Chỉ có thể từ chối hồ sơ đang ở trạng thái Chờ xét duyệt (PENDING).');
+    }
+
+    const now = new Date();
+    const contract = claim.contract;
+    const adminNote = dto.adminNote?.trim() || 'Hồ sơ bảo hành không đáp ứng điều kiện hoặc bằng chứng không hợp lệ theo quy chế sàn.';
+
+    const rejectedClaim = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.warrantyClaim.update({
+        where: { id: claimId },
+        data: {
+          status: WarrantyClaimStatus.REJECTED,
+          adminNote,
+          resolvedByUserId: adminUserId,
+          resolvedAt: now,
+        },
+      });
+
+      await tx.contractHistory.create({
+        data: {
+          contractId: contract.id,
+          action: 'WARRANTY_REJECTED_BY_ADMIN',
+          performedByUserId: adminUserId,
+          note: `Quản trị viên (Admin) đã TỪ CHỐI yêu cầu bảo hành (${claim.claimNumber}). Lý do: "${adminNote}". Không phát sinh bồi hoàn Credit.`,
+          snapshot: {
+            claimId: claim.id,
+            claimNumber: claim.claimNumber,
+            adminNote,
+          },
+        },
+      });
+
+      return updated;
+    });
+
+    // Notify Recruiter about rejection
+    try {
+      await this.notificationsService.createNotification({
+        recipientUserId: claim.recruiterUserId,
+        applicationId: contract.application.id,
+        title: `Yêu cầu bảo hành bị TỪ CHỐI (${claim.claimNumber})`,
+        message: `Yêu cầu bảo hành cho vị trí "${contract.jobTitle}" đã bị từ chối sau khi Ban Quản trị thẩm định. Lý do: "${adminNote}".`,
+        payload: { contractId: contract.id, claimNumber: claim.claimNumber, status: 'REJECTED', adminNote },
+      });
+    } catch (err) {
+      this.logger.warn(`Failed to notify recruiter about rejection: ${err}`);
+    }
+
+    return rejectedClaim;
+  }
 }
+

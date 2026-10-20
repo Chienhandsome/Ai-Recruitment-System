@@ -37,6 +37,7 @@ import {
 import { CreateOrEditContractModal } from "./contracts/CreateOrEditContractModal";
 import { UploadSignedScanModal } from "./contracts/UploadSignedScanModal";
 import { DigitalSignatureModal } from "@/components/common/contracts/DigitalSignatureModal";
+import { ClaimWarrantyModal } from "./contracts/ClaimWarrantyModal";
 import { FileSignature, FileText, Download } from "lucide-react";
 
 export type PillarDimension = "skills" | "experience" | "education" | "other";
@@ -93,6 +94,7 @@ export function CandidateScoringWorkspace({
   const [showContractModal, setShowContractModal] = useState(false);
   const [showUploadScanModal, setShowUploadScanModal] = useState(false);
   const [showRecruiterESignModal, setShowRecruiterESignModal] = useState(false);
+  const [showWarrantyModal, setShowWarrantyModal] = useState(false);
 
   const handleRevokeOffer = async () => {
     if (!selectedApplicationDetail?.offer?.id) return;
@@ -908,29 +910,52 @@ export function CandidateScoringWorkspace({
                               Hợp Đồng Lao Động (Labor Contract)
                             </span>
                             {workspaceContract ? (
-                              <span
-                                className={`rounded-full px-2.5 py-0.5 text-2xs font-extrabold border ${
-                                  workspaceContract.status === 'SIGNED'
-                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span
+                                  className={`rounded-full px-2.5 py-0.5 text-2xs font-extrabold border ${
+                                    workspaceContract.status === 'SIGNED'
+                                      ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                      : workspaceContract.status === 'PENDING_REVIEW'
+                                      ? 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse'
+                                      : workspaceContract.status === 'REVISION_REQUESTED'
+                                      ? 'bg-rose-100 text-rose-800 border-rose-300'
+                                      : workspaceContract.status === 'APPROVED'
+                                      ? 'bg-blue-100 text-blue-800 border-blue-300'
+                                      : 'bg-slate-100 text-slate-700 border-slate-300'
+                                  }`}
+                                >
+                                  {workspaceContract.status === 'SIGNED'
+                                    ? '✓ Đã hoàn tất ký kết'
                                     : workspaceContract.status === 'PENDING_REVIEW'
-                                    ? 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse'
+                                    ? '⏳ Đang chờ ứng viên duyệt'
                                     : workspaceContract.status === 'REVISION_REQUESTED'
-                                    ? 'bg-rose-100 text-rose-800 border-rose-300'
+                                    ? '⚠️ Ứng viên yêu cầu điều chỉnh'
                                     : workspaceContract.status === 'APPROVED'
-                                    ? 'bg-blue-100 text-blue-800 border-blue-300'
-                                    : 'bg-slate-100 text-slate-700 border-slate-300'
-                                }`}
-                              >
-                                {workspaceContract.status === 'SIGNED'
-                                  ? '✓ Đã hoàn tất ký kết'
-                                  : workspaceContract.status === 'PENDING_REVIEW'
-                                  ? '⏳ Đang chờ ứng viên duyệt'
-                                  : workspaceContract.status === 'REVISION_REQUESTED'
-                                  ? '⚠️ Ứng viên yêu cầu điều chỉnh'
-                                  : workspaceContract.status === 'APPROVED'
-                                  ? '🤝 Đã thống nhất - Chờ ký'
-                                  : '📝 Bản nháp hợp đồng'}
-                              </span>
+                                    ? '🤝 Đã thống nhất - Chờ ký'
+                                    : '📝 Bản nháp hợp đồng'}
+                                </span>
+                                {workspaceContract.status === 'SIGNED' && (
+                                  <span
+                                    className={`rounded-full px-2.5 py-0.5 text-2xs font-bold border ${
+                                      workspaceContract.isWarrantyClaimed || workspaceContract.warrantyClaim?.status === 'APPROVED'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                        : workspaceContract.warrantyClaim?.status === 'PENDING'
+                                        ? 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse'
+                                        : workspaceContract.warrantyClaim?.status === 'REJECTED'
+                                        ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                        : 'bg-blue-50 text-[#2563EB] border-blue-200'
+                                    }`}
+                                  >
+                                    {workspaceContract.isWarrantyClaimed || workspaceContract.warrantyClaim?.status === 'APPROVED'
+                                      ? '🛡️ Đã bồi hoàn BH'
+                                      : workspaceContract.warrantyClaim?.status === 'PENDING'
+                                      ? '⏳ Chờ Admin duyệt BH'
+                                      : workspaceContract.warrantyClaim?.status === 'REJECTED'
+                                      ? '⚠️ BH bị từ chối'
+                                      : '🛡️ Bảo hành 30 ngày'}
+                                  </span>
+                                )}
+                              </div>
                             ) : (
                               <span className="rounded-full bg-slate-100 border border-slate-300 px-2.5 py-0.5 text-2xs font-bold text-slate-600">
                                 Chưa khởi tạo hợp đồng
@@ -991,6 +1016,25 @@ export function CandidateScoringWorkspace({
                           >
                             <Download className="size-3.5" />
                             Tải Hợp Đồng (.PDF)
+                          </button>
+                        )}
+
+                        {workspaceContract && workspaceContract.status === 'SIGNED' && (
+                          <button
+                            type="button"
+                            onClick={() => setShowWarrantyModal(true)}
+                            className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 text-xs font-bold transition-colors shadow-2xs cursor-pointer ${
+                              workspaceContract.isWarrantyClaimed || workspaceContract.warrantyClaim?.status === 'APPROVED'
+                                ? 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                                : workspaceContract.warrantyClaim?.status === 'PENDING'
+                                ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                                : 'border-blue-300 bg-blue-50/70 text-[#2563EB] hover:bg-blue-100'
+                            }`}
+                          >
+                            <ShieldCheck className="size-3.5" />
+                            {workspaceContract.isWarrantyClaimed || workspaceContract.warrantyClaim
+                              ? 'Chi Tiết Bảo Hành'
+                              : 'Khai Báo Bảo Hành (30N)'}
                           </button>
                         )}
                       </div>
@@ -2230,6 +2274,21 @@ export function CandidateScoringWorkspace({
                 token={token}
                 onSignConfirmed={async (signatureDataUrl, otpCode, options) => {
                   await eSignContract(token, workspaceContract.id, signatureDataUrl, otpCode, options);
+                  await loadWorkspaceContract();
+                  onRefresh();
+                }}
+              />
+
+              <ClaimWarrantyModal
+                isOpen={showWarrantyModal}
+                onClose={() => setShowWarrantyModal(false)}
+                token={token}
+                contractId={workspaceContract.id}
+                contractNumber={workspaceContract.contractNumber}
+                candidateName={candUser?.fullName || "Ứng viên"}
+                jobTitle={job.title}
+                startDate={workspaceContract.startDate}
+                onSuccess={async () => {
                   await loadWorkspaceContract();
                   onRefresh();
                 }}

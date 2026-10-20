@@ -225,6 +225,22 @@ enum DisputeCategory {
   OTHER
 }
 
+enum WarrantyReason {
+  NO_SHOW
+  EARLY_RESIGNATION
+}
+
+enum WarrantyCompensationType {
+  CREDIT_REFUND
+  AI_REPLACEMENT
+}
+
+enum WarrantyClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum AiInterviewStatus {
   CREATED
   IN_PROGRESS
@@ -372,6 +388,7 @@ model Company {
   departments       Department[]
   recruiterProfiles RecruiterProfile[]
   entitlements      PackageEntitlement[]
+  warrantyClaims    WarrantyClaim[]
 
   @@map("companies")
 }
@@ -415,6 +432,7 @@ model User {
   jdFitAnalyses    CandidateJdFitAnalysis[]
   disputes         Dispute[]
   contractSigningOtps ContractSigningOtp[]
+  warrantyClaims   WarrantyClaim[]
 
   @@index([email])
   @@map("users")
@@ -1173,6 +1191,8 @@ model Contract {
   createdAt             DateTime              @default(now()) @map("created_at")
   updatedAt             DateTime              @updatedAt @map("updated_at")
 
+  isWarrantyClaimed     Boolean               @default(false) @map("is_warranty_claimed")
+  warrantyClaim         WarrantyClaim?
   histories             ContractHistory[]
   signingOtps           ContractSigningOtp[]
 
@@ -1432,4 +1452,34 @@ model CvUnlock {
   @@index([entitlementId])
   @@index([candidateProfileId])
   @@map("cv_unlocks")
+}
+
+model WarrantyClaim {
+  id                  String                   @id @default(uuid())
+  claimNumber         String                   @unique @map("claim_number")
+  contractId          String                   @unique @map("contract_id")
+  contract            Contract                 @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  recruiterUserId     String                   @map("recruiter_user_id") @db.Uuid
+  recruiterUser       User                     @relation(fields: [recruiterUserId], references: [id], onDelete: Cascade)
+  companyId           String?                  @map("company_id")
+  company             Company?                 @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  reason              WarrantyReason
+  compensationType    WarrantyCompensationType @default(CREDIT_REFUND) @map("compensation_type")
+  note                String?                  @db.Text
+  evidenceUrl         String?                  @map("evidence_url")
+  status              WarrantyClaimStatus      @default(PENDING)
+  creditRefunded      Int                      @default(0) @map("credit_refunded")
+  daysExtended        Int                      @default(0) @map("days_extended")
+  candidateResponse   String?                  @map("candidate_response") @db.Text
+  candidateRespondedAt DateTime?               @map("candidate_responded_at")
+  adminNote           String?                  @map("admin_note") @db.Text
+  resolvedByUserId    String?                  @map("resolved_by_user_id") @db.Uuid
+  resolvedAt          DateTime?                @map("resolved_at")
+  createdAt           DateTime                 @default(now()) @map("created_at")
+  updatedAt           DateTime                 @updatedAt @map("updated_at")
+
+  @@index([contractId])
+  @@index([recruiterUserId, status])
+  @@index([companyId])
+  @@map("warranty_claims")
 }

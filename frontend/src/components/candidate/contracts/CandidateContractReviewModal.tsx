@@ -24,11 +24,14 @@ import {
   requestContractRevision,
   approveContract,
   eSignContract,
+  getContractWarrantyStatus,
+  type ContractWarrantyStatus,
 } from '@/lib/contract-api';
 import { ContractDocumentView } from '@/components/common/contracts/ContractDocumentView';
 import { DigitalSignatureModal } from '@/components/common/contracts/DigitalSignatureModal';
 import { PolicyQuickViewModal } from '@/components/common/policies/PolicyQuickViewModal';
 import { ReportDisputeModal } from '@/components/common/disputes/ReportDisputeModal';
+import { CandidateWarrantyFeedbackModal } from './CandidateWarrantyFeedbackModal';
 
 interface CandidateContractReviewModalProps {
   isOpen: boolean;
@@ -57,6 +60,16 @@ export function CandidateContractReviewModal({
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [showScanViewer, setShowScanViewer] = useState(false);
   const [activeScanPageIndex, setActiveScanPageIndex] = useState(0);
+  const [showWarrantyFeedbackModal, setShowWarrantyFeedbackModal] = useState(false);
+  const [warrantyStatus, setWarrantyStatus] = useState<ContractWarrantyStatus | null>(null);
+
+  React.useEffect(() => {
+    if (isOpen && contract?.id && contract.status === 'SIGNED') {
+      getContractWarrantyStatus(token, contract.id)
+        .then((res) => setWarrantyStatus(res))
+        .catch(() => {});
+    }
+  }, [isOpen, contract?.id, contract?.status, token]);
 
   const manualScanPages = (contract.auditCertificate as any)?.manualScan?.pages as Array<any> | undefined;
 
@@ -151,6 +164,44 @@ export function CandidateContractReviewModal({
           <div className="border-t border-slate-200 bg-white px-6 py-4 shadow-lg">
             {contract.status === 'SIGNED' ? (
               <div className="space-y-3">
+                {warrantyStatus?.existingClaim && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-amber-300 bg-amber-50/80 text-xs text-amber-950">
+                    <div className="flex items-start gap-2.5">
+                      <ShieldAlert className="size-5 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block text-slate-900">
+                          Thông báo: Nhà tuyển dụng đã gửi yêu cầu bảo hành ({warrantyStatus.existingClaim.claimNumber})
+                        </span>
+                        <p className="text-2xs text-amber-900/90 mt-0.5">
+                          Lý do ghi nhận:{' '}
+                          <strong>
+                            {warrantyStatus.existingClaim.reason === 'NO_SHOW'
+                              ? 'Không đến nhận việc ngày đầu (No-Show)'
+                              : 'Tự ý nghỉ việc trong 30 ngày (Early Resignation)'}
+                          </strong>
+                          {warrantyStatus.existingClaim.candidateResponse ? (
+                            <span className="text-emerald-700 font-semibold block mt-0.5">
+                              ✓ Bạn đã gửi văn bản đối chất / giải trình. Ban Quản trị sàn đang đối soát.
+                            </span>
+                          ) : (
+                            <span className="text-amber-800 block mt-0.5">
+                              Bạn có quyền gửi ý kiến giải trình cho Ban Quản trị sàn xem xét đối soát.
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowWarrantyFeedbackModal(true)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 text-xs transition shadow-xs cursor-pointer shrink-0"
+                    >
+                      <ShieldAlert className="size-3.5" />
+                      {warrantyStatus.existingClaim.candidateResponse ? 'Xem Lại Giải Trình' : 'Gửi Ý Kiến Đối Chất'}
+                    </button>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-emerald-700 text-xs font-bold">
                     <CheckCircle2 className="size-5 shrink-0" />
@@ -503,6 +554,23 @@ export function CandidateContractReviewModal({
             </div>
           </div>
         </div>
+      )}
+
+      {warrantyStatus?.existingClaim && (
+        <CandidateWarrantyFeedbackModal
+          isOpen={showWarrantyFeedbackModal}
+          onClose={() => setShowWarrantyFeedbackModal(false)}
+          token={token}
+          contractId={contract.id}
+          contractNumber={contract.contractNumber}
+          jobTitle={contract.jobTitle}
+          existingClaim={warrantyStatus.existingClaim}
+          onSuccess={async () => {
+            const updated = await getContractWarrantyStatus(token, contract.id);
+            setWarrantyStatus(updated);
+            await onSuccess();
+          }}
+        />
       )}
     </>
   );

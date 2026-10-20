@@ -19,7 +19,11 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Request, Response } from 'express';
-import { ContractSigningMethod, ContractStatus } from '@prisma/client';
+import {
+  ContractSigningMethod,
+  ContractStatus,
+  WarrantyClaimStatus,
+} from '@prisma/client';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -35,6 +39,11 @@ import {
   RequestContractOtpDto,
   UploadSignedContractDto,
 } from './dto/sign-contract.dto';
+import {
+  ClaimWarrantyDto,
+  CandidateWarrantyFeedbackDto,
+  AdminResolveWarrantyDto,
+} from './dto/claim-warranty.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -97,6 +106,56 @@ export class ContractsController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.contractsService.getContractForensics(id);
+  }
+
+  @Get('admin/warranty-claims')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Admin: Get all B2B recruitment warranty claims with filters and metrics' })
+  getAdminWarrantyClaims(
+    @Query('status') status?: WarrantyClaimStatus,
+    @Query('search') search?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.contractsService.getAdminWarrantyClaims({
+      status,
+      search,
+      page,
+      limit,
+    });
+  }
+
+  @Get('admin/warranty-claims/:claimId')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Admin: Get single recruitment warranty claim detail with full contract dossier' })
+  getAdminWarrantyClaimDetail(
+    @Param('claimId', ParseUUIDPipe) claimId: string,
+  ) {
+    return this.contractsService.getAdminWarrantyClaimDetail(claimId);
+  }
+
+  @Post('admin/warranty-claims/:claimId/approve')
+  @Roles('ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin: Approve recruitment warranty claim, reimburse +1 CV credit and extend job' })
+  adminApproveWarranty(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('claimId', ParseUUIDPipe) claimId: string,
+    @Body() dto: AdminResolveWarrantyDto,
+  ) {
+    return this.contractsService.adminApproveWarranty(user.id, claimId, dto);
+  }
+
+  @Post('admin/warranty-claims/:claimId/reject')
+  @Roles('ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin: Reject recruitment warranty claim with justification' })
+  adminRejectWarranty(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('claimId', ParseUUIDPipe) claimId: string,
+    @Body() dto: AdminResolveWarrantyDto,
+  ) {
+    return this.contractsService.adminRejectWarranty(user.id, claimId, dto);
   }
 
   @Get(':id')
@@ -252,5 +311,39 @@ export class ContractsController {
     @Param('contractNumber') contractNumber: string,
   ) {
     return this.contractsService.verifyContractPublic(contractNumber);
+  }
+
+  @Get(':id/warranty/status')
+  @Roles('RECRUITER', 'CANDIDATE', 'ADMIN')
+  @ApiOperation({ summary: 'Check recruitment warranty status and eligibility for a signed contract' })
+  getWarrantyStatus(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.contractsService.getWarrantyStatus(user.id, id);
+  }
+
+  @Post(':id/warranty/claim')
+  @Roles('RECRUITER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Submit a recruitment warranty claim (No-Show or Early Resignation within 30 days)' })
+  claimWarranty(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ClaimWarrantyDto,
+  ) {
+    return this.contractsService.claimWarranty(user.id, id, dto);
+  }
+
+  @Post(':id/warranty/candidate-feedback')
+  @Roles('CANDIDATE')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Candidate submits counter-explanation or confirmation regarding warranty claim' })
+  candidateRespondWarranty(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CandidateWarrantyFeedbackDto,
+  ) {
+    return this.contractsService.candidateRespondWarranty(user.id, id, dto);
   }
 }

@@ -78,6 +78,8 @@ export interface ContractData {
     };
   };
   offer?: any;
+  isWarrantyClaimed?: boolean;
+  warrantyClaim?: any;
   histories?: ContractHistoryItem[];
 }
 
@@ -458,3 +460,200 @@ export async function getContractForensics(
   });
   return handleResponse<ContractForensicDossier>(res);
 }
+
+// ==========================================
+// MECHANISM 4: RECRUITMENT WARRANTY (BẢO HÀNH TUYỂN DỤNG B2B)
+// ==========================================
+
+export type WarrantyReason = 'NO_SHOW' | 'EARLY_RESIGNATION';
+export type WarrantyCompensationType = 'CREDIT_REFUND' | 'AI_REPLACEMENT';
+export type WarrantyClaimStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface WarrantyClaimInfo {
+  id: string;
+  claimNumber: string;
+  contractId: string;
+  recruiterUserId: string;
+  companyId?: string | null;
+  reason: WarrantyReason;
+  compensationType: WarrantyCompensationType;
+  status: WarrantyClaimStatus;
+  note?: string | null;
+  evidenceUrl?: string | null;
+  creditRefunded: number;
+  daysExtended: number;
+  candidateResponse?: string | null;
+  candidateRespondedAt?: string | null;
+  adminNote?: string | null;
+  resolvedByUserId?: string | null;
+  resolvedAt?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+  contract?: any;
+  recruiterUser?: {
+    id: string;
+    fullName: string;
+    email: string;
+    phone?: string | null;
+  };
+  company?: {
+    id: string;
+    name: string;
+    logoUrl?: string | null;
+  };
+}
+
+export interface ContractWarrantyStatus {
+  contractId: string;
+  contractNumber: string;
+  jobTitle: string;
+  candidateName: string;
+  candidateUserId?: string | null;
+  startDate: string;
+  warrantyEnd: string;
+  daysRemaining: number;
+  isWithinWindow: boolean;
+  isSigned: boolean;
+  isWarrantyClaimed: boolean;
+  isEligible: boolean;
+  existingClaim?: WarrantyClaimInfo | null;
+}
+
+export interface ClaimWarrantyInput {
+  reason: WarrantyReason;
+  compensationType?: WarrantyCompensationType;
+  note?: string;
+  evidenceUrl?: string;
+}
+
+export async function getContractWarrantyStatus(
+  token: string,
+  contractId: string,
+): Promise<ContractWarrantyStatus> {
+  const res = await fetch(`${API_BASE}/contracts/${contractId}/warranty/status`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return handleResponse<ContractWarrantyStatus>(res);
+}
+
+export async function claimContractWarranty(
+  token: string,
+  contractId: string,
+  input: ClaimWarrantyInput,
+): Promise<WarrantyClaimInfo> {
+  const res = await fetch(`${API_BASE}/contracts/${contractId}/warranty/claim`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+  });
+  return handleResponse<WarrantyClaimInfo>(res);
+}
+
+export async function candidateRespondWarranty(
+  token: string,
+  contractId: string,
+  feedback: string,
+): Promise<WarrantyClaimInfo> {
+  const res = await fetch(`${API_BASE}/contracts/${contractId}/warranty/candidate-feedback`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ feedback }),
+  });
+  return handleResponse<WarrantyClaimInfo>(res);
+}
+
+export interface AdminWarrantyClaimsResponse {
+  items: WarrantyClaimInfo[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  metrics: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
+}
+
+export async function getAdminWarrantyClaims(
+  token: string,
+  filters?: {
+    status?: WarrantyClaimStatus | 'ALL';
+    search?: string;
+    page?: number;
+    limit?: number;
+  },
+): Promise<AdminWarrantyClaimsResponse> {
+  const params = new URLSearchParams();
+  if (filters?.search) params.append('search', filters.search);
+  if (filters?.status && filters.status !== 'ALL') params.append('status', filters.status);
+  if (filters?.page) params.append('page', String(filters.page));
+  if (filters?.limit) params.append('limit', String(filters.limit));
+
+  const queryStr = params.toString() ? `?${params.toString()}` : '';
+  const res = await fetch(`${API_BASE}/contracts/admin/warranty-claims${queryStr}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return handleResponse<AdminWarrantyClaimsResponse>(res);
+}
+
+export async function getAdminWarrantyClaimDetail(
+  token: string,
+  claimId: string,
+): Promise<WarrantyClaimInfo> {
+  const res = await fetch(`${API_BASE}/contracts/admin/warranty-claims/${claimId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return handleResponse<WarrantyClaimInfo>(res);
+}
+
+export async function adminApproveWarranty(
+  token: string,
+  claimId: string,
+  adminNote?: string,
+): Promise<WarrantyClaimInfo> {
+  const res = await fetch(`${API_BASE}/contracts/admin/warranty-claims/${claimId}/approve`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ adminNote }),
+  });
+  return handleResponse<WarrantyClaimInfo>(res);
+}
+
+export async function adminRejectWarranty(
+  token: string,
+  claimId: string,
+  adminNote?: string,
+): Promise<WarrantyClaimInfo> {
+  const res = await fetch(`${API_BASE}/contracts/admin/warranty-claims/${claimId}/reject`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ adminNote }),
+  });
+  return handleResponse<WarrantyClaimInfo>(res);
+}
+

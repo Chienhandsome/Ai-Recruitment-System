@@ -121,6 +121,15 @@ export function AdminWarrantyReviewModal({
     daysFromStart = Math.max(0, Math.round((c - s) / (1000 * 60 * 60 * 24)));
   }
 
+  // 48-hour response window calculation
+  let hoursRemaining = 0;
+  let is48hActive = false;
+  if (claim && !claim.candidateResponse && claim.status === 'PENDING') {
+    const elapsedMs = new Date().getTime() - new Date(claim.createdAt).getTime();
+    hoursRemaining = Math.max(0, Math.ceil((48 * 60 * 60 * 1000 - elapsedMs) / (1000 * 60 * 60)));
+    is48hActive = hoursRemaining > 0;
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div
@@ -283,13 +292,30 @@ export function AdminWarrantyReviewModal({
                         <CheckCircle2 className="size-3" />
                         Đã gửi văn bản giải trình ({claim.candidateRespondedAt ? new Date(claim.candidateRespondedAt).toLocaleDateString('vi-VN') : ''})
                       </span>
+                    ) : is48hActive ? (
+                      <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold text-2xs animate-pulse">
+                        <Clock className="size-3 text-amber-600" />
+                        Đang trong thời hạn 48h đối chất (còn ~{hoursRemaining}h)
+                      </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium text-2xs">
                         <Clock className="size-3" />
-                        Ứng viên chưa gửi phản hồi
+                        Đã quá 48h, ứng viên không gửi phản hồi
                       </span>
                     )}
                   </div>
+
+                  {is48hActive && (
+                    <div className="rounded-lg bg-amber-100/70 border border-amber-300 p-2.5 flex items-start gap-2 text-2xs text-amber-900">
+                      <AlertTriangle className="size-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block">Thời hạn đối chất 48h vẫn còn hiệu lực</span>
+                        <p className="text-amber-800 text-3xs mt-0.5">
+                          Khuyến nghị Admin chờ ứng viên phản hồi trước khi ra phán quyết, trừ trường hợp đã có xác nhận bằng văn bản qua kênh khác.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <div>
                     <span className="text-2xs text-slate-500 block">Nội dung giải trình / Đối chất:</span>

@@ -1613,12 +1613,30 @@ export class ContractsService {
       where: { contractId },
     });
 
-    if (existingClaim && (existingClaim.status === WarrantyClaimStatus.PENDING || existingClaim.status === WarrantyClaimStatus.APPROVED)) {
-      throw new BadRequestException('Hợp đồng này đã có yêu cầu bảo hành đang chờ xét duyệt hoặc đã được phê duyệt.');
+    if (existingClaim) {
+      if (existingClaim.status === WarrantyClaimStatus.APPROVED) {
+        throw new BadRequestException('Hợp đồng này đã được Ban Quản trị phê duyệt bảo hành và bồi hoàn trước đó.');
+      }
+      if (existingClaim.status === WarrantyClaimStatus.PENDING) {
+        throw new BadRequestException('Hợp đồng này đang có yêu cầu bảo hành chờ Ban Quản trị xét duyệt.');
+      }
+      if (existingClaim.status === WarrantyClaimStatus.REJECTED) {
+        throw new BadRequestException(
+          'Yêu cầu bảo hành cho hợp đồng này đã bị Ban Quản trị từ chối sau khi thẩm định. Để khiếu nại thêm, vui lòng liên hệ bộ phận CSKH.',
+        );
+      }
     }
 
     const startDate = new Date(contract.startDate);
     const now = new Date();
+    // Allow claim at most 1 day before start date (in case candidate announces no-show in advance)
+    const minClaimDate = new Date(startDate.getTime() - 24 * 60 * 60 * 1000);
+    if (now < minClaimDate) {
+      throw new BadRequestException(
+        `Chưa đến ngày nhận việc (${startDate.toLocaleDateString('vi-VN')}). Không thể yêu cầu bảo hành sự cố trước ngày tiếp nhận công việc.`,
+      );
+    }
+
     const warrantyEnd = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
     if (now > warrantyEnd) {
       throw new BadRequestException('Hợp đồng đã quá thời hạn bảo hành 30 ngày kể từ ngày bắt đầu nhận việc.');
@@ -1720,6 +1738,10 @@ export class ContractsService {
 
     if (claim.status !== WarrantyClaimStatus.PENDING) {
       throw new BadRequestException('Hồ sơ bảo hành đã được xử lý hoặc đóng, không thể gửi thêm phản hồi.');
+    }
+
+    if (claim.candidateResponse) {
+      throw new BadRequestException('Bạn đã gửi văn bản giải trình đối chất cho hồ sơ này rồi. Không thể nộp lại nhiều lần.');
     }
 
     const updatedClaim = await this.prisma.$transaction(async (tx) => {
@@ -1983,7 +2005,15 @@ export class ContractsService {
     const contract = claim.contract;
 
     const result = await this.prisma.$transaction(async (tx) => {
-      // 1. Update claim to APPROVED
+      // 1. Double-check claim status atomically inside transaction to prevent race conditions
+      const currentClaim = await tx.warrantyClaim.findUnique({
+        where: { id: claimId },
+      });
+      if (!currentClaim || currentClaim.status !== WarrantyClaimStatus.PENDING) {
+        throw new BadRequestException('Hồ sơ bảo hành không tồn tại hoặc đã được xử lý bởi một quản trị viên khác.');
+      }
+
+      // 2. Update claim to APPROVED
       const approvedClaim = await tx.warrantyClaim.update({
         where: { id: claimId },
         data: {
@@ -1996,26 +2026,44 @@ export class ContractsService {
         },
       });
 
-      // 2. Mark contract as claimed
+      // 3. Mark contract as claimed
       await tx.contract.update({
         where: { id: contract.id },
         data: { isWarrantyClaimed: true },
       });
 
-      // 3. Compensate: Refund 1 CV Unlock credit & extend job posting by 30 days
+      // 4. Compensate: Refund 1 CV Unlock credit & extend job posting by 30 days
       let entitlement = await tx.packageEntitlement.findFirst({
         where: { userId: claim.recruiterUserId, status: 'ACTIVE' },
+        orderBy: { createdAt: 'desc' },
       });
       if (!entitlement && contract.application.job.recruiter?.company?.id) {
         entitlement = await tx.packageEntitlement.findFirst({
           where: { companyId: contract.application.job.recruiter.company.id, status: 'ACTIVE' },
+          orderBy: { createdAt: 'desc' },
+        });
+      }
+      if (!entitlement) {
+        // Fallback: Find recruiter's latest entitlement (even if expired) to reactivate and credit
+        entitlement = await tx.packageEntitlement.findFirst({
+          where: { userId: claim.recruiterUserId },
+          orderBy: { createdAt: 'desc' },
         });
       }
 
       if (entitlement) {
+        const extensionMs = 30 * 24 * 60 * 60 * 1000;
+        const newEndsAt = entitlement.endsAt && entitlement.endsAt < now
+          ? new Date(now.getTime() + extensionMs)
+          : entitlement.endsAt;
+
         await tx.packageEntitlement.update({
           where: { id: entitlement.id },
-          data: { cvUnlockRemaining: entitlement.cvUnlockRemaining + 1 },
+          data: {
+            cvUnlockRemaining: entitlement.cvUnlockRemaining + 1,
+            status: 'ACTIVE',
+            ...(newEndsAt ? { endsAt: newEndsAt } : {}),
+          },
         });
 
         await tx.packageUsageLog.create({
@@ -2031,9 +2079,10 @@ export class ContractsService {
         });
       }
 
-      // Extend job posting by 30 days
+      // Extend job posting by 30 days (ensure at least 30 days from now if already expired)
       const currentExpiry = contract.application.job.expiryDate || new Date();
-      const newExpiry = new Date(currentExpiry.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const baseExpiry = currentExpiry > now ? currentExpiry : now;
+      const newExpiry = new Date(baseExpiry.getTime() + 30 * 24 * 60 * 60 * 1000);
       await tx.jobPosting.update({
         where: { id: contract.application.job.id },
         data: { expiryDate: newExpiry },
@@ -2121,6 +2170,13 @@ export class ContractsService {
     const adminNote = dto.adminNote?.trim() || 'Hồ sơ bảo hành không đáp ứng điều kiện hoặc bằng chứng không hợp lệ theo quy chế sàn.';
 
     const rejectedClaim = await this.prisma.$transaction(async (tx) => {
+      const currentClaim = await tx.warrantyClaim.findUnique({
+        where: { id: claimId },
+      });
+      if (!currentClaim || currentClaim.status !== WarrantyClaimStatus.PENDING) {
+        throw new BadRequestException('Hồ sơ bảo hành không tồn tại hoặc đã được xử lý bởi một quản trị viên khác.');
+      }
+
       const updated = await tx.warrantyClaim.update({
         where: { id: claimId },
         data: {

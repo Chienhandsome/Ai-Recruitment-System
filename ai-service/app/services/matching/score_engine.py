@@ -68,59 +68,6 @@ class ScoreEngine:
         earned_skills, earned_exp, earned_edu, earned_other = base_points
         adj_skills, adj_exp, adj_edu, adj_other = 0.0, 0.0, 0.0, 0.0
 
-        # Determine mandatory_score_cap when mandatory skills are missing
-        mandatory_score_cap = None
-        skills_metrics = match_metrics.get("skills", {})
-        missing_mandatory_skills = skills_metrics.get("missing_mandatory", [])
-        conditional_mandatory_skills = skills_metrics.get("conditional_mandatory", [])
-
-        if mandatory_ratio is not None and mandatory_ratio < 1.0:
-            if missing_mandatory_skills:
-                if mandatory_ratio < 0.4:
-                    mandatory_score_cap = 39.0
-                elif mandatory_ratio < 0.6:
-                    mandatory_score_cap = 59.0
-                elif mandatory_ratio < 0.8:
-                    mandatory_score_cap = 74.0
-                else:
-                    mandatory_score_cap = 84.0
-            elif conditional_mandatory_skills:
-                mandatory_score_cap = 88.0
-            else:
-                mandatory_score_cap = 84.0
-
-        base_overall = final_overall
-        if mandatory_score_cap is not None and final_overall > mandatory_score_cap:
-            final_overall = mandatory_score_cap
-
-        score_adjustment = round(final_overall - base_overall, 2)
-
-        if final_overall < base_overall and base_overall > 0:
-            scale = final_overall / base_overall
-            earned_skills = round(base_points[0] * scale, 2)
-            earned_exp = round(base_points[1] * scale, 2)
-            earned_edu = round(base_points[2] * scale, 2)
-            earned_other = round(base_points[3] * scale, 2)
-
-            diff = round(
-                final_overall
-                - (earned_skills + earned_exp + earned_edu + earned_other),
-                2,
-            )
-            if diff != 0.0:
-                earned_skills = round(earned_skills + diff, 2)
-
-            adj_skills = round(earned_skills - base_points[0], 2)
-            adj_exp = round(earned_exp - base_points[1], 2)
-            adj_edu = round(earned_edu - base_points[2], 2)
-            adj_other = round(earned_other - base_points[3], 2)
-
-        match_level = (
-            "HIGH"
-            if final_overall >= 75.0
-            else ("MEDIUM" if final_overall >= 50.0 else "LOW")
-        )
-
         # Confidence score based on profile richness
         profile = request.candidate_profile
         data_pts = (
@@ -136,12 +83,14 @@ class ScoreEngine:
             else (0.6 if data_pts < 7 else (0.85 if data_pts < 12 else 1.0))
         )
 
-        # --- INDEPENDENT MANDATORY GATE EVALUATION ---
+        # --- INDEPENDENT MANDATORY GATE EVALUATION ACROSS ALL 4 PILLARS ---
         mandatory_failures: List[Dict[str, Any]] = []
 
         # 1. Skills mandatory evaluation
-        missing_mandatory_skills = match_metrics["skills"].get("missing_mandatory", [])
-        matched_skills_list = match_metrics["skills"].get("matched", [])
+        skills_metrics = match_metrics.get("skills", {})
+        missing_mandatory_skills = skills_metrics.get("missing_mandatory", [])
+        conditional_mandatory_skills = skills_metrics.get("conditional_mandatory", [])
+        matched_skills_list = skills_metrics.get("matched", [])
         for skill_name in missing_mandatory_skills:
             # Check if this missing mandatory skill was evaluated via transferable skills or context
             matched_item = next(
@@ -272,6 +221,94 @@ class ScoreEngine:
             mandatory_status = "PASS"
         else:
             mandatory_status = "NOT_APPLICABLE"
+
+        # Apply domain compatibility attenuation for role/domain mismatch
+        if domain_compat < 0.40:
+            final_overall = min(final_overall, 54.0)
+        elif domain_compat < 0.60:
+            final_overall = min(final_overall, 59.0)
+        elif domain_compat < 0.70:
+            final_overall = min(final_overall, 69.0)
+
+        # Determine mandatory_score_cap across all 4 pillars when mandatory gate fails
+        mandatory_score_cap = None
+        if mandatory_status == "FAIL":
+            caps = []
+            # 1. Skills
+            if missing_mandatory_skills and weights["skills"] > 0:
+                if mandatory_ratio < 0.4:
+                    caps.append(39.0)
+                elif mandatory_ratio < 0.6:
+                    caps.append(59.0)
+                elif mandatory_ratio < 0.8:
+                    caps.append(74.0)
+                else:
+                    caps.append(79.0)
+
+            # 2. Experience shortfall
+            has_exp_fail = any(f.get("type") == "EXPERIENCE" for f in mandatory_failures)
+            if has_exp_fail and weights["experience"] > 0:
+                caps.append(79.0)
+
+            # 3. Education failure
+            has_edu_fail = any(f.get("type") == "EDUCATION" for f in mandatory_failures)
+            if has_edu_fail and weights["education"] > 0:
+                caps.append(84.9)
+
+            # 4. Other (Certificate / Language)
+            has_cert_fail = any(f.get("type") == "CERTIFICATE" for f in mandatory_failures)
+            has_lang_fail = any(f.get("type") == "LANGUAGE" for f in mandatory_failures)
+            if weights["other"] > 0:
+                if has_cert_fail:
+                    caps.append(80.0)
+                elif has_lang_fail:
+                    caps.append(85.0)
+
+            # Multi-pillar failures
+            pillar_types = {f.get("type") for f in mandatory_failures}
+            active_failing_pillars = [
+                p for p in pillar_types
+                if weights.get("other" if p in ("LANGUAGE", "CERTIFICATE") else p.lower(), 1) > 0
+            ]
+            if len(active_failing_pillars) >= 2:
+                caps.append(59.0)
+
+            if caps:
+                mandatory_score_cap = min(caps)
+        elif mandatory_status == "CONDITIONAL_PASS":
+            mandatory_score_cap = 88.0
+
+        base_overall = final_overall
+        if mandatory_score_cap is not None and final_overall > mandatory_score_cap:
+            final_overall = mandatory_score_cap
+
+        score_adjustment = round(final_overall - base_overall, 2)
+
+        if final_overall < base_overall and base_overall > 0:
+            scale = final_overall / base_overall
+            earned_skills = round(base_points[0] * scale, 2)
+            earned_exp = round(base_points[1] * scale, 2)
+            earned_edu = round(base_points[2] * scale, 2)
+            earned_other = round(base_points[3] * scale, 2)
+
+            diff = round(
+                final_overall
+                - (earned_skills + earned_exp + earned_edu + earned_other),
+                2,
+            )
+            if diff != 0.0:
+                earned_skills = round(earned_skills + diff, 2)
+
+            adj_skills = round(earned_skills - base_points[0], 2)
+            adj_exp = round(earned_exp - base_points[1], 2)
+            adj_edu = round(earned_edu - base_points[2], 2)
+            adj_other = round(earned_other - base_points[3], 2)
+
+        match_level = (
+            "HIGH"
+            if final_overall >= 75.0
+            else ("MEDIUM" if final_overall >= 50.0 else "LOW")
+        )
 
         score_breakdown = {
             "skills": {

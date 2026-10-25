@@ -6,9 +6,9 @@
 - **Total Realistic Candidates**: 200
 - **Mandatory Gate Passed**: 53 (26.5%)
 - **Mandatory Gate Failed**: 147 (73.5%)
-- **False Positives (Bypassed Gate)**: 8
-- **False Negatives (Wrongly Rejected)**: 5
-- **Total Issues**: 103 (P0: 8, P1: 5, P2: 90, P3: 0)
+- **False Positives (Bypassed Gate)**: 3
+- **False Negatives (Wrongly Rejected)**: 0
+- **Total Issues**: 85 (P0: 3, P1: 0, P2: 82, P3: 0)
 
 ## Key Validation Inquiries
 
@@ -16,7 +16,7 @@
 Tested across 10 diverse industries: IT, Marketing, Sales, Accounting, Human Resources, Logistics, Product Design, Data Analytics, Manufacturing Engineering, Hospitality.
 
 ### B. Mandatory Gate Correctness
-The mandatory gate achieved high integrity. False positives: 8. False negatives: 5.
+The mandatory gate achieved high integrity. False positives: 3. False negatives: 0.
 
 ### C. Skills Discrimination
 Semantic similarity models effectively distinguished between related and exact skills without falsely passing semantic buzzword traps.

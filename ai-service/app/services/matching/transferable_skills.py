@@ -75,6 +75,7 @@ class DirectedSkillTransferEngine:
             ("docker", "k8s"): (0.95, TransferDirection.DOWNWARD, "Kỹ năng K8s bao hàm kiến thức sâu rộng về Docker/Container"),
             ("kubernetes", "docker"): (0.65, TransferDirection.UPWARD, "Docker là nền tảng container tốt để tiếp cận Kubernetes (Cần đào tạo thêm về orchestration)"),
             ("k8s", "docker"): (0.65, TransferDirection.UPWARD, "Docker là nền tảng container tốt để tiếp cận K8s (Cần đào tạo thêm về orchestration)"),
+            ("kubernetes", "linux"): (0.50, TransferDirection.UPWARD, "Linux là hệ điều hành nền tảng cho hạ tầng Kubernetes"),
             ("podman", "docker"): (0.90, TransferDirection.PEER, "Docker và Podman có kiến trúc container OCI tương thích cao"),
             ("docker", "podman"): (0.90, TransferDirection.PEER, "Podman và Docker có kiến trúc container OCI tương thích cao"),
 
@@ -198,6 +199,7 @@ class DirectedSkillTransferEngine:
     def _init_clusters(self) -> None:
         """
         Broad multi-industry functional skill clusters for fallback peer matching.
+        Organized by domain families to prevent cross-industry hallucinations.
         """
         self._clusters: List[Tuple[str, Set[str]]] = [
             ("hospitality_hotel_pms", {
@@ -221,8 +223,12 @@ class DirectedSkillTransferEngine:
                 "dashboard", "phân tích dữ liệu", "data analytics"
             }),
             ("design_ui_ux", {
-                "figma", "sketch", "adobe xd", "photoshop", "illustrator",
-                "ui design", "ux design", "ui/ux", "wireframing", "prototyping", "design system"
+                "figma", "sketch", "adobe xd", "ui design", "ux design", "ui/ux",
+                "wireframing", "prototyping", "design system"
+            }),
+            ("design_graphic", {
+                "photoshop", "illustrator", "indesign", "canva", "coreldraw",
+                "thiết kế đồ họa", "graphic design"
             }),
             ("manufacturing_engineering", {
                 "autocad", "autocad 2d", "solidworks", "catia", "inventor",
@@ -235,16 +241,38 @@ class DirectedSkillTransferEngine:
             }),
             ("digital_marketing_ads", {
                 "facebook ads", "fb ads", "meta ads", "google ads", "tiktok ads",
-                "zalo ads", "performance marketing", "seo", "content marketing"
+                "zalo ads", "performance marketing", "advantage+ shopping campaigns"
+            }),
+            ("digital_marketing_seo_content", {
+                "seo", "content marketing", "copywriting", "on-page seo", "technical seo"
             }),
             ("frontend_frameworks", {
                 "react", "reactjs", "next.js", "nextjs", "vue", "vuejs",
                 "nuxt", "nuxtjs", "angular", "angularjs", "svelte"
             }),
-            ("backend_runtimes", {
-                "node.js", "nodejs", "nestjs", "express", "express.js",
-                "fastapi", "django", "flask", "spring", "spring boot",
-                "golang", ".net", "dotnet", "asp.net", "laravel", "ruby on rails"
+            ("frontend_styling", {
+                "tailwind css", "tailwind", "tailwindcss", "bootstrap", "sass", "scss", "css3", "css", "styled-components"
+            }),
+            ("python_backend", {
+                "fastapi", "django", "flask", "aiohttp", "tornado", "celery", "pydantic"
+            }),
+            ("java_backend", {
+                "spring", "spring boot", "springboot", "quarkus", "micronaut", "jvm", "hibernate"
+            }),
+            ("nodejs_backend", {
+                "node.js", "nodejs", "nestjs", "express", "express.js", "fastify", "koa"
+            }),
+            ("dotnet_backend", {
+                ".net", "dotnet", "asp.net", "c#", "entity framework"
+            }),
+            ("php_backend", {
+                "laravel", "symfony", "codeigniter", "php"
+            }),
+            ("golang_backend", {
+                "golang", "go", "gin", "fiber", "echo"
+            }),
+            ("ruby_backend", {
+                "ruby on rails", "rails", "ruby"
             }),
             ("relational_sql", {
                 "postgresql", "postgres", "mysql", "mariadb", "oracle",
@@ -273,6 +301,43 @@ class DirectedSkillTransferEngine:
                 "key accounts", "kam", "huấn luyện bán hàng", "sales coaching"
             }),
         ]
+
+        self._cluster_to_family: Dict[str, str] = {
+            "hospitality_hotel_pms": "HOSPITALITY",
+            "hr_systems_recruitment": "HR",
+            "logistics_supply_chain": "LOGISTICS",
+            "data_analytics_bi": "DATA_AI",
+            "design_ui_ux": "DESIGN",
+            "design_graphic": "DESIGN",
+            "manufacturing_engineering": "ENGINEERING",
+            "accounting_erp": "FINANCE_ACCOUNTING",
+            "digital_marketing_ads": "MARKETING",
+            "digital_marketing_seo_content": "MARKETING",
+            "frontend_frameworks": "TECH_FRONTEND",
+            "frontend_styling": "TECH_FRONTEND",
+            "python_backend": "TECH_BACKEND",
+            "java_backend": "TECH_BACKEND",
+            "nodejs_backend": "TECH_BACKEND",
+            "dotnet_backend": "TECH_BACKEND",
+            "php_backend": "TECH_BACKEND",
+            "golang_backend": "TECH_BACKEND",
+            "ruby_backend": "TECH_BACKEND",
+            "relational_sql": "TECH_DATABASE",
+            "nosql_databases": "TECH_DATABASE",
+            "devops_containers": "TECH_DEVOPS",
+            "cloud_providers": "TECH_CLOUD",
+            "embedded_firmware": "TECH_EMBEDDED",
+            "sales_channels": "SALES",
+        }
+
+    def _find_cluster_and_family(self, skill_text: str) -> Tuple[Optional[str], Optional[str]]:
+        """Finds the most specific cluster and overarching macro domain family for a skill."""
+        s = skill_text.lower().strip()
+        for cluster_name, cluster_tokens in self._clusters:
+            if any(self._token_boundary_matches(token, s) for token in cluster_tokens):
+                family = self._cluster_to_family.get(cluster_name, "GENERAL")
+                return cluster_name, family
+        return None, None
 
     def _token_boundary_matches(self, token: str, text: str) -> bool:
         """Boundary-safe matching to avoid false positives with short keywords."""
@@ -369,6 +434,7 @@ class DirectedSkillTransferEngine:
         target_skill: str,
         candidate_skill: str,
         domain_context: Optional[str] = None,
+        source_years: float = 0.0,
     ) -> Tuple[bool, float, TransferDirection, str]:
         """
         Determines whether candidate_skill can transfer to target_skill.
@@ -394,28 +460,86 @@ class DirectedSkillTransferEngine:
             if self._token_boundary_matches(r_tgt, s_tgt) and self._token_boundary_matches(r_cand, s_cand):
                 return (True, credit, direction, note)
 
-        # 2. Broad multi-industry taxonomy clusters
-        for cluster_name, cluster_tokens in self._clusters:
-            tgt_in_cluster = any(self._token_boundary_matches(token, s_tgt) for token in cluster_tokens)
-            cand_in_cluster = any(self._token_boundary_matches(token, s_cand) for token in cluster_tokens)
+        # Domain & Family Resolution
+        tgt_cluster, tgt_family = self._find_cluster_and_family(s_tgt)
+        cand_cluster, cand_family = self._find_cluster_and_family(s_cand)
 
-            if tgt_in_cluster and cand_in_cluster:
-                direction, credit = self._infer_hierarchy_and_direction(s_tgt, s_cand)
+        # Cross-Domain Hard Barrier:
+        # If both skills belong to recognized domain families, but their macro families are completely disjoint:
+        # (e.g. MARKETING vs TECH_FRONTEND, FINANCE_ACCOUNTING vs HOSPITALITY, etc.)
+        if tgt_family and cand_family and tgt_family != cand_family:
+            macro_tgt = tgt_family.split("_")[0]
+            macro_cand = cand_family.split("_")[0]
+            if macro_tgt != macro_cand:
                 return (
-                    True,
-                    credit,
-                    direction,
-                    f"Cùng phân khúc nghiệp vụ đa ngành ({cluster_name})"
+                    False,
+                    0.0,
+                    TransferDirection.PEER,
+                    f"Hai kỹ năng thuộc hai lĩnh vực nghề nghiệp khác biệt ({macro_tgt} vs {macro_cand})",
                 )
 
-        # 3. Dynamic Semantic Embedding & Hierarchy Inference for ANY unseen skill
+        # 2. Broad multi-industry taxonomy clusters (Exact cluster match)
+        if tgt_cluster and cand_cluster and tgt_cluster == cand_cluster:
+            direction, credit = self._infer_hierarchy_and_direction(s_tgt, s_cand)
+            return (
+                True,
+                credit,
+                direction,
+                f"Cùng phân khúc nghiệp vụ đa ngành ({tgt_cluster})"
+            )
+
+        # 3. Dynamic Semantic Embedding & LLM Adjudication for ANY unseen skill
         try:
+            # Check domain context mismatch
+            if domain_context and cand_family:
+                domain_prefix = domain_context.split("_")[0].upper()
+                macro_cand = cand_family.split("_")[0].upper()
+                if (domain_prefix in ("IT", "TECH") and macro_cand in ("MARKETING", "HOSPITALITY", "HR", "SALES")) or \
+                   (domain_prefix in ("MKT", "MARKETING") and macro_cand in ("TECH", "IT", "ENGINEERING")):
+                    return (
+                        False,
+                        0.0,
+                        TransferDirection.PEER,
+                        f"Kỹ năng ứng viên ({cand_family}) không tương thích với lĩnh vực công việc ({domain_context})",
+                    )
+
+            # Fast Vector Pre-Filter:
+            # Check fast embedding similarity first. If similarity < 0.68, skills are too dissimilar to justify LLM call.
             from app.services.matching.semantic import semantic_matcher
             raw_sim = float(
                 semantic_matcher.compute_similarity(target_skill.strip(), candidate_skill.strip())
             )
+            if raw_sim < 0.68:
+                return (False, 0.0, TransferDirection.PEER, "Không thuộc phân khúc kỹ năng chuyển giao")
 
-            if raw_sim >= 0.78:
+            # Try LLM Adjudicator for borderline / ambiguous unseen skills (raw_sim >= 0.68)
+            from app.services.matching.llm_adjudicator import llm_adjudicator
+            if llm_adjudicator.is_available:
+                llm_judgement = llm_adjudicator.judge_skill_transfer(
+                    target_skill=target_skill,
+                    candidate_skill=candidate_skill,
+                    domain_context=domain_context,
+                    source_years=source_years,
+                )
+                if llm_judgement is not None:
+                    if llm_judgement.is_transferable and llm_judgement.transfer_credit > 0.0:
+                        direction, _ = self._infer_hierarchy_and_direction(s_tgt, s_cand)
+                        return (
+                            True,
+                            round(llm_judgement.transfer_credit, 2),
+                            direction,
+                            llm_judgement.reason_vi or "Chuyên gia AI xác nhận kỹ năng có thể chuyển giao",
+                        )
+                    else:
+                        return (
+                            False,
+                            0.0,
+                            TransferDirection.PEER,
+                            llm_judgement.reason_vi or "AI xác nhận không thể chuyển giao giữa 2 kỹ năng",
+                        )
+
+            # Strict fallback when LLM is offline (requires very high similarity)
+            if raw_sim >= 0.88:
                 direction, hierarchy_credit = self._infer_hierarchy_and_direction(s_tgt, s_cand)
                 final_credit = round(min(0.95, (raw_sim * 0.5 + hierarchy_credit * 0.5)), 2)
                 return (
@@ -486,13 +610,20 @@ class DirectedSkillTransferEngine:
             cs_name = getattr(cs, "skill_name", "") if hasattr(cs, "skill_name") else cs.get("skill_name", "")
             cs_level = getattr(cs, "proficiency_level", "BEGINNER") if hasattr(cs, "proficiency_level") else cs.get("proficiency_level", "BEGINNER")
 
-            is_trans, credit, direction, explanation = self.check_transferable(
-                target_skill, cs_name, domain_context=domain_context
-            )
-            if not is_trans:
+            source_years = float(calc_skill_years_fn(cs_name, cand_profile))
+
+            # Multi-Industry Seniority Gate:
+            # Candidate must have at least 1.0 year in source skill to transfer it as an equivalent peer/tool.
+            # You cannot transfer an unmastered skill (e.g. 0.4 yr Spring Boot, 0.3 yr MISA, 0.3 yr Opera) to an alternate technology.
+            if source_years < 1.0:
                 continue
 
-            source_years = float(calc_skill_years_fn(cs_name, cand_profile))
+            is_trans, credit, direction, explanation = self.check_transferable(
+                target_skill, cs_name, domain_context=domain_context, source_years=source_years
+            )
+            if not is_trans or credit <= 0.0:
+                continue
+
             transferred_years = self.calculate_transferred_experience(source_years, credit)
 
             level_mult = min(

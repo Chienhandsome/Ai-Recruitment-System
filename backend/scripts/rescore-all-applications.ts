@@ -104,6 +104,7 @@ function buildSnapshot(
           start_date: edu.startDate ? (edu.startDate instanceof Date ? edu.startDate.toISOString() : new Date(edu.startDate).toISOString()) : null,
           end_date: edu.endDate ? (edu.endDate instanceof Date ? edu.endDate.toISOString() : new Date(edu.endDate).toISOString()) : null,
           description: edu.description ?? null,
+          source_text: edu.sourceText ?? null,
         })),
         projects: (profile.projects || []).map((proj: any) => ({
           id: proj.id,
@@ -217,7 +218,25 @@ async function main(): Promise<void> {
 
   await prisma.$connect();
 
+  const targetEmail = process.argv[2]?.trim();
+  const whereClause: Prisma.ApplicationWhereInput = targetEmail
+    ? {
+        job: {
+          recruiter: {
+            user: {
+              email: { equals: targetEmail, mode: 'insensitive' },
+            },
+          },
+        },
+      }
+    : {};
+
+  if (targetEmail) {
+    console.log(`🎯 Lọc theo tài khoản HR: ${targetEmail}`);
+  }
+
   const applications = await prisma.application.findMany({
+    where: whereClause,
     include: {
       candidate: {
         include: {

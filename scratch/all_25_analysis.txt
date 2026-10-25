@@ -1,0 +1,252 @@
+TOTAL APPLICATIONS: 25
+
+[01] Nguyễn Đinh Xuân Trường (Desired: Backend Developer)
+     Target Job: Data Engineer (Python, PostgreSQL, ETL) | ReqLevel: MIDDLE | ReqYears: 2
+     Edu in CV: Bachelor's Degree in Software Engineering at Industrial University of Ho Chi Minh City (IUH) ==> EduScore: 94
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 70.8
+     Scores: Overall=57.5 | Skills=77.03 | Exp=70.8 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 10.25, 'normalized_score': 94, 'adjustment_points': -3.85} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 21.24, 'earned_points': 15.44, 'normalized_score': 70.8, 'adjustment_points': -5.8}
+     Pillar Edu: Đạt 10.2 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 15.4 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Data Engineer (Python, PostgreSQL, ETL)).', 'Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (2.0 năm, thiếu 2.0 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[02] Nguyễn Đinh Xuân Trường (Desired: Backend Developer)
+     Target Job: Frontend Developer | ReqLevel: INTERN | ReqYears: 2
+     Edu in CV: Bachelor's Degree in Software Engineering at Industrial University of Ho Chi Minh City (IUH) ==> EduScore: 94
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 60.81
+     Scores: Overall=72.1 | Skills=53.11 | Exp=60.81 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 18.24, 'earned_points': 18.24, 'normalized_score': 60.81, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 18.2 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Frontend Developer).', 'Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (2.0 năm, thiếu 2.0 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[03] Trần Văn Cao Cấp (Senior FE) (Desired: Senior Frontend Engineer)
+     Target Job: Frontend Developer | ReqLevel: INTERN | ReqYears: 2
+     Edu in CV: Kỹ sư in Kỹ thuật Phần mềm at Đại học Bách Khoa TP.HCM ==> EduScore: 94
+     Exp in CV (2 entries): Senior Frontend Engineer (TechCorp Vietnam); Frontend Team Lead (EComGlobal Portal)
+     Exp Metrics: TotalExp=4.77y | CandLevel=SENIOR | LevelFit=100 ==> ExpScore: 93.78
+     Scores: Overall=100 | Skills=100 | Exp=93.78 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 28.13, 'earned_points': 28.13, 'normalized_score': 93.78, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Kỹ thuật Phần mềm). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Kỹ thuật Phần mềm) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 28.1 / 30.0 điểm: Đánh giá dựa trên 4.8 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Frontend Developer).', 'Tổng thâm niên tích lũy (4.8 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Frontend Engineer) -> Cộng điểm tương quan cấp bậc.', 'Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Không có điểm trừ đáng kể về kinh nghiệm.']
+------------------------------------------------------------------------------------------
+[04] Nguyễn Trung Bình (Mid FE) (Desired: Frontend Developer)
+     Target Job: Frontend Developer | ReqLevel: INTERN | ReqYears: 2
+     Edu in CV: Cử nhân thực hành in Tin học ứng dụng at Cao đẳng Công nghệ Thông tin ==> EduScore: 94
+     Exp in CV (1 entries): Junior Web Developer (SoftAgency Studio)
+     Exp Metrics: TotalExp=2.4y | CandLevel=JUNIOR | LevelFit=100 ==> ExpScore: 88.82
+     Scores: Overall=70.5 | Skills=70.36 | Exp=88.82 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 12.44, 'normalized_score': 94, 'adjustment_points': -1.66} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 26.65, 'earned_points': 23.51, 'normalized_score': 88.82, 'adjustment_points': -3.14}
+     Pillar Edu: Đạt 12.4 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Tin học ứng dụng). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Tin học ứng dụng) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 23.5 / 30.0 điểm: Đánh giá dựa trên 2.4 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Frontend Developer).', 'Tổng thâm niên tích lũy (2.4 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Junior Web Developer) -> Cộng điểm tương quan cấp bậc.', 'Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Không có điểm trừ đáng kể về kinh nghiệm.']
+------------------------------------------------------------------------------------------
+[05] Lê Thấp Điểm (Non-FE / Marketing) (Desired: Digital Marketing Specialist)
+     Target Job: Frontend Developer | ReqLevel: INTERN | ReqYears: 2
+     Edu in CV: Cử nhân in Marketing at Đại học Kinh tế TP.HCM ==> EduScore: 94
+     Exp in CV (1 entries): Marketing Specialist (AgencyX Marketing)
+     Exp Metrics: TotalExp=2y | CandLevel=JUNIOR | LevelFit=100 ==> ExpScore: 82.99
+     Scores: Overall=39 | Skills=67.13 | Exp=82.99 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 6.8, 'normalized_score': 94, 'adjustment_points': -7.3} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.9, 'earned_points': 12.01, 'normalized_score': 82.99, 'adjustment_points': -12.89}
+     Pillar Edu: Đạt 6.8 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 12.0 / 30.0 điểm: Đánh giá dựa trên 2.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Frontend Developer).', 'Tổng thâm niên tích lũy (2.0 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Không có điểm trừ đáng kể về kinh nghiệm.']
+------------------------------------------------------------------------------------------
+[06] Lê Thấp Điểm (Non-FE / Marketing) (Desired: Digital Marketing Specialist)
+     Target Job: Performance Marketing Specialist | ReqLevel: MIDDLE | ReqYears: 2
+     Edu in CV: Cử nhân in Marketing at Đại học Kinh tế TP.HCM ==> EduScore: 100
+     Exp in CV (1 entries): Marketing Specialist (AgencyX Marketing)
+     Exp Metrics: TotalExp=2y | CandLevel=JUNIOR | LevelFit=70 ==> ExpScore: 84.13
+     Scores: Overall=54.5 | Skills=75 | Exp=84.13 | Edu=100 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 15, 'earned_points': 15, 'normalized_score': 100, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 25.24, 'earned_points': 25.24, 'normalized_score': 84.13, 'adjustment_points': 0}
+     Pillar Edu: Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 25.2 / 30.0 điểm: Đánh giá dựa trên 2.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (2.0 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Marketing Specialist) -> Cộng điểm tương quan cấp bậc.', 'Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.']
+------------------------------------------------------------------------------------------
+[07] Chiến Công (Desired: Flutter Developer Intern)
+     Target Job: Chuyên viên Tuyển dụng Công nghệ | ReqLevel: JUNIOR | ReqYears: 1
+     Edu in CV: Bachelor of Engineering in Software Engineering at Industrial University of Ho Chi Minh City ==> EduScore: 81
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 40.2
+     Scores: Overall=39 | Skills=0 | Exp=40.2 | Edu=81 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 12.15, 'earned_points': 12.08, 'normalized_score': 81, 'adjustment_points': -0.07} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 12.06, 'earned_points': 12, 'normalized_score': 40.2, 'adjustment_points': -0.06}
+     Pillar Edu: Đạt 12.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Đạt yêu cầu về trình độ học vấn.'] | Minus: ['Chuyên ngành tốt nghiệp (Software Engineering) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành.']
+     Pillar Exp: Đạt 12.0 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 1.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.', 'Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (1.0 năm, thiếu 1.0 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[08] Nguyễn Đinh Xuân Trường (Desired: Backend Developer)
+     Target Job: Chuyên viên Tuyển dụng Công nghệ | ReqLevel: JUNIOR | ReqYears: 1
+     Edu in CV: Bachelor's Degree in Software Engineering at Industrial University of Ho Chi Minh City (IUH) ==> EduScore: 81
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 40.5
+     Scores: Overall=39 | Skills=0 | Exp=40.5 | Edu=81 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 12.15, 'earned_points': 12.06, 'normalized_score': 81, 'adjustment_points': -0.09} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 12.15, 'earned_points': 12.06, 'normalized_score': 40.5, 'adjustment_points': -0.09}
+     Pillar Edu: Đạt 12.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Đạt yêu cầu về trình độ học vấn.'] | Minus: ['Chuyên ngành tốt nghiệp (Software Engineering) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành.']
+     Pillar Exp: Đạt 12.1 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 1.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.', 'Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (1.0 năm, thiếu 1.0 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[09] Chiến Công (Desired: Flutter Developer Intern)
+     Target Job: Senior Software engineer | ReqLevel: JUNIOR | ReqYears: 2
+     Edu in CV: Bachelor of Engineering in Software Engineering at Industrial University of Ho Chi Minh City ==> EduScore: 94
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 85
+     Scores: Overall=96.1 | Skills=100 | Exp=85 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 25.5, 'earned_points': 25.5, 'normalized_score': 85, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 25.5 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Software engineer).', 'Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (2.0 năm, thiếu 2.0 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[10] Phạm Thuỳ Dung (Desired: Brand Marketing Intern / Assistant)
+     Target Job: Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh | ReqLevel: MIDDLE | ReqYears: 2
+     Edu in CV: Cử nhân in Marketing (Quản trị Thương hiệu) at Đại học Kinh tế – Tài chính TP.HCM (UEF) ==> EduScore: 94
+     Exp in CV (2 entries): Brand Marketing Intern (Sparkle Creative Communications Agency); Trưởng Ban Truyền thông & Sáng tạo (Câu lạc bộ Marketing Trẻ (Young Marketers Club))
+     Exp Metrics: TotalExp=2.66y | CandLevel=INTERN | LevelFit=0 ==> ExpScore: 79.48
+     Scores: Overall=39 | Skills=35 | Exp=79.48 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 10.18, 'normalized_score': 94, 'adjustment_points': -3.92} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 23.84, 'earned_points': 17.22, 'normalized_score': 79.48, 'adjustment_points': -6.62}
+     Pillar Edu: Đạt 10.2 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing (Quản trị Thương hiệu)). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Marketing (Quản trị Thương hiệu)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 17.2 / 30.0 điểm: Đánh giá dựa trên 2.7 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (2.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.', 'Vị trí công việc gần nhất (Brand Marketing Intern) ở cấp độ sơ cấp, chưa đạt cấp bậc theo yêu cầu của vị trí tuyển dụng -> Bị trừ điểm cấp bậc.']
+------------------------------------------------------------------------------------------
+[11] Vũ Tuấn Anh (Desired: Digital & Performance Marketing Specialist)
+     Target Job: Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh | ReqLevel: MIDDLE | ReqYears: 2
+     Edu in CV: Cử nhân in Hệ thống Thông tin Quản lý (MIS) at Đại học Công nghệ TP. Hồ Chí Minh (HUTECH) ==> EduScore: 94
+     Exp in CV (2 entries): Digital & Performance Marketing Specialist (V-Tech Retail Accessories); Digital Marketing Executive (MegaBuy D2C Brand)
+     Exp Metrics: TotalExp=5.4y | CandLevel=SENIOR | LevelFit=100 ==> ExpScore: 82.77
+     Scores: Overall=39 | Skills=28.12 | Exp=82.77 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 10.18, 'normalized_score': 94, 'adjustment_points': -3.92} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.83, 'earned_points': 17.93, 'normalized_score': 82.77, 'adjustment_points': -6.9}
+     Pillar Edu: Đạt 10.2 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Hệ thống Thông tin Quản lý (MIS)). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Hệ thống Thông tin Quản lý (MIS)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 17.9 / 30.0 điểm: Đánh giá dựa trên 5.4 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (5.4 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital & Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.']
+------------------------------------------------------------------------------------------
+[12] Lê Hoàng Yến (Desired: Content Marketing & Social Media Executive)
+     Target Job: Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh | ReqLevel: MIDDLE | ReqYears: 2
+     Edu in CV: Cử nhân in Quản trị Kinh doanh (Thương mại) at Đại học Tôn Đức Thắng (TDTU) ==> EduScore: 94
+     Exp in CV (2 entries): Content Marketing & Social Media Executive (ChicDecor & Accessories); Marketing Assistant (Sunny Corner Gift Shop)
+     Exp Metrics: TotalExp=5.31y | CandLevel=SENIOR | LevelFit=100 ==> ExpScore: 81.6
+     Scores: Overall=52.5 | Skills=47.5 | Exp=81.6 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.48, 'earned_points': 24.48, 'normalized_score': 81.6, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quản trị Kinh doanh (Thương mại)). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh (Thương mại)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 24.5 / 30.0 điểm: Đánh giá dựa trên 5.3 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (5.3 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Content Marketing & Social Media Executive) -> Cộng điểm tương quan cấp bậc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.']
+------------------------------------------------------------------------------------------
+[13] Trần Minh Khang (Desired: Senior Creative & Campaign Lead)
+     Target Job: Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh | ReqLevel: MIDDLE | ReqYears: 2
+     Edu in CV: Cử nhân in Quan hệ Công chúng & Truyền thông at Đại học Văn Lang ==> EduScore: 94
+     Exp in CV (2 entries): Senior Creative Content & Campaign Lead (NEMO Studio & Atelier); Creative Copywriter & Social Specialist (Herbal Roots Botanics)
+     Exp Metrics: TotalExp=5.56y | CandLevel=SENIOR | LevelFit=100 ==> ExpScore: 82.43
+     Scores: Overall=57.5 | Skills=77.5 | Exp=82.43 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.73, 'earned_points': 24.73, 'normalized_score': 82.43, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quan hệ Công chúng & Truyền thông). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Quan hệ Công chúng & Truyền thông) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 24.7 / 30.0 điểm: Đánh giá dựa trên 5.6 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (5.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Creative Content & Campaign Lead) -> Cộng điểm tương quan cấp bậc.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.', "Lưu ý mốc thời gian (INFO): Khai báo sử dụng 'tiktok shop' từ năm 2021 (Công nghệ ra mắt năm 2022, có thể do lỗi nhập liệu)."]
+------------------------------------------------------------------------------------------
+[14] Nguyễn Hà Linh (Desired: Brand Marketing Specialist)
+     Target Job: Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh | ReqLevel: MIDDLE | ReqYears: 2
+     Edu in CV: Cử nhân in Marketing (Chất lượng cao) at Đại học Kinh tế TP. Hồ Chí Minh (UEH) ==> EduScore: 94
+     Exp in CV (2 entries): Assistant Brand Manager (L’Éclat Lifestyle & Gift Boutique); Brand & Content Executive (Cobi Home & Accessories)
+     Exp Metrics: TotalExp=5.23y | CandLevel=SENIOR | LevelFit=100 ==> ExpScore: 81.76
+     Scores: Overall=57.5 | Skills=95 | Exp=81.76 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.53, 'earned_points': 24.53, 'normalized_score': 81.76, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing (Chất lượng cao)). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Marketing (Chất lượng cao)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 24.5 / 30.0 điểm: Đánh giá dựa trên 5.2 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (5.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Assistant Brand Manager) -> Cộng điểm tương quan cấp bậc.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.']
+------------------------------------------------------------------------------------------
+[15] Nguyễn Đinh Xuân Trường (Desired: Backend Developer)
+     Target Job: Senior Fullstack Developer | ReqLevel: SENIOR | ReqYears: 5
+     Edu in CV: Bachelor's Degree in Software Engineering at Industrial University of Ho Chi Minh City (IUH) ==> EduScore: 76
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 85
+     Scores: Overall=91.8 | Skills=96.76 | Exp=85 | Edu=76 | Project=100
+     Breakdown: Edu={'max_points': 10, 'weight_pct': 10, 'base_points': 7.6, 'earned_points': 7.6, 'normalized_score': 76, 'adjustment_points': 0} | Exp={'max_points': 40, 'weight_pct': 40, 'base_points': 34, 'earned_points': 34, 'normalized_score': 85, 'adjustment_points': 0}
+     Pillar Edu: Đạt 7.6 / 10.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Đạt yêu cầu về trình độ học vấn.'] | Minus: ['Chuyên ngành tốt nghiệp (Software Engineering) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành.']
+     Pillar Exp: Đạt 34.0 / 40.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Fullstack Developer).', 'Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (5.0 năm, thiếu 5.0 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[16] Chiến Đinh Trần Công (Desired: Flutter Developer Intern)
+     Target Job: Senior Fullstack Developer | ReqLevel: SENIOR | ReqYears: 5
+     Edu in CV: Bachelor of Engineering in Software Engineering at Industrial University of Ho Chi Minh City ==> EduScore: 76
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 49.28
+     Scores: Overall=39 | Skills=63.82 | Exp=49.28 | Edu=76 | Project=100
+     Breakdown: Edu={'max_points': 10, 'weight_pct': 10, 'base_points': 7.6, 'earned_points': 4.72, 'normalized_score': 76, 'adjustment_points': -2.88} | Exp={'max_points': 40, 'weight_pct': 40, 'base_points': 19.71, 'earned_points': 12.23, 'normalized_score': 49.28, 'adjustment_points': -7.48}
+     Pillar Edu: Đạt 4.7 / 10.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Đạt yêu cầu về trình độ học vấn.'] | Minus: ['Chuyên ngành tốt nghiệp (Software Engineering) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành.']
+     Pillar Exp: Đạt 12.2 / 40.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Fullstack Developer).', 'Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (5.0 năm, thiếu 5.0 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[17] Nguyễn Hải Nam (Desired: Head of Performance Marketing / Growth Lead (E-commerce))
+     Target Job: Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL) | ReqLevel: SENIOR | ReqYears: 3
+     Edu in CV: Cử nhân Xuất sắc in Thương mại Điện tử (E-Commerce) at Đại học Kinh tế TP. Hồ Chí Minh (UEH) ==> EduScore: 94
+     Exp in CV (2 entries): Senior Performance Marketing Lead (Công ty Cổ phần Thời trang D2C CoolStyle); Digital Acquisition Specialist (Tập đoàn Bán lẻ Mỹ phẩm BeautyHub)
+     Exp Metrics: TotalExp=4.5y | CandLevel=SENIOR | LevelFit=100 ==> ExpScore: 81.66
+     Scores: Overall=39 | Skills=0 | Exp=81.66 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 10.26, 'normalized_score': 94, 'adjustment_points': -3.84} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.5, 'earned_points': 17.83, 'normalized_score': 81.66, 'adjustment_points': -6.67}
+     Pillar Edu: Đạt 10.3 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Thương mại Điện tử (E-Commerce)). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Thương mại Điện tử (E-Commerce)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 17.8 / 30.0 điểm: Đánh giá dựa trên 4.5 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (4.5 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Performance Marketing Lead) -> Cộng điểm tương quan cấp bậc.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.']
+------------------------------------------------------------------------------------------
+[18] Lê Thị Thảo Vy (Desired: Senior Performance Media Specialist / Assistant Manager)
+     Target Job: Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL) | ReqLevel: SENIOR | ReqYears: 3
+     Edu in CV: Cử nhân in Quan hệ Quốc tế (International Relations) at Đại học Khoa học Xã hội & Nhân văn TP.HCM ==> EduScore: 49
+     Exp in CV (2 entries): Senior Performance Media Executive (T-Media Performance Agency); Digital Media Planner (Digital First Agency)
+     Exp Metrics: TotalExp=3.42y | CandLevel=MIDDLE | LevelFit=70 ==> ExpScore: 82.46
+     Scores: Overall=32.09 | Skills=0 | Exp=82.46 | Edu=49 | Project=0
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 7.35, 'earned_points': 7.35, 'normalized_score': 49, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.74, 'earned_points': 24.74, 'normalized_score': 82.46, 'adjustment_points': 0}
+     Pillar Edu: Đạt 7.3 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quan hệ Quốc tế (International Relations)). | Plus: ['Đạt yêu cầu về trình độ học vấn.'] | Minus: ['Chuyên ngành tốt nghiệp (Quan hệ Quốc tế (International Relations)) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn.']
+     Pillar Exp: Đạt 24.7 / 30.0 điểm: Đánh giá dựa trên 3.4 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (3.4 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Performance Media Executive) -> Cộng điểm tương quan cấp bậc.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.']
+------------------------------------------------------------------------------------------
+[19] Hoàng Đức Minh (Desired: B2B Growth & Performance Lead)
+     Target Job: Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL) | ReqLevel: SENIOR | ReqYears: 3
+     Edu in CV: Cử nhân in Quản trị Kinh doanh Quốc tế at Đại học Ngoại Thương Cơ sở II ==> EduScore: 94
+     Exp in CV (2 entries): B2B Growth & Performance Lead (CloudFlow Enterprise SaaS); Digital Marketing Specialist (BaseVN Software Corp)
+     Exp Metrics: TotalExp=4.16y | CandLevel=SENIOR | LevelFit=100 ==> ExpScore: 80.2
+     Scores: Overall=38.16 | Skills=0 | Exp=80.2 | Edu=94 | Project=0
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.06, 'earned_points': 24.06, 'normalized_score': 80.2, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quản trị Kinh doanh Quốc tế). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh Quốc tế) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 24.1 / 30.0 điểm: Đánh giá dựa trên 4.2 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (4.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.']
+------------------------------------------------------------------------------------------
+[20] Phạm Thu Trang (Desired: Nhân viên Marketing / Quảng cáo Fanpage)
+     Target Job: Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL) | ReqLevel: SENIOR | ReqYears: 3
+     Edu in CV: Cử nhân in Marketing Thương mại at Đại học Văn Lang ==> EduScore: 94
+     Exp in CV (1 entries): Nhân viên Content & Quảng cáo Facebook (Shop Thời trang Nữ Dear Bella)
+     Exp Metrics: TotalExp=1.67y | CandLevel=JUNIOR | LevelFit=35 ==> ExpScore: 53.85
+     Scores: Overall=30.26 | Skills=0 | Exp=53.85 | Edu=94 | Project=0
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 16.16, 'earned_points': 16.16, 'normalized_score': 53.85, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing Thương mại). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Marketing Thương mại) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 16.2 / 30.0 điểm: Đánh giá dựa trên 1.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.', 'Tổng thâm niên tích lũy (1.7 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 1.3 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[21] Đặng Minh Quân (Desired: Senior Performance User Acquisition Manager (Mobile Gaming))
+     Target Job: Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL) | ReqLevel: SENIOR | ReqYears: 3
+     Edu in CV: Kỹ sư in Hệ thống Thông tin Quản lý at Đại học Bách Khoa TP.HCM ==> EduScore: 94
+     Exp in CV (2 entries): Senior Performance User Acquisition Manager (Virtual Apps & Gaming Global); Performance Ads Specialist (Joystick Mobile Studio)
+     Exp Metrics: TotalExp=5.58y | CandLevel=MANAGER | LevelFit=100 ==> ExpScore: 81.99
+     Scores: Overall=38.7 | Skills=0 | Exp=81.99 | Edu=94 | Project=0
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.6, 'earned_points': 24.6, 'normalized_score': 81.99, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Hệ thống Thông tin Quản lý). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Hệ thống Thông tin Quản lý) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 24.6 / 30.0 điểm: Đánh giá dựa trên 5.6 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Tổng thâm niên tích lũy (5.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.', 'Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Performance User Acquisition Manager) -> Cộng điểm tương quan cấp bậc.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.']
+------------------------------------------------------------------------------------------
+[22] Nguyễn Đinh Xuân Trường (Desired: Backend Developer)
+     Target Job: Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL) | ReqLevel: SENIOR | ReqYears: 3
+     Edu in CV: Bachelor's Degree in Software Engineering at Industrial University of Ho Chi Minh City (IUH) ==> EduScore: 94
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 80.65
+     Scores: Overall=63.9 | Skills=72.71 | Exp=80.65 | Edu=94 | Project=0
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.2, 'earned_points': 24.2, 'normalized_score': 80.65, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 24.2 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)).', 'Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 3.0 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[23] Nguyễn Đinh Xuân Trường (Desired: Backend Developer)
+     Target Job: Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL) | ReqLevel: SENIOR | ReqYears: 3
+     Edu in CV: Bachelor's Degree in Software Engineering at Industrial University of Ho Chi Minh City (IUH) ==> EduScore: 94
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 80.65
+     Scores: Overall=63.9 | Skills=72.71 | Exp=80.65 | Edu=94 | Project=0
+     Breakdown: Edu={'max_points': 15, 'weight_pct': 15, 'base_points': 14.1, 'earned_points': 14.1, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 24.2, 'earned_points': 24.2, 'normalized_score': 80.65, 'adjustment_points': 0}
+     Pillar Edu: Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 24.2 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)).', 'Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 3.0 năm) -> Bị trừ điểm thâm niên tương ứng.']
+------------------------------------------------------------------------------------------
+[24] Nguyễn Đinh Xuân Trường (Desired: Backend Developer)
+     Target Job: Intern Backend Java | ReqLevel: INTERN | ReqYears: 0
+     Edu in CV: Bachelor's Degree in Software Engineering at Industrial University of Ho Chi Minh City (IUH) ==> EduScore: 94
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 61.25
+     Scores: Overall=75.6 | Skills=75.88 | Exp=61.25 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 20, 'weight_pct': 20, 'base_points': 18.8, 'earned_points': 18.8, 'normalized_score': 94, 'adjustment_points': 0} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 18.38, 'earned_points': 18.38, 'normalized_score': 61.25, 'adjustment_points': 0}
+     Pillar Edu: Đạt 18.8 / 20.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 18.4 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 0.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Intern Backend Java).', 'Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Không có điểm trừ đáng kể về kinh nghiệm.']
+------------------------------------------------------------------------------------------
+[25] Nguyễn Đinh Xuân Trường (Desired: Backend Developer)
+     Target Job: Thực Tập Sinh Lập Trình Viên | ReqLevel: INTERN | ReqYears: 0
+     Edu in CV: Bachelor's Degree in Software Engineering at Industrial University of Ho Chi Minh City (IUH) ==> EduScore: 94
+     Exp in CV (0 entries): None
+     Exp Metrics: TotalExp=0y | CandLevel=None | LevelFit=None ==> ExpScore: 58.35
+     Scores: Overall=59 | Skills=92.07 | Exp=58.35 | Edu=94 | Project=100
+     Breakdown: Edu={'max_points': 20, 'weight_pct': 20, 'base_points': 18.8, 'earned_points': 13.34, 'normalized_score': 94, 'adjustment_points': -5.46} | Exp={'max_points': 30, 'weight_pct': 30, 'base_points': 17.5, 'earned_points': 12.42, 'normalized_score': 58.35, 'adjustment_points': -5.08}
+     Pillar Edu: Đạt 13.3 / 20.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering). | Plus: ['Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn.'] | Minus: ['Không có điểm trừ về học vấn.']
+     Pillar Exp: Đạt 12.4 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 0.0 năm), cấp bậc vị trí và dự án thực chiến. | Plus: ['Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Thực Tập Sinh Lập Trình Viên).', 'Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.', 'Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc.'] | Minus: ['Không có điểm trừ đáng kể về kinh nghiệm.']
+------------------------------------------------------------------------------------------

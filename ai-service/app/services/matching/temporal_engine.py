@@ -119,12 +119,19 @@ class TemporalEngine:
         Returns:
             Dict with velocity_score, promotion_count, velocity_label, trajectory_evidence.
         """
-        if not work_experiences or len(work_experiences) <= 1:
+        if not work_experiences:
             return {
                 "velocity_score": 1.0,
                 "promotion_count": 0,
-                "velocity_label": "STEADY_GROWTH",
-                "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu hoặc chưa ghi nhận chuyển bậc chức danh."
+                "velocity_label": "NO_EXPERIENCE",
+                "trajectory_evidence": "Hồ sơ chưa có lịch sử làm việc chính thức tại doanh nghiệp."
+            }
+        if len(work_experiences) == 1:
+            return {
+                "velocity_score": 1.0,
+                "promotion_count": 0,
+                "velocity_label": "ENTRY_LEVEL",
+                "trajectory_evidence": "Hồ sơ giai đoạn khởi đầu tại 1 vị trí chuyên môn."
             }
 
         # Sort experiences by start date ascending

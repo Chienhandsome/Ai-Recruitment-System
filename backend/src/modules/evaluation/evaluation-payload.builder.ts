@@ -249,6 +249,7 @@ export class EvaluationPayloadBuilder {
           start_date: education.startDate?.toISOString() ?? null,
           end_date: education.endDate?.toISOString() ?? null,
           description: education.description,
+          source_text: education.sourceText ?? null,
         })),
         projects: profile.projects.map((project) => ({
           id: project.id,

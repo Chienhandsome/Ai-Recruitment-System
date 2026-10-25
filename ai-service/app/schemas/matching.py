@@ -41,6 +41,10 @@ class Education(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     description: Optional[str] = None
+    gpa: Optional[float] = None
+    gpa_scale: Optional[float] = None
+    academic_honors: Optional[str] = None
+    source_text: Optional[str] = None
 
 
 class CandidateProject(BaseModel):
@@ -265,3 +269,6 @@ class EvaluationResponse(BaseModel):
     career_velocity: Optional[Dict[str, Any]] = None
     summary: str
     experience_assessment: Optional[ExperienceLevelAssessment] = None
+    llm_reasoning: Optional[str] = None
+    llm_adjudication: Optional[Dict[str, Any]] = None
+

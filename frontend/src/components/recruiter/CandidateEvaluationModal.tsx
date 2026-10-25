@@ -104,7 +104,7 @@ function getScoreColor(score: number, highThreshold = 80, lowThreshold = 40) {
 }
 
 function SkillsPillarDetail({ aiResult, job }: { aiResult: any; job: JobPostingData }) {
-  const sWeight = Number(job.skillWeight) || 40;
+  const sWeight = job.skillWeight != null && !isNaN(Number(job.skillWeight)) ? Number(job.skillWeight) : 40;
   const sScore = Number(aiResult?.skillScore) || 0;
   const sPts = +(sScore * (sWeight / 100)).toFixed(1);
   const maxPts = sWeight;

@@ -14,6 +14,68 @@ from app.services.matching.transferable_skills import transferable_skills_engine
 from app.utils.normalizer import normalize_skill_name
 
 
+def _is_negated_mention(text: str, match_start: int, match_end: int) -> bool:
+    if not text:
+        return False
+    # Check 80 chars before match
+    prefix = text[max(0, match_start - 80) : match_start].lower()
+    # Check 50 chars after match
+    suffix = text[match_end : min(len(text), match_end + 50)].lower()
+
+    neg_prefix = re.compile(
+        r"\b(?:chưa\s+(?:từng\s+)?(?:làm|dùng|biết|học|tiếp\s*xúc)|"
+        r"chưa\s+(?:có|từng|biết)|"
+        r"không\s+(?:có|biết|rành|chuyên|thành\s*thạo|thạo|dùng|làm)|"
+        r"no\s+(?:experience|programming|coding|practical\s+experience|knowledge)(?:\s+(?:or|in|with|of))?|"
+        r"not\s+(?:proficient|familiar|experienced|trained)(?:\s+(?:with|in))?|"
+        r"never\s+(?:used|worked|trained|learned)(?:\s+(?:in|with))?|"
+        r"lacking(?:\s+(?:any|practical|statistical|hands-on))?(?:\s+(?:experience\s+in|knowledge\s+of))?|"
+        r"non-technical\s+in|"
+        r"without(?:\s+(?:prior|any|practical))?\s+experience(?:\s+in)?)\b",
+        re.IGNORECASE,
+    )
+    if neg_prefix.search(prefix):
+        return True
+
+    neg_suffix = re.compile(
+        r"^(?:\s+(?:scripting|programming|skill|tool|framework|experience|knowledge))?\s*"
+        r"(?:is\s+lacking|experience\s+is\s+none|chưa\s+có|không\s+có|chưa\s+từng\s+làm)\b",
+        re.IGNORECASE,
+    )
+    if neg_suffix.search(suffix):
+        return True
+
+    return False
+
+
+def _find_non_negated_alias(text: str, aliases: List[str]) -> bool:
+    """Return True if at least one non-negated mention of any alias exists in text."""
+    if not text or not aliases:
+        return False
+    text_lower = text.lower()
+    for alias in aliases:
+        if not alias:
+            continue
+        for m in re.finditer(rf"\b{re.escape(alias.lower())}\b", text_lower):
+            if not _is_negated_mention(text, m.start(), m.end()):
+                return True
+    return False
+
+
+def _is_explicitly_disclaimed(text: str, aliases: List[str]) -> bool:
+    """Return True if the text explicitly disclaims/negates the skill."""
+    if not text or not aliases:
+        return False
+    text_lower = text.lower()
+    for alias in aliases:
+        if not alias:
+            continue
+        for m in re.finditer(rf"\b{re.escape(alias.lower())}\b", text_lower):
+            if _is_negated_mention(text, m.start(), m.end()):
+                return True
+    return False
+
+
 class GenericMatchingEngine:
     """
     Unified Cognitive Matching Architecture (H-CAME V4):
@@ -76,8 +138,8 @@ class GenericMatchingEngine:
             skills_res = self._match_skills(
                 cand_profile, job, domain_compat, job_subdomain, cand_subdomain
             )
-            exp_res = self._match_experience(cand_profile, job, domain_compat)
-            edu_res = self._match_education(cand_profile, job)
+            exp_res = self._match_experience(cand_profile, job, domain_compat, job_subdomain)
+            edu_res = self._match_education(cand_profile, job, job_subdomain)
             cert_res = self._match_certificates(cand_profile, job)
             lang_res = language_matcher.match(cand_profile, job)
 
@@ -1109,11 +1171,24 @@ class GenericMatchingEngine:
         job_subdom = job_subdom or self._detect_subdomain(
             f"{job.title} {job.description or ''} {job.requirements or ''}"
         )
+
+        # Negation Filter: Exclude candidate skills where candidate explicitly states lack of experience
+        negation_pattern = re.compile(
+            r"(?:không\s+có\s+(?:kinh\s+nghiệm|kỹ\s+năng|kiến\s+thức)|chưa\s+(?:từng|bao\s+giờ|có)|chưa\s+thành\s+thạo|no\s+experience\s+in|not\s+experienced\s+with|never\s+used|haven't\s+used|lack\s+of)\b",
+            re.IGNORECASE,
+        )
+        valid_cand_skills = [
+            cs
+            for cs in cand_profile.skills
+            if cs and cs.skill_name and not negation_pattern.search(cs.skill_name.strip())
+        ]
+
         cand_skill_id_map = {
-            str(cs.skill_id): cs for cs in cand_profile.skills if cs.skill_id
+            str(cs.skill_id): cs for cs in valid_cand_skills if cs.skill_id
         }
-        cand_skill_map = {self._skill_match_key(cs): cs for cs in cand_profile.skills}
+        cand_skill_map = {self._skill_match_key(cs): cs for cs in valid_cand_skills}
         cand_norm_names = set(cand_skill_map.keys())
+        used_cand_skills: Set[str] = set()
 
         # Ngưỡng động (Đồng nghĩa thực sự vs Chuyển giao)
         mandatory_threshold = 0.78
@@ -1130,18 +1205,32 @@ class GenericMatchingEngine:
 
         job_context = f"[CONTEXT] Domain: {job_subdom} | Environment: {job.work_mode or 'Professional'}"
 
-        for req in job_req_skills:
+        # PASS 1: Identify all exact skill matches first so requirements with exact matches claim their skills
+        exact_matched_reqs: Dict[int, Any] = {}
+        # Prioritize mandatory requirements for exact matching claims
+        sorted_req_indices = sorted(
+            range(len(job_req_skills)),
+            key=lambda i: (not job_req_skills[i].is_mandatory),
+        )
+        for idx in sorted_req_indices:
+            req = job_req_skills[idx]
+            norm_req_name = self._skill_match_key(req)
+            cand_s = cand_skill_id_map.get(str(req.skill_id)) if req.skill_id else None
+            if cand_s is None:
+                cand_s = cand_skill_map.get(norm_req_name)
+            if cand_s is not None and self._skill_match_key(cand_s) not in used_cand_skills:
+                used_cand_skills.add(self._skill_match_key(cand_s))
+                exact_matched_reqs[idx] = cand_s
+
+        for idx, req in enumerate(job_req_skills):
             norm_req_name = self._skill_match_key(req)
             is_man = req.is_mandatory
             req_min_years = float(getattr(req, "minimum_years", 0.0) or 0.0)
             cand_skill_years = self._calculate_skill_years(req.skill_name, cand_profile)
 
             # 1. Khớp chính xác danh sách kỹ năng
-            cand_s = cand_skill_id_map.get(str(req.skill_id)) if req.skill_id else None
-            if cand_s is None:
-                cand_s = cand_skill_map.get(norm_req_name)
-
-            if cand_s is not None:
+            if idx in exact_matched_reqs:
+                cand_s = exact_matched_reqs[idx]
                 level_mult = min(
                     1.0,
                     self._get_level_val(cand_s.proficiency_level)
@@ -1198,7 +1287,9 @@ class GenericMatchingEngine:
             ai_matched = False
             best_sem_score = 0.0
             best_cs_match = None
-            for cs in cand_profile.skills:
+            for cs in valid_cand_skills:
+                if self._skill_match_key(cs) in used_cand_skills:
+                    continue
                 # Kiểm tra tương đương trực tiếp qua semantic embedding
                 raw_sem = semantic_matcher.compute_similarity(
                     req.skill_name.strip(), cs.skill_name.strip()
@@ -1211,6 +1302,7 @@ class GenericMatchingEngine:
                     best_cs_match = cs
 
             if best_sem_score >= mandatory_threshold and best_cs_match:
+                used_cand_skills.add(self._skill_match_key(best_cs_match))
                 level_multiplier = min(
                     1.0,
                     self._get_level_val(best_cs_match.proficiency_level)
@@ -1220,16 +1312,17 @@ class GenericMatchingEngine:
 
                 # Check skill experience years requirement
                 years_gap_info = None
+                effective_years = max(cand_skill_years, self._calculate_skill_years(best_cs_match.skill_name, cand_profile))
                 if req_min_years > 0:
-                    if cand_skill_years < req_min_years:
-                        ratio = cand_skill_years / req_min_years
+                    if effective_years < req_min_years:
+                        ratio = effective_years / req_min_years
                         penalty_mult = 0.65 + 0.35 * max(0.2, min(1.0, ratio))
                         final_skill_score *= penalty_mult
                         years_gap_info = {
                             "req_years": req_min_years,
-                            "actual_years": cand_skill_years,
+                            "actual_years": effective_years,
                             "ratio": round(ratio, 2),
-                            "penalty_msg": f"Kỹ năng '{req.skill_name}': Thâm niên thực tế ({cand_skill_years:.1f} năm) chưa đủ số năm yêu cầu của JD ({req_min_years:.1f} năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
+                            "penalty_msg": f"Kỹ năng '{req.skill_name}': Thâm niên thực tế ({effective_years:.1f} năm) chưa đủ số năm yêu cầu của JD ({req_min_years:.1f} năm). Đã trừ điểm thâm niên kỹ năng tương ứng.",
                         }
 
                 matched.append(
@@ -1237,7 +1330,7 @@ class GenericMatchingEngine:
                         "name": req.skill_name,
                         "isMandatory": is_man,
                         "source": f"Kỹ năng tương đương: {best_cs_match.skill_name}",
-                        "actual_years": cand_skill_years,
+                        "actual_years": effective_years,
                         "req_years": req_min_years,
                         "years_gap": years_gap_info,
                     }
@@ -1251,17 +1344,26 @@ class GenericMatchingEngine:
                 )
                 if is_man:
                     mandatory_scores.append(final_skill_score)
-                    mandatory_credits.append(1.0)
+                    if req_min_years > 0 and effective_years < req_min_years * 0.3:
+                        mand_credit = max(0.2, (effective_years / req_min_years))
+                        mandatory_credits.append(mand_credit)
+                        missing_mandatory.append(req.skill_name)
+                    else:
+                        mandatory_credits.append(1.0)
                 else:
                     optional_scores.append(final_skill_score)
                 ai_matched = True
             else:
                 # Kiểm tra năng lực chuyển giao có hướng (Directed Transferable Skills & Experience Inheritance)
+                available_transfer_skills = [
+                    cs for cs in valid_cand_skills
+                    if self._skill_match_key(cs) not in used_cand_skills
+                ]
                 best_trans = transferable_skills_engine.evaluate_best_candidate_skill(
                     target_skill=req.skill_name,
                     target_min_years=req_min_years,
                     target_min_level=req.minimum_level,
-                    candidate_skills=cand_profile.skills,
+                    candidate_skills=available_transfer_skills,
                     get_level_val_fn=self._get_level_val,
                     calc_skill_years_fn=self._calculate_skill_years,
                     cand_profile=cand_profile,
@@ -1570,13 +1672,7 @@ class GenericMatchingEngine:
                     target_aliases.append(sub_strip)
 
         def contains_alias(text: str) -> bool:
-            if not text:
-                return False
-            text_lower = text.lower()
-            return any(
-                re.search(rf"\b{re.escape(alias)}\b", text_lower)
-                for alias in target_aliases
-            )
+            return _find_non_negated_alias(text, target_aliases)
 
         intervals: List[Tuple[datetime, datetime]] = []
 
@@ -1734,6 +1830,44 @@ class GenericMatchingEngine:
             return 0.0
         return best_sim
 
+    def _is_discrete_entity(self, skill_name: str) -> bool:
+        """
+        Determines whether a skill is a Discrete Tool, Specific Software, Programming Language,
+        Runtime Framework, Specific Database, ERP/PMS/CRM System, or Regulatory Standard.
+        For these discrete entities, candidate must explicitly mention the tool/standard in their
+        experience/project text. Vague semantic text inference from a project without mentioning
+        the entity is strictly prohibited across all industries.
+        """
+        s = (skill_name or "").lower().strip()
+        if not s:
+            return False
+
+        # 1. Any entity matching tokens in transferable skill clusters
+        for _, cluster_tokens in transferable_skills_engine._clusters:
+            if any(transferable_skills_engine._token_boundary_matches(tok, s) for tok in cluster_tokens):
+                return True
+
+        # 2. Known discrete technical and industry entities
+        discrete_keywords = {
+            "python", "java", "c++", "c#", "golang", "go", "php", "ruby", "rust",
+            "swift", "kotlin", "typescript", "javascript", "react", "vue", "angular",
+            "django", "fastapi", "flask", "spring", "spring boot", "laravel", ".net",
+            "dotnet", "asp.net", "docker", "kubernetes", "k8s", "aws", "gcp", "azure",
+            "postgresql", "mysql", "mongodb", "redis", "elasticsearch", "sql server",
+            "misa", "fast", "bravo", "sap", "sap fico", "oracle erp", "dynamics 365",
+            "opera", "opera pms", "smile", "smile pms", "ezcloud", "fidelio",
+            "figma", "sketch", "photoshop", "illustrator", "autocad", "solidworks",
+            "incoterms", "vnaccs", "vcis", "wms", "tms", "salesforce", "hubspot",
+            "tailwind", "tailwind css", "bootstrap", "graphql", "kafka", "rabbitmq",
+        }
+        if s in discrete_keywords:
+            return True
+
+        if re.search(r"\b(?:java|python|c\+\+|c#|react|angular|vue|spring|dotnet|\.net)\s*\d*", s):
+            return True
+
+        return False
+
     def _search_in_context(
         self,
         norm_req,
@@ -1752,6 +1886,28 @@ class GenericMatchingEngine:
         target_aliases = [norm_req, req_name] if norm_req else [req_name]
         alias_clean = [a.lower().strip() for a in target_aliases if a]
 
+        # Check if the candidate explicitly disclaims/negates this skill anywhere in their profile
+        prof = getattr(profile, "profile", None)
+        prof_header = f"{getattr(prof, 'professional_summary', '') or ''} {getattr(prof, 'desired_title', '') or ''}"
+        is_disclaimed = _is_explicitly_disclaimed(prof_header, alias_clean)
+        if not is_disclaimed:
+            for exp in profile.work_experiences:
+                exp_text = f"{exp.position_title or ''} {exp.description or ''} {exp.achievements or ''}"
+                if _is_explicitly_disclaimed(exp_text, alias_clean):
+                    is_disclaimed = True
+                    break
+        if not is_disclaimed:
+            for proj in getattr(profile, "projects", []) or []:
+                proj_text = f"{proj.project_name or ''} {proj.description or ''}"
+                if _is_explicitly_disclaimed(proj_text, alias_clean):
+                    is_disclaimed = True
+                    break
+
+        if is_disclaimed:
+            return 0.0, "", ""
+
+        is_discrete = self._is_discrete_entity(req_name) or (norm_req and self._is_discrete_entity(norm_req))
+
         for exp in profile.work_experiences:
             exp_text = f"{exp.position_title or ''} {exp.description or ''} {exp.achievements or ''}"
             exp_text_lower = exp_text.lower()
@@ -1767,9 +1923,7 @@ class GenericMatchingEngine:
             cand_context_pro = f"[CONTEXT] Type: professional_employment | Domain: {exp_domain} | Seniority: {seniority}"
             text_v2 = f"{cand_context_pro} [CONTENT] {exp_text}"
 
-            has_direct_kw = any(
-                re.search(rf"\b{re.escape(a)}\b", exp_text_lower) for a in alias_clean
-            )
+            has_direct_kw = _find_non_negated_alias(exp_text, alias_clean)
             if has_direct_kw:
                 # Detect if the context mention is passive / observation / receipt from third-party
                 is_passive = any(
@@ -1795,7 +1949,7 @@ class GenericMatchingEngine:
                         source_desc,
                     )
                     is_explicit = True
-            elif not is_explicit and domain_compat >= 0.40:
+            elif not is_explicit and domain_compat >= 0.40 and not is_discrete:
                 sim = (
                     semantic_matcher.compute_similarity(req_name_v2, text_v2)
                     * multiplier
@@ -1816,9 +1970,7 @@ class GenericMatchingEngine:
             cand_context_proj = f"[CONTEXT] Type: project | Domain: {proj_domain} | Seniority: experienced"
             text_v2 = f"{cand_context_proj} [CONTENT] {proj_text}"
 
-            has_direct_kw = any(
-                re.search(rf"\b{re.escape(a)}\b", proj_text_lower) for a in alias_clean
-            )
+            has_direct_kw = _find_non_negated_alias(proj_text, alias_clean)
             if has_direct_kw:
                 is_passive = any(
                     re.search(p, proj_text_lower)
@@ -1843,7 +1995,7 @@ class GenericMatchingEngine:
                         source_desc,
                     )
                     is_explicit = True
-            elif not is_explicit and domain_compat >= 0.40:
+            elif not is_explicit and domain_compat >= 0.40 and not is_discrete:
                 sim = (
                     semantic_matcher.compute_similarity(req_name_v2, text_v2)
                     * multiplier
@@ -1862,114 +2014,182 @@ class GenericMatchingEngine:
 
         return best_score, best_text, best_source
 
+    def _calc_single_tenure(self, exp) -> float:
+        if not exp:
+            return 0.0
+        now = datetime.now()
+        try:
+            start = (
+                datetime.strptime(str(exp.start_date).split("T")[0], "%Y-%m-%d")
+                if exp.start_date
+                else now
+            )
+        except:
+            start = now
+        try:
+            end = (
+                datetime.strptime(str(exp.end_date).split("T")[0], "%Y-%m-%d")
+                if exp.end_date and not exp.is_current
+                else now
+            )
+        except:
+            end = now
+        if start > end:
+            start, end = end, start
+        return max(0.0, (end - start).days / 365.25)
+
     def _match_experience(
         self,
         cand_profile: CandidateProfilePayload,
         job: JobPayload,
         domain_compat: float,
+        job_subdomain: Optional[str] = None,
     ) -> Dict[str, Any]:
+        experiences = cand_profile.work_experiences or []
+        req_years = float(job.required_experience_years or 0.0)
+        req_level = (job.experience_level or "").upper()
+        j_title_lower = (job.title or "").lower().strip()
+        is_job_intern = "intern" in j_title_lower or "thực tập" in j_title_lower
+
         level_assessment = None
         if job.experience_level:
             level_assessment = experience_level_evaluator.evaluate(
-                cand_profile.work_experiences,
+                experiences,
                 job.experience_level,
                 job.level_requirement_mode,
                 job.evaluation_date,
             )
 
-        total_years = self._calculate_total_years(cand_profile.work_experiences)
-        req_years = float(job.required_experience_years or 0.0)
+        total_years = self._calculate_total_years(experiences)
 
-        # Check management/leadership requirements if job level is MANAGER/LEAD/DIRECTOR
-        req_level = (job.experience_level or "").upper()
+        # 1. Calculate Relevant Experience Years (Weighted Tenure)
+        relevant_years = 0.0
+        candidate_titles = []
+        best_rel = 0.0
+
+        for exp in experiences:
+            p_title = (exp.position_title or "").strip()
+            if not p_title:
+                continue
+            candidate_titles.append(p_title)
+            p_title_lower = p_title.lower()
+
+            # Base title relevance
+            if p_title_lower in j_title_lower or j_title_lower in p_title_lower:
+                rel = 1.0
+            else:
+                rel = semantic_matcher.compute_similarity(job.title, p_title)
+
+            # Intern penalty if applying to non-intern job
+            if ("intern" in p_title_lower or "thực tập" in p_title_lower) and not is_job_intern:
+                rel *= 0.50
+
+            # Weight tenure by domain compatibility & title relevance
+            tenure = self._calc_single_tenure(exp)
+            if domain_compat < 0.40:
+                # Cross-domain completely unrelated work (e.g. Gaming Marketer applying to Software Engineer)
+                factor = min(0.10, rel * 0.15)
+            elif domain_compat < 0.65:
+                # Adjacent domain
+                factor = min(1.0, rel * 0.70)
+            else:
+                # Compatible domain
+                factor = min(1.0, rel)
+
+            relevant_years += tenure * factor
+            best_rel = max(best_rel, rel)
+
+        relevant_years = min(total_years, relevant_years)
+
+        # 2. Duration Score Computation
         if req_level in {"MANAGER", "LEAD", "DIRECTOR"} and req_years > 0.0:
             mgmt_years = experience_level_evaluator.calculate_management_years(
-                cand_profile.work_experiences, job.evaluation_date
+                experiences, job.evaluation_date
             )
-            total_duration_ratio = (total_years / req_years) if req_years > 0.0 else 1.0
+            total_duration_ratio = (relevant_years / req_years) if req_years > 0.0 else 1.0
             mgmt_duration_ratio = (mgmt_years / req_years) if req_years > 0.0 else 1.0
 
             if mgmt_duration_ratio < 0.2:
-                # Almost zero management tenure for a Management role
                 duration_score = 0.15
             elif mgmt_duration_ratio < 0.5:
-                # Partial management tenure (e.g. 2 years vs 5 years required)
-                duration_score = 0.45 * mgmt_duration_ratio + 0.25 * min(
-                    1.0, total_duration_ratio
-                )
+                duration_score = 0.45 * mgmt_duration_ratio + 0.25 * min(1.0, total_duration_ratio)
             else:
-                duration_score = 0.6 * min(1.0, mgmt_duration_ratio) + 0.4 * min(
-                    1.0, total_duration_ratio
-                )
+                duration_score = 0.6 * min(1.0, mgmt_duration_ratio) + 0.4 * min(1.0, total_duration_ratio)
             duration_score = max(0.1, min(1.0, duration_score))
         else:
-            # EPSILON_YEARS = 0.05 (~18 days tolerance for leap-year and calendar term calculations)
             EPSILON_YEARS = 0.05
-            if req_years > 0.0 and (req_years - total_years) <= EPSILON_YEARS:
+            if req_years == 0.0:
+                duration_score = 1.0
+            elif relevant_years >= (req_years - EPSILON_YEARS):
                 duration_score = 1.0
             else:
-                duration_ratio = (total_years / req_years) if req_years > 0.0 else 1.0
-                if duration_ratio < 0.6:
-                    duration_score = max(0.1, (duration_ratio**1.3))
-                else:
-                    duration_score = min(1.0, duration_ratio)
+                rel_ratio = relevant_years / req_years
+                gen_ratio = total_years / req_years
+                # Primary weight on relevant years (85%), small credit for general workplace tenure (15%)
+                duration_score = 0.85 * min(1.0, rel_ratio) + 0.15 * min(1.0, gen_ratio)
+                if rel_ratio < 0.20:
+                    duration_score = max(0.08, duration_score * 0.55)
 
-        candidate_titles = [
-            exp.position_title
-            for exp in cand_profile.work_experiences
-            if exp.position_title
-        ]
-        j_title_lower = job.title.lower()
-        is_job_intern = "intern" in j_title_lower
-
-        best_rel = 0.0
-        for c_title in candidate_titles:
-            c_title_lower = c_title.lower()
-            rel = (
-                1.0
-                if (c_title_lower in j_title_lower or j_title_lower in c_title_lower)
-                else semantic_matcher.compute_similarity(job.title, c_title)
-            )
-            if "intern" in c_title_lower and not is_job_intern:
-                rel *= 0.55
-            best_rel = max(best_rel, rel)
-
-        relevance_score = 0.6 * best_rel + 0.4 * (0.3 + 0.7 * domain_compat)
+        relevance_score = 0.60 * best_rel + 0.40 * (0.30 + 0.70 * domain_compat)
         exp_score = (
-            0.5 * duration_score + 0.5 * relevance_score
-            if cand_profile.work_experiences
+            0.55 * duration_score + 0.45 * relevance_score
+            if experiences
             else 0.0
         )
 
+        # 3. Project Evaluation & Strict Seniority Gating
         project_metrics = self._eval_projects(cand_profile, job)
-        project_score = project_metrics["score"]
+        project_score = project_metrics.get("score", 0.0)
 
-        if cand_profile.work_experiences and cand_profile.projects:
-            if total_years >= 2.0 or (req_years > 0 and total_years >= (req_years - 0.05)):
+        if experiences and cand_profile.projects:
+            if relevant_years >= 2.0 or (req_years > 0 and relevant_years >= (req_years - 0.05)):
                 final_score = 0.85 * exp_score + 0.15 * project_score
             else:
                 final_score = 0.70 * exp_score + 0.30 * project_score
-        elif cand_profile.work_experiences:
+        elif experiences:
             final_score = exp_score
         elif cand_profile.projects:
-            final_score = project_score * 0.85
+            # Candidate has ZERO work experience (only student/academic projects)
+            if req_level in {"SENIOR", "LEAD", "PRINCIPAL", "MANAGER", "DIRECTOR"}:
+                # Hard cap for Senior/Lead roles: academic projects cannot substitute for commercial tenure
+                final_score = min(0.28, project_score * 0.28)
+            elif req_level in {"MID", "MIDDLE"}:
+                final_score = min(0.40, project_score * 0.40)
+            elif req_level in {"FRESHER", "JUNIOR", "INTERN"} or req_years <= 1.0:
+                final_score = min(0.70, project_score * 0.70)
+            else:
+                final_score = min(0.35, project_score * 0.35)
         else:
             final_score = 0.0
+
+        # Cross-Domain Seniority Protection:
+        # If candidate has years of experience, but domain compatibility is low (< 0.40)
+        # and applying to a Senior/Lead position (e.g. 5.58 years in Marketing applying to Senior Software Engineer)
+        if domain_compat < 0.40 and req_level in {"SENIOR", "LEAD", "PRINCIPAL", "MANAGER", "DIRECTOR"}:
+            final_score = min(final_score, 0.30)
+            if level_assessment is not None:
+                level_assessment["fit_status"] = "NON_RELEVANT_DOMAIN"
+                level_assessment["reason"] = (
+                    f"Kinh nghiệm làm việc tích lũy thuộc phân khúc ngành nghề khác, không tương thích "
+                    f"với yêu cầu thâm niên chuyên môn của vị trí {req_level}."
+                )
 
         if level_assessment is not None:
             level_assessment = {
                 **level_assessment,
                 "duration_score": round(duration_score * 100.0, 2),
                 "relevance_score": round(relevance_score * 100.0, 2),
+                "relevant_years": round(relevant_years, 2),
             }
 
         return {
-            "score": final_score,
-            "total_years": total_years,
+            "score": round(max(0.0, min(1.0, final_score)), 4),
+            "total_years": round(total_years, 2),
+            "relevant_years": round(relevant_years, 2),
             "req_years": req_years,
-            "duration_score": duration_score,
-            "title_sim": best_rel,
-            "domain_compat": domain_compat,
+            "duration_score": round(duration_score, 4),
+            "title_sim": round(best_rel, 3),
+            "domain_compat": round(domain_compat, 3),
             "best_title": candidate_titles[0] if candidate_titles else None,
             "project_metrics": project_metrics,
             "level_assessment": level_assessment,
@@ -2032,11 +2252,86 @@ class GenericMatchingEngine:
         "associate": 2,
         "cao đẳng": 2,
         "trung cấp": 2,
+        "trung cấp nghề": 2,
+        "sơ cấp nghề": 2,
+        "chứng chỉ nghề": 2,
+        "nghiệp vụ buồng phòng": 2,
+        "nghiệp vụ khách sạn": 2,
+        "nghiệp vụ lễ tân": 2,
+        "nghề": 2,
         "vocational": 2,
         "high school": 1,
         "cấp 3": 1,
         "thpt": 1,
         "trung học phổ thông": 1,
+    }
+
+    SUBDOMAIN_TO_ACADEMIC_DISCIPLINE: Dict[str, str] = {
+        # IT & Software
+        "IT_FULLSTACK_DEV": "IT_COMPUTER_SCIENCE",
+        "IT_FRONTEND_WEB": "IT_COMPUTER_SCIENCE",
+        "IT_BACKEND_SYSTEMS": "IT_COMPUTER_SCIENCE",
+        "IT_MOBILE_APP": "IT_COMPUTER_SCIENCE",
+        "IT_DEVOPS_CLOUD": "IT_COMPUTER_SCIENCE",
+        "IT_AI_DATA_SCIENCE": "DATA_ANALYTICS",
+        "IT_EMBEDDED_FIRMWARE": "ENGINEERING_TECHNICAL",
+        # Design & Creative
+        "DESIGN_UI_UX": "DESIGN_CREATIVE",
+        "DESIGN_3D_GAME_ART": "DESIGN_CREATIVE",
+        "DESIGN_GRAPHIC_BRANDING": "DESIGN_CREATIVE",
+        # Finance & Accounting
+        "FIN_TAX_ACCOUNTING": "ACCOUNTING_FINANCE",
+        "FIN_AUDIT_INTERNAL_CONTROL": "ACCOUNTING_FINANCE",
+        "FIN_INVESTMENT_BANKING": "ACCOUNTING_FINANCE",
+        "FIN_RETAIL_BANKING": "ACCOUNTING_FINANCE",
+        # Marketing & Communications
+        "MKT_MOBILE_GAMING_UA": "MARKETING_COMMUNICATION",
+        "MKT_B2B_SAAS": "MARKETING_COMMUNICATION",
+        "MKT_AGENCY_SERVICES": "MARKETING_COMMUNICATION",
+        "MKT_ECOMMERCE_D2C": "MARKETING_COMMUNICATION",
+        "MKT_SOCIAL_CONTENT": "MARKETING_COMMUNICATION",
+        # Sales & Commercial
+        "SALES_DISTRIBUTION_CHANNELS": "SALES_COMMERCE",
+        "SALES_FMCG_CONSUMER": "SALES_COMMERCE",
+        "SALES_B2B_ENTERPRISE": "SALES_COMMERCE",
+        "SALES_PHARMA_HEALTHCARE": "HEALTHCARE_MEDICINE",
+        # Human Resources
+        "HR_RECRUITMENT_TALENT": "HUMAN_RESOURCES",
+        "HR_COMPENSATION_BENEFITS": "HUMAN_RESOURCES",
+        "HR_GENERAL_OPERATIONS": "HUMAN_RESOURCES",
+        # Legal & Compliance
+        "LAW_CORPORATE_LEGAL": "LAW_LEGAL",
+        "LAW_INTELLECTUAL_PROPERTY": "LAW_LEGAL",
+        "LAW_REGULATORY_COMPLIANCE": "LAW_LEGAL",
+        # Manufacturing & Engineering
+        "MFG_AUTOMATION_PLC": "ENGINEERING_TECHNICAL",
+        "MFG_QUALITY_CONTROL": "ENGINEERING_TECHNICAL",
+        "MFG_PLANT_OPERATIONS": "ENGINEERING_TECHNICAL",
+        # Hospitality & Tourism
+        "HOSP_HOTEL_RESORT": "HOSPITALITY_TOURISM",
+        "HOSP_FB_RESTAURANT": "HOSPITALITY_TOURISM",
+        # Real Estate & Construction
+        "REAL_ESTATE_BROKERAGE": "SALES_COMMERCE",
+        "REAL_PROPERTY_BROKERAGE": "SALES_COMMERCE",
+        "REAL_CIVIL_CONSTRUCTION": "ENGINEERING_TECHNICAL",
+        # Agriculture & Veterinary
+        "AGRI_CROP_FARMING": "AGRICULTURE_VET",
+        "AGRI_LIVESTOCK_VET": "AGRICULTURE_VET",
+        # Customer Service & Helpdesk
+        "CS_CUSTOMER_CARE": "SALES_COMMERCE",
+        "CS_TECH_HELPDESK": "IT_COMPUTER_SCIENCE",
+        # Education & Teaching
+        "EDU_ACADEMIC_ESL": "HUMANITIES_SOCIAL",
+        "EDU_EARLY_CHILDHOOD_K12": "HUMANITIES_SOCIAL",
+        "EDU_CORPORATE_TRAINING": "HUMAN_RESOURCES",
+        # Healthcare & Medicine
+        "MED_CLINICAL_DOCTOR": "HEALTHCARE_MEDICINE",
+        "MED_PHARMACEUTICAL": "HEALTHCARE_MEDICINE",
+        "MED_NURSING_CARE": "HEALTHCARE_MEDICINE",
+        # Logistics & Supply Chain
+        "LOG_WAREHOUSE_WMS": "LOGISTICS_SUPPLY_CHAIN",
+        "LOG_CUSTOMS_FORWARDING": "LOGISTICS_SUPPLY_CHAIN",
+        "LOG_FLEET_TRANSPORT": "LOGISTICS_SUPPLY_CHAIN",
     }
 
     ACADEMIC_DISCIPLINES: Dict[str, Dict[str, Any]] = {
@@ -2057,11 +2352,19 @@ class GenericMatchingEngine:
                 "truyền thông đa phương tiện",
                 "thương mại",
                 "quản trị thương mại",
+                "marketing management",
+                "quản trị marketing",
+                "truyền thông marketing",
                 "e-commerce",
                 "business administration",
                 "advertising",
                 "mass communication",
                 "media studies",
+                "brand",
+                "marketing specialist",
+                "seo",
+                "content creator",
+                "copywriter",
             ],
         },
         "SALES_COMMERCE": {
@@ -2073,13 +2376,22 @@ class GenericMatchingEngine:
                 "thương mại",
                 "thương mại quốc tế",
                 "kinh tế quốc tế",
+                "international economics",
                 "phát triển thị trường",
+                "kinh tế phát triển",
+                "kinh tế học",
                 "kinh tế",
+                "economics",
+                "business",
                 "sales",
                 "commerce",
                 "business development",
                 "international trade",
                 "commercial",
+                "sales executive",
+                "account executive",
+                "bán lẻ",
+                "retail",
             ],
         },
         "ACCOUNTING_FINANCE": {
@@ -2094,6 +2406,8 @@ class GenericMatchingEngine:
                 "kế toán doanh nghiệp",
                 "đầu tư tài chính",
                 "kế toán tài chính",
+                "kiểm toán viên",
+                "chuyên ngành kế toán",
                 "accounting",
                 "finance",
                 "audit",
@@ -2101,6 +2415,8 @@ class GenericMatchingEngine:
                 "taxation",
                 "corporate finance",
                 "accountancy",
+                "kế toán tổng hợp",
+                "financial analyst",
             ],
         },
         "IT_COMPUTER_SCIENCE": {
@@ -2123,6 +2439,25 @@ class GenericMatchingEngine:
                 "cybersecurity",
                 "artificial intelligence",
                 "computer engineering",
+                "fullstack",
+                "frontend",
+                "backend",
+                "developer",
+                "engineer",
+                "devops",
+                "cloud",
+                "lập trình viên",
+                "lập trình",
+                "web developer",
+                "mobile developer",
+                "software developer",
+                "reactjs",
+                "nodejs",
+                "python developer",
+                "java developer",
+                ".net developer",
+                "c# developer",
+                "software",
             ],
         },
         "DATA_ANALYTICS": {
@@ -2132,8 +2467,14 @@ class GenericMatchingEngine:
                 "phân tích dữ liệu",
                 "toán tin",
                 "toán ứng dụng",
+                "toán học",
                 "thống kê",
                 "kinh tế lượng",
+                "kinh tế",
+                "economics",
+                "quantitative economics",
+                "mathematics",
+                "math",
                 "hệ thống thông tin quản lý",
                 "data science",
                 "data analytics",
@@ -2160,6 +2501,15 @@ class GenericMatchingEngine:
                 "chế tạo máy",
                 "công nghệ sinh học",
                 "cơ điện tử",
+                "luyện kim",
+                "khoa học vật liệu",
+                "vật liệu",
+                "địa chất dầu khí",
+                "metallurgy",
+                "metallurgical material science",
+                "material science",
+                "materials engineering",
+                "nuclear engineering",
                 "engineering",
                 "mechanical",
                 "mechanical engineering",
@@ -2181,6 +2531,10 @@ class GenericMatchingEngine:
                 "mỹ thuật",
                 "tạo dáng công nghiệp",
                 "đa phương tiện",
+                "multimedia",
+                "multimedia arts",
+                "digital art",
+                "media arts",
                 "thiết kế đồ họa",
                 "thiết kế nội thất",
                 "thiết kế thời trang",
@@ -2224,6 +2578,9 @@ class GenericMatchingEngine:
                 "nhân sự",
                 "quản lý nguồn nhân lực",
                 "tâm lý học",
+                "tâm lý",
+                "psychology",
+                "industrial psychology",
                 "lao động xã hội",
                 "kinh tế lao động",
                 "human resources",
@@ -2244,6 +2601,12 @@ class GenericMatchingEngine:
                 "lữ hành",
                 "dịch vụ du lịch",
                 "khách sạn du lịch",
+                "quản trị dịch vụ du lịch",
+                "lễ tân",
+                "buồng phòng",
+                "front office",
+                "guest relations",
+                "housekeeping",
                 "hotel management",
                 "tourism",
                 "hospitality",
@@ -2280,6 +2643,10 @@ class GenericMatchingEngine:
                 "luật quốc tế",
                 "luật dân sự",
                 "pháp lý",
+                "tội phạm học",
+                "hình sự",
+                "criminology",
+                "criminal law",
                 "law",
                 "legal",
                 "economic law",
@@ -2297,11 +2664,26 @@ class GenericMatchingEngine:
                 "phiên dịch",
                 "sư phạm",
                 "triết học",
+                "triết học mác-lênin",
+                "triết học mác - lênin",
+                "marxist-leninist philosophy",
+                "khảo cổ",
+                "khảo cổ học",
+                "archaeology",
+                "ancient civilizations",
+                "văn minh cổ đại",
                 "lịch sử",
                 "văn học",
+                "văn học việt nam",
+                "classical vietnamese literature",
+                "văn học cổ điển",
                 "xã hội học",
                 "ngôn ngữ học",
                 "giáo dục học",
+                "tôn giáo học",
+                "theology",
+                "cultural studies",
+                "nghiên cứu văn hóa",
                 "pedagogy",
                 "philosophy",
                 "history",
@@ -2312,22 +2694,84 @@ class GenericMatchingEngine:
                 "dialectical philosophy",
             ],
         },
+        "NATURAL_SCIENCES": {
+            "name": "Khoa học Tự nhiên & Vật lý & Hóa học & Thiên văn",
+            "keywords": [
+                "khoa học tự nhiên",
+                "vật lý",
+                "hóa học",
+                "sinh học",
+                "thiên văn",
+                "địa chất",
+                "vật lý lý thuyết",
+                "physics",
+                "chemistry",
+                "astronomy",
+                "astrophysics",
+                "theoretical astrophysics",
+                "geology",
+                "natural sciences",
+            ],
+        },
+        "AGRICULTURE_VET": {
+            "name": "Nông nghiệp & Lâm nghiệp & Thú y & Cây trồng",
+            "keywords": [
+                "nông nghiệp",
+                "lâm nghiệp",
+                "thú y",
+                "trồng trọt",
+                "chăn nuôi",
+                "bảo vệ thực vật",
+                "thủy sản",
+                "nông học",
+                "khoa học cây trồng",
+                "agronomy",
+                "veterinary",
+                "agriculture",
+                "forestry",
+                "crop science",
+                "horticulture",
+            ],
+        },
+        "ART_MUSIC": {
+            "name": "Nghệ thuật & Âm nhạc & Mỹ thuật biểu diễn & Điện ảnh",
+            "keywords": [
+                "âm nhạc",
+                "thanh nhạc",
+                "hội họa",
+                "sân khấu",
+                "điện ảnh",
+                "múa",
+                "diễn xuất",
+                "đạo diễn",
+                "film directing",
+                "music",
+                "vocal",
+                "painting",
+                "performing arts",
+                "theatre",
+                "fine arts",
+            ],
+        },
     }
 
     DISCIPLINE_COMPATIBILITY: Dict[str, Set[str]] = {
         "IT_COMPUTER_SCIENCE": {"IT_COMPUTER_SCIENCE", "DATA_ANALYTICS", "ENGINEERING_TECHNICAL"},
-        "DATA_ANALYTICS": {"DATA_ANALYTICS", "IT_COMPUTER_SCIENCE"},
-        "MARKETING_COMMUNICATION": {"MARKETING_COMMUNICATION", "SALES_COMMERCE", "HUMANITIES_SOCIAL"},
-        "SALES_COMMERCE": {"SALES_COMMERCE", "MARKETING_COMMUNICATION", "LOGISTICS_SUPPLY_CHAIN"},
+        "DATA_ANALYTICS": {"DATA_ANALYTICS", "IT_COMPUTER_SCIENCE", "SALES_COMMERCE"},
+        "MARKETING_COMMUNICATION": {"MARKETING_COMMUNICATION", "SALES_COMMERCE"},
+        "SALES_COMMERCE": {"SALES_COMMERCE", "MARKETING_COMMUNICATION", "LOGISTICS_SUPPLY_CHAIN", "ACCOUNTING_FINANCE"},
         "ACCOUNTING_FINANCE": {"ACCOUNTING_FINANCE"},
         "HUMAN_RESOURCES": {"HUMAN_RESOURCES", "HUMANITIES_SOCIAL", "MARKETING_COMMUNICATION"},
         "LOGISTICS_SUPPLY_CHAIN": {"LOGISTICS_SUPPLY_CHAIN", "SALES_COMMERCE", "ENGINEERING_TECHNICAL"},
-        "DESIGN_CREATIVE": {"DESIGN_CREATIVE", "MARKETING_COMMUNICATION", "IT_COMPUTER_SCIENCE"},
-        "ENGINEERING_TECHNICAL": {"ENGINEERING_TECHNICAL", "IT_COMPUTER_SCIENCE"},
-        "HOSPITALITY_TOURISM": {"HOSPITALITY_TOURISM", "MARKETING_COMMUNICATION", "HUMANITIES_SOCIAL"},
+        "DESIGN_CREATIVE": {"DESIGN_CREATIVE", "MARKETING_COMMUNICATION", "IT_COMPUTER_SCIENCE", "ART_MUSIC"},
+        "ENGINEERING_TECHNICAL": {"ENGINEERING_TECHNICAL", "IT_COMPUTER_SCIENCE", "NATURAL_SCIENCES"},
+        "HOSPITALITY_TOURISM": {"HOSPITALITY_TOURISM", "MARKETING_COMMUNICATION", "SALES_COMMERCE"},
         "HEALTHCARE_MEDICINE": {"HEALTHCARE_MEDICINE"},
         "LAW_LEGAL": {"LAW_LEGAL"},
-        "HUMANITIES_SOCIAL": {"HUMANITIES_SOCIAL", "MARKETING_COMMUNICATION", "HUMAN_RESOURCES"},
+        "HUMANITIES_SOCIAL": {"HUMANITIES_SOCIAL"},
+        "NATURAL_SCIENCES": {"NATURAL_SCIENCES", "ENGINEERING_TECHNICAL"},
+        "AGRICULTURE_VET": {"AGRICULTURE_VET"},
+        "ART_MUSIC": {"ART_MUSIC", "DESIGN_CREATIVE"},
     }
 
     def _parse_degree_level(self, text: str) -> int:
@@ -2335,7 +2779,8 @@ class GenericMatchingEngine:
             return 0
         t = text.lower()
         for kw, lvl in self.DEGREE_HIERARCHY.items():
-            if re.search(rf"\b{re.escape(kw)}\b", t):
+            pattern = rf"(?<![a-zA-Z0-9À-ỹ]){re.escape(kw)}(?![a-zA-Z0-9À-ỹ])"
+            if re.search(pattern, t):
                 return lvl
         return 0
 
@@ -2361,10 +2806,12 @@ class GenericMatchingEngine:
                 return field
         return (job.title or "").strip()
 
-    def _detect_job_disciplines(self, job: JobPayload) -> Tuple[str, List[str]]:
+    def _detect_job_disciplines(
+        self, job: JobPayload, job_subdomain: Optional[str] = None
+    ) -> Tuple[str, List[str]]:
         """
         Extract the primary job field string and identify all matched academic disciplines.
-        Prioritizes the Education requirements section and job title.
+        Prioritizes detected job_subdomain, Education requirements section, and job title.
         """
         reqs = f"{job.requirements or ''}"
         m_sec = re.search(
@@ -2376,25 +2823,52 @@ class GenericMatchingEngine:
         target_text = f"{job.title or ''} {edu_text}".lower()
 
         matched_disciplines = []
-        for disc_key, disc_info in self.ACADEMIC_DISCIPLINES.items():
-            if any(re.search(rf"\b{re.escape(kw)}\b", target_text) for kw in disc_info["keywords"]):
-                matched_disciplines.append(disc_key)
 
-        # Fallback to full requirements if none detected in title/education line
+        # 1. Primary discipline from detected job_subdomain
+        if job_subdomain and job_subdomain in self.SUBDOMAIN_TO_ACADEMIC_DISCIPLINE:
+            matched_disciplines.append(self.SUBDOMAIN_TO_ACADEMIC_DISCIPLINE[job_subdomain])
+
+        # 2. Check title and education section
+        for disc_key, disc_info in self.ACADEMIC_DISCIPLINES.items():
+            if any(
+                re.search(
+                    rf"(?<![a-zA-Z0-9À-ỹ]){re.escape(kw)}(?![a-zA-Z0-9À-ỹ])",
+                    target_text,
+                )
+                for kw in disc_info["keywords"]
+            ):
+                if disc_key not in matched_disciplines:
+                    matched_disciplines.append(disc_key)
+
+        # 3. Fallback to full requirements if still empty
         if not matched_disciplines:
             for disc_key, disc_info in self.ACADEMIC_DISCIPLINES.items():
-                if any(re.search(rf"\b{re.escape(kw)}\b", reqs.lower()) for kw in disc_info["keywords"]):
-                    matched_disciplines.append(disc_key)
+                if any(
+                    re.search(
+                        rf"(?<![a-zA-Z0-9À-ỹ]){re.escape(kw)}(?![a-zA-Z0-9À-ỹ])",
+                        reqs.lower(),
+                    )
+                    for kw in disc_info["keywords"]
+                ):
+                    if disc_key not in matched_disciplines:
+                        matched_disciplines.append(disc_key)
 
         job_field = self._extract_job_field(job)
         return job_field, matched_disciplines
+
 
     def _detect_major_discipline(self, major_name: str) -> Optional[str]:
         if not major_name:
             return None
         m_lower = major_name.lower().strip()
         for disc_key, disc_info in self.ACADEMIC_DISCIPLINES.items():
-            if any(re.search(rf"\b{re.escape(kw)}\b", m_lower) for kw in disc_info["keywords"]):
+            if any(
+                re.search(
+                    rf"(?<![a-zA-Z0-9À-ỹ]){re.escape(kw)}(?![a-zA-Z0-9À-ỹ])",
+                    m_lower,
+                )
+                for kw in disc_info["keywords"]
+            ):
                 return disc_key
         return None
 
@@ -2441,8 +2915,11 @@ class GenericMatchingEngine:
         ):
             return 3
 
-        # Level 2: Associate / Cao đẳng / Trung cấp
-        if re.search(r"\b(?:associate(?:'s)?(?:\s+degree)?|cao\s*đẳng|trung\s*cấp|vocational)\b", text_to_check):
+        # Level 2: Associate / Cao đẳng / Trung cấp / Nghề
+        if re.search(
+            r"(?<![a-zA-Z0-9À-ỹ])(?:associate(?:'s)?(?:\s+degree)?|cao\s*đẳng|trung\s*cấp(?:\s*nghề)?|sơ\s*cấp(?:\s*nghề)?|chứng\s*chỉ\s*nghề|nghiệp\s*vụ\s*(?:buồng\s*phòng|khách\s*sạn|lễ\s*tân)|vocational)(?![a-zA-Z0-9À-ỹ])",
+            text_to_check,
+        ):
             return 2
 
         # Level 1: High School / Cấp 3 / THPT
@@ -2451,14 +2928,174 @@ class GenericMatchingEngine:
 
         return 0
 
+    def _extract_gpa_and_honors(self, edu) -> Dict[str, Any]:
+        """
+        Trích xuất điểm trung bình tích lũy (GPA) và danh hiệu học tập (Honors).
+        Hỗ trợ cả thang điểm 4.0, thang điểm 10.0, và các cụm từ vinh danh tiếng Việt / tiếng Anh.
+        """
+        gpa_val = getattr(edu, "gpa", None)
+        gpa_scale = getattr(edu, "gpa_scale", None) or 4.0
+        honors = getattr(edu, "academic_honors", None)
+
+        text_sources = " ".join(
+            [
+                str(getattr(edu, "description", "") or ""),
+                str(getattr(edu, "degree", "") or ""),
+                str(getattr(edu, "source_text", "") or ""),
+            ]
+        ).strip().lower()
+
+        # Extract GPA from text if not provided structured
+        if gpa_val is None and text_sources:
+            m_gpa = re.search(
+                r"(?:gpa|cpa|điểm\s*trung\s*bình|dtb)[\s:]*([0-9]+(?:[.,][0-9]+)?)\s*(?:/\s*([0-9]+(?:\.[0-9]+)?))?",
+                text_sources,
+                re.IGNORECASE,
+            )
+            if not m_gpa:
+                m_gpa = re.search(
+                    r"\b([0-9]\.[0-9]{1,2})\s*/\s*([0-9](?:\.[0-9])?)\b",
+                    text_sources,
+                )
+
+            if m_gpa:
+                try:
+                    num_str = m_gpa.group(1).replace(",", ".")
+                    gpa_val = float(num_str)
+                    if m_gpa.group(2):
+                        gpa_scale = float(m_gpa.group(2))
+                    else:
+                        gpa_scale = 10.0 if gpa_val > 4.0 else 4.0
+                except (ValueError, TypeError):
+                    gpa_val = None
+
+        # Extract honors from text
+        is_honors = False
+        honors_title = honors or ""
+        if not honors_title and text_sources:
+            if any(
+                k in text_sources
+                for k in [
+                    "xuất sắc",
+                    "thủ khoa",
+                    "summa cum laude",
+                    "valedictorian",
+                    "high distinction",
+                ]
+            ):
+                honors_title = "Xuất sắc"
+                is_honors = True
+            elif any(
+                k in text_sources
+                for k in [
+                    "loại giỏi",
+                    "tốt nghiệp giỏi",
+                    "bằng giỏi",
+                    "magna cum laude",
+                    "distinction",
+                    "dean's list",
+                    "first class honours",
+                ]
+            ):
+                honors_title = "Giỏi"
+                is_honors = True
+            elif any(
+                k in text_sources
+                for k in [
+                    "loại khá",
+                    "bằng khá",
+                    "cum laude",
+                    "second class honours",
+                ]
+            ):
+                honors_title = "Khá"
+
+        has_gpa = gpa_val is not None and gpa_val > 0.0
+        gpa_score = 0.75
+        gpa_display = None
+
+        if has_gpa:
+            gpa_display = f"{gpa_val:.2f}/{gpa_scale:.1f}"
+            if gpa_scale <= 4.5:
+                # 4.0 scale
+                if gpa_val >= 3.6:
+                    gpa_score = 1.00
+                    if not honors_title:
+                        honors_title = "Xuất sắc"
+                    is_honors = True
+                elif gpa_val >= 3.2:
+                    gpa_score = 0.90 + 0.10 * ((gpa_val - 3.2) / 0.4)
+                    if not honors_title:
+                        honors_title = "Giỏi"
+                    is_honors = True
+                elif gpa_val >= 2.5:
+                    gpa_score = 0.78 + 0.12 * ((gpa_val - 2.5) / 0.7)
+                elif gpa_val >= 2.0:
+                    gpa_score = 0.65
+                else:
+                    gpa_score = 0.50
+            else:
+                # 10.0 scale
+                if gpa_val >= 9.0:
+                    gpa_score = 1.00
+                    if not honors_title:
+                        honors_title = "Xuất sắc"
+                    is_honors = True
+                elif gpa_val >= 8.0:
+                    gpa_score = 0.90 + 0.10 * ((gpa_val - 8.0) / 1.0)
+                    if not honors_title:
+                        honors_title = "Giỏi"
+                    is_honors = True
+                elif gpa_val >= 7.0:
+                    gpa_score = 0.78 + 0.12 * ((gpa_val - 7.0) / 1.0)
+                elif gpa_val >= 5.0:
+                    gpa_score = 0.65
+                else:
+                    gpa_score = 0.50
+        elif honors_title:
+            if "xuất sắc" in honors_title.lower() or "thủ khoa" in honors_title.lower():
+                gpa_score = 1.00
+                is_honors = True
+                has_gpa = True
+            elif "giỏi" in honors_title.lower():
+                gpa_score = 0.92
+                is_honors = True
+                has_gpa = True
+            elif "khá" in honors_title.lower():
+                gpa_score = 0.80
+                has_gpa = True
+
+        return {
+            "has_gpa": has_gpa,
+            "gpa_val": gpa_val,
+            "gpa_scale": gpa_scale,
+            "gpa_display": gpa_display,
+            "gpa_score": round(min(1.0, max(0.0, gpa_score)), 3),
+            "honors_title": honors_title,
+            "is_honors": is_honors,
+        }
+
     def _match_education(
-        self, cand_profile: CandidateProfilePayload, job: JobPayload
+        self,
+        cand_profile: CandidateProfilePayload,
+        job: JobPayload,
+        job_subdomain: Optional[str] = None,
     ) -> Dict[str, Any]:
         educations = cand_profile.educations
         req_degree_level = self._extract_job_degree_req(job)
         job_has_edu_req = req_degree_level > 0 or any(
             k in f"{job.requirements or ''} {job.description or ''}".lower()
-            for k in ["tốt nghiệp", "chuyên ngành", "bằng cấp", "đại học", "cao đẳng", "bachelor", "master", "degree", "education"]
+            for k in [
+                "tốt nghiệp",
+                "chuyên ngành",
+                "bằng cấp",
+                "đại học",
+                "cao đẳng",
+                "bachelor",
+                "master",
+                "degree",
+                "education",
+            ]
         )
 
         if not educations:
@@ -2518,48 +3155,111 @@ class GenericMatchingEngine:
             degree_score = 1.0
             degree_passed = True
 
-        # 2. Major Relevance Assessment (discipline taxonomy + semantic comparison)
-        job_field, matched_job_disciplines = self._detect_job_disciplines(job)
-        majors = [e.major for e in educations if e.major]
+        # 2. Major Relevance Assessment (4 Tiers: EXACT, ADJACENT, OPEN, INCOMPATIBLE)
+        job_field, matched_job_disciplines = self._detect_job_disciplines(
+            job, job_subdomain
+        )
+
+        OPEN_DISCIPLINES = {
+            "SALES_COMMERCE",
+            "MARKETING_COMMUNICATION",
+            "HOSPITALITY_TOURISM",
+            "HUMANITIES_SOCIAL",
+        }
+        is_job_open_domain = bool(
+            matched_job_disciplines
+            and any(jd in OPEN_DISCIPLINES for jd in matched_job_disciplines)
+        )
 
         best_sim = 0.0
         best_major = None
-        for m in majors:
+        best_major_tier = "INCOMPATIBLE"
+        best_edu_obj = educations[0] if educations else None
+
+        for edu in educations:
+            m = edu.major
+            if not m:
+                continue
             m_lower = m.lower().strip()
             jf_lower = job_field.lower().strip()
             m_disc = self._detect_major_discipline(m)
 
-            # 1. Direct keyword match for major vs job title/field
+            # Direct string match
             if m_lower in jf_lower or jf_lower in m_lower:
-                sim = 1.0
-            # 2. Academic discipline match
+                sim = 1.00
+                tier = "EXACT"
+            # Academic discipline match
             elif matched_job_disciplines and m_disc:
-                is_compat = any(
-                    m_disc == jd or m_disc in self.DISCIPLINE_COMPATIBILITY.get(jd, set())
+                if any(m_disc == jd for jd in matched_job_disciplines):
+                    sim = 1.00
+                    tier = "EXACT"
+                elif any(
+                    m_disc in self.DISCIPLINE_COMPATIBILITY.get(jd, set())
                     for jd in matched_job_disciplines
-                )
-                if is_compat:
-                    sim = 0.90
+                ):
+                    sim = 0.82
+                    tier = "ADJACENT"
+                elif is_job_open_domain and best_cand_degree >= 3:
+                    sim = 0.85
+                    tier = "OPEN"
                 else:
-                    # Incompatible disciplines (e.g. Accounting vs Engineering/Philosophy)
-                    sim = 0.15
+                    sim = 0.20
+                    tier = "INCOMPATIBLE"
             elif matched_job_disciplines and not m_disc:
-                raw_sim = semantic_matcher.compute_similarity(job_field, m)
-                sim = raw_sim if raw_sim >= 0.70 else 0.20
+                disc_names = " ".join(
+                    [
+                        self.ACADEMIC_DISCIPLINES[jd]["name"]
+                        for jd in matched_job_disciplines
+                        if jd in self.ACADEMIC_DISCIPLINES
+                    ]
+                )
+                raw_sim = semantic_matcher.compute_similarity(disc_names, m)
+                if raw_sim >= 0.78:
+                    sim = 0.80
+                    tier = "ADJACENT"
+                elif is_job_open_domain and best_cand_degree >= 3:
+                    sim = 0.85
+                    tier = "OPEN"
+                else:
+                    sim = 0.20
+                    tier = "INCOMPATIBLE"
             else:
-                # 3. Fallback semantic similarity
-                sim = semantic_matcher.compute_similarity(job_field, m)
+                raw_sim = semantic_matcher.compute_similarity(job_field, m)
+                sim = raw_sim if raw_sim >= 0.60 else 0.25
+                tier = "ADJACENT" if sim >= 0.70 else "INCOMPATIBLE"
 
             if sim > best_sim:
-                best_sim, best_major = sim, m
+                best_sim = sim
+                best_major = m
+                best_major_tier = tier
+                best_edu_obj = edu
 
-        # Relevance threshold: >= 0.55 considered relevant
-        major_passed = best_sim >= 0.55 if (job_has_edu_req and majors) else True
+        # 3. GPA & Academic Honors Evaluation
+        gpa_info = (
+            self._extract_gpa_and_honors(best_edu_obj)
+            if best_edu_obj
+            else {"has_gpa": False, "gpa_score": 0.75}
+        )
 
-        if majors:
-            edu_score = 0.4 * degree_score + 0.6 * best_sim
+        # 4. Multi-Pillar Education Score Synthesis
+        if best_major:
+            if gpa_info["has_gpa"]:
+                # Degree (35%) + Major Relevance (45%) + GPA / Academic Achievement (20%)
+                edu_score = (
+                    0.35 * degree_score
+                    + 0.45 * best_sim
+                    + 0.20 * gpa_info["gpa_score"]
+                )
+                if gpa_info.get("is_honors"):
+                    edu_score += 0.03
+            else:
+                # Neutral without GPA: Degree (40%) + Major Relevance (60%)
+                edu_score = 0.40 * degree_score + 0.60 * best_sim
         else:
-            edu_score = 0.5 * degree_score
+            edu_score = 0.50 * degree_score
+
+        # Major is considered passed if sim >= 0.55
+        major_passed = best_sim >= 0.55 if (job_has_edu_req and best_major) else True
 
         failures = []
         if req_degree_level > 0 and not degree_passed:
@@ -2573,14 +3273,14 @@ class GenericMatchingEngine:
                 }
             )
 
-        if job_has_edu_req and majors and not major_passed:
+        if job_has_edu_req and best_major and not major_passed:
             failures.append(
                 {
                     "type": "EDUCATION",
                     "requirement": f"Chuyên ngành đào tạo phù hợp: {job_field}",
                     "candidateValue": best_major or "Chưa rõ",
                     "status": "FAIL",
-                    "reason": f"Chuyên ngành đào tạo ({best_major}) không phù hợp với yêu cầu chuyên môn của công việc ({job_field}).",
+                    "reason": f"Chuyên ngành đào tạo ({best_major}) không thuộc khối chuyên môn phù hợp với vị trí {job.title} ({job_field}).",
                 }
             )
 
@@ -2592,7 +3292,9 @@ class GenericMatchingEngine:
             "degree_passed": degree_passed,
             "major_passed": major_passed,
             "best_major": best_major,
+            "best_major_tier": best_major_tier,
             "best_sim": round(best_sim, 3),
+            "gpa_info": gpa_info,
             "failures": failures,
         }
 

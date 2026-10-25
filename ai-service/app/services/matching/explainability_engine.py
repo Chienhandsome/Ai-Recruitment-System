@@ -223,16 +223,33 @@ class ExplainabilityEngine:
         # -------------------------------------------------------------------------
         em = metrics.get("experience", {})
         total_yrs = em.get("total_years", 0.0)
+        rel_yrs = em.get("relevant_years", total_yrs)
         req_yrs = em.get("req_years", 0.0)
+        level_assessment = em.get("level_assessment") or {}
+        fit_status = level_assessment.get("fit_status")
+
+        if fit_status == "NON_RELEVANT_DOMAIN":
+            gap_msg = f"Kinh nghiệm làm việc trước đây thuộc phân khúc ngành nghề khác, không tương thích với chuyên môn của vị trí {job_title}."
+            gaps.append(gap_msg)
+            exp_minus.append(gap_msg)
 
         if req_yrs > 0:
-            if total_yrs >= req_yrs - 0.05:
-                msg = f"Tổng thâm niên tích lũy ({total_yrs:.1f} năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD ({req_yrs:.1f} năm) -> Đạt điểm thâm niên tối đa."
+            if rel_yrs >= req_yrs - 0.05:
+                msg = f"Thâm niên kinh nghiệm đúng ngành ({rel_yrs:.1f} năm) đáp ứng hoặc vượt yêu cầu của JD ({req_yrs:.1f} năm) -> Đạt điểm thâm niên tối đa."
                 strengths.append(msg)
                 exp_plus.append(msg)
+            elif total_yrs >= req_yrs and rel_yrs < (req_yrs * 0.5):
+                gap_val = round(req_yrs - rel_yrs, 1)
+                msg = f"Tổng thâm niên tích lũy là {total_yrs:.1f} năm, tuy nhiên số năm kinh nghiệm chuyên môn liên quan trực tiếp đến {job_title} chỉ đạt {rel_yrs:.1f} năm (thiếu {gap_val} năm chuyên ngành) -> Bị trừ điểm kinh nghiệm phù hợp."
+                gaps.append(msg)
+                exp_minus.append(msg)
+            elif total_yrs == 0:
+                msg = f"Ứng viên chưa có kinh nghiệm làm việc thực tế tại doanh nghiệp (yêu cầu {req_yrs:.1f} năm) -> Điểm kinh nghiệm bị giới hạn tối đa."
+                gaps.append(msg)
+                exp_minus.append(msg)
             else:
-                gap_val = round(req_yrs - total_yrs, 1)
-                msg = f"Tổng thâm niên tích lũy ({total_yrs:.1f} năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu ({req_yrs:.1f} năm, thiếu {gap_val} năm) -> Bị trừ điểm thâm niên tương ứng."
+                gap_val = round(req_yrs - rel_yrs, 1)
+                msg = f"Thâm niên kinh nghiệm liên quan ({rel_yrs:.1f} năm) chưa đạt số năm yêu cầu tối thiểu ({req_yrs:.1f} năm, thiếu {gap_val} năm) -> Bị trừ điểm thâm niên tương ứng."
                 gaps.append(msg)
                 exp_minus.append(msg)
 
@@ -269,28 +286,58 @@ class ExplainabilityEngine:
             exp_minus.append(flag)
 
         # -------------------------------------------------------------------------
-        # 4. Giải Trình Học Vấn (Education)
+        # 4. Giải Trình Học Vấn (Education: Major, GPA & Honors)
         # -------------------------------------------------------------------------
         edm = metrics.get("education", {})
+        gpa_info = edm.get("gpa_info") or {}
+        major_tier = edm.get("best_major_tier", "INCOMPATIBLE")
+
         if edm.get("has_degree"):
             degree_name = edm.get("best_degree") or "Đại học"
             major_name = edm.get("best_major") or "Chuyên ngành"
+
             if not edm.get("degree_passed", True):
                 msg = f"Cấp bậc văn bằng ({degree_name}) chưa đạt yêu cầu tối thiểu của vị trí tuyển dụng -> Bị trừ điểm cấp bậc học vấn."
                 gaps.append(msg)
                 edu_minus.append(msg)
-            elif not edm.get("major_passed", True):
-                msg = f"Chuyên ngành tốt nghiệp ({major_name}) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn."
+
+            # Major relevance explanation
+            if not edm.get("major_passed", True) or major_tier == "INCOMPATIBLE":
+                msg = f"Chuyên ngành tốt nghiệp ({major_name}) không thuộc khối chuyên ngành phù hợp với vị trí {job_title} (Trái ngành) -> Không đạt chuẩn chuyên môn học vấn."
                 gaps.append(msg)
                 edu_minus.append(msg)
-            elif edm.get("best_sim", 0.0) >= 0.7:
-                msg = f"Trình độ văn bằng ({degree_name}) và chuyên ngành ({major_name}) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+            elif major_tier == "EXACT":
+                msg = f"Chuyên ngành đào tạo ({major_name}) hoàn toàn đúng chuyên ngành của vị trí tuyển dụng -> Đạt điểm tối đa chuyên ngành."
                 strengths.append(msg)
                 edu_plus.append(msg)
-            else:
-                msg = f"Chuyên ngành tốt nghiệp ({major_name}) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành."
-                gaps.append(msg)
-                edu_minus.append(msg)
+            elif major_tier == "ADJACENT":
+                msg = f"Chuyên ngành đào tạo ({major_name}) thuộc khối ngành gần/kỹ thuật liên quan, có thể bổ trợ tốt cho vị trí tuyển dụng."
+                strengths.append(msg)
+                edu_plus.append(msg)
+            elif major_tier == "OPEN":
+                msg = f"Chuyên ngành đào tạo ({major_name}) đáp ứng tốt tiêu chuẩn học vấn của phân khúc ngành kinh doanh/thương mại mở."
+                strengths.append(msg)
+                edu_plus.append(msg)
+
+            # GPA & Honors explanation
+            if gpa_info.get("has_gpa"):
+                gpa_disp = gpa_info.get("gpa_display")
+                honors = gpa_info.get("honors_title")
+                parts = []
+                if gpa_disp:
+                    parts.append(f"GPA {gpa_disp}")
+                if honors:
+                    parts.append(f"Tốt nghiệp loại {honors}")
+                desc_str = " - ".join(parts) if parts else "Đạt kết quả học tập tốt"
+
+                if gpa_info.get("is_honors"):
+                    msg = f"Thành tích học tập danh dự: {desc_str} -> Được cộng điểm thưởng học tập xuất sắc/giỏi."
+                    strengths.append(msg)
+                    edu_plus.append(msg)
+                elif gpa_info.get("gpa_score", 0.0) >= 0.75:
+                    msg = f"Kết quả học tập: {desc_str} -> Đạt chuẩn học lực khá/tốt."
+                    strengths.append(msg)
+                    edu_plus.append(msg)
         else:
             if edm.get("req_degree_level", 0) == 0 and edm.get("score", 0.0) >= 0.99:
                 msg = "Vị trí tuyển dụng không bắt buộc trình độ văn bằng chuyên ngành đặc thù -> Đạt chuẩn tiêu chí học vấn."
@@ -477,6 +524,18 @@ class ExplainabilityEngine:
                 "summary": other_summary,
             },
         }
+
+        # -------------------------------------------------------------------------
+        # 6.5. Đánh Giá Chiều Sâu Dự Án từ LLM Adjudicator (nếu có)
+        # -------------------------------------------------------------------------
+        llm_reasoning = scores.get("llm_reasoning")
+        llm_adj = scores.get("llm_adjudication") or {}
+        if llm_reasoning:
+            impact_score = llm_adj.get("project_impact_score", 0.0)
+            if impact_score >= 0.0:
+                strengths.append(f"Thẩm định chiều sâu dự án (AI Depth Analysis): {llm_reasoning}")
+            else:
+                gaps.append(f"Đánh giá chiều sâu dự án (AI Depth Analysis): {llm_reasoning}")
 
         # -------------------------------------------------------------------------
         # 7. Tổng Hợp Báo Cáo Chẩn Đoán (Executive Diagnostic Summary)

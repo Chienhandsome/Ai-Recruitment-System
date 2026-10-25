@@ -1,0 +1,3455 @@
+[
+  {
+    "index": 1,
+    "appId": "7a40fde4-82d5-41a0-aa2b-d4f6c8494ddd",
+    "candidate": {
+      "name": "Nguyễn Đinh Xuân Trường",
+      "desiredTitle": "Backend Developer",
+      "educations": [
+        {
+          "degree": "Bachelor's Degree",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City (IUH)"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Data Engineer (Python, PostgreSQL, ETL)",
+      "level": "MIDDLE",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 57.5,
+      "matchLevel": "MEDIUM",
+      "skillScore": 77.03,
+      "experienceScore": 70.8,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": null,
+      "reqLevel": "MIDDLE",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 10.9 / 15.0 điểm: Đáp ứng một phần tiêu chí ngoại ngữ hoặc chứng chỉ chuyên môn bổ trợ.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 10.91,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 22.4 / 40.0 điểm: Đã đáp ứng 2/5 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (Python, SQL).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'PostgreSQL' (Khai báo đạt chuẩn năng lực).",
+            "Sở hữu kỹ năng bổ trợ: 'Docker'."
+          ],
+          "earned_points": 22.4,
+          "minus_reasons": [
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'Python' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'SQL' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Amazon Web Services' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 10.2 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 10.25,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 15.4 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Data Engineer (Python, PostgreSQL, ETL)).",
+            "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 15.44,
+          "minus_reasons": [
+            "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (2.0 năm, thiếu 2.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 10.91,
+          "normalized_score": 100,
+          "adjustment_points": -4.09
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 30.81,
+          "earned_points": 22.4,
+          "normalized_score": 77.03,
+          "adjustment_points": -8.41
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 10.25,
+          "normalized_score": 94,
+          "adjustment_points": -3.85
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 21.24,
+          "earned_points": 15.44,
+          "normalized_score": 70.8,
+          "adjustment_points": -5.8
+        }
+      }
+    }
+  },
+  {
+    "index": 2,
+    "appId": "0acd9bbd-17d7-4381-ab0f-640ae4e81796",
+    "candidate": {
+      "name": "Nguyễn Đinh Xuân Trường",
+      "desiredTitle": "Backend Developer",
+      "educations": [
+        {
+          "degree": "Bachelor's Degree",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City (IUH)"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Frontend Developer",
+      "level": "INTERN",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 72.1,
+      "matchLevel": "MEDIUM",
+      "skillScore": 53.11,
+      "experienceScore": 60.81,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": null,
+      "reqLevel": "INTERN",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 15.0 / 15.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 15,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 21.2 / 40.0 điểm: Đã đáp ứng 3/7 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (Git).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'TypeScript' (Khai báo đạt chuẩn năng lực).",
+            "Kỹ năng 'Git' ghi nhận qua ngữ cảnh gián tiếp (Suy luận từ dự án: Zola: Real-time Messaging Platform (Microservices) (Cần phỏng vấn xác minh) (Chuyển giao)).",
+            "AI nhận diện kỹ năng 'React' qua Kỹ năng tương đương: ReactJS (Đạt chuẩn chuyên môn)."
+          ],
+          "earned_points": 21.25,
+          "minus_reasons": [
+            "Lưu ý phỏng vấn: Kỹ năng 'Git' ghi nhận qua ngữ cảnh gián tiếp/bên thứ ba (Suy luận từ dự án: Zola: Real-time Messaging Platform (Microservices) (Cần phỏng vấn xác minh) (Chuyển giao)) -> Cần phỏng vấn xác minh năng lực thực chiến độc lập.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Tailwind CSS' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Figma' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'UI Design' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'UX Design' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 18.2 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Frontend Developer).",
+            "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 18.24,
+          "minus_reasons": [
+            "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (2.0 năm, thiếu 2.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 15,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 21.25,
+          "earned_points": 21.25,
+          "normalized_score": 53.11,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 18.24,
+          "earned_points": 18.24,
+          "normalized_score": 60.81,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 3,
+    "appId": "c02718ab-24fb-4bb9-8bdd-c0d1d5434fe5",
+    "candidate": {
+      "name": "Trần Văn Cao Cấp (Senior FE)",
+      "desiredTitle": "Senior Frontend Engineer",
+      "educations": [
+        {
+          "degree": "Kỹ sư",
+          "major": "Kỹ thuật Phần mềm",
+          "school": "Đại học Bách Khoa TP.HCM"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Senior Frontend Engineer",
+          "company": "TechCorp Vietnam",
+          "start": "2022-01-01T00:00:00.000Z",
+          "end": "2024-03-01T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Phát triển giao diện web với React, TypeScript, Redux Toolkit, Tailwind CSS. Tối ưu Core Web Vitals giúp tăng 30% tốc độ load trang."
+        },
+        {
+          "title": "Frontend Team Lead",
+          "company": "EComGlobal Portal",
+          "start": "2024-03-15T00:00:00.000Z",
+          "end": null,
+          "isCurrent": true,
+          "desc": "Quản lý team 5 devs, chuyển đổi hệ thống sang Next.js App Router, sử dụng TypeScript và Git CI/CD."
+        }
+      ],
+      "projectCount": 1
+    },
+    "job": {
+      "title": "Frontend Developer",
+      "level": "INTERN",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 100,
+      "matchLevel": "HIGH",
+      "skillScore": 100,
+      "experienceScore": 93.78,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": "SENIOR",
+      "reqLevel": "INTERN",
+      "totalExpYears": 4.77,
+      "levelFitScore": 100,
+      "levelGap": -4,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 15.0 / 15.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 15,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 40.0 / 40.0 điểm: Đã đáp ứng 7/7 kỹ năng chuyên môn.",
+          "max_points": 40,
+          "plus_reasons": [
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'TypeScript' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Git' (Khai báo đạt chuẩn năng lực).",
+            "Sở hữu kỹ năng bổ trợ: 'Tailwind CSS'.",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'React' (Khai báo đạt chuẩn năng lực).",
+            "Sở hữu kỹ năng bổ trợ: 'Figma'.",
+            "Sở hữu kỹ năng bổ trợ: 'UI Design'.",
+            "Sở hữu kỹ năng bổ trợ: 'UX Design'."
+          ],
+          "earned_points": 40,
+          "minus_reasons": [
+            "Không có điểm trừ đáng kể về kỹ năng."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Kỹ thuật Phần mềm).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Kỹ thuật Phần mềm) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 28.1 / 30.0 điểm: Đánh giá dựa trên 4.8 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Frontend Developer).",
+            "Tổng thâm niên tích lũy (4.8 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Frontend Engineer) -> Cộng điểm tương quan cấp bậc.",
+            "Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 28.13,
+          "minus_reasons": [
+            "Không có điểm trừ đáng kể về kinh nghiệm."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 15,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 40,
+          "earned_points": 40,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 28.13,
+          "earned_points": 28.13,
+          "normalized_score": 93.78,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 4,
+    "appId": "ce24bcbc-7b8c-4a29-b601-22239fe48067",
+    "candidate": {
+      "name": "Nguyễn Trung Bình (Mid FE)",
+      "desiredTitle": "Frontend Developer",
+      "educations": [
+        {
+          "degree": "Cử nhân thực hành",
+          "major": "Tin học ứng dụng",
+          "school": "Cao đẳng Công nghệ Thông tin"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Junior Web Developer",
+          "company": "SoftAgency Studio",
+          "start": "2024-06-01T00:00:00.000Z",
+          "end": null,
+          "isCurrent": true,
+          "desc": "Xây dựng website bán hàng bằng ReactJS và Git. Tối ưu giao diện đáp ứng responsive."
+        }
+      ],
+      "projectCount": 1
+    },
+    "job": {
+      "title": "Frontend Developer",
+      "level": "INTERN",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 70.5,
+      "matchLevel": "MEDIUM",
+      "skillScore": 70.36,
+      "experienceScore": 88.82,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": "JUNIOR",
+      "reqLevel": "INTERN",
+      "totalExpYears": 2.4,
+      "levelFitScore": 100,
+      "levelGap": -2,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 13.2 / 15.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 13.23,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 24.8 / 40.0 điểm: Đã đáp ứng 3/7 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (TypeScript).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Git' (Khai báo đạt chuẩn năng lực).",
+            "Kỹ năng 'Tailwind CSS' được chứng minh qua Dự án: Company Landing Page.",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'React' (Khai báo đạt chuẩn năng lực)."
+          ],
+          "earned_points": 24.82,
+          "minus_reasons": [
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'TypeScript' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Figma' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'UI Design' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'UX Design' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 12.4 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Tin học ứng dụng).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Tin học ứng dụng) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 12.44,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 23.5 / 30.0 điểm: Đánh giá dựa trên 2.4 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Frontend Developer).",
+            "Tổng thâm niên tích lũy (2.4 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Junior Web Developer) -> Cộng điểm tương quan cấp bậc.",
+            "Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 23.51,
+          "minus_reasons": [
+            "Không có điểm trừ đáng kể về kinh nghiệm."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 13.23,
+          "normalized_score": 100,
+          "adjustment_points": -1.77
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 28.15,
+          "earned_points": 24.82,
+          "normalized_score": 70.36,
+          "adjustment_points": -3.33
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 12.44,
+          "normalized_score": 94,
+          "adjustment_points": -1.66
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 26.65,
+          "earned_points": 23.51,
+          "normalized_score": 88.82,
+          "adjustment_points": -3.14
+        }
+      }
+    }
+  },
+  {
+    "index": 5,
+    "appId": "1575741d-7b59-4e3b-86b3-4d03ecf91ad1",
+    "candidate": {
+      "name": "Lê Thấp Điểm (Non-FE / Marketing)",
+      "desiredTitle": "Digital Marketing Specialist",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Marketing",
+          "school": "Đại học Kinh tế TP.HCM"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Marketing Specialist",
+          "company": "AgencyX Marketing",
+          "start": "2023-01-01T00:00:00.000Z",
+          "end": "2024-12-31T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Quản lý chiến dịch quảng cáo Facebook & TikTok Ads, tối ưu chuyển đổi lead."
+        }
+      ],
+      "projectCount": 1
+    },
+    "job": {
+      "title": "Frontend Developer",
+      "level": "INTERN",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 39,
+      "matchLevel": "LOW",
+      "skillScore": 67.13,
+      "experienceScore": 82.99,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": "JUNIOR",
+      "reqLevel": "INTERN",
+      "totalExpYears": 2,
+      "levelFitScore": 100,
+      "levelGap": -2,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 7.2 / 15.0 điểm: Đáp ứng một phần tiêu chí ngoại ngữ hoặc chứng chỉ chuyên môn bổ trợ.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 7.24,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 12.9 / 40.0 điểm: Đã đáp ứng 1/7 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (TypeScript, Git, React).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Kỹ năng 'Git' ghi nhận qua ngữ cảnh gián tiếp (Suy luận ngữ cảnh: Marketing Specialist (Cần phỏng vấn xác minh))."
+          ],
+          "earned_points": 12.95,
+          "minus_reasons": [
+            "Lưu ý phỏng vấn: Kỹ năng 'Git' ghi nhận qua ngữ cảnh gián tiếp/bên thứ ba (Suy luận ngữ cảnh: Marketing Specialist (Cần phỏng vấn xác minh)) -> Cần phỏng vấn xác minh năng lực thực chiến độc lập.",
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'TypeScript' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Tailwind CSS' trong hồ sơ khai báo.",
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'React' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Figma' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'UI Design' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'UX Design' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 6.8 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 6.8,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 12.0 / 30.0 điểm: Đánh giá dựa trên 2.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Frontend Developer).",
+            "Tổng thâm niên tích lũy (2.0 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 12.01,
+          "minus_reasons": [
+            "Không có điểm trừ đáng kể về kinh nghiệm."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 7.24,
+          "normalized_score": 100,
+          "adjustment_points": -7.76
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 26.85,
+          "earned_points": 12.95,
+          "normalized_score": 67.13,
+          "adjustment_points": -13.9
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 6.8,
+          "normalized_score": 94,
+          "adjustment_points": -7.3
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.9,
+          "earned_points": 12.01,
+          "normalized_score": 82.99,
+          "adjustment_points": -12.89
+        }
+      }
+    }
+  },
+  {
+    "index": 6,
+    "appId": "c0ca63bc-9dc5-455e-b4cb-aac3692ce7af",
+    "candidate": {
+      "name": "Lê Thấp Điểm (Non-FE / Marketing)",
+      "desiredTitle": "Digital Marketing Specialist",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Marketing",
+          "school": "Đại học Kinh tế TP.HCM"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Marketing Specialist",
+          "company": "AgencyX Marketing",
+          "start": "2023-01-01T00:00:00.000Z",
+          "end": "2024-12-31T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Quản lý chiến dịch quảng cáo Facebook & TikTok Ads, tối ưu chuyển đổi lead."
+        }
+      ],
+      "projectCount": 1
+    },
+    "job": {
+      "title": "Performance Marketing Specialist",
+      "level": "MIDDLE",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 54.5,
+      "matchLevel": "MEDIUM",
+      "skillScore": 75,
+      "experienceScore": 84.13,
+      "educationScore": 100,
+      "projectScore": 100,
+      "candidateExpLevel": "JUNIOR",
+      "reqLevel": "MIDDLE",
+      "totalExpYears": 2,
+      "levelFitScore": 70,
+      "levelGap": 1,
+      "levelEligible": false,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 15.0 / 15.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 15,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 30.0 / 40.0 điểm: Đã đáp ứng 2/6 kỹ năng chuyên môn.",
+          "max_points": 40,
+          "plus_reasons": [
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Facebook Ads' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'TikTok Ads' (Khai báo đạt chuẩn năng lực)."
+          ],
+          "earned_points": 30,
+          "minus_reasons": [
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'SEO & Content Marketing' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Communication' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Content Creation' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Copywriting' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 15.0 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 15,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 25.2 / 30.0 điểm: Đánh giá dựa trên 2.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (2.0 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Marketing Specialist) -> Cộng điểm tương quan cấp bậc.",
+            "Có năng lực thực tiễn được chứng minh qua 1 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 25.24,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 15,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 30,
+          "earned_points": 30,
+          "normalized_score": 75,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 15,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 25.24,
+          "earned_points": 25.24,
+          "normalized_score": 84.13,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 7,
+    "appId": "ef27b6cf-3c1a-4439-b91f-1f705874361e",
+    "candidate": {
+      "name": "Chiến Công",
+      "desiredTitle": "Flutter Developer Intern",
+      "educations": [
+        {
+          "degree": "Bachelor of Engineering",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Chuyên viên Tuyển dụng Công nghệ",
+      "level": "JUNIOR",
+      "reqExpYears": 1,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 39,
+      "matchLevel": "LOW",
+      "skillScore": 0,
+      "experienceScore": 40.2,
+      "educationScore": 81,
+      "projectScore": 100,
+      "candidateExpLevel": null,
+      "reqLevel": "JUNIOR",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 14.9 / 15.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 14.92,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 0.0 / 40.0 điểm: Đã đáp ứng 0/4 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (Talent Acquisition, Communication, Teamwork).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Đáp ứng các kỹ năng cơ bản của công việc."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Talent Acquisition' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Business English' trong hồ sơ khai báo.",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Communication' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Teamwork' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết)."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 12.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Đạt yêu cầu về trình độ học vấn."
+          ],
+          "earned_points": 12.08,
+          "minus_reasons": [
+            "Chuyên ngành tốt nghiệp (Software Engineering) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 12.0 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 1.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 12,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.",
+            "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (1.0 năm, thiếu 1.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 14.92,
+          "normalized_score": 100,
+          "adjustment_points": -0.08
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 12.15,
+          "earned_points": 12.08,
+          "normalized_score": 81,
+          "adjustment_points": -0.07
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 12.06,
+          "earned_points": 12,
+          "normalized_score": 40.2,
+          "adjustment_points": -0.06
+        }
+      }
+    }
+  },
+  {
+    "index": 8,
+    "appId": "f75d7beb-713b-4573-ad47-b6e4c75f0891",
+    "candidate": {
+      "name": "Nguyễn Đinh Xuân Trường",
+      "desiredTitle": "Backend Developer",
+      "educations": [
+        {
+          "degree": "Bachelor's Degree",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City (IUH)"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Chuyên viên Tuyển dụng Công nghệ",
+      "level": "JUNIOR",
+      "reqExpYears": 1,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 39,
+      "matchLevel": "LOW",
+      "skillScore": 0,
+      "experienceScore": 40.5,
+      "educationScore": 81,
+      "projectScore": 100,
+      "candidateExpLevel": null,
+      "reqLevel": "JUNIOR",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 14.9 / 15.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 14.89,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt -0.0 / 40.0 điểm: Đã đáp ứng 0/4 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (Talent Acquisition, Communication, Teamwork).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Đáp ứng các kỹ năng cơ bản của công việc."
+          ],
+          "earned_points": -0.01,
+          "minus_reasons": [
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Talent Acquisition' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Business English' trong hồ sơ khai báo.",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Communication' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Teamwork' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết)."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 12.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Đạt yêu cầu về trình độ học vấn."
+          ],
+          "earned_points": 12.06,
+          "minus_reasons": [
+            "Chuyên ngành tốt nghiệp (Software Engineering) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 12.1 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 1.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 12.06,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.",
+            "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (1.0 năm, thiếu 1.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 14.89,
+          "normalized_score": 100,
+          "adjustment_points": -0.11
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 0,
+          "earned_points": -0.01,
+          "normalized_score": 0,
+          "adjustment_points": -0.01
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 12.15,
+          "earned_points": 12.06,
+          "normalized_score": 81,
+          "adjustment_points": -0.09
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 12.15,
+          "earned_points": 12.06,
+          "normalized_score": 40.5,
+          "adjustment_points": -0.09
+        }
+      }
+    }
+  },
+  {
+    "index": 9,
+    "appId": "a1cd0063-88b0-4cab-9317-2fdd191e11ca",
+    "candidate": {
+      "name": "Chiến Công",
+      "desiredTitle": "Flutter Developer Intern",
+      "educations": [
+        {
+          "degree": "Bachelor of Engineering",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Senior Software engineer",
+      "level": "JUNIOR",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 96.1,
+      "matchLevel": "HIGH",
+      "skillScore": 100,
+      "experienceScore": 85,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": null,
+      "reqLevel": "JUNIOR",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 15.0 / 15.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 15,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 40.0 / 40.0 điểm: Đã đáp ứng 0/0 kỹ năng chuyên môn.",
+          "max_points": 40,
+          "plus_reasons": [
+            "Đáp ứng các kỹ năng cơ bản của công việc."
+          ],
+          "earned_points": 40,
+          "minus_reasons": [
+            "Không có điểm trừ đáng kể về kỹ năng."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 25.5 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Software engineer).",
+            "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 25.5,
+          "minus_reasons": [
+            "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (2.0 năm, thiếu 2.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 15,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 40,
+          "earned_points": 40,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 25.5,
+          "earned_points": 25.5,
+          "normalized_score": 85,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 10,
+    "appId": "50bb5e99-3a5f-4f24-bdd3-d868918c0ac3",
+    "candidate": {
+      "name": "Phạm Thuỳ Dung",
+      "desiredTitle": "Brand Marketing Intern / Assistant",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Marketing (Quản trị Thương hiệu)",
+          "school": "Đại học Kinh tế – Tài chính TP.HCM (UEF)"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Brand Marketing Intern",
+          "company": "Sparkle Creative Communications Agency",
+          "start": "2023-11-01T00:00:00.000Z",
+          "end": "2024-04-30T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Hỗ trợ nghiên cứu đối thủ và khảo sát thói quen tiêu dùng giới trẻ. Tham gia brainstorm Big Idea và concept chụp hình sản phẩm. Sử dụng Midjourney tạo"
+        },
+        {
+          "title": "Trưởng Ban Truyền thông & Sáng tạo",
+          "company": "Câu lạc bộ Marketing Trẻ (Young Marketers Club)",
+          "start": "2021-09-01T00:00:00.000Z",
+          "end": "2023-10-31T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Lên kế hoạch quảng bá 3 cuộc thi học thuật về xây dựng thương hiệu. Sản xuất chuỗi bài về Brand Identity và Storytelling trong bán lẻ."
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh",
+      "level": "MIDDLE",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "30",
+        "exp": "30",
+        "edu": "15",
+        "other": "25"
+      }
+    },
+    "aiResult": {
+      "overallScore": 39,
+      "matchLevel": "LOW",
+      "skillScore": 35,
+      "experienceScore": 79.48,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": "INTERN",
+      "reqLevel": "MIDDLE",
+      "totalExpYears": 2.66,
+      "levelFitScore": 0,
+      "levelGap": 3,
+      "levelEligible": false,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 18.1 / 25.0 điểm: Đáp ứng một phần tiêu chí ngoại ngữ hoặc chứng chỉ chuyên môn bổ trợ.",
+          "max_points": 25,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 18.06,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt -6.5 / 30.0 điểm: Đã đáp ứng 4/11 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (Creative Planning, Product Development, Visual Direction, Social Media Marketing).",
+          "max_points": 30,
+          "plus_reasons": [
+            "Sở hữu kỹ năng bổ trợ: 'Canva & Creative Tools'.",
+            "Sở hữu kỹ năng bổ trợ: 'English Communication'.",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Brand Marketing' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Storytelling' (Khai báo đạt chuẩn năng lực)."
+          ],
+          "earned_points": -6.46,
+          "minus_reasons": [
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Consumer Insight' trong hồ sơ khai báo.",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Creative Planning' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Product Development' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Visual Direction' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Social Media Marketing' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'POSM & Packaging Design' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Market Research & Competitor Analysis' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 10.2 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing (Quản trị Thương hiệu)).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing (Quản trị Thương hiệu)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 10.18,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 17.2 / 30.0 điểm: Đánh giá dựa trên 2.7 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (2.7 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa."
+          ],
+          "earned_points": 17.22,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.",
+            "Vị trí công việc gần nhất (Brand Marketing Intern) ở cấp độ sơ cấp, chưa đạt cấp bậc theo yêu cầu của vị trí tuyển dụng -> Bị trừ điểm cấp bậc."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 25,
+          "weight_pct": 25,
+          "base_points": 25,
+          "earned_points": 18.06,
+          "normalized_score": 100,
+          "adjustment_points": -6.94
+        },
+        "skills": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 10.5,
+          "earned_points": -6.46,
+          "normalized_score": 35,
+          "adjustment_points": -16.96
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 10.18,
+          "normalized_score": 94,
+          "adjustment_points": -3.92
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 23.84,
+          "earned_points": 17.22,
+          "normalized_score": 79.48,
+          "adjustment_points": -6.62
+        }
+      }
+    }
+  },
+  {
+    "index": 11,
+    "appId": "8230846d-fefa-463d-88e1-a569e03f41a8",
+    "candidate": {
+      "name": "Vũ Tuấn Anh",
+      "desiredTitle": "Digital & Performance Marketing Specialist",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Hệ thống Thông tin Quản lý (MIS)",
+          "school": "Đại học Công nghệ TP. Hồ Chí Minh (HUTECH)"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Digital & Performance Marketing Specialist",
+          "company": "V-Tech Retail Accessories",
+          "start": "2023-05-01T00:00:00.000Z",
+          "end": null,
+          "isCurrent": true,
+          "desc": "Vận hành ngân sách quảng cáo 150-250 triệu/tháng trên Meta, TikTok và Google. Thiết lập phễu chuyển đổi A/B testing tiêu đề và video quảng cáo. Phân t"
+        },
+        {
+          "title": "Digital Marketing Executive",
+          "company": "MegaBuy D2C Brand",
+          "start": "2021-06-01T00:00:00.000Z",
+          "end": "2023-04-30T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Tối ưu hóa Facebook Ads tìm kiếm khách hàng. Tối ưu từ khóa SEO Shopee và tham gia các gói Mega Campaign của sàn."
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh",
+      "level": "MIDDLE",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "30",
+        "exp": "30",
+        "edu": "15",
+        "other": "25"
+      }
+    },
+    "aiResult": {
+      "overallScore": 39,
+      "matchLevel": "LOW",
+      "skillScore": 28.12,
+      "experienceScore": 82.77,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": "SENIOR",
+      "reqLevel": "MIDDLE",
+      "totalExpYears": 5.4,
+      "levelFitScore": 100,
+      "levelGap": -1,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 18.1 / 25.0 điểm: Đáp ứng một phần tiêu chí ngoại ngữ hoặc chứng chỉ chuyên môn bổ trợ.",
+          "max_points": 25,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 18.06,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt -7.2 / 30.0 điểm: Đã đáp ứng 4/11 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (Brand Marketing, Creative Planning, Product Development, Storytelling, Visual Direction).",
+          "max_points": 30,
+          "plus_reasons": [
+            "Sở hữu kỹ năng chuyển giao bổ trợ 'Consumer Insight': Kế thừa 3.0 năm thâm niên từ nền tảng 'Data Analysis & E-commerce' (chuyển giao tương đương ngang hàng (Peer), tương thích 75%). Kỹ năng phân tích dữ liệu và thương mại điện tử cung cấp nền tảng tư duy dựa trên số liệu vững chắc, giúp ứng viên dễ dàng chuyển đổi sang việc thấu hiểu hành vi người dùng trong thiết kế UI/UX..",
+            "Kỹ năng chuyển giao hỗ trợ: Có nền tảng 'Data Analysis & E-commerce' (4.0 năm) hỗ trợ một phần cho 'Product Development' (chuyển giao tương đương ngang hàng (Peer), tương thích 65%). Kỹ năng phân tích dữ liệu và thương mại điện tử cung cấp tư duy định hướng người dùng và tối ưu hóa sản phẩm rất tốt cho vị trí phát triển sản phẩm trong ngành UI/UX..",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Social Media Marketing' (Khai báo đạt chuẩn năng lực).",
+            "Sở hữu kỹ năng chuyển giao bổ trợ 'Market Research & Competitor Analysis': Kế thừa 3.0 năm thâm niên từ nền tảng 'Data Analysis & E-commerce' (chuyển giao tương đương ngang hàng (Peer), tương thích 75%). Kỹ năng phân tích dữ liệu và thương mại điện tử cung cấp nền tảng tư duy logic và hiểu biết hành vi người dùng rất tốt để thực hiện nghiên cứu thị trường và đối thủ trong thiết kế UI/UX.."
+          ],
+          "earned_points": -7.17,
+          "minus_reasons": [
+            "Chưa đạt yêu cầu kỹ năng bắt buộc 'Product Development': Ứng viên mới có kỹ năng nền tảng cơ sở 'Data Analysis & E-commerce' (chuyển giao tương đương ngang hàng (Peer), tương thích 65%), không đủ điều kiện thay thế độc lập cho yêu cầu chuyên sâu của JD (Kỹ năng phân tích dữ liệu và thương mại điện tử cung cấp tư duy định hướng người dùng và tối ưu hóa sản phẩm rất tốt cho vị trí phát triển sản phẩm trong ngành UI/UX.) -> Đã vi phạm tiêu chí tiên quyết (Mandatory Fail).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Canva & Creative Tools' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'English Communication' trong hồ sơ khai báo.",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Brand Marketing' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Creative Planning' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Storytelling' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Visual Direction' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'POSM & Packaging Design' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 10.2 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Hệ thống Thông tin Quản lý (MIS)).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Hệ thống Thông tin Quản lý (MIS)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 10.18,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 17.9 / 30.0 điểm: Đánh giá dựa trên 5.4 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (5.4 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Digital & Performance Marketing Specialist) -> Cộng điểm tương quan cấp bậc."
+          ],
+          "earned_points": 17.93,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 25,
+          "weight_pct": 25,
+          "base_points": 25,
+          "earned_points": 18.06,
+          "normalized_score": 100,
+          "adjustment_points": -6.94
+        },
+        "skills": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 8.44,
+          "earned_points": -7.17,
+          "normalized_score": 28.12,
+          "adjustment_points": -15.61
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 10.18,
+          "normalized_score": 94,
+          "adjustment_points": -3.92
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.83,
+          "earned_points": 17.93,
+          "normalized_score": 82.77,
+          "adjustment_points": -6.9
+        }
+      }
+    }
+  },
+  {
+    "index": 12,
+    "appId": "bf001a7e-0850-4aa7-9164-fa81de05adbf",
+    "candidate": {
+      "name": "Lê Hoàng Yến",
+      "desiredTitle": "Content Marketing & Social Media Executive",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Quản trị Kinh doanh (Thương mại)",
+          "school": "Đại học Tôn Đức Thắng (TDTU)"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Content Marketing & Social Media Executive",
+          "company": "ChicDecor & Accessories",
+          "start": "2022-10-01T00:00:00.000Z",
+          "end": null,
+          "isCurrent": true,
+          "desc": "Thực thi lịch nội dung mạng xã hội (Facebook, Instagram, TikTok). Lên kịch bản video 'Gợi ý quà tặng bạn thân', hỗ trợ đạo cụ chụp ảnh và phối hợp gửi"
+        },
+        {
+          "title": "Marketing Assistant",
+          "company": "Sunny Corner Gift Shop",
+          "start": "2021-07-01T00:00:00.000Z",
+          "end": "2022-09-30T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Viết bài giới thiệu sản phẩm quà tặng thủ công, thiết kế banner/voucher bằng Canva, hỗ trợ đóng gói quà sự kiện."
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh",
+      "level": "MIDDLE",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "30",
+        "exp": "30",
+        "edu": "15",
+        "other": "25"
+      }
+    },
+    "aiResult": {
+      "overallScore": 52.5,
+      "matchLevel": "MEDIUM",
+      "skillScore": 47.5,
+      "experienceScore": 81.6,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": "SENIOR",
+      "reqLevel": "MIDDLE",
+      "totalExpYears": 5.31,
+      "levelFitScore": 100,
+      "levelGap": -1,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 25.0 / 25.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 25,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 25,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 14.2 / 30.0 điểm: Đã đáp ứng 5/11 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (Creative Planning, Product Development, Visual Direction).",
+          "max_points": 30,
+          "plus_reasons": [
+            "Sở hữu kỹ năng bổ trợ: 'Canva & Creative Tools'.",
+            "Sở hữu kỹ năng bổ trợ: 'English Communication'.",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Brand Marketing' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Storytelling' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Social Media Marketing' (Khai báo đạt chuẩn năng lực)."
+          ],
+          "earned_points": 14.25,
+          "minus_reasons": [
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Consumer Insight' trong hồ sơ khai báo.",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Creative Planning' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Product Development' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Visual Direction' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'POSM & Packaging Design' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Market Research & Competitor Analysis' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quản trị Kinh doanh (Thương mại)).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh (Thương mại)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 24.5 / 30.0 điểm: Đánh giá dựa trên 5.3 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (5.3 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Content Marketing & Social Media Executive) -> Cộng điểm tương quan cấp bậc."
+          ],
+          "earned_points": 24.48,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 25,
+          "weight_pct": 25,
+          "base_points": 25,
+          "earned_points": 25,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 14.25,
+          "earned_points": 14.25,
+          "normalized_score": 47.5,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.48,
+          "earned_points": 24.48,
+          "normalized_score": 81.6,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 13,
+    "appId": "499289b3-fe6d-4563-b256-eb7a5bf63017",
+    "candidate": {
+      "name": "Trần Minh Khang",
+      "desiredTitle": "Senior Creative & Campaign Lead",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Quan hệ Công chúng & Truyền thông",
+          "school": "Đại học Văn Lang"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Senior Creative Content & Campaign Lead",
+          "company": "NEMO Studio & Atelier",
+          "start": "2023-03-01T00:00:00.000Z",
+          "end": null,
+          "isCurrent": true,
+          "desc": "Đề xuất chủ đề BST thời trang - phụ kiện theo mùa. Viết câu chuyện chủ đạo (Master Narrative), lên moodboard và trực tiếp đạo diễn hình ảnh cho toàn b"
+        },
+        {
+          "title": "Creative Copywriter & Social Specialist",
+          "company": "Herbal Roots Botanics",
+          "start": "2021-04-01T00:00:00.000Z",
+          "end": "2023-02-28T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Sáng tạo thông điệp cho các dòng sản phẩm hộp quà tặng (Gift Sets) dịp 8/3, 20/10. Định hướng hình ảnh Shopee/TikTok Shop đồng bộ tiêu chuẩn nhận diện"
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh",
+      "level": "MIDDLE",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "30",
+        "exp": "30",
+        "edu": "15",
+        "other": "25"
+      }
+    },
+    "aiResult": {
+      "overallScore": 57.5,
+      "matchLevel": "MEDIUM",
+      "skillScore": 77.5,
+      "experienceScore": 82.43,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": "SENIOR",
+      "reqLevel": "MIDDLE",
+      "totalExpYears": 5.56,
+      "levelFitScore": 100,
+      "levelGap": -1,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 25.0 / 25.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 25,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 25,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 23.2 / 30.0 điểm: Đã đáp ứng 8/11 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (Product Development).",
+          "max_points": 30,
+          "plus_reasons": [
+            "Sở hữu kỹ năng bổ trợ: 'Consumer Insight'.",
+            "Sở hữu kỹ năng bổ trợ: 'Canva & Creative Tools'.",
+            "Sở hữu kỹ năng bổ trợ: 'English Communication'.",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Brand Marketing' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Creative Planning' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Storytelling' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Visual Direction' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Social Media Marketing' (Khai báo đạt chuẩn năng lực)."
+          ],
+          "earned_points": 23.25,
+          "minus_reasons": [
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Product Development' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'POSM & Packaging Design' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Market Research & Competitor Analysis' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quan hệ Công chúng & Truyền thông).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Quan hệ Công chúng & Truyền thông) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 24.7 / 30.0 điểm: Đánh giá dựa trên 5.6 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (5.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Creative Content & Campaign Lead) -> Cộng điểm tương quan cấp bậc.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 24.73,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.",
+            "Lưu ý mốc thời gian (INFO): Khai báo sử dụng 'tiktok shop' từ năm 2021 (Công nghệ ra mắt năm 2022, có thể do lỗi nhập liệu)."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 25,
+          "weight_pct": 25,
+          "base_points": 25,
+          "earned_points": 25,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 23.25,
+          "earned_points": 23.25,
+          "normalized_score": 77.5,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.73,
+          "earned_points": 24.73,
+          "normalized_score": 82.43,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 14,
+    "appId": "93ad29d5-392e-4f89-bae3-fcc2f28cf006",
+    "candidate": {
+      "name": "Nguyễn Hà Linh",
+      "desiredTitle": "Brand Marketing Specialist",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Marketing (Chất lượng cao)",
+          "school": "Đại học Kinh tế TP. Hồ Chí Minh (UEH)"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Assistant Brand Manager",
+          "company": "L’Éclat Lifestyle & Gift Boutique",
+          "start": "2023-06-01T00:00:00.000Z",
+          "end": null,
+          "isCurrent": true,
+          "desc": "Chủ trì nghiên cứu xu hướng và đối thủ để phát triển 4 bộ sưu tập quà tặng/năm (Mùa Tựu trường, Trung Thu, Giáng sinh, Valentine). Xây dựng câu chuyện"
+        },
+        {
+          "title": "Brand & Content Executive",
+          "company": "Cobi Home & Accessories",
+          "start": "2021-08-01T00:00:00.000Z",
+          "end": "2023-05-31T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Quản trị định vị thương hiệu trên mạng xã hội. Khảo sát 300+ khách hàng để đề xuất ra mắt dòng nến thơm quà tặng. Giám sát Brand Guidelines trên toàn "
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Brand Specialist – Ngành Bán lẻ / Phụ kiện / Quà tặng – Newzone – Hồ Chí Minh",
+      "level": "MIDDLE",
+      "reqExpYears": 2,
+      "weights": {
+        "skills": "30",
+        "exp": "30",
+        "edu": "15",
+        "other": "25"
+      }
+    },
+    "aiResult": {
+      "overallScore": 57.5,
+      "matchLevel": "MEDIUM",
+      "skillScore": 95,
+      "experienceScore": 81.76,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": "SENIOR",
+      "reqLevel": "MIDDLE",
+      "totalExpYears": 5.23,
+      "levelFitScore": 100,
+      "levelGap": -1,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 25.0 / 25.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 25,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 25,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 28.5 / 30.0 điểm: Đã đáp ứng 10/11 kỹ năng chuyên môn.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Sở hữu kỹ năng bổ trợ: 'Canva & Creative Tools'.",
+            "Sở hữu kỹ năng bổ trợ: 'English Communication'.",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Brand Marketing' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Creative Planning' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Product Development' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Storytelling' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Visual Direction' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Social Media Marketing' (Khai báo đạt chuẩn năng lực).",
+            "Sở hữu kỹ năng bổ trợ: 'POSM & Packaging Design'.",
+            "Sở hữu kỹ năng bổ trợ: 'Market Research & Competitor Analysis'."
+          ],
+          "earned_points": 28.5,
+          "minus_reasons": [
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Consumer Insight' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing (Chất lượng cao)).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing (Chất lượng cao)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 24.5 / 30.0 điểm: Đánh giá dựa trên 5.2 năm thâm niên (Yêu cầu: 2.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (5.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (2.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Assistant Brand Manager) -> Cộng điểm tương quan cấp bậc.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 24.53,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 25,
+          "weight_pct": 25,
+          "base_points": 25,
+          "earned_points": 25,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 28.5,
+          "earned_points": 28.5,
+          "normalized_score": 95,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.53,
+          "earned_points": 24.53,
+          "normalized_score": 81.76,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 15,
+    "appId": "d4879087-464f-4189-b560-c1d0c66a3a0a",
+    "candidate": {
+      "name": "Nguyễn Đinh Xuân Trường",
+      "desiredTitle": "Backend Developer",
+      "educations": [
+        {
+          "degree": "Bachelor's Degree",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City (IUH)"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Senior Fullstack Developer",
+      "level": "SENIOR",
+      "reqExpYears": 5,
+      "weights": {
+        "skills": "40",
+        "exp": "40",
+        "edu": "10",
+        "other": "10"
+      }
+    },
+    "aiResult": {
+      "overallScore": 91.8,
+      "matchLevel": "HIGH",
+      "skillScore": 96.76,
+      "experienceScore": 85,
+      "educationScore": 76,
+      "projectScore": 100,
+      "candidateExpLevel": null,
+      "reqLevel": "SENIOR",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 10.0 / 10.0 điểm: Vị trí không bắt buộc chứng chỉ/ngoại ngữ đặc thù; hồ sơ đạt yêu cầu chung.",
+          "max_points": 10,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 10,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 38.7 / 40.0 điểm: Đã đáp ứng 6/6 kỹ năng chuyên môn.",
+          "max_points": 40,
+          "plus_reasons": [
+            "AI nhận diện kỹ năng 'React' qua Kỹ năng tương đương: ReactJS (Đạt chuẩn chuyên môn).",
+            "AI nhận diện kỹ năng 'Next.js' qua Kỹ năng tương đương: Next.js (Đạt chuẩn chuyên môn).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'TypeScript' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Node.js' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'PostgreSQL' (Khai báo đạt chuẩn năng lực).",
+            "Sở hữu kỹ năng bổ trợ: 'Docker'."
+          ],
+          "earned_points": 38.7,
+          "minus_reasons": [
+            "Không có điểm trừ đáng kể về kỹ năng."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 7.6 / 10.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 10,
+          "plus_reasons": [
+            "Đạt yêu cầu về trình độ học vấn."
+          ],
+          "earned_points": 7.6,
+          "minus_reasons": [
+            "Chuyên ngành tốt nghiệp (Software Engineering) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 34.0 / 40.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 40,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Fullstack Developer).",
+            "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 34,
+          "minus_reasons": [
+            "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (5.0 năm, thiếu 5.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 10,
+          "weight_pct": 10,
+          "base_points": 10,
+          "earned_points": 10,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 38.7,
+          "earned_points": 38.7,
+          "normalized_score": 96.76,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 10,
+          "weight_pct": 10,
+          "base_points": 7.6,
+          "earned_points": 7.6,
+          "normalized_score": 76,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 34,
+          "earned_points": 34,
+          "normalized_score": 85,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 16,
+    "appId": "9138e179-6bf2-4660-8a6f-9bc521a51142",
+    "candidate": {
+      "name": "Chiến Đinh Trần Công",
+      "desiredTitle": "Flutter Developer Intern",
+      "educations": [
+        {
+          "degree": "Bachelor of Engineering",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Senior Fullstack Developer",
+      "level": "SENIOR",
+      "reqExpYears": 5,
+      "weights": {
+        "skills": "40",
+        "exp": "40",
+        "edu": "10",
+        "other": "10"
+      }
+    },
+    "aiResult": {
+      "overallScore": 39,
+      "matchLevel": "LOW",
+      "skillScore": 63.82,
+      "experienceScore": 49.28,
+      "educationScore": 76,
+      "projectScore": 100,
+      "candidateExpLevel": null,
+      "reqLevel": "SENIOR",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 6.2 / 10.0 điểm: Đáp ứng một phần tiêu chí ngoại ngữ hoặc chứng chỉ chuyên môn bổ trợ.",
+          "max_points": 10,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 6.21,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 15.8 / 40.0 điểm: Đã đáp ứng 1/6 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (React, Next.js, TypeScript, Node.js, PostgreSQL).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Kỹ năng chuyển giao hỗ trợ: Có nền tảng 'Dart' (1.0 năm) hỗ trợ một phần cho 'React' (chuyển giao tương đương ngang hàng (Peer), tương thích 65%). Cả hai đều là ngôn ngữ lập trình hiện đại, việc chuyển đổi từ Dart sang React (JavaScript/TypeScript) đòi hỏi học lại hệ sinh thái và tư duy DOM, nhưng nền tảng lập trình logic là tương đồng.."
+          ],
+          "earned_points": 15.84,
+          "minus_reasons": [
+            "Chưa đạt yêu cầu kỹ năng bắt buộc 'React': Ứng viên mới có kỹ năng nền tảng cơ sở 'Dart' (chuyển giao tương đương ngang hàng (Peer), tương thích 65%), không đủ điều kiện thay thế độc lập cho yêu cầu chuyên sâu của JD (Cả hai đều là ngôn ngữ lập trình hiện đại, việc chuyển đổi từ Dart sang React (JavaScript/TypeScript) đòi hỏi học lại hệ sinh thái và tư duy DOM, nhưng nền tảng lập trình logic là tương đồng.) -> Đã vi phạm tiêu chí tiên quyết (Mandatory Fail).",
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'Next.js' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'TypeScript' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'Node.js' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'PostgreSQL' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Docker' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 4.7 / 10.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 10,
+          "plus_reasons": [
+            "Đạt yêu cầu về trình độ học vấn."
+          ],
+          "earned_points": 4.72,
+          "minus_reasons": [
+            "Chuyên ngành tốt nghiệp (Software Engineering) thuộc khối ngành gần/khác so với trọng tâm chuyên môn công việc -> Bị trừ điểm tương quan ngành."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 12.2 / 40.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 5.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 40,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Fullstack Developer).",
+            "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 12.23,
+          "minus_reasons": [
+            "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (5.0 năm, thiếu 5.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 10,
+          "weight_pct": 10,
+          "base_points": 10,
+          "earned_points": 6.21,
+          "normalized_score": 100,
+          "adjustment_points": -3.79
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 25.53,
+          "earned_points": 15.84,
+          "normalized_score": 63.82,
+          "adjustment_points": -9.69
+        },
+        "education": {
+          "max_points": 10,
+          "weight_pct": 10,
+          "base_points": 7.6,
+          "earned_points": 4.72,
+          "normalized_score": 76,
+          "adjustment_points": -2.88
+        },
+        "experience": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 19.71,
+          "earned_points": 12.23,
+          "normalized_score": 49.28,
+          "adjustment_points": -7.48
+        }
+      }
+    }
+  },
+  {
+    "index": 17,
+    "appId": "425f0e07-accd-43b0-be2b-67cc021a3851",
+    "candidate": {
+      "name": "Nguyễn Hải Nam",
+      "desiredTitle": "Head of Performance Marketing / Growth Lead (E-commerce)",
+      "educations": [
+        {
+          "degree": "Cử nhân Xuất sắc",
+          "major": "Thương mại Điện tử (E-Commerce)",
+          "school": "Đại học Kinh tế TP. Hồ Chí Minh (UEH)"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Senior Performance Marketing Lead",
+          "company": "Công ty Cổ phần Thời trang D2C CoolStyle",
+          "start": "2022-04-01T00:00:00.000Z",
+          "end": "2025-04-01T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Chịu trách nhiệm toàn quyền về tăng trưởng doanh thu từ các kênh Paid Traffic trên hệ thống Website Shopify và Shopee Mall, quản lý ngân sách bình quâ"
+        },
+        {
+          "title": "Digital Acquisition Specialist",
+          "company": "Tập đoàn Bán lẻ Mỹ phẩm BeautyHub",
+          "start": "2020-10-01T00:00:00.000Z",
+          "end": "2022-03-31T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Phụ trách thực thi chiến dịch quảng cáo Paid Search và Paid Social cho hơn 50 thương hiệu mỹ phẩm nhập khẩu, tối ưu chi phí thu nạp khách hàng mới (CA"
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)",
+      "level": "SENIOR",
+      "reqExpYears": 3,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 39,
+      "matchLevel": "LOW",
+      "skillScore": 0,
+      "experienceScore": 81.66,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": "SENIOR",
+      "reqLevel": "SENIOR",
+      "totalExpYears": 4.5,
+      "levelFitScore": 100,
+      "levelGap": 0,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 10.9 / 15.0 điểm: Đáp ứng một phần tiêu chí ngoại ngữ hoặc chứng chỉ chuyên môn bổ trợ.",
+          "max_points": 15,
+          "plus_reasons": [
+            "Sở hữu chứng chỉ chuyên môn đạt chuẩn: 'AWS Certified Solutions Architect' -> Cộng điểm tiêu chí bổ trợ."
+          ],
+          "earned_points": 10.91,
+          "minus_reasons": [
+            "Không có điểm trừ về chứng chỉ hay ngoại ngữ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 0.0 / 40.0 điểm: Đã đáp ứng 0/6 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (React, Node.js, PostgreSQL, TypeScript).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Đáp ứng các kỹ năng cơ bản của công việc."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'React' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Node.js' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'PostgreSQL' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'TypeScript' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Tailwind CSS' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Docker' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 10.3 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Thương mại Điện tử (E-Commerce)).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Thương mại Điện tử (E-Commerce)) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 10.26,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 17.8 / 30.0 điểm: Đánh giá dựa trên 4.5 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (4.5 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Performance Marketing Lead) -> Cộng điểm tương quan cấp bậc.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 17.83,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 15,
+          "earned_points": 10.91,
+          "normalized_score": 100,
+          "adjustment_points": -4.09
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 10.26,
+          "normalized_score": 94,
+          "adjustment_points": -3.84
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.5,
+          "earned_points": 17.83,
+          "normalized_score": 81.66,
+          "adjustment_points": -6.67
+        }
+      }
+    }
+  },
+  {
+    "index": 18,
+    "appId": "9beaa87f-f10c-4895-b532-41636c48c7d2",
+    "candidate": {
+      "name": "Lê Thị Thảo Vy",
+      "desiredTitle": "Senior Performance Media Specialist / Assistant Manager",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Quan hệ Quốc tế (International Relations)",
+          "school": "Đại học Khoa học Xã hội & Nhân văn TP.HCM"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Senior Performance Media Executive",
+          "company": "T-Media Performance Agency",
+          "start": "2022-08-01T00:00:00.000Z",
+          "end": "2025-02-01T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Trực tiếp quản lý và chạy quảng cáo chuyển đổi cho 4 tài khoản khách hàng E-commerce ngành FMCG và Mỹ phẩm, tổng ngân sách điều phối trung bình 1.2 tỷ"
+        },
+        {
+          "title": "Digital Media Planner",
+          "company": "Digital First Agency",
+          "start": "2021-09-01T00:00:00.000Z",
+          "end": "2022-07-31T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Lập kế hoạch phân bổ ngân sách Digital đa kênh, phụ trách setup tài khoản quảng cáo Facebook và Google Search cho các đợt Siêu Sale Mega Day (9.9, 11."
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)",
+      "level": "SENIOR",
+      "reqExpYears": 3,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 32.09,
+      "matchLevel": "LOW",
+      "skillScore": 0,
+      "experienceScore": 82.46,
+      "educationScore": 49,
+      "projectScore": 0,
+      "candidateExpLevel": "MIDDLE",
+      "reqLevel": "SENIOR",
+      "totalExpYears": 3.42,
+      "levelFitScore": 70,
+      "levelGap": 1,
+      "levelEligible": false,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 0.0 / 15.0 điểm: Ứng viên không có chứng chỉ chuyên môn và không đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng (Không đủ đáp ứng).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Hồ sơ chưa có chứng chỉ chuyên môn theo yêu cầu của JD: 'AWS Certified Solutions Architect' -> Bị trừ điểm tiêu chí chứng chỉ.",
+            "Ứng viên không có gì trong hồ sơ khai báo về chứng chỉ (AWS Certified Solutions Architect) -> Không đủ đáp ứng tiêu chí ngoại ngữ & chứng chỉ theo yêu cầu tuyển dụng."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 0.0 / 40.0 điểm: Đã đáp ứng 0/6 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (React, Node.js, PostgreSQL, TypeScript).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Đáp ứng các kỹ năng cơ bản của công việc."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'React' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Node.js' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'PostgreSQL' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'TypeScript' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Tailwind CSS' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Docker' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 7.3 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quan hệ Quốc tế (International Relations)).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Đạt yêu cầu về trình độ học vấn."
+          ],
+          "earned_points": 7.35,
+          "minus_reasons": [
+            "Chuyên ngành tốt nghiệp (Quan hệ Quốc tế (International Relations)) không thuộc khối ngành phù hợp với vị trí tuyển dụng -> Không đạt tiêu chuẩn chuyên môn học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 24.7 / 30.0 điểm: Đánh giá dựa trên 3.4 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (3.4 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Performance Media Executive) -> Cộng điểm tương quan cấp bậc.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 24.74,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 7.35,
+          "earned_points": 7.35,
+          "normalized_score": 49,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.74,
+          "earned_points": 24.74,
+          "normalized_score": 82.46,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 19,
+    "appId": "5e3fa219-3171-4d91-ae8b-ab2b88c0f6a6",
+    "candidate": {
+      "name": "Hoàng Đức Minh",
+      "desiredTitle": "B2B Growth & Performance Lead",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Quản trị Kinh doanh Quốc tế",
+          "school": "Đại học Ngoại Thương Cơ sở II"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "B2B Growth & Performance Lead",
+          "company": "CloudFlow Enterprise SaaS",
+          "start": "2022-03-01T00:00:00.000Z",
+          "end": "2025-03-01T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Quản lý toàn bộ ngân sách Paid Acquisition 350 triệu VNĐ/tháng tập trung vào các kênh: Google Ads (Search chuyên sâu, Dynamic Search Ads, Display Rema"
+        },
+        {
+          "title": "Digital Marketing Specialist",
+          "company": "BaseVN Software Corp",
+          "start": "2021-01-01T00:00:00.000Z",
+          "end": "2022-02-28T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Thực thi các chiến dịch Google Search Ads nhắm mục tiêu doanh nghiệp vừa và nhỏ (SME), thu hút hơn 800 lượt đăng ký dùng thử phần mềm/tháng. Quản lý h"
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)",
+      "level": "SENIOR",
+      "reqExpYears": 3,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 38.16,
+      "matchLevel": "LOW",
+      "skillScore": 0,
+      "experienceScore": 80.2,
+      "educationScore": 94,
+      "projectScore": 0,
+      "candidateExpLevel": "SENIOR",
+      "reqLevel": "SENIOR",
+      "totalExpYears": 4.16,
+      "levelFitScore": 100,
+      "levelGap": 0,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 0.0 / 15.0 điểm: Ứng viên không có chứng chỉ chuyên môn và không đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng (Không đủ đáp ứng).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Hồ sơ chưa có chứng chỉ chuyên môn theo yêu cầu của JD: 'AWS Certified Solutions Architect' -> Bị trừ điểm tiêu chí chứng chỉ.",
+            "Ứng viên không có gì trong hồ sơ khai báo về chứng chỉ (AWS Certified Solutions Architect) -> Không đủ đáp ứng tiêu chí ngoại ngữ & chứng chỉ theo yêu cầu tuyển dụng."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 0.0 / 40.0 điểm: Đã đáp ứng 0/6 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (React, Node.js, PostgreSQL, TypeScript).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Đáp ứng các kỹ năng cơ bản của công việc."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'React' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Node.js' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'PostgreSQL' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'TypeScript' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Tailwind CSS' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Docker' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Quản trị Kinh doanh Quốc tế).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Quản trị Kinh doanh Quốc tế) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 24.1 / 30.0 điểm: Đánh giá dựa trên 4.2 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (4.2 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 24.06,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.06,
+          "earned_points": 24.06,
+          "normalized_score": 80.2,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 20,
+    "appId": "f400c3f2-c87d-41cf-b49c-2a4b940aae36",
+    "candidate": {
+      "name": "Phạm Thu Trang",
+      "desiredTitle": "Nhân viên Marketing / Quảng cáo Fanpage",
+      "educations": [
+        {
+          "degree": "Cử nhân",
+          "major": "Marketing Thương mại",
+          "school": "Đại học Văn Lang"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Nhân viên Content & Quảng cáo Facebook",
+          "company": "Shop Thời trang Nữ Dear Bella",
+          "start": "2023-05-01T00:00:00.000Z",
+          "end": "2025-01-01T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Viết bài quảng cáo, chụp ảnh sản phẩm và lên lịch đăng bài hàng ngày cho Fanpage và trang Instagram (hơn 50k followers). Trực tiếp cài đặt quảng cáo F"
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)",
+      "level": "SENIOR",
+      "reqExpYears": 3,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 30.26,
+      "matchLevel": "LOW",
+      "skillScore": 0,
+      "experienceScore": 53.85,
+      "educationScore": 94,
+      "projectScore": 0,
+      "candidateExpLevel": "JUNIOR",
+      "reqLevel": "SENIOR",
+      "totalExpYears": 1.67,
+      "levelFitScore": 35,
+      "levelGap": 2,
+      "levelEligible": false,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 0.0 / 15.0 điểm: Ứng viên không có chứng chỉ chuyên môn và không đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng (Không đủ đáp ứng).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Hồ sơ chưa có chứng chỉ chuyên môn theo yêu cầu của JD: 'AWS Certified Solutions Architect' -> Bị trừ điểm tiêu chí chứng chỉ.",
+            "Ứng viên không có gì trong hồ sơ khai báo về chứng chỉ (AWS Certified Solutions Architect) -> Không đủ đáp ứng tiêu chí ngoại ngữ & chứng chỉ theo yêu cầu tuyển dụng."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 0.0 / 40.0 điểm: Đã đáp ứng 0/6 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (React, Node.js, PostgreSQL, TypeScript).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Đáp ứng các kỹ năng cơ bản của công việc."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'React' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Node.js' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'PostgreSQL' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'TypeScript' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Tailwind CSS' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Docker' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Marketing Thương mại).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Marketing Thương mại) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 16.2 / 30.0 điểm: Đánh giá dựa trên 1.7 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 16.16,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng.",
+            "Tổng thâm niên tích lũy (1.7 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 1.3 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 16.16,
+          "earned_points": 16.16,
+          "normalized_score": 53.85,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 21,
+    "appId": "947e9597-8764-49a8-9d83-6d3dff91f84e",
+    "candidate": {
+      "name": "Đặng Minh Quân",
+      "desiredTitle": "Senior Performance User Acquisition Manager (Mobile Gaming)",
+      "educations": [
+        {
+          "degree": "Kỹ sư",
+          "major": "Hệ thống Thông tin Quản lý",
+          "school": "Đại học Bách Khoa TP.HCM"
+        }
+      ],
+      "workExperiences": [
+        {
+          "title": "Senior Performance User Acquisition Manager",
+          "company": "Virtual Apps & Gaming Global",
+          "start": "2021-06-01T00:00:00.000Z",
+          "end": "2025-03-01T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Lãnh đạo chiến lược Paid Performance User Acquisition trên phạm vi toàn cầu (Thị trường Mỹ, Châu Âu, Đông Nam Á) cho 6 tựa game casual và hybrid-casua"
+        },
+        {
+          "title": "Performance Ads Specialist",
+          "company": "Joystick Mobile Studio",
+          "start": "2019-08-01T00:00:00.000Z",
+          "end": "2021-05-31T00:00:00.000Z",
+          "isCurrent": false,
+          "desc": "Setup và tối ưu chiến dịch quảng cáo ứng dụng qua Facebook Ads và Google AdMob; đo lường chỉ số Retargeting người dùng không hoạt động (Re-engagement "
+        }
+      ],
+      "projectCount": 0
+    },
+    "job": {
+      "title": "Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)",
+      "level": "SENIOR",
+      "reqExpYears": 3,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 38.7,
+      "matchLevel": "LOW",
+      "skillScore": 0,
+      "experienceScore": 81.99,
+      "educationScore": 94,
+      "projectScore": 0,
+      "candidateExpLevel": "MANAGER",
+      "reqLevel": "SENIOR",
+      "totalExpYears": 5.58,
+      "levelFitScore": 100,
+      "levelGap": -2,
+      "levelEligible": true,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 0.0 / 15.0 điểm: Ứng viên không có chứng chỉ chuyên môn và không đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng (Không đủ đáp ứng).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Hồ sơ chưa có chứng chỉ chuyên môn theo yêu cầu của JD: 'AWS Certified Solutions Architect' -> Bị trừ điểm tiêu chí chứng chỉ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 0.0 / 40.0 điểm: Đã đáp ứng 0/6 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (React, Node.js, PostgreSQL, TypeScript).",
+          "max_points": 40,
+          "plus_reasons": [
+            "Đáp ứng các kỹ năng cơ bản của công việc."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'React' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'Node.js' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'PostgreSQL' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa tìm thấy thông tin hoặc bằng chứng xác thực về kỹ năng bắt buộc: 'TypeScript' trong hồ sơ khai báo (Đã trừ điểm tiêu chí tiên quyết).",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Tailwind CSS' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Docker' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Hệ thống Thông tin Quản lý).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Hệ thống Thông tin Quản lý) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 24.6 / 30.0 điểm: Đánh giá dựa trên 5.6 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Tổng thâm niên tích lũy (5.6 năm) đáp ứng hoặc vượt yêu cầu kinh nghiệm của JD (3.0 năm) -> Đạt điểm thâm niên tối đa.",
+            "Đã từng đảm nhiệm vị trí cấp bậc tương đương hoặc tương đồng (Senior Performance User Acquisition Manager) -> Cộng điểm tương quan cấp bậc.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 24.6,
+          "minus_reasons": [
+            "Mô hình kinh nghiệm trước đây không tương thích với mô hình hoạt động cốt lõi của vị trí tuyển dụng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.6,
+          "earned_points": 24.6,
+          "normalized_score": 81.99,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 22,
+    "appId": "718929b9-a28d-4ad0-81db-e302f1eeffb5",
+    "candidate": {
+      "name": "Nguyễn Đinh Xuân Trường",
+      "desiredTitle": "Backend Developer",
+      "educations": [
+        {
+          "degree": "Bachelor's Degree",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City (IUH)"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)",
+      "level": "SENIOR",
+      "reqExpYears": 3,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 63.9,
+      "matchLevel": "MEDIUM",
+      "skillScore": 72.71,
+      "experienceScore": 80.65,
+      "educationScore": 94,
+      "projectScore": 0,
+      "candidateExpLevel": null,
+      "reqLevel": "SENIOR",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 0.0 / 15.0 điểm: Ứng viên không có chứng chỉ chuyên môn và không đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng (Không đủ đáp ứng).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Hồ sơ chưa có chứng chỉ chuyên môn theo yêu cầu của JD: 'AWS Certified Solutions Architect' -> Bị trừ điểm tiêu chí chứng chỉ.",
+            "Ứng viên không có gì trong hồ sơ khai báo về chứng chỉ (AWS Certified Solutions Architect) -> Không đủ đáp ứng tiêu chí ngoại ngữ & chứng chỉ theo yêu cầu tuyển dụng."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 29.1 / 40.0 điểm: Đã đáp ứng 5/6 kỹ năng chuyên môn.",
+          "max_points": 40,
+          "plus_reasons": [
+            "AI nhận diện kỹ năng 'React' qua Kỹ năng tương đương: ReactJS (Đạt chuẩn chuyên môn).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Node.js' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'PostgreSQL' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'TypeScript' (Khai báo đạt chuẩn năng lực).",
+            "Sở hữu kỹ năng bổ trợ: 'Docker'."
+          ],
+          "earned_points": 29.08,
+          "minus_reasons": [
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Tailwind CSS' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 24.2 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)).",
+            "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 24.2,
+          "minus_reasons": [
+            "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 3.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 29.08,
+          "earned_points": 29.08,
+          "normalized_score": 72.71,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.2,
+          "earned_points": 24.2,
+          "normalized_score": 80.65,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 23,
+    "appId": "c78ec83c-e436-41ea-adcb-9201a20c0580",
+    "candidate": {
+      "name": "Nguyễn Đinh Xuân Trường",
+      "desiredTitle": "Backend Developer",
+      "educations": [
+        {
+          "degree": "Bachelor's Degree",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City (IUH)"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)",
+      "level": "SENIOR",
+      "reqExpYears": 3,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "15",
+        "other": "15"
+      }
+    },
+    "aiResult": {
+      "overallScore": 63.9,
+      "matchLevel": "MEDIUM",
+      "skillScore": 72.71,
+      "experienceScore": 80.65,
+      "educationScore": 94,
+      "projectScore": 0,
+      "candidateExpLevel": null,
+      "reqLevel": "SENIOR",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 0.0 / 15.0 điểm: Ứng viên không có chứng chỉ chuyên môn và không đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng (Không đủ đáp ứng).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Hồ sơ chưa có chứng chỉ chuyên môn theo yêu cầu của JD: 'AWS Certified Solutions Architect' -> Bị trừ điểm tiêu chí chứng chỉ.",
+            "Ứng viên không có gì trong hồ sơ khai báo về chứng chỉ (AWS Certified Solutions Architect) -> Không đủ đáp ứng tiêu chí ngoại ngữ & chứng chỉ theo yêu cầu tuyển dụng."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 29.1 / 40.0 điểm: Đã đáp ứng 5/6 kỹ năng chuyên môn.",
+          "max_points": 40,
+          "plus_reasons": [
+            "AI nhận diện kỹ năng 'React' qua Kỹ năng tương đương: ReactJS (Đạt chuẩn chuyên môn).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Node.js' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'PostgreSQL' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'TypeScript' (Khai báo đạt chuẩn năng lực).",
+            "Sở hữu kỹ năng bổ trợ: 'Docker'."
+          ],
+          "earned_points": 29.08,
+          "minus_reasons": [
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Tailwind CSS' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 14.1 / 15.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 15,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 14.1,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 24.2 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 3.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Senior Fullstack Engineer (React/Next.js & Node.js/PostgreSQL)).",
+            "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 24.2,
+          "minus_reasons": [
+            "Tổng thâm niên tích lũy (0.0 năm) chưa đạt số năm kinh nghiệm yêu cầu tối thiểu (3.0 năm, thiếu 3.0 năm) -> Bị trừ điểm thâm niên tương ứng."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 0,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 29.08,
+          "earned_points": 29.08,
+          "normalized_score": 72.71,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 15,
+          "weight_pct": 15,
+          "base_points": 14.1,
+          "earned_points": 14.1,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 24.2,
+          "earned_points": 24.2,
+          "normalized_score": 80.65,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 24,
+    "appId": "f0caf11a-38e0-4351-87db-070750ddcb54",
+    "candidate": {
+      "name": "Nguyễn Đinh Xuân Trường",
+      "desiredTitle": "Backend Developer",
+      "educations": [
+        {
+          "degree": "Bachelor's Degree",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City (IUH)"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Intern Backend Java",
+      "level": "INTERN",
+      "reqExpYears": 0,
+      "weights": {
+        "skills": "50",
+        "exp": "30",
+        "edu": "20",
+        "other": "0"
+      }
+    },
+    "aiResult": {
+      "overallScore": 75.6,
+      "matchLevel": "HIGH",
+      "skillScore": 75.88,
+      "experienceScore": 61.25,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": null,
+      "reqLevel": "INTERN",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 0.0 / 0.0 điểm: Ứng viên không có chứng chỉ chuyên môn và không đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng (Không đủ đáp ứng).",
+          "max_points": 0,
+          "plus_reasons": [
+            "Chưa ghi nhận điểm cộng về chứng chỉ hoặc ngoại ngữ."
+          ],
+          "earned_points": 0,
+          "minus_reasons": [
+            "Ứng viên không có chứng chỉ chuyên môn và chưa đáp ứng trình độ ngoại ngữ theo yêu cầu tuyển dụng -> Không đủ đáp ứng tiêu chí ngoại ngữ & chứng chỉ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 37.9 / 50.0 điểm: Đã đáp ứng 10/13 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (Kubernetes, CI/CD, Fix Bug).",
+          "max_points": 50,
+          "plus_reasons": [
+            "Kỹ năng chuyển giao hỗ trợ: Có nền tảng 'Docker Compose' (1.0 năm) hỗ trợ một phần cho 'Kubernetes' (chuyển giao từ nền tảng cơ sở lên chuyên sâu (Upward), tương thích 65%). Docker là nền tảng container tốt để tiếp cận Kubernetes (Cần đào tạo thêm về orchestration).",
+            "Kỹ năng chuyển giao hỗ trợ: Có nền tảng 'Docker Compose' (1.0 năm) hỗ trợ một phần cho 'CI/CD' (chuyển giao tương đương ngang hàng (Peer), tương thích 75%). Docker Compose là nền tảng quan trọng trong quy trình container hóa, giúp ứng viên dễ dàng tiếp cận và triển khai các pipeline CI/CD cho hệ thống backend..",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Java' (Khai báo đạt chuẩn năng lực).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Spring Boot' (Khai báo đạt chuẩn năng lực).",
+            "Kỹ năng chuyển giao hỗ trợ: Có nền tảng 'RESTful API' (1.0 năm) hỗ trợ một phần cho 'Fix Bug' (chuyển giao tương đương ngang hàng (Peer), tương thích 75%). Việc phát triển RESTful API đòi hỏi tư duy logic và kỹ năng debug hệ thống backend, đây là nền tảng trực tiếp để thực hiện công việc fix bug trong môi trường IT..",
+            "AI nhận diện kỹ năng 'SQL' qua Kỹ năng tương đương: PostgreSQL (Đạt chuẩn chuyên môn).",
+            "Kỹ năng 'Machine Learning' ghi nhận qua ngữ cảnh gián tiếp (Suy luận từ dự án: Zola: Real-time Messaging Platform (Microservices) (Cần phỏng vấn xác minh)).",
+            "Kỹ năng 'Large Language Models' ghi nhận qua ngữ cảnh gián tiếp (Suy luận từ dự án: Zola: Real-time Messaging Platform (Microservices) (Cần phỏng vấn xác minh)).",
+            "Kỹ năng 'Generative AI' ghi nhận qua ngữ cảnh gián tiếp (Suy luận từ dự án: Zola: Real-time Messaging Platform (Microservices) (Cần phỏng vấn xác minh)).",
+            "Thành thạo kỹ năng bắt buộc cốt lõi: 'Docker' (Khai báo đạt chuẩn năng lực)."
+          ],
+          "earned_points": 37.94,
+          "minus_reasons": [
+            "Chưa đạt yêu cầu kỹ năng bắt buộc 'Kubernetes': Ứng viên mới có kỹ năng nền tảng cơ sở 'Docker Compose' (chuyển giao từ nền tảng cơ sở lên chuyên sâu (Upward), tương thích 65%), không đủ điều kiện thay thế độc lập cho yêu cầu chuyên sâu của JD (Docker là nền tảng container tốt để tiếp cận Kubernetes (Cần đào tạo thêm về orchestration)) -> Đã vi phạm tiêu chí tiên quyết (Mandatory Fail).",
+            "Chưa đạt yêu cầu kỹ năng bắt buộc 'CI/CD': Ứng viên mới có kỹ năng nền tảng cơ sở 'Docker Compose' (chuyển giao tương đương ngang hàng (Peer), tương thích 75%), không đủ điều kiện thay thế độc lập cho yêu cầu chuyên sâu của JD (Docker Compose là nền tảng quan trọng trong quy trình container hóa, giúp ứng viên dễ dàng tiếp cận và triển khai các pipeline CI/CD cho hệ thống backend.) -> Đã vi phạm tiêu chí tiên quyết (Mandatory Fail).",
+            "Chưa đạt yêu cầu kỹ năng bắt buộc 'Fix Bug': Ứng viên mới có kỹ năng nền tảng cơ sở 'RESTful API' (chuyển giao tương đương ngang hàng (Peer), tương thích 75%), không đủ điều kiện thay thế độc lập cho yêu cầu chuyên sâu của JD (Việc phát triển RESTful API đòi hỏi tư duy logic và kỹ năng debug hệ thống backend, đây là nền tảng trực tiếp để thực hiện công việc fix bug trong môi trường IT.) -> Đã vi phạm tiêu chí tiên quyết (Mandatory Fail).",
+            "Lưu ý phỏng vấn: Kỹ năng 'Machine Learning' ghi nhận qua ngữ cảnh gián tiếp/bên thứ ba (Suy luận từ dự án: Zola: Real-time Messaging Platform (Microservices) (Cần phỏng vấn xác minh)) -> Cần phỏng vấn xác minh năng lực thực chiến độc lập.",
+            "Lưu ý phỏng vấn: Kỹ năng 'Large Language Models' ghi nhận qua ngữ cảnh gián tiếp/bên thứ ba (Suy luận từ dự án: Zola: Real-time Messaging Platform (Microservices) (Cần phỏng vấn xác minh)) -> Cần phỏng vấn xác minh năng lực thực chiến độc lập.",
+            "Lưu ý phỏng vấn: Kỹ năng 'Generative AI' ghi nhận qua ngữ cảnh gián tiếp/bên thứ ba (Suy luận từ dự án: Zola: Real-time Messaging Platform (Microservices) (Cần phỏng vấn xác minh)) -> Cần phỏng vấn xác minh năng lực thực chiến độc lập.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Python' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'Django' trong hồ sơ khai báo.",
+            "Chưa ghi nhận bằng chứng về kỹ năng bổ trợ: 'FastAPI' trong hồ sơ khai báo."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 18.8 / 20.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 20,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 18.8,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 18.4 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 0.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Intern Backend Java).",
+            "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 18.38,
+          "minus_reasons": [
+            "Không có điểm trừ đáng kể về kinh nghiệm."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 0,
+          "weight_pct": 0,
+          "base_points": 0,
+          "earned_points": 0,
+          "normalized_score": 100,
+          "adjustment_points": 0
+        },
+        "skills": {
+          "max_points": 50,
+          "weight_pct": 50,
+          "base_points": 37.94,
+          "earned_points": 37.94,
+          "normalized_score": 75.88,
+          "adjustment_points": 0
+        },
+        "education": {
+          "max_points": 20,
+          "weight_pct": 20,
+          "base_points": 18.8,
+          "earned_points": 18.8,
+          "normalized_score": 94,
+          "adjustment_points": 0
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 18.38,
+          "earned_points": 18.38,
+          "normalized_score": 61.25,
+          "adjustment_points": 0
+        }
+      }
+    }
+  },
+  {
+    "index": 25,
+    "appId": "48e3449a-890a-4a24-bf14-4b5764971a36",
+    "candidate": {
+      "name": "Nguyễn Đinh Xuân Trường",
+      "desiredTitle": "Backend Developer",
+      "educations": [
+        {
+          "degree": "Bachelor's Degree",
+          "major": "Software Engineering",
+          "school": "Industrial University of Ho Chi Minh City (IUH)"
+        }
+      ],
+      "workExperiences": [],
+      "projectCount": 2
+    },
+    "job": {
+      "title": "Thực Tập Sinh Lập Trình Viên",
+      "level": "INTERN",
+      "reqExpYears": 0,
+      "weights": {
+        "skills": "40",
+        "exp": "30",
+        "edu": "20",
+        "other": "10"
+      }
+    },
+    "aiResult": {
+      "overallScore": 59,
+      "matchLevel": "MEDIUM",
+      "skillScore": 92.07,
+      "experienceScore": 58.35,
+      "educationScore": 94,
+      "projectScore": 100,
+      "candidateExpLevel": null,
+      "reqLevel": "INTERN",
+      "totalExpYears": 0,
+      "levelFitScore": null,
+      "levelGap": null,
+      "levelEligible": null,
+      "pillarExplanations": {
+        "other": {
+          "summary": "Đạt 7.1 / 10.0 điểm: Đáp ứng một phần tiêu chí ngoại ngữ hoặc chứng chỉ chuyên môn bổ trợ.",
+          "max_points": 10,
+          "plus_reasons": [
+            "Vị trí tuyển dụng không bắt buộc chứng chỉ hay ngoại ngữ đặc thù; ứng viên đáp ứng tiêu chuẩn chung."
+          ],
+          "earned_points": 7.1,
+          "minus_reasons": [
+            "Hồ sơ chưa khai báo chứng chỉ chuyên môn hoặc năng lực ngoại ngữ bổ trợ."
+          ]
+        },
+        "skills": {
+          "summary": "Đạt 26.1 / 40.0 điểm: Đã đáp ứng 1/3 kỹ năng chuyên môn. [CẢNH BÁO BẮT BUỘC]: Thiếu hụt hoặc chưa đạt tiêu chuẩn kỹ năng tiên quyết (.NET, C#).",
+          "max_points": 40,
+          "plus_reasons": [
+            "AI nhận diện kỹ năng 'SQL' qua Kỹ năng tương đương: PostgreSQL (Đạt chuẩn chuyên môn)."
+          ],
+          "earned_points": 26.14,
+          "minus_reasons": [
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc '.NET' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc).",
+            "Chưa tìm thấy bằng chứng trực tiếp về kỹ năng bắt buộc 'C#' (Mới chỉ ghi nhận năng lực chuyển giao phân khúc một phần, đã trừ điểm tiêu chí bắt buộc)."
+          ]
+        },
+        "education": {
+          "summary": "Đạt 13.3 / 20.0 điểm: Đánh giá dựa trên cấp bậc văn bằng (Đại học/Cao đẳng) và mức độ phù hợp chuyên ngành (Software Engineering).",
+          "max_points": 20,
+          "plus_reasons": [
+            "Trình độ văn bằng (Đại học) và chuyên ngành (Software Engineering) có độ tương đồng cao với vị trí tuyển dụng -> Đạt điểm tối đa học vấn."
+          ],
+          "earned_points": 13.34,
+          "minus_reasons": [
+            "Không có điểm trừ về học vấn."
+          ]
+        },
+        "experience": {
+          "summary": "Đạt 12.4 / 30.0 điểm: Đánh giá dựa trên 0.0 năm thâm niên (Yêu cầu: 0.0 năm), cấp bậc vị trí và dự án thực chiến.",
+          "max_points": 30,
+          "plus_reasons": [
+            "Mô hình kinh nghiệm làm việc rất tương đồng với yêu cầu thực tế của vị trí (Thực Tập Sinh Lập Trình Viên).",
+            "Có năng lực thực tiễn được chứng minh qua 2 dự án chuyên môn liên quan -> Cộng điểm năng lực thực thi dự án.",
+            "Quỹ đạo phát triển nghề nghiệp tăng trưởng đều đặn qua các vị trí công việc."
+          ],
+          "earned_points": 12.42,
+          "minus_reasons": [
+            "Không có điểm trừ đáng kể về kinh nghiệm."
+          ]
+        }
+      },
+      "scoreBreakdown": {
+        "other": {
+          "max_points": 10,
+          "weight_pct": 10,
+          "base_points": 10,
+          "earned_points": 7.1,
+          "normalized_score": 100,
+          "adjustment_points": -2.9
+        },
+        "skills": {
+          "max_points": 40,
+          "weight_pct": 40,
+          "base_points": 36.83,
+          "earned_points": 26.14,
+          "normalized_score": 92.07,
+          "adjustment_points": -10.69
+        },
+        "education": {
+          "max_points": 20,
+          "weight_pct": 20,
+          "base_points": 18.8,
+          "earned_points": 13.34,
+          "normalized_score": 94,
+          "adjustment_points": -5.46
+        },
+        "experience": {
+          "max_points": 30,
+          "weight_pct": 30,
+          "base_points": 17.5,
+          "earned_points": 12.42,
+          "normalized_score": 58.35,
+          "adjustment_points": -5.08
+        }
+      }
+    }
+  }
+]

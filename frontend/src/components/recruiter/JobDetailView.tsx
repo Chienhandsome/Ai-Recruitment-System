@@ -718,19 +718,19 @@ export function JobDetailView({
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div className="bg-white p-2 rounded-lg border border-blue-100 flex justify-between">
                       <span className="text-slate-500">Kỹ năng:</span>
-                      <span className="font-bold text-[#2563EB]">{job.skillWeight || 40}%</span>
+                      <span className="font-bold text-[#2563EB]">{job.skillWeight != null && !isNaN(Number(job.skillWeight)) ? Number(job.skillWeight) : 40}%</span>
                     </div>
                     <div className="bg-white p-2 rounded-lg border border-blue-100 flex justify-between">
                       <span className="text-slate-500">Kinh nghiệm:</span>
-                      <span className="font-bold text-[#2563EB]">{job.experienceWeight || 30}%</span>
+                      <span className="font-bold text-[#2563EB]">{job.experienceWeight != null && !isNaN(Number(job.experienceWeight)) ? Number(job.experienceWeight) : 30}%</span>
                     </div>
                     <div className="bg-white p-2 rounded-lg border border-blue-100 flex justify-between">
                       <span className="text-slate-500">Học vấn:</span>
-                      <span className="font-bold text-[#2563EB]">{job.educationWeight || 15}%</span>
+                      <span className="font-bold text-[#2563EB]">{job.educationWeight != null && !isNaN(Number(job.educationWeight)) ? Number(job.educationWeight) : 15}%</span>
                     </div>
                     <div className="bg-slate-50 p-2 rounded border border-slate-100 flex items-center justify-between">
                       <span className="text-xs text-slate-500 font-bold">Ngoại ngữ / Chứng chỉ</span>
-                      <span className="font-bold text-[#2563EB]">{job.otherWeight || 15}%</span>
+                      <span className="font-bold text-[#2563EB]">{job.otherWeight != null && !isNaN(Number(job.otherWeight)) ? Number(job.otherWeight) : 15}%</span>
                     </div>
                   </div>
                 </div>

@@ -45,6 +45,7 @@ export function AdminWarrantyReviewModal({
   const [claim, setClaim] = useState<WarrantyClaimInfo | null>(null);
   const [adminNote, setAdminNote] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [zoomedImageUrl, setZoomedImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen || !claimId) return;
@@ -255,16 +256,58 @@ export function AdminWarrantyReviewModal({
                   </div>
 
                   {claim.evidenceUrl && (
-                    <div className="pt-1">
-                      <a
-                        href={claim.evidenceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-2xs font-bold text-[#2563EB] hover:underline"
-                      >
-                        <ExternalLink className="size-3" />
-                        Xem link bằng chứng đính kèm
-                      </a>
+                    <div className="pt-2 border-t border-blue-100">
+                      <span className="text-3xs font-extrabold text-slate-500 uppercase tracking-wider block mb-1.5 flex items-center gap-1">
+                        <ShieldCheck className="size-3 text-emerald-600" />
+                        Tệp minh chứng HR đã nộp (SHA-256):
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {claim.evidenceUrl.split(',').map((url, i) => {
+                          const trimmed = url.trim();
+                          const isImg =
+                            trimmed.startsWith('data:image/') ||
+                            /\.(png|jpe?g|webp|gif)($|\?)/i.test(trimmed) ||
+                            trimmed.includes('.png') ||
+                            trimmed.includes('.jpg');
+
+                          if (isImg) {
+                            return (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => setZoomedImageUrl(trimmed)}
+                                className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:border-[#2563EB] transition-all bg-white cursor-pointer"
+                                title="Bấm để xem ảnh phóng to"
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={trimmed}
+                                  alt={`Bằng chứng HR #${i + 1}`}
+                                  className="h-16 w-20 object-cover group-hover:scale-105 transition-transform"
+                                />
+                                <span className="absolute bottom-0 inset-x-0 bg-slate-900/70 text-white text-3xs py-0.5 text-center font-bold">
+                                  Ảnh #{i + 1}
+                                </span>
+                              </button>
+                            );
+                          }
+
+                          const fileName = trimmed.split('/').pop()?.split('_').pop() || `Tài liệu #${i + 1}`;
+                          return (
+                            <a
+                              key={i}
+                              href={trimmed}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-2xs font-bold bg-white border border-slate-200 text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"
+                            >
+                              <FileText className="size-3.5 text-slate-500" />
+                              <span className="max-w-[150px] truncate">{fileName}</span>
+                              <ExternalLink className="size-2.5 text-slate-400" />
+                            </a>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 
@@ -317,12 +360,79 @@ export function AdminWarrantyReviewModal({
                     </div>
                   )}
 
-                  <div>
-                    <span className="text-2xs text-slate-500 block">Nội dung giải trình / Đối chất:</span>
-                    <p className="mt-0.5 text-slate-800 bg-white p-2.5 rounded-lg border border-amber-100 text-2xs italic leading-relaxed min-h-[60px]">
-                      {claim.candidateResponse ? `"${claim.candidateResponse}"` : 'Chưa có văn bản đối chất từ ứng viên.'}
-                    </p>
-                  </div>
+                  {(() => {
+                    const fullResp = claim.candidateResponse || '';
+                    const match = fullResp.match(/\[BẰNG CHỨNG ĐỐI CHẤT:\s*([\s\S]*?)\]/);
+                    const cleanText = fullResp.replace(/\[BẰNG CHỨNG ĐỐI CHẤT:\s*[\s\S]*?\]/g, '').trim();
+                    const candEvidenceUrls = match ? match[1].split(',') : [];
+
+                    return (
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-2xs text-slate-500 block">Nội dung giải trình / Đối chất:</span>
+                          <p className="mt-0.5 text-slate-800 bg-white p-2.5 rounded-lg border border-amber-100 text-2xs italic leading-relaxed min-h-[50px] whitespace-pre-wrap">
+                            {cleanText ? `"${cleanText}"` : 'Chưa có văn bản đối chất từ ứng viên.'}
+                          </p>
+                        </div>
+
+                        {candEvidenceUrls.length > 0 && (
+                          <div className="pt-2 border-t border-amber-200/60">
+                            <span className="text-3xs font-extrabold text-amber-800 uppercase tracking-wider block mb-1.5 flex items-center gap-1">
+                              <ShieldCheck className="size-3 text-emerald-600" />
+                              Tệp bằng chứng ứng viên đối chất (SHA-256):
+                            </span>
+                            <div className="flex flex-wrap gap-2">
+                              {candEvidenceUrls.map((url, i) => {
+                                const trimmed = url.trim();
+                                const isImg =
+                                  trimmed.startsWith('data:image/') ||
+                                  /\.(png|jpe?g|webp|gif)($|\?)/i.test(trimmed) ||
+                                  trimmed.includes('.png') ||
+                                  trimmed.includes('.jpg');
+
+                                if (isImg) {
+                                  return (
+                                    <button
+                                      key={i}
+                                      type="button"
+                                      onClick={() => setZoomedImageUrl(trimmed)}
+                                      className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:border-[#2563EB] transition-all bg-white cursor-pointer"
+                                      title="Bấm để xem ảnh phóng to"
+                                    >
+                                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                                      <img
+                                        src={trimmed}
+                                        alt={`Bằng chứng ứng viên #${i + 1}`}
+                                        className="h-16 w-20 object-cover group-hover:scale-105 transition-transform"
+                                      />
+                                      <span className="absolute bottom-0 inset-x-0 bg-slate-900/70 text-white text-3xs py-0.5 text-center font-bold">
+                                        Ảnh #{i + 1}
+                                      </span>
+                                    </button>
+                                  );
+                                }
+
+                                const fileName = trimmed.split('/').pop()?.split('_').pop() || `Tài liệu #${i + 1}`;
+                                return (
+                                  <a
+                                    key={i}
+                                    href={trimmed}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-2xs font-bold bg-white border border-slate-200 text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"
+                                  >
+                                    <FileText className="size-3.5 text-slate-500" />
+                                    <span className="max-w-[150px] truncate">{fileName}</span>
+                                    <ExternalLink className="size-2.5 text-slate-400" />
+                                  </a>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   <div className="text-2xs text-slate-400 pt-1 border-t border-amber-100">
                     Ứng viên: {contract?.application?.candidate?.email} • {contract?.application?.candidate?.phone || 'N/A'}
@@ -403,6 +513,51 @@ export function AdminWarrantyReviewModal({
           ) : null}
         </div>
       </div>
+
+      {/* Lightbox for zooming evidence images */}
+      {zoomedImageUrl && (
+        <div
+          className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 p-4 animate-in fade-in duration-200"
+          onClick={() => setZoomedImageUrl(null)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-700 p-2 flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex items-center justify-between pb-2 px-2 text-white text-xs border-b border-slate-800">
+              <span className="font-semibold flex items-center gap-1.5">
+                <ShieldCheck className="size-4 text-emerald-400" />
+                Hồ Sơ Minh Chứng Gốc (Lưu trữ bất biến SHA-256)
+              </span>
+              <div className="flex items-center gap-3">
+                <a
+                  href={zoomedImageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-2xs text-blue-400 hover:text-blue-300 underline"
+                >
+                  <ExternalLink className="size-3" /> Mở trong tab mới
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setZoomedImageUrl(null)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            </div>
+            <div className="p-2 overflow-auto max-h-[80vh] flex items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={zoomedImageUrl}
+                alt="Minh chứng phóng to"
+                className="max-h-[75vh] w-auto max-w-full rounded-lg object-contain shadow-md"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

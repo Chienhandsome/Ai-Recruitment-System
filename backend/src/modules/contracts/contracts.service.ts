@@ -10,9 +10,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { Response } from 'express';
 import {
+  ApplicationStage,
   ContractSigningMethod,
   ContractStatus,
   ContractType,
+  HrDecision,
+  JobCloseReason,
+  JobStatus,
   Prisma,
   WarrantyClaimStatus,
   WarrantyCompensationType,
@@ -50,6 +54,89 @@ export class ContractsService {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     return `HDLD-${dateStr}-${randomSuffix}`;
+  }
+
+  /**
+   * Helper: Finalize application stage to HIRED and check job quota auto-close
+   * Triggered only when the contract is officially SIGNED by both parties.
+   */
+  private async finalizeHiredApplication(
+    tx: Prisma.TransactionClient,
+    applicationId: string,
+    performedByUserId: string,
+  ) {
+    const application = await tx.application.findUnique({
+      where: { id: applicationId },
+      include: {
+        job: {
+          select: {
+            id: true,
+            title: true,
+            targetHires: true,
+            autoCloseOnQuota: true,
+            status: true,
+            recruiter: { select: { userId: true } },
+          },
+        },
+      },
+    });
+
+    if (!application) return;
+
+    if (application.currentStage !== ApplicationStage.HIRED) {
+      await tx.application.update({
+        where: { id: applicationId },
+        data: {
+          currentStage: ApplicationStage.HIRED,
+          hrDecision: HrDecision.ACCEPTED,
+        },
+      });
+
+      await tx.applicationStatusHistory.create({
+        data: {
+          applicationId,
+          previousStage: application.currentStage,
+          newStage: ApplicationStage.HIRED,
+          changedByUserId: performedByUserId,
+          note: 'Hợp đồng lao động đã hoàn tất ký kết chính thức bởi cả hai bên. Ứng viên chính thức chuyển sang giai đoạn Đã tuyển dụng (HIRED).',
+        },
+      });
+    }
+
+    const job = application.job;
+    if (job && job.autoCloseOnQuota && job.status === JobStatus.PUBLISHED) {
+      const hiredCount = await tx.application.count({
+        where: {
+          jobId: job.id,
+          currentStage: ApplicationStage.HIRED,
+        },
+      });
+
+      if (hiredCount >= job.targetHires) {
+        await tx.jobPosting.update({
+          where: { id: job.id },
+          data: {
+            status: JobStatus.CLOSED,
+            closeReason: JobCloseReason.QUOTA_REACHED,
+            closedAt: new Date(),
+          },
+        });
+
+        const recruiterUserId = job.recruiter?.userId;
+        if (recruiterUserId) {
+          try {
+            await this.notificationsService.createNotification({
+              recipientUserId: recruiterUserId,
+              title: `Đã tuyển đủ chỉ tiêu: ${job.title}`,
+              message: `Vị trí tuyển dụng '${job.title}' đã đạt đủ chỉ tiêu (${hiredCount}/${job.targetHires}) sau khi hoàn tất ký hợp đồng và đã được tự động đóng. Toàn bộ ứng viên còn lại trong quy trình được bảo lưu an toàn trong Talent Pool.`,
+              payload: { jobId: job.id, type: 'QUOTA_REACHED' },
+            });
+          } catch (err) {
+            this.logger.warn(`Failed to dispatch quota notification: ${err}`);
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -685,6 +772,8 @@ export class ContractsService {
         },
       });
 
+      await this.finalizeHiredApplication(tx, contract.applicationId, recruiterUserId);
+
       return res;
     });
 
@@ -836,6 +925,8 @@ export class ContractsService {
         },
       });
 
+      await this.finalizeHiredApplication(tx, contract.applicationId, recruiterUserId);
+
       return res;
     });
 
@@ -919,12 +1010,14 @@ export class ContractsService {
       throw new BadRequestException('Hợp đồng này đã được ký kết hoàn tất.');
     }
 
-    // Determine target recipient email
-    let targetEmail: string | undefined;
-    if (isCandidate) {
-      targetEmail = contract.application.candidate.user?.email || contract.application.candidate.email || emailOverride;
-    } else if (isRecruiter) {
-      targetEmail = contract.application.job.recruiter?.user?.email || emailOverride;
+    // Determine target recipient email (allow emailOverride for custom recipient)
+    let targetEmail: string | undefined = emailOverride?.trim();
+    if (!targetEmail) {
+      if (isCandidate) {
+        targetEmail = contract.application.candidate.user?.email || contract.application.candidate.email;
+      } else if (isRecruiter) {
+        targetEmail = contract.application.job.recruiter?.user?.email;
+      }
     }
 
     if (!targetEmail) {
@@ -1011,10 +1104,10 @@ export class ContractsService {
 
     return {
       success: true,
-      message: `Mã OTP xác thực gồm 6 chữ số đã được gửi đến email ${maskedEmail}.`,
+      message: `Mã OTP xác thực gồm 6 chữ số đã được gửi đến email ${targetEmail}.`,
       expiresAt,
-      destinationEmail: maskedEmail,
-      demoOtp: process.env.NODE_ENV !== 'production' ? otpCode : undefined,
+      destinationEmail: targetEmail,
+      maskedEmail,
     };
   }
 
@@ -1187,6 +1280,10 @@ export class ContractsService {
           snapshot: auditCertificate as Prisma.InputJsonValue,
         },
       });
+
+      if (willBeFullySigned) {
+        await this.finalizeHiredApplication(tx, contract.applicationId, userId);
+      }
 
       return res;
     });
@@ -1745,10 +1842,14 @@ export class ContractsService {
     }
 
     const updatedClaim = await this.prisma.$transaction(async (tx) => {
+      const responsePayload = dto.evidenceUrl
+        ? `${dto.feedback.trim()}\n\n[BẰNG CHỨNG ĐỐI CHẤT: ${dto.evidenceUrl}]`
+        : dto.feedback.trim();
+
       const updated = await tx.warrantyClaim.update({
         where: { id: claim.id },
         data: {
-          candidateResponse: dto.feedback.trim(),
+          candidateResponse: responsePayload,
           candidateRespondedAt: new Date(),
         },
       });
@@ -1762,6 +1863,7 @@ export class ContractsService {
           snapshot: {
             claimId: claim.id,
             candidateResponse: dto.feedback.trim(),
+            evidenceUrl: dto.evidenceUrl || null,
           },
         },
       });

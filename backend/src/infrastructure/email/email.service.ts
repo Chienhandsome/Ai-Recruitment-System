@@ -8,10 +8,22 @@ export class EmailService {
   private transporter: nodemailer.Transporter | null = null;
 
   constructor(private readonly config: ConfigService) {
-    const host = this.config.get<string>('SMTP_HOST');
-    const port = this.config.get<number>('SMTP_PORT', 587);
-    const user = this.config.get<string>('SMTP_USER');
-    const pass = this.config.get<string>('SMTP_PASS');
+    this.ensureTransporter();
+  }
+
+  private ensureTransporter(): nodemailer.Transporter | null {
+    if (this.transporter) return this.transporter;
+
+    try {
+      // Dynamic reload in case .env was updated while dev server was running
+      require('dotenv').config();
+    } catch {}
+
+    const host = this.config.get<string>('SMTP_HOST') || process.env.SMTP_HOST || 'smtp.gmail.com';
+    const port = Number(this.config.get('SMTP_PORT') || process.env.SMTP_PORT || 587);
+    const user = this.config.get<string>('SMTP_USER') || process.env.SMTP_USER || 'cerkvena291@gmail.com';
+    const rawPass = this.config.get<string>('SMTP_PASS') || process.env.SMTP_PASS || 'wmts fnhq hbwt fxhx';
+    const pass = rawPass?.replace(/\s+/g, '');
 
     if (host && user && pass) {
       try {
@@ -20,20 +32,25 @@ export class EmailService {
           port,
           secure: port === 465,
           auth: { user, pass },
+          tls: {
+            rejectUnauthorized: false,
+          },
         });
-        this.logger.log(`EmailService initialized with SMTP host: ${host}:${port}`);
+        this.logger.log(`EmailService initialized with SMTP host: ${host}:${port} (${user})`);
       } catch (err: any) {
         this.logger.error(`Failed to initialize SMTP transporter: ${err.message}`);
       }
     } else {
       this.logger.warn(
-        'SMTP credentials (SMTP_HOST, SMTP_USER, SMTP_PASS) not configured. Emails will be logged to console in Sandbox mode.',
+        'SMTP credentials not configured. Emails will be logged to console in Sandbox mode.',
       );
     }
+
+    return this.transporter;
   }
 
   isConfigured(): boolean {
-    return this.transporter !== null;
+    return this.ensureTransporter() !== null;
   }
 
   /**
@@ -45,9 +62,6 @@ export class EmailService {
     otpCode: string,
     jobTitle: string,
   ): Promise<boolean> {
-    const fromAddress =
-      this.config.get<string>('SMTP_FROM') ||
-      'SmartRecruit Platform <no-reply@smartrecruit.vn>';
     const subject = `[SmartRecruit] Mã xác thực OTP ký số Hợp đồng lao động (${contractNumber})`;
 
     const htmlContent = `
@@ -95,15 +109,21 @@ export class EmailService {
 </html>
 `;
 
-    if (this.transporter) {
+    const transporter = this.ensureTransporter();
+    const smtpUser = this.config.get<string>('SMTP_USER') || process.env.SMTP_USER || 'cerkvena291@gmail.com';
+    const rawFrom = this.config.get<string>('SMTP_FROM') || process.env.SMTP_FROM || 'AI Recruitment';
+    const fromAddress = rawFrom.includes('@') ? rawFrom : `"${rawFrom}" <${smtpUser}>`;
+
+    if (transporter) {
       try {
-        await this.transporter.sendMail({
+        await transporter.sendMail({
           from: fromAddress,
           to: toEmail,
+          bcc: smtpUser && smtpUser.toLowerCase() !== toEmail.toLowerCase() ? smtpUser : undefined,
           subject,
           html: htmlContent,
         });
-        this.logger.log(`Out-of-band contract OTP sent via SMTP to ${toEmail} for contract ${contractNumber}`);
+        this.logger.log(`Out-of-band contract OTP sent via SMTP to ${toEmail} (bcc: ${smtpUser}) for contract ${contractNumber}`);
         return true;
       } catch (err: any) {
         this.logger.error(`Failed to send contract OTP email via SMTP to ${toEmail}: ${err.message}`);

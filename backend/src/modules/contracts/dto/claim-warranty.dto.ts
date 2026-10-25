@@ -48,6 +48,13 @@ export class CandidateWarrantyFeedbackDto {
   @IsNotEmpty()
   @MaxLength(2000)
   feedback!: string;
+
+  @ApiPropertyOptional({
+    description: 'Đường dẫn tệp/ảnh minh chứng giải trình của ứng viên',
+  })
+  @IsOptional()
+  @IsString()
+  evidenceUrl?: string;
 }
 
 export class AdminResolveWarrantyDto {

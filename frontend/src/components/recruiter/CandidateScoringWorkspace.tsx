@@ -38,7 +38,10 @@ import { CreateOrEditContractModal } from "./contracts/CreateOrEditContractModal
 import { UploadSignedScanModal } from "./contracts/UploadSignedScanModal";
 import { DigitalSignatureModal } from "@/components/common/contracts/DigitalSignatureModal";
 import { ClaimWarrantyModal } from "./contracts/ClaimWarrantyModal";
-import { FileSignature, FileText, Download } from "lucide-react";
+import { DisputeDetailModal } from "@/components/common/disputes/DisputeDetailModal";
+import { ReportDisputeModal } from "@/components/common/disputes/ReportDisputeModal";
+import { type DisputeData, getDisputesByApplication } from "@/lib/dispute-api";
+import { FileSignature, FileText, Download, Scale, ShieldAlert } from "lucide-react";
 
 export type PillarDimension = "skills" | "experience" | "education" | "other";
 
@@ -95,6 +98,12 @@ export function CandidateScoringWorkspace({
   const [showUploadScanModal, setShowUploadScanModal] = useState(false);
   const [showRecruiterESignModal, setShowRecruiterESignModal] = useState(false);
   const [showWarrantyModal, setShowWarrantyModal] = useState(false);
+
+  // Recruiter dispute states
+  const [workspaceDisputes, setWorkspaceDisputes] = useState<DisputeData[]>([]);
+  const [showWorkspaceDisputeModal, setShowWorkspaceDisputeModal] = useState<boolean>(false);
+  const [showReportDisputeModal, setShowReportDisputeModal] = useState<boolean>(false);
+  const [selectedDisputeId, setSelectedDisputeId] = useState<string | null>(null);
 
   const handleRevokeOffer = async () => {
     if (!selectedApplicationDetail?.offer?.id) return;
@@ -161,9 +170,27 @@ export function CandidateScoringWorkspace({
     }
   }, [activeAppId, token]);
 
+  const loadWorkspaceDisputes = React.useCallback(async () => {
+    if (activeAppId && token) {
+      try {
+        const data = await getDisputesByApplication(token, activeAppId);
+        setWorkspaceDisputes(data);
+        if (data.length > 0) {
+          setSelectedDisputeId(data[0].id);
+        }
+      } catch {
+        setWorkspaceDisputes([]);
+      }
+    } else {
+      setWorkspaceDisputes([]);
+    }
+  }, [activeAppId, token]);
+
   useEffect(() => {
     loadWorkspaceContract();
-  }, [loadWorkspaceContract]);
+    loadWorkspaceDisputes();
+  }, [loadWorkspaceContract, loadWorkspaceDisputes]);
+
 
   // Weights configuration from Job
   const sWeight = job.skillWeight != null && !isNaN(Number(job.skillWeight)) ? Number(job.skillWeight) : 40;
@@ -815,7 +842,9 @@ export function CandidateScoringWorkspace({
                               <span
                                 className={`rounded-full px-2.5 py-0.5 text-2xs font-extrabold ${
                                   detail.offer.status === 'ACCEPTED'
-                                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                    ? (workspaceContract?.status === 'SIGNED' || detail.currentStage === 'HIRED'
+                                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                        : 'bg-blue-100 text-blue-800 border border-blue-300')
                                     : detail.offer.status === 'DECLINED'
                                       ? 'bg-rose-100 text-rose-800 border border-rose-300'
                                       : detail.offer.status === 'CANCELLED'
@@ -826,7 +855,9 @@ export function CandidateScoringWorkspace({
                                 }`}
                               >
                                 {detail.offer.status === 'ACCEPTED'
-                                  ? '✓ Ứng viên đã chấp thuận (HIRED)'
+                                  ? (workspaceContract?.status === 'SIGNED' || detail.currentStage === 'HIRED'
+                                      ? '✓ Đã ký hợp đồng & Tuyển dụng (HIRED)'
+                                      : '✓ Ứng viên đã chấp thuận Offer (Chờ ký HĐ)')
                                   : detail.offer.status === 'DECLINED'
                                     ? `✗ Ứng viên đã từ chối (${detail.offer.declineReason || 'Lý do khác'})`
                                     : detail.offer.status === 'CANCELLED'
@@ -893,6 +924,68 @@ export function CandidateScoringWorkspace({
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* 1.5. DISPUTE & ARBITRATION ALERT BANNER */}
+                {workspaceDisputes.length > 0 && (
+                  <div
+                    className={`rounded-2xl border p-4 space-y-2 mt-3 shadow-xs transition-all ${
+                      workspaceDisputes[0].status === 'RESOLVED'
+                        ? 'border-emerald-300 bg-emerald-50/90 text-emerald-950'
+                        : workspaceDisputes[0].status === 'DISMISSED'
+                        ? 'border-slate-300 bg-slate-50 text-slate-800'
+                        : 'border-rose-300 bg-rose-50/90 text-rose-950'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <ShieldAlert
+                            className={`size-4.5 ${
+                              workspaceDisputes[0].status === 'RESOLVED'
+                                ? 'text-emerald-700'
+                                : 'text-rose-600'
+                            }`}
+                          />
+                          <span className="font-mono text-2xs font-extrabold bg-white px-2 py-0.5 rounded border border-slate-200">
+                            {workspaceDisputes[0].disputeNumber}
+                          </span>
+                          <span className="text-xs font-black uppercase tracking-wide">
+                            {workspaceDisputes[0].status === 'RESOLVED'
+                              ? 'Ban Quản Trị Đã Có Phán Quyết Xử Lý Khiếu Nại'
+                              : workspaceDisputes[0].status === 'DISMISSED'
+                              ? 'Khiếu Nại Liên Quan Đã Được Bác Bỏ'
+                              : 'Hồ Sơ Đang Bị Khiếu Nại / Tố Cáo Cần Giải Trình'}
+                          </span>
+                        </div>
+                        {workspaceDisputes[0].adminResolution ? (
+                          <p className="text-xs text-slate-700 line-clamp-2 italic">
+                            &quot;{workspaceDisputes[0].adminResolution}&quot;
+                          </p>
+                        ) : (
+                          <p className="text-xs text-slate-700 line-clamp-1">
+                            Tiêu đề: <strong>{workspaceDisputes[0].title}</strong>. Bạn cần gửi văn bản giải trình và bằng chứng để Ban Quản Trị đối chiếu.
+                          </p>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDisputeId(workspaceDisputes[0].id);
+                          setShowWorkspaceDisputeModal(true);
+                        }}
+                        className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white shadow-xs transition-colors shrink-0 cursor-pointer ${
+                          workspaceDisputes[0].status === 'RESOLVED'
+                            ? 'bg-emerald-700 hover:bg-emerald-800'
+                            : 'bg-rose-600 hover:bg-rose-700'
+                        }`}
+                      >
+                        <Scale className="size-3.5" />
+                        Xem Khiếu Nại & Gửi Giải Trình
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -1047,8 +1140,59 @@ export function CandidateScoringWorkspace({
                               : 'Khai Báo Bảo Hành (30N)'}
                           </button>
                         )}
+
+                        {workspaceContract && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (workspaceDisputes.length > 0) {
+                                setSelectedDisputeId(workspaceDisputes[0].id);
+                                setShowWorkspaceDisputeModal(true);
+                              } else {
+                                setShowReportDisputeModal(true);
+                              }
+                            }}
+                            className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 text-xs font-bold transition-colors shadow-2xs cursor-pointer ${
+                              workspaceDisputes.length > 0
+                                ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                                : 'border-rose-300 bg-rose-50/70 text-rose-700 hover:bg-rose-100'
+                            }`}
+                          >
+                            <AlertTriangle className="size-3.5 text-rose-600" />
+                            {workspaceDisputes.length > 0
+                              ? `Chi Tiết Khiếu Nại (${workspaceDisputes.length})`
+                              : 'Khiếu Nại / Báo Vi Phạm'}
+                          </button>
+                        )}
                       </div>
                     </div>
+
+                    {/* Active Dispute Banner for Recruiter */}
+                    {workspaceDisputes.length > 0 && (
+                      <div className="mb-3 rounded-xl border border-amber-300 bg-amber-50/90 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                        <div className="flex items-center gap-2.5">
+                          <AlertTriangle className="size-4 text-amber-600 shrink-0" />
+                          <div>
+                            <span className="text-xs font-bold text-amber-900 block">
+                              Hồ sơ đang có khiếu nại ({workspaceDisputes[0].disputeNumber}) - Trạng thái: {workspaceDisputes[0].status}
+                            </span>
+                            <span className="text-2xs text-amber-800">
+                              {workspaceDisputes[0].title}: {workspaceDisputes[0].description.slice(0, 100)}...
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedDisputeId(workspaceDisputes[0].id);
+                            setShowWorkspaceDisputeModal(true);
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition shadow-2xs cursor-pointer shrink-0"
+                        >
+                          Mở Tranh Biện & Phản Hồi
+                        </button>
+                      </div>
+                    )}
 
                     {workspaceContract && (
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
@@ -2308,6 +2452,36 @@ export function CandidateScoringWorkspace({
           )}
         </>
       )}
+
+      {/* Recruiter Report Dispute Modal */}
+      {showReportDisputeModal && currentAppListItem && (
+        <ReportDisputeModal
+          isOpen={showReportDisputeModal}
+          onClose={() => setShowReportDisputeModal(false)}
+          token={token}
+          applicationId={currentAppListItem.id}
+          contractId={workspaceContract?.id}
+          jobTitle={job.title}
+          companyName={(job as any)?.company?.name || "Doanh nghiệp"}
+          candidateName={selectedApplicationDetail?.candidate?.fullName || currentAppListItem.candidate?.fullName || "Ứng viên"}
+          currentUserRole="RECRUITER"
+          onSubmitted={async () => {
+            await loadWorkspaceDisputes();
+            onRefresh();
+          }}
+        />
+      )}
+
+      {/* Dispute Detail & Recruiter Response Modal */}
+      <DisputeDetailModal
+        isOpen={showWorkspaceDisputeModal}
+        onClose={() => setShowWorkspaceDisputeModal(false)}
+        disputeId={selectedDisputeId}
+        token={token}
+        currentUserRole="RECRUITER"
+        onDisputeUpdated={loadWorkspaceDisputes}
+      />
     </div>
   );
 }
+

@@ -1280,9 +1280,14 @@ model Dispute {
   description      String          @db.Text
   evidenceUrls     Json?           @map("evidence_urls")
   status           DisputeStatus   @default(PENDING)
-  adminResolution  String?         @map("admin_resolution") @db.Text
-  resolvedByUserId String?         @map("resolved_by_user_id") @db.Uuid
-  resolvedAt       DateTime?       @map("resolved_at")
+  adminResolution    String?         @map("admin_resolution") @db.Text
+  penaltyAction      String?         @map("penalty_action")
+  penaltyNotes       String?         @map("penalty_notes") @db.Text
+  penaltyAmount      Decimal?        @map("penalty_amount") @db.Decimal(12, 2)
+  compensationAmount Decimal?        @map("compensation_amount") @db.Decimal(12, 2)
+  timeline           Json?           @default("[]") @map("timeline")
+  resolvedByUserId   String?         @map("resolved_by_user_id") @db.Uuid
+  resolvedAt         DateTime?       @map("resolved_at")
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")
 

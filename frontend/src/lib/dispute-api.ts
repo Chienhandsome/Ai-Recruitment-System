@@ -24,6 +24,25 @@ export const disputeStatusLabels: Record<DisputeStatus, string> = {
   DISMISSED: 'Bác bỏ / Không đủ căn cứ',
 };
 
+export interface DisputeTimelineEntry {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderRole: 'CANDIDATE' | 'RECRUITER' | 'ADMIN';
+  type: 'INITIAL_CLAIM' | 'MESSAGE' | 'EXPLANATION' | 'ADMIN_NOTE' | 'ADMIN_RESOLUTION' | 'APPEAL';
+  message: string;
+  evidenceUrls?: string[];
+  createdAt: string;
+  isAppeal?: boolean;
+  meta?: {
+    status?: DisputeStatus;
+    enforcementAction?: 'NONE' | 'WARN' | 'LOCK_RECRUITER';
+    penaltyNotes?: string;
+    penaltyAmount?: number;
+    compensationAmount?: number;
+  };
+}
+
 export interface DisputeData {
   id: string;
   disputeNumber: string;
@@ -38,9 +57,19 @@ export interface DisputeData {
   adminResolution?: string | null;
   resolvedByUserId?: string | null;
   resolvedAt?: string | null;
+  penaltyAction?: string | null;
+  penaltyNotes?: string | null;
+  penaltyAmount?: number | null;
+  compensationAmount?: number | null;
+  timeline?: DisputeTimelineEntry[] | null;
   createdAt: string;
   updatedAt: string;
   reportedByUser?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  resolvedByUser?: {
     id: string;
     fullName: string;
     email: string;
@@ -53,13 +82,15 @@ export interface DisputeData {
       recruiter?: {
         userId?: string;
         user?: { fullName?: string; email?: string; status?: string };
-        company?: { id?: string; name?: string };
+        company?: { id?: string; name?: string; logoUrl?: string };
       };
     };
     candidate?: {
       id: string;
+      userId: string;
       fullName: string;
       email: string;
+      phone?: string;
     };
     offer?: any;
     contract?: any;
@@ -79,6 +110,15 @@ export interface ResolveDisputeInput {
   status: DisputeStatus;
   adminResolution: string;
   enforcementAction?: 'NONE' | 'WARN' | 'LOCK_RECRUITER';
+  penaltyNotes?: string;
+  penaltyAmount?: number;
+  compensationAmount?: number;
+}
+
+export interface RespondDisputeInput {
+  message: string;
+  evidenceUrls?: string[];
+  isAppeal?: boolean;
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
@@ -120,6 +160,33 @@ export async function getDisputesByApplication(
   return handleResponse<DisputeData[]>(res);
 }
 
+export async function getDisputeById(
+  token: string,
+  disputeId: string,
+): Promise<DisputeData> {
+  const res = await fetch(`${API_BASE}/disputes/${disputeId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+  return handleResponse<DisputeData>(res);
+}
+
+export async function respondDispute(
+  token: string,
+  disputeId: string,
+  input: RespondDisputeInput,
+): Promise<DisputeData> {
+  const res = await fetch(`${API_BASE}/disputes/${disputeId}/messages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+  });
+  return handleResponse<DisputeData>(res);
+}
+
 export async function getAdminDisputes(
   token: string,
   status?: DisputeStatus,
@@ -149,3 +216,32 @@ export async function resolveAdminDispute(
   });
   return handleResponse<DisputeData>(res);
 }
+
+export interface UploadedEvidenceFile {
+  fileName: string;
+  savedFileName: string;
+  mimeType: string;
+  size: number;
+  sha256Hash: string;
+  url: string;
+  dataUrl?: string;
+}
+
+export async function uploadDisputeEvidence(
+  token: string,
+  files: File[],
+): Promise<UploadedEvidenceFile[]> {
+  const formData = new FormData();
+  files.forEach((f) => formData.append('files', f));
+
+  const res = await fetch(`${API_BASE}/disputes/upload-evidence`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+  return handleResponse<UploadedEvidenceFile[]>(res);
+}
+
+

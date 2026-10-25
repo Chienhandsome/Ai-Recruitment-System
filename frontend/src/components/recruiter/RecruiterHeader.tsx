@@ -4,7 +4,16 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { BrainCircuit, Calendar, ChevronDown, CreditCard, LogOut, User, Users } from 'lucide-react';
+import {
+  BrainCircuit,
+  Calendar,
+  ChevronDown,
+  CreditCard,
+  LogOut,
+  Mail,
+  User,
+  Users,
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { RecruiterProfileData } from '@/lib/recruiter-api';
 import { RecruiterNotificationBell } from './RecruiterNotificationBell';
@@ -202,6 +211,14 @@ export function RecruiterHeader({
                 >
                   <Users className="size-4" />
                   Ứng viên đang tìm việc
+                </Link>
+                <Link
+                  href="/recruiter/talent-invitations"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  <Mail className="size-4" />
+                  Lời mời đã gửi
                 </Link>
                 <button
                   type="button"

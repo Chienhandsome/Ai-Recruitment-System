@@ -2,6 +2,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -456,5 +457,257 @@ describe('ApplicationsService', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(transactionClient.notification.deleteMany).not.toHaveBeenCalled();
     expect(transactionClient.application.delete).not.toHaveBeenCalled();
+  });
+});
+
+function invitationApplicationDependencies() {
+  const dependencies = createDependencies();
+  const tx = {
+    ...dependencies.prisma,
+    $queryRaw: jest.fn().mockResolvedValue([]),
+    talentInvitation: {
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      findFirst: jest.fn().mockResolvedValue({
+        id: 'invite-1',
+        status: 'ACCEPTED',
+        applicationId: null,
+        recruiterUserId: 'recruiter-user-1',
+      }),
+      update: jest.fn().mockResolvedValue({}),
+    },
+  };
+  const prisma = {
+    ...tx,
+    $transaction: jest.fn(async (fn: (client: typeof tx) => Promise<unknown>) =>
+      fn(tx),
+    ),
+  };
+  const notifications = {
+    createNotificationOnce: jest.fn().mockResolvedValue({ count: 1 }),
+    createNotification: jest.fn().mockResolvedValue({}),
+  };
+  const service = new ApplicationsService(
+    prisma as never,
+    dependencies.evaluationService as never,
+    {} as never,
+    dependencies.entitlements as never,
+    new EvaluationPayloadBuilder() as never,
+    notifications as never,
+  );
+  return { ...dependencies, prisma, tx, notifications, service };
+}
+
+describe('ApplicationsService invitation acceptance', () => {
+  it('creates a TALENT_POOL_INVITE application, links it atomically and dispatches normal evaluation', async () => {
+    const { service, tx, evaluationService, notifications } =
+      invitationApplicationDependencies();
+    const result = await service.applyForJob(
+      candidateProfile.userId,
+      { jobId: job.id, resumeId: resume.id },
+      now,
+      'invite-1',
+    );
+    expect(result.applicationId).toBe('application-1');
+    expect(tx.talentInvitation.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          id: 'invite-1',
+          candidateId: candidateProfile.id,
+          jobId: job.id,
+          status: 'PENDING',
+          expiresAt: { gt: now },
+        },
+      }),
+    );
+    expect(tx.application.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          source: 'TALENT_POOL_INVITE',
+          resumeId: resume.id,
+        }),
+      }),
+    );
+    expect(tx.talentInvitation.update).toHaveBeenCalledWith({
+      where: { id: 'invite-1' },
+      data: { applicationId: 'application-1' },
+    });
+    expect(evaluationService.dispatchNewApplication).toHaveBeenCalledTimes(1);
+    expect(notifications.createNotificationOnce).toHaveBeenCalledWith(
+      tx,
+      'talent-invitation:invite-1:ACCEPTED',
+      expect.objectContaining({ applicationId: 'application-1' }),
+    );
+  });
+
+  it('cannot accept when a withdrawal or expiry wins the conditional claim', async () => {
+    const { service, tx, evaluationService } =
+      invitationApplicationDependencies();
+    tx.talentInvitation.updateMany.mockResolvedValue({ count: 0 });
+    tx.talentInvitation.findFirst.mockResolvedValue({ status: 'WITHDRAWN' });
+    await expect(
+      service.applyForJob(
+        candidateProfile.userId,
+        { jobId: job.id },
+        now,
+        'invite-1',
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(tx.application.create).not.toHaveBeenCalled();
+    expect(evaluationService.dispatchNewApplication).not.toHaveBeenCalled();
+  });
+
+  it('returns the existing linked application after a concurrent repeated accept, without dispatching again', async () => {
+    const { service, tx, evaluationService } =
+      invitationApplicationDependencies();
+    tx.talentInvitation.updateMany.mockResolvedValue({ count: 0 });
+    tx.talentInvitation.findFirst.mockResolvedValue({
+      status: 'ACCEPTED',
+      applicationId: 'existing-application',
+    });
+    const result = await service.applyForJob(
+      candidateProfile.userId,
+      { jobId: job.id },
+      now,
+      'invite-1',
+    );
+    expect(result).toMatchObject({
+      applicationId: 'existing-application',
+      reused: true,
+    });
+    expect(tx.application.create).not.toHaveBeenCalled();
+    expect(evaluationService.dispatchNewApplication).not.toHaveBeenCalled();
+  });
+
+  it('links a direct application that arrives before acceptance obtains the job lock', async () => {
+    const { service, tx, evaluationService } =
+      invitationApplicationDependencies();
+    tx.application.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ id: 'direct-application' });
+    const result = await service.applyForJob(
+      candidateProfile.userId,
+      { jobId: job.id },
+      now,
+      'invite-1',
+    );
+    expect(result).toMatchObject({
+      applicationId: 'direct-application',
+      reused: true,
+    });
+    expect(tx.application.create).not.toHaveBeenCalled();
+    expect(tx.talentInvitation.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { applicationId: 'direct-application' },
+      }),
+    );
+    expect(evaluationService.dispatchNewApplication).not.toHaveBeenCalled();
+  });
+
+  it('rechecks publication after acquiring the job lock', async () => {
+    const { service, tx } = invitationApplicationDependencies();
+    tx.jobPosting.findFirst
+      .mockResolvedValueOnce({
+        ...job,
+        recruiter: { userId: 'recruiter-user-1' },
+      })
+      .mockResolvedValueOnce(null);
+    await expect(
+      service.applyForJob(
+        candidateProfile.userId,
+        { jobId: job.id },
+        now,
+        'invite-1',
+      ),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(tx.application.create).not.toHaveBeenCalled();
+  });
+
+  it('does not bypass applicant limits when accepting an invitation', async () => {
+    const { service, tx, entitlements } = invitationApplicationDependencies();
+    entitlements.getApplicantCapForJobOwner.mockResolvedValue(1);
+    tx.application.count.mockResolvedValue(1);
+    await expect(
+      service.applyForJob(
+        candidateProfile.userId,
+        { jobId: job.id },
+        now,
+        'invite-1',
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(tx.application.create).not.toHaveBeenCalled();
+  });
+
+  it('retains CV ownership and parsing checks for invited candidates', async () => {
+    const { service, tx } = invitationApplicationDependencies();
+    tx.resume.findFirst.mockResolvedValue(null);
+    await expect(
+      service.applyForJob(
+        candidateProfile.userId,
+        { jobId: job.id, resumeId: 'someone-elses-cv' },
+        now,
+        'invite-1',
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(tx.talentInvitation.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('creates and evaluates only once when two accepts run together', async () => {
+    const { service, tx, prisma, evaluationService } =
+      invitationApplicationDependencies();
+    const state = {
+      status: 'PENDING',
+      applicationId: null as string | null,
+      recruiterUserId: 'recruiter-user-1',
+    };
+    let applicationId: string | null = null;
+    let queue = Promise.resolve();
+    // Simulate the serialization provided by the job row lock in PostgreSQL.
+    prisma.$transaction.mockImplementation((fn) => {
+      const result = queue.then(() => fn(tx));
+      queue = result.then(
+        () => undefined,
+        () => undefined,
+      );
+      return result;
+    });
+    tx.talentInvitation.updateMany.mockImplementation(async () => {
+      if (state.status !== 'PENDING') return { count: 0 };
+      state.status = 'ACCEPTED';
+      return { count: 1 };
+    });
+    tx.talentInvitation.findFirst.mockImplementation(async () => ({
+      ...state,
+    }));
+    tx.talentInvitation.update.mockImplementation(async () => {
+      state.applicationId = applicationId;
+      return {};
+    });
+    tx.application.findUnique.mockImplementation(async () =>
+      applicationId ? { id: applicationId } : null,
+    );
+    tx.application.create.mockImplementation(async () => {
+      applicationId = 'application-1';
+      return { id: applicationId };
+    });
+    const results = await Promise.all([
+      service.applyForJob(
+        candidateProfile.userId,
+        { jobId: job.id },
+        now,
+        'invite-1',
+      ),
+      service.applyForJob(
+        candidateProfile.userId,
+        { jobId: job.id },
+        now,
+        'invite-1',
+      ),
+    ]);
+    expect(results.map((result) => result.applicationId)).toEqual([
+      'application-1',
+      'application-1',
+    ]);
+    expect(tx.application.create).toHaveBeenCalledTimes(1);
+    expect(evaluationService.dispatchNewApplication).toHaveBeenCalledTimes(1);
   });
 });

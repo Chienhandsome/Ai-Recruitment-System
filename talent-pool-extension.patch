@@ -1,0 +1,1822 @@
+diff --git a/backend/prisma/migrations/20261020133000_add_talent_pool_resume/migration.sql b/backend/prisma/migrations/20261020133000_add_talent_pool_resume/migration.sql
+new file mode 100644
+index 0000000..2bd68fe
+--- /dev/null
++++ b/backend/prisma/migrations/20261020133000_add_talent_pool_resume/migration.sql
+@@ -0,0 +1,13 @@
++BEGIN;
++
++ALTER TABLE "candidate_profiles"
++ADD COLUMN "talent_pool_resume_id" UUID;
++
++ALTER TABLE "candidate_profiles" ADD CONSTRAINT "candidate_profiles_talent_pool_resume_id_fkey"
++FOREIGN KEY ("talent_pool_resume_id") REFERENCES "resumes"("id")
++ON DELETE SET NULL ON UPDATE CASCADE;
++
++-- Resumes uploaded by the candidate; NULL means they have not chosen one yet.
++-- HR can only download the chosen resume through a short-lived signed URL after unlocking.
++
++COMMIT;
+diff --git a/backend/prisma/schema.prisma b/backend/prisma/schema.prisma
+index 2604f97..7db0cf9 100644
+--- a/backend/prisma/schema.prisma
++++ b/backend/prisma/schema.prisma
+@@ -645,6 +645,9 @@ model CandidateProfile {
+   jobSeekingEntitlement PackageEntitlement?  @relation("JobSeekingEntitlement", fields: [jobSeekingEntitlementId], references: [id], onDelete: SetNull)
+   primaryResumeId     String?                @unique @map("primary_resume_id")
+   primaryResume       Resume?                @relation("PrimaryResume", fields: [primaryResumeId], references: [id], onDelete: SetNull)
++  /// Resume the candidate agreed to share through the Premium talent pool (unlocked together with contact).
++  talentPoolResumeId  String?                @map("talent_pool_resume_id")
++  talentPoolResume    Resume?                @relation("TalentPoolResume", fields: [talentPoolResumeId], references: [id], onDelete: SetNull)
+   createdAt           DateTime               @default(now()) @map("created_at")
+   updatedAt           DateTime               @updatedAt @map("updated_at")
+ 
+@@ -690,6 +693,7 @@ model Resume {
+   applications               Application[]
+   jdFitAnalyses              CandidateJdFitAnalysis[]
+   primaryForCandidateProfile CandidateProfile? @relation("PrimaryResume")
++  talentPoolForCandidateProfile CandidateProfile? @relation("TalentPoolResume")
+   workExperiences            WorkExperience[]  @relation("WorkExperienceResume")
+   educations                 Education[]       @relation("EducationResume")
+   projects                   Project[]         @relation("ProjectResume")
+diff --git a/backend/src/modules/billing/billing.controller.ts b/backend/src/modules/billing/billing.controller.ts
+index 642b0d3..1b9a156 100644
+--- a/backend/src/modules/billing/billing.controller.ts
++++ b/backend/src/modules/billing/billing.controller.ts
+@@ -203,4 +203,13 @@ export class BillingController {
+   ) {
+     return this.talentPoolService.unlock(user.id, candidateProfileId);
+   }
++
++  @Get('talent-pool/:candidateProfileId/resume-url')
++  @Roles('RECRUITER')
++  getTalentResumeUrl(
++    @CurrentUser() user: AuthenticatedUser,
++    @Param('candidateProfileId', ParseUUIDPipe) candidateProfileId: string,
++  ) {
++    return this.talentPoolService.getResumeUrl(user.id, candidateProfileId);
++  }
+ }
+diff --git a/backend/src/modules/billing/billing.module.ts b/backend/src/modules/billing/billing.module.ts
+index 3b83953..245ab2e 100644
+--- a/backend/src/modules/billing/billing.module.ts
++++ b/backend/src/modules/billing/billing.module.ts
+@@ -7,10 +7,11 @@ import { MockPaymentProvider } from './payment/mock-payment.provider';
+ import { PayosPaymentProvider } from './payment/payos-payment.provider';
+ import { PAYMENT_PROVIDER } from './payment/payment-provider.interface';
+ import { PrismaModule } from '../../database/prisma.module';
++import { SupabaseModule } from '../../infrastructure/supabase/supabase.module';
+ import { AuthModule } from '../auth/auth.module';
+ 
+ @Module({
+-  imports: [PrismaModule, AuthModule],
++  imports: [PrismaModule, AuthModule, SupabaseModule],
+   controllers: [BillingController],
+   providers: [
+     BillingService,
+diff --git a/backend/src/modules/billing/talent-pool.service.spec.ts b/backend/src/modules/billing/talent-pool.service.spec.ts
+index b23db3d..ea4df59 100644
+--- a/backend/src/modules/billing/talent-pool.service.spec.ts
++++ b/backend/src/modules/billing/talent-pool.service.spec.ts
+@@ -5,6 +5,7 @@ import { talentPoolVisibilityWhere } from './talent-pool-visibility';
+ describe('TalentPoolService paid visibility and contact privacy', () => {
+   let prisma: any;
+   let entitlements: any;
++  let storage: any;
+   let service: TalentPoolService;
+   const profile = {
+     id: 'candidate',
+@@ -18,6 +19,7 @@ describe('TalentPoolService paid visibility and contact privacy', () => {
+     githubUrl: null,
+     portfolioUrl: null,
+     candidateSkills: [],
++    talentPoolResume: { originalFileName: 'cv.pdf' },
+   };
+   beforeEach(() => {
+     jest.useFakeTimers().setSystemTime(new Date('2026-10-18T00:00:00Z'));
+@@ -44,7 +46,12 @@ describe('TalentPoolService paid visibility and contact privacy', () => {
+         .fn()
+         .mockResolvedValue({ entitlementId: 'hr-ent', cvUnlockRemaining: 2 }),
+     };
+-    service = new TalentPoolService(prisma, entitlements);
++    storage = {
++      createSignedDownloadUrl: jest
++        .fn()
++        .mockResolvedValue({ signedUrl: 'https://signed/resume', expiresIn: 300 }),
++    };
++    service = new TalentPoolService(prisma, entitlements, storage);
+   });
+   afterEach(() => jest.useRealTimers());
+ 
+@@ -208,4 +215,92 @@ describe('TalentPoolService paid visibility and contact privacy', () => {
+       expect(prisma.packageEntitlement.updateMany).toHaveBeenCalledTimes(1);
+     },
+   );
++
++  it('does not expose the shared resume before unlock', async () => {
++    const result = await service.search('hr', { page: 1, limit: 20 });
++    expect(result.data[0].resume).toBeNull();
++    expect(JSON.stringify(result.data)).not.toContain('cv.pdf');
++  });
++
++  it('exposes the shared resume filename together with the unlocked contact', async () => {
++    prisma.cvUnlock.findUnique.mockResolvedValue({ id: 'unlock' });
++    const result = await service.getCandidate('hr', 'candidate');
++    expect(result.resume).toEqual({ fileName: 'cv.pdf' });
++  });
++
++  describe('getResumeUrl', () => {
++    const resumeRow = {
++      id: 'candidate',
++      talentPoolResume: {
++        objectPath: 'candidate/cv.pdf',
++        originalFileName: 'cv.pdf',
++        mimeType: 'application/pdf',
++      },
++    };
++
++    it('blocks download before unlock without touching storage', async () => {
++      prisma.candidateProfile.findFirst.mockResolvedValue(resumeRow);
++      await expect(service.getResumeUrl('hr', 'candidate')).rejects.toThrow(
++        ForbiddenException,
++      );
++      expect(storage.createSignedDownloadUrl).not.toHaveBeenCalled();
++    });
++
++    it('blocks download when the candidate stopped sharing, even after a previous unlock', async () => {
++      prisma.candidateProfile.findFirst.mockResolvedValue(null);
++      prisma.cvUnlock.findUnique.mockResolvedValue({ id: 'unlock' });
++      await expect(service.getResumeUrl('hr', 'candidate')).rejects.toThrow(
++        NotFoundException,
++      );
++      expect(storage.createSignedDownloadUrl).not.toHaveBeenCalled();
++    });
++
++    it('returns only a short-lived signed URL after unlock and never debits quota', async () => {
++      prisma.candidateProfile.findFirst.mockResolvedValue(resumeRow);
++      prisma.cvUnlock.findUnique.mockResolvedValue({ id: 'unlock' });
++      const result = await service.getResumeUrl('hr', 'candidate');
++      expect(storage.createSignedDownloadUrl).toHaveBeenCalledWith(
++        'candidate/cv.pdf',
++        300,
++      );
++      expect(result).toEqual({
++        url: 'https://signed/resume',
++        fileName: 'cv.pdf',
++        mimeType: 'application/pdf',
++        expiresIn: 300,
++      });
++      expect(prisma.packageEntitlement.updateMany).not.toHaveBeenCalled();
++      expect(prisma.cvUnlock.create).not.toHaveBeenCalled();
++    });
++
++    it('follows the resume the candidate currently shares', async () => {
++      prisma.candidateProfile.findFirst.mockResolvedValue({
++        id: 'candidate',
++        talentPoolResume: {
++          objectPath: 'candidate/cv-v2.pdf',
++          originalFileName: 'cv-v2.pdf',
++          mimeType: 'application/pdf',
++        },
++      });
++      prisma.cvUnlock.findUnique.mockResolvedValue({ id: 'unlock' });
++      const result = await service.getResumeUrl('hr', 'candidate');
++      expect(result.fileName).toBe('cv-v2.pdf');
++      expect(storage.createSignedDownloadUrl).toHaveBeenCalledWith(
++        'candidate/cv-v2.pdf',
++        300,
++      );
++    });
++
++    it('rejects when the candidate shared profile only, without a resume', async () => {
++      prisma.candidateProfile.findFirst.mockResolvedValue({
++        id: 'candidate',
++        talentPoolResume: null,
++      });
++      prisma.cvUnlock.findUnique.mockResolvedValue({ id: 'unlock' });
++      await expect(service.getResumeUrl('hr', 'candidate')).rejects.toThrow(
++        NotFoundException,
++      );
++      expect(storage.createSignedDownloadUrl).not.toHaveBeenCalled();
++    });
++  });
+ });
+diff --git a/backend/src/modules/billing/talent-pool.service.ts b/backend/src/modules/billing/talent-pool.service.ts
+index 546833d..06037f9 100644
+--- a/backend/src/modules/billing/talent-pool.service.ts
++++ b/backend/src/modules/billing/talent-pool.service.ts
+@@ -8,15 +8,20 @@ import {
+   Prisma,
+ } from '@prisma/client';
+ import { PrismaService } from '../../database/prisma.service';
++import { SupabaseStorageService } from '../../infrastructure/supabase/supabase-storage.service';
+ import { EntitlementsService } from './entitlements.service';
+ import { QueryTalentPoolDto } from './dto/query-talent-pool.dto';
+ import { talentPoolVisibilityWhere } from './talent-pool-visibility';
+ 
++/** Short-lived access to an unlocked shared resume; never a public URL. */
++const RESUME_URL_TTL_SECONDS = 300;
++
+ @Injectable()
+ export class TalentPoolService {
+   constructor(
+     private readonly prisma: PrismaService,
+     private readonly entitlements: EntitlementsService,
++    private readonly storage?: SupabaseStorageService,
+   ) {}
+ 
+   async search(userId: string, query: QueryTalentPoolDto) {
+@@ -87,6 +92,7 @@ export class TalentPoolService {
+           linkedinUrl: true,
+           githubUrl: true,
+           portfolioUrl: true,
++          talentPoolResume: { select: { originalFileName: true } },
+           candidateSkills: {
+             take: 12,
+             select: {
+@@ -138,6 +144,69 @@ export class TalentPoolService {
+     return this.getCandidateCard(userId, candidateProfileId, this.prisma);
+   }
+ 
++  /**
++   * Download access to the resume a candidate agreed to share. Requires the
++   * profile to still be visible (a candidate who stopped job seeking is fully
++   * blocked, even for previously unlocked profiles) and an unlock owned by
++   * this HR account. Returns only a short-lived signed URL.
++   */
++  async getResumeUrl(userId: string, candidateProfileId: string) {
++    await this.entitlements.assertTalentPool(userId);
++    if (!this.storage) {
++      throw new ForbiddenException('Tính năng tải CV chưa được cấu hình.');
++    }
++
++    const profile = await this.prisma.candidateProfile.findFirst({
++      where: {
++        id: candidateProfileId,
++        ...talentPoolVisibilityWhere(),
++      },
++      select: {
++        id: true,
++        talentPoolResume: {
++          select: {
++            objectPath: true,
++            originalFileName: true,
++            mimeType: true,
++          },
++        },
++      },
++    });
++    if (!profile) {
++      throw new NotFoundException(
++        'Không tìm thấy hồ sơ công khai trong kho ứng viên.',
++      );
++    }
++
++    const unlocked = await this.prisma.cvUnlock.findUnique({
++      where: {
++        unlockedByUserId_candidateProfileId: {
++          unlockedByUserId: userId,
++          candidateProfileId,
++        },
++      },
++    });
++    if (!unlocked) {
++      throw new ForbiddenException(
++        'Mở khóa hồ sơ trước khi xem hoặc tải CV gốc.',
++      );
++    }
++    if (!profile.talentPoolResume) {
++      throw new NotFoundException('Ứng viên chưa chia sẻ CV gốc.');
++    }
++
++    const { signedUrl } = await this.storage.createSignedDownloadUrl(
++      profile.talentPoolResume.objectPath,
++      RESUME_URL_TTL_SECONDS,
++    );
++    return {
++      url: signedUrl,
++      fileName: profile.talentPoolResume.originalFileName,
++      mimeType: profile.talentPoolResume.mimeType,
++      expiresIn: RESUME_URL_TTL_SECONDS,
++    };
++  }
++
+   private async getCandidateCard(
+     userId: string,
+     candidateProfileId: string,
+@@ -162,6 +231,7 @@ export class TalentPoolService {
+         linkedinUrl: true,
+         githubUrl: true,
+         portfolioUrl: true,
++        talentPoolResume: { select: { originalFileName: true } },
+         candidateSkills: {
+           select: {
+             skill: { select: { id: true, name: true } },
+@@ -311,6 +381,7 @@ export class TalentPoolService {
+       linkedinUrl: string | null;
+       githubUrl: string | null;
+       portfolioUrl: string | null;
++      talentPoolResume?: { originalFileName: string } | null;
+       candidateSkills?: unknown;
+       workExperiences?: unknown;
+       educations?: unknown;
+@@ -342,6 +413,10 @@ export class TalentPoolService {
+             address: profile.address,
+           }
+         : null,
++      resume:
++        unlocked && profile.talentPoolResume
++          ? { fileName: profile.talentPoolResume.originalFileName }
++          : null,
+       privacyNote: unlocked
+         ? null
+         : 'Thông tin liên hệ bị ẩn cho đến khi bạn mở khóa hồ sơ (Premium).',
+diff --git a/backend/src/modules/candidates/candidate-job-seeking.service.spec.ts b/backend/src/modules/candidates/candidate-job-seeking.service.spec.ts
+index 3ae2868..cb81665 100644
+--- a/backend/src/modules/candidates/candidate-job-seeking.service.spec.ts
++++ b/backend/src/modules/candidates/candidate-job-seeking.service.spec.ts
+@@ -23,10 +23,16 @@ describe('CandidateJobSeekingService', () => {
+           jobSeekingEnabled: false,
+           jobSeekingConfirmedAt: null,
+           jobSeekingUntil: null,
++          primaryResumeId: null,
++          talentPoolResumeId: null,
+         }),
+         findFirst: jest.fn().mockResolvedValue(null),
+         update: jest.fn().mockResolvedValue({}),
+       },
++      resume: {
++        findMany: jest.fn().mockResolvedValue([]),
++        findFirst: jest.fn().mockResolvedValue(null),
++      },
+     };
+     entitlements = {
+       getEffectiveEntitlement: jest.fn().mockResolvedValue({
+@@ -96,6 +102,7 @@ describe('CandidateJobSeekingService', () => {
+         jobSeekingConfirmedAt: new Date(),
+         jobSeekingUntil: until,
+         jobSeekingEntitlementId: 'paid-entitlement',
++        talentPoolResumeId: null,
+       },
+     });
+   });
+@@ -114,8 +121,99 @@ describe('CandidateJobSeekingService', () => {
+         jobSeekingEnabled: false,
+         jobSeekingUntil: null,
+         jobSeekingEntitlementId: null,
++        talentPoolResumeId: null,
++      },
++    });
++  });
++
++  it('saves the resume the candidate explicitly chose to share', async () => {
++    prisma.resume.findFirst.mockResolvedValue({ id: 'resume-9' });
++    await service.update('user', {
++      enabled: true,
++      consent: true,
++      resumeId: 'resume-9',
++    });
++    expect(prisma.resume.findFirst).toHaveBeenCalledWith({
++      where: {
++        id: 'resume-9',
++        candidateId: 'candidate',
++        parsingStatus: 'PARSED',
+       },
++      select: { id: true },
+     });
++    expect(prisma.candidateProfile.update).toHaveBeenCalledWith(
++      expect.objectContaining({
++        data: expect.objectContaining({ talentPoolResumeId: 'resume-9' }),
++      }),
++    );
++  });
++
++  it('rejects a shared resume that is not theirs or not parsed', async () => {
++    prisma.resume.findFirst.mockResolvedValue(null);
++    await expect(
++      service.update('user', {
++        enabled: true,
++        consent: true,
++        resumeId: 'someone-else',
++      }),
++    ).rejects.toThrow(BadRequestException);
++    expect(prisma.candidateProfile.update).not.toHaveBeenCalled();
++  });
++
++  it('falls back to the primary resume when no resume is chosen', async () => {
++    prisma.candidateProfile.findUnique.mockResolvedValue({
++      id: 'candidate',
++      userId: 'user',
++      status: 'READY',
++      desiredTitle: 'Engineer',
++      professionalSummary: 'Backend engineer',
++      jobSeekingEnabled: false,
++      jobSeekingConfirmedAt: null,
++      jobSeekingUntil: null,
++      primaryResumeId: 'resume-primary',
++      talentPoolResumeId: null,
++    });
++    prisma.resume.findFirst.mockResolvedValue({ id: 'resume-primary' });
++    await service.update('user', { enabled: true, consent: true });
++    expect(prisma.candidateProfile.update).toHaveBeenCalledWith(
++      expect.objectContaining({
++        data: expect.objectContaining({
++          talentPoolResumeId: 'resume-primary',
++        }),
++      }),
++    );
++  });
++
++  it('exposes parsed resumes and the shared choice in the status', async () => {
++    prisma.resume.findMany.mockResolvedValue([
++      {
++        id: 'resume-1',
++        originalFileName: 'cv-new.pdf',
++        createdAt: new Date('2026-10-10T00:00:00Z'),
++      },
++    ]);
++    prisma.candidateProfile.findUnique.mockResolvedValue({
++      id: 'candidate',
++      userId: 'user',
++      status: 'READY',
++      desiredTitle: 'Engineer',
++      professionalSummary: 'Backend engineer',
++      jobSeekingEnabled: true,
++      jobSeekingConfirmedAt: new Date(),
++      jobSeekingUntil: until,
++      primaryResumeId: 'resume-1',
++      talentPoolResumeId: 'resume-1',
++    });
++    const result = await service.getStatus('user');
++    expect(result.sharedResumeId).toBe('resume-1');
++    expect(result.resumes).toEqual([
++      {
++        id: 'resume-1',
++        fileName: 'cv-new.pdf',
++        createdAt: new Date('2026-10-10T00:00:00Z'),
++        isPrimary: true,
++      },
++    ]);
+   });
+ 
+   it('does not republish after purchase or renewal when checking status', async () => {
+diff --git a/backend/src/modules/candidates/candidate-job-seeking.service.ts b/backend/src/modules/candidates/candidate-job-seeking.service.ts
+index 2abde91..80806b0 100644
+--- a/backend/src/modules/candidates/candidate-job-seeking.service.ts
++++ b/backend/src/modules/candidates/candidate-job-seeking.service.ts
+@@ -4,7 +4,11 @@ import {
+   Injectable,
+   NotFoundException,
+ } from '@nestjs/common';
+-import { CandidateProfileStatus, PackageAudience } from '@prisma/client';
++import {
++  CandidateProfileStatus,
++  PackageAudience,
++  ResumeParsingStatus,
++} from '@prisma/client';
+ import { PrismaService } from '../../database/prisma.service';
+ import { EntitlementsService } from '../billing/entitlements.service';
+ import { talentPoolVisibilityWhere } from '../billing/talent-pool-visibility';
+@@ -38,6 +42,14 @@ export class CandidateJobSeekingService {
+       features.endsAt &&
+       features.endsAt > now,
+     );
++    const resumes = await this.prisma.resume.findMany({
++      where: {
++        candidateId: profile.id,
++        parsingStatus: ResumeParsingStatus.PARSED,
++      },
++      orderBy: { createdAt: 'desc' },
++      select: { id: true, originalFileName: true, createdAt: true },
++    });
+     return {
+       enabled: profile.jobSeekingEnabled,
+       visible: Boolean(visible),
+@@ -47,6 +59,13 @@ export class CandidateJobSeekingService {
+       profileReady,
+       packageName: features.packageName,
+       packageEndsAt: features.endsAt,
++      sharedResumeId: profile.talentPoolResumeId,
++      resumes: resumes.map((resume) => ({
++        id: resume.id,
++        fileName: resume.originalFileName,
++        createdAt: resume.createdAt,
++        isPrimary: resume.id === profile.primaryResumeId,
++      })),
+     };
+   }
+ 
+@@ -64,6 +83,7 @@ export class CandidateJobSeekingService {
+           isProfilePublic: false,
+           jobSeekingUntil: null,
+           jobSeekingEntitlementId: null,
++          talentPoolResumeId: null,
+         },
+       });
+       return this.getStatus(userId);
+@@ -93,6 +113,10 @@ export class CandidateJobSeekingService {
+         'Vui lòng hoàn thiện vị trí mong muốn, giới thiệu nghề nghiệp và hồ sơ trước khi bật tìm việc.',
+       );
+     }
++    const talentPoolResumeId = await this.resolveSharedResumeId(
++      profile,
++      dto.resumeId,
++    );
+     await this.prisma.candidateProfile.update({
+       where: { id: profile.id },
+       data: {
+@@ -101,11 +125,42 @@ export class CandidateJobSeekingService {
+         jobSeekingConfirmedAt: now,
+         jobSeekingUntil: features.endsAt,
+         jobSeekingEntitlementId: features.entitlementId,
++        talentPoolResumeId,
+       },
+     });
+     return this.getStatus(userId);
+   }
+ 
++  /**
++   * The resume shared through the talent pool must belong to this candidate and
++   * be fully parsed. An explicit choice wins; otherwise keep the previously
++   * chosen resume, then fall back to the primary resume.
++   */
++  private async resolveSharedResumeId(
++    profile: { id: string; primaryResumeId: string | null; talentPoolResumeId: string | null },
++    requestedResumeId?: string,
++  ): Promise<string | null> {
++    const candidateId = requestedResumeId ?? profile.talentPoolResumeId ?? profile.primaryResumeId;
++    if (!candidateId) return null;
++    const resume = await this.prisma.resume.findFirst({
++      where: {
++        id: candidateId,
++        candidateId: profile.id,
++        parsingStatus: ResumeParsingStatus.PARSED,
++      },
++      select: { id: true },
++    });
++    if (!resume) {
++      if (requestedResumeId) {
++        throw new BadRequestException(
++          'CV được chọn không thuộc về bạn hoặc chưa phân tích xong.',
++        );
++      }
++      return null;
++    }
++    return resume.id;
++  }
++
+   private isProfileReady(profile: {
+     status: CandidateProfileStatus;
+     desiredTitle: string | null;
+diff --git a/backend/src/modules/candidates/dto/update-job-seeking.dto.ts b/backend/src/modules/candidates/dto/update-job-seeking.dto.ts
+index eeeb7f2..b6c423c 100644
+--- a/backend/src/modules/candidates/dto/update-job-seeking.dto.ts
++++ b/backend/src/modules/candidates/dto/update-job-seeking.dto.ts
+@@ -1,5 +1,5 @@
+ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+-import { IsBoolean, IsOptional } from 'class-validator';
++import { IsBoolean, IsOptional, IsUUID } from 'class-validator';
+ 
+ export class UpdateJobSeekingDto {
+   @ApiProperty()
+@@ -12,4 +12,12 @@ export class UpdateJobSeekingDto {
+   @IsOptional()
+   @IsBoolean()
+   consent?: boolean;
++
++  @ApiPropertyOptional({
++    description:
++      'Resume the candidate agrees to share through the talent pool. Falls back to the primary resume when omitted.',
++  })
++  @IsOptional()
++  @IsUUID()
++  resumeId?: string;
+ }
+diff --git a/frontend/src/app/recruiter/talent-pool/[id]/page.tsx b/frontend/src/app/recruiter/talent-pool/[id]/page.tsx
+new file mode 100644
+index 0000000..689f4e2
+--- /dev/null
++++ b/frontend/src/app/recruiter/talent-pool/[id]/page.tsx
+@@ -0,0 +1,34 @@
++import { redirect } from 'next/navigation';
++import { createClient } from '@/lib/supabase/server';
++import { requireProfile } from '@/lib/server-profile';
++import { getRecruiterProfile } from '@/lib/recruiter-api';
++import { TalentProfilePage } from '@/components/recruiter/talent-pool/TalentProfilePage';
++
++export const dynamic = 'force-dynamic';
++export const metadata = { title: 'Hồ sơ ứng viên - Kho ứng viên' };
++
++export default async function TalentProfileRoutePage({
++  params,
++  searchParams,
++}: {
++  params: Promise<{ id: string }>;
++  searchParams: Promise<{ list?: string }>;
++}) {
++  await requireProfile('RECRUITER');
++  const { id } = await params;
++  const { list } = await searchParams;
++  const supabase = await createClient();
++  const {
++    data: { session },
++  } = await supabase.auth.getSession();
++  if (!session?.access_token) redirect('/login');
++  const profile = await getRecruiterProfile(session.access_token).catch(() => null);
++  return (
++    <TalentProfilePage
++      token={session.access_token}
++      initialProfile={profile}
++      candidateId={id}
++      listQuery={list ?? ''}
++    />
++  );
++}
+diff --git a/frontend/src/app/recruiter/talent-pool/page.tsx b/frontend/src/app/recruiter/talent-pool/page.tsx
+index d90ac66..9ac1803 100644
+--- a/frontend/src/app/recruiter/talent-pool/page.tsx
++++ b/frontend/src/app/recruiter/talent-pool/page.tsx
+@@ -7,13 +7,35 @@ import { TalentPoolWorkspace } from '@/components/recruiter/talent-pool/TalentPo
+ export const dynamic = 'force-dynamic';
+ export const metadata = { title: 'Kho ứng viên - SmartRecruit AI' };
+ 
+-export default async function TalentPoolPage() {
++export default async function TalentPoolPage({
++  searchParams,
++}: {
++  searchParams: Promise<{
++    search?: string;
++    desiredTitle?: string;
++    skill?: string;
++    page?: string;
++  }>;
++}) {
+   await requireProfile('RECRUITER');
++  const query = await searchParams;
+   const supabase = await createClient();
+   const {
+     data: { session },
+   } = await supabase.auth.getSession();
+   if (!session?.access_token) redirect('/login');
+   const profile = await getRecruiterProfile(session.access_token).catch(() => null);
+-  return <TalentPoolWorkspace token={session.access_token} initialProfile={profile} />;
++  const page = Number.parseInt(query.page ?? '', 10);
++  return (
++    <TalentPoolWorkspace
++      token={session.access_token}
++      initialProfile={profile}
++      initialQuery={{
++        search: query.search ?? '',
++        desiredTitle: query.desiredTitle ?? '',
++        skill: query.skill ?? '',
++        page: Number.isFinite(page) && page > 0 ? page : 1,
++      }}
++    />
++  );
+ }
+diff --git a/frontend/src/components/candidate/JobSeekingCard.tsx b/frontend/src/components/candidate/JobSeekingCard.tsx
+index 424b70a..e7ba86b 100644
+--- a/frontend/src/components/candidate/JobSeekingCard.tsx
++++ b/frontend/src/components/candidate/JobSeekingCard.tsx
+@@ -21,6 +21,7 @@ async function getToken() {
+ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void }) {
+   const [status, setStatus] = useState<JobSeekingStatus | null>(null);
+   const [consent, setConsent] = useState(false);
++  const [selectedResumeId, setSelectedResumeId] = useState('');
+   const [loading, setLoading] = useState(true);
+   const [saving, setSaving] = useState(false);
+   const [error, setError] = useState<string | null>(null);
+@@ -34,6 +35,12 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
+       const nextStatus = await getJobSeekingStatus(await getToken());
+       if (version !== requestVersion.current) return;
+       setStatus(nextStatus);
++      setSelectedResumeId(
++        nextStatus.sharedResumeId ??
++          nextStatus.resumes.find((resume) => resume.isPrimary)?.id ??
++          nextStatus.resumes[0]?.id ??
++          '',
++      );
+       setError(null);
+     } catch (e) {
+       if (version === requestVersion.current) {
+@@ -79,7 +86,12 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
+     setSaving(true);
+     setError(null);
+     try {
+-      const nextStatus = await updateJobSeekingStatus(await getToken(), enabled, consent);
++      const nextStatus = await updateJobSeekingStatus(
++        await getToken(),
++        enabled,
++        consent,
++        enabled ? selectedResumeId || undefined : undefined,
++      );
+       if (version !== requestVersion.current) return;
+       setStatus(nextStatus);
+       setConsent(false);
+@@ -96,6 +108,57 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
+     }
+   };
+ 
++  const changeSharedResume = async () => {
++    if (mutationPending.current || !status?.visible || !selectedResumeId) return;
++    if (selectedResumeId === status.sharedResumeId) return;
++    mutationPending.current = true;
++    const version = ++requestVersion.current;
++    setSaving(true);
++    setError(null);
++    try {
++      // Re-confirming with the newly chosen resume keeps the same consent scope.
++      const nextStatus = await updateJobSeekingStatus(
++        await getToken(),
++        true,
++        true,
++        selectedResumeId,
++      );
++      if (version !== requestVersion.current) return;
++      setStatus(nextStatus);
++    } catch (e) {
++      if (version === requestVersion.current) {
++        setError(e instanceof Error ? e.message : 'Không đổi được CV chia sẻ.');
++      }
++    } finally {
++      mutationPending.current = false;
++      if (version === requestVersion.current) setSaving(false);
++    }
++  };
++
++  const sharedResume = status?.resumes.find((resume) => resume.id === status.sharedResumeId);
++  const resumeSelect = status && status.resumes.length > 0 && (
++    <label className="block text-sm font-medium text-slate-700">
++      CV chia sẻ trong kho ứng viên
++      <select
++        value={selectedResumeId}
++        disabled={saving}
++        onChange={(e) => setSelectedResumeId(e.target.value)}
++        className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50 sm:max-w-md"
++      >
++        {status.resumes.map((resume) => (
++          <option key={resume.id} value={resume.id}>
++            {resume.fileName}
++            {resume.isPrimary ? ' (CV chính)' : ''} ·{' '}
++            {new Date(resume.createdAt).toLocaleDateString('vi-VN')}
++          </option>
++        ))}
++      </select>
++      <span className="mt-1 block text-xs font-normal text-slate-500">
++        HR chỉ xem hoặc tải được CV này sau khi mở khóa hồ sơ của bạn.
++      </span>
++    </label>
++  );
++
+   return (
+     <section
+       className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6"
+@@ -139,9 +202,10 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
+       {status && (
+         <div className="mt-4 space-y-4">
+           <p className="text-sm text-slate-600">
+-            HR thấy chức danh, giới thiệu, kỹ năng và khu vực của bạn. Tên được rút gọn, liên hệ bị
+-            ẩn cho đến khi HR mở khóa bằng hạn mức gói. Khi tắt, hồ sơ ngừng xuất hiện trong kho ứng
+-            viên; các hồ sơ bạn đã ứng tuyển vẫn được xử lý bình thường.
++            HR thấy chức danh, giới thiệu, kỹ năng và khu vực của bạn. Tên được rút gọn, liên hệ và
++            CV gốc bị ẩn cho đến khi HR mở khóa bằng hạn mức gói. Khi tắt, hồ sơ ngừng xuất hiện
++            trong kho ứng viên và HR không truy cập được nữa, kể cả hồ sơ đã mở khóa; các hồ sơ bạn
++            đã ứng tuyển vẫn được xử lý bình thường.
+           </p>
+           {status.visible && status.visibleUntil && (
+             <p className="text-sm font-medium text-emerald-700">
+@@ -149,6 +213,27 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
+               bất kỳ lúc nào.
+             </p>
+           )}
++          {status.visible && resumeSelect && (
++            <div className="space-y-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
++              {resumeSelect}
++              {selectedResumeId !== status.sharedResumeId ? (
++                <button
++                  type="button"
++                  disabled={saving || !selectedResumeId}
++                  onClick={() => void changeSharedResume()}
++                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
++                >
++                  {saving && <Loader2 className="size-4 animate-spin" />}
++                  Lưu CV chia sẻ
++                </button>
++              ) : (
++                <p className="text-xs text-slate-500">
++                  CV đang chia sẻ: <strong>{sharedResume?.fileName ?? 'Chưa chọn'}</strong>. Đổi CV
++                  sẽ áp dụng ngay cho HR đã mở khóa.
++                </p>
++              )}
++            </div>
++          )}
+           {!status.visible && !status.canEnable && (
+             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
+               <span>
+@@ -170,19 +255,22 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
+             </p>
+           )}
+           {!status.visible && status.canEnable && (
+-            <label className="flex cursor-pointer items-start gap-3 text-sm text-slate-700">
+-              <input
+-                type="checkbox"
+-                checked={consent}
+-                disabled={saving}
+-                onChange={(e) => setConsent(e.target.checked)}
+-                className="mt-1 size-4 accent-blue-600"
+-              />
+-              <span>
+-                Tôi đồng ý hiển thị hồ sơ và cho phép HR mở khóa thông tin liên hệ trong thời hạn
+-                gói. Gia hạn hoặc mua gói không tự bật chia sẻ.
+-              </span>
+-            </label>
++            <>
++              {resumeSelect}
++              <label className="flex cursor-pointer items-start gap-3 text-sm text-slate-700">
++                <input
++                  type="checkbox"
++                  checked={consent}
++                  disabled={saving}
++                  onChange={(e) => setConsent(e.target.checked)}
++                  className="mt-1 size-4 accent-blue-600"
++                />
++                <span>
++                  Tôi đồng ý hiển thị hồ sơ và cho phép HR mở khóa thông tin liên hệ cùng CV đã chọn
++                  trong thời hạn gói. Gia hạn hoặc mua gói không tự bật chia sẻ.
++                </span>
++              </label>
++            </>
+           )}
+           <div className="flex flex-wrap gap-3">
+             <button
+diff --git a/frontend/src/components/recruiter/talent-pool/TalentPoolWorkspace.tsx b/frontend/src/components/recruiter/talent-pool/TalentPoolWorkspace.tsx
+index 911bb39..dc67e8f 100644
+--- a/frontend/src/components/recruiter/talent-pool/TalentPoolWorkspace.tsx
++++ b/frontend/src/components/recruiter/talent-pool/TalentPoolWorkspace.tsx
+@@ -2,6 +2,7 @@
+ 
+ import Link from 'next/link';
+ import { useEffect, useRef, useState } from 'react';
++import { usePathname, useRouter } from 'next/navigation';
+ import {
+   AlertCircle,
+   ArrowRight,
+@@ -35,6 +36,15 @@ import { TalentProfileDrawer } from './TalentProfileDrawer';
+ 
+ type Filters = { search: string; desiredTitle: string; skill: string };
+ const emptyFilters: Filters = { search: '', desiredTitle: '', skill: '' };
++
++function buildListQuery(criteria: Filters, page: number) {
++  const params = new URLSearchParams();
++  if (criteria.search.trim()) params.set('search', criteria.search.trim());
++  if (criteria.desiredTitle.trim()) params.set('desiredTitle', criteria.desiredTitle.trim());
++  if (criteria.skill.trim()) params.set('skill', criteria.skill.trim());
++  if (page > 1) params.set('page', String(page));
++  return params.toString();
++}
+ const fields = [
+   { key: 'search', label: 'Từ khóa', placeholder: 'Tên, giới thiệu...' },
+   { key: 'desiredTitle', label: 'Vị trí mong muốn', placeholder: 'Ví dụ: Backend Developer' },
+@@ -46,15 +56,26 @@ const message = (error: unknown, fallback: string) =>
+ export function TalentPoolWorkspace({
+   token,
+   initialProfile,
++  initialQuery,
+ }: {
+   token: string;
+   initialProfile: RecruiterProfileData | null;
++  initialQuery?: Filters & { page: number };
+ }) {
++  const router = useRouter();
++  const pathname = usePathname();
++  const initialFilters: Filters = initialQuery
++    ? {
++        search: initialQuery.search,
++        desiredTitle: initialQuery.desiredTitle,
++        skill: initialQuery.skill,
++      }
++    : emptyFilters;
+   const [profile, setProfile] = useState(initialProfile);
+   const [showProfile, setShowProfile] = useState(false);
+   const [entitlement, setEntitlement] = useState<EntitlementStatus | null>(null);
+-  const [filters, setFilters] = useState(emptyFilters);
+-  const [applied, setApplied] = useState(emptyFilters);
++  const [filters, setFilters] = useState(initialFilters);
++  const [applied, setApplied] = useState(initialFilters);
+   const [rows, setRows] = useState<TalentPoolCard[]>([]);
+   const [meta, setMeta] = useState({ total: 0, page: 1, totalPages: 0 });
+   const [loading, setLoading] = useState(true);
+@@ -80,7 +101,10 @@ export function TalentPoolWorkspace({
+         if (!mounted.current || id !== listRequest.current) return;
+         setEntitlement(status);
+         if (status.talentPoolAccess) {
+-          const result = await searchTalentPool(token, {});
++          const result = await searchTalentPool(token, {
++            ...initialFilters,
++            page: initialQuery?.page ?? 1,
++          });
+           if (!mounted.current || id !== listRequest.current) return;
+           setRows(result.data);
+           setMeta(result.meta);
+@@ -121,6 +145,10 @@ export function TalentPoolWorkspace({
+       if (!mounted.current || id !== listRequest.current) return;
+       setRows(result.data);
+       setMeta(result.meta);
++      // Keep filters and pagination in the URL so recruiters returning from a
++      // profile page land on the same list again.
++      const query = buildListQuery(criteria, result.meta.page);
++      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+     } catch (e) {
+       if (!mounted.current || id !== listRequest.current) return;
+       setRows([]);
+@@ -520,6 +548,8 @@ export function TalentPoolWorkspace({
+       </main>
+       <TalentProfileDrawer
+         candidate={selected}
++        token={token}
++        listQuery={buildListQuery(applied, meta.page)}
+         loading={detailLoading}
+         unlocking={busyId !== null}
+         canUnlock={canUnlock}
+diff --git a/frontend/src/components/recruiter/talent-pool/TalentProfileContent.tsx b/frontend/src/components/recruiter/talent-pool/TalentProfileContent.tsx
+new file mode 100644
+index 0000000..c64ce52
+--- /dev/null
++++ b/frontend/src/components/recruiter/talent-pool/TalentProfileContent.tsx
+@@ -0,0 +1,258 @@
++'use client';
++
++import { useState } from 'react';
++import {
++  BriefcaseBusiness,
++  CheckCircle2,
++  Download,
++  ExternalLink,
++  FileText,
++  GraduationCap,
++  Loader2,
++  Mail,
++  MapPin,
++  Phone,
++  ShieldCheck,
++} from 'lucide-react';
++import { toast } from 'sonner';
++import { getTalentResumeUrl, type TalentPoolCard } from '@/lib/billing-api';
++import { TalentSkills } from './TalentCandidateCard';
++
++function safeWebLink(value: string) {
++  try {
++    const url = new URL(value);
++    return ['https:', 'http:'].includes(url.protocol) ? url.href : null;
++  } catch {
++    return null;
++  }
++}
++
++function month(value: string) {
++  const date = new Date(value);
++  return Number.isNaN(date.getTime())
++    ? ''
++    : date.toLocaleDateString('vi-VN', { month: '2-digit', year: 'numeric' });
++}
++
++/**
++ * Shared profile body used by both the quick-view drawer and the standalone
++ * profile page so recruiters always see the same information and actions.
++ */
++export function TalentProfileContent({
++  candidate,
++  token,
++  loading,
++  error,
++  onRetry,
++}: {
++  candidate: TalentPoolCard;
++  token: string;
++  loading: boolean;
++  error: string | null;
++  onRetry: () => void;
++}) {
++  const [resumeBusy, setResumeBusy] = useState(false);
++
++  const downloadResume = async () => {
++    if (resumeBusy) return;
++    setResumeBusy(true);
++    try {
++      const { url } = await getTalentResumeUrl(token, candidate.id);
++      window.open(url, '_blank', 'noopener,noreferrer');
++    } catch (e) {
++      toast.error(
++        e instanceof Error
++          ? e.message
++          : 'Không tải được CV. Ứng viên có thể đã ngừng chia sẻ.',
++      );
++    } finally {
++      setResumeBusy(false);
++    }
++  };
++
++  return (
++    <div className="space-y-7" aria-busy={loading}>
++      <section>
++        <div className="mb-3 inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
++          <CheckCircle2 className="size-3.5" />
++          Đang tìm việc
++        </div>
++        <h3 className="break-words text-xl font-extrabold text-slate-900">
++          {candidate.displayName}
++        </h3>
++        <p className="mt-1 text-sm text-slate-600">{candidate.desiredTitle}</p>
++        {candidate.locationHint && (
++          <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
++            <MapPin className="size-3.5" />
++            {candidate.locationHint}
++          </p>
++        )}
++        <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">
++          {candidate.professionalSummary}
++        </p>
++      </section>
++      {candidate.skills.length > 0 && (
++        <section>
++          <h3 className="mb-3 text-xs font-extrabold text-slate-900">Kỹ năng chuyên môn</h3>
++          <TalentSkills key={candidate.id} skills={candidate.skills} />
++        </section>
++      )}
++      <section className="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
++        <h3 className="flex items-center gap-2 text-xs font-extrabold text-slate-900">
++          <ShieldCheck className="size-4 text-blue-600" />
++          Thông tin liên hệ
++        </h3>
++        {candidate.contactUnlocked && candidate.contact ? (
++          <div className="mt-3 space-y-3 text-sm">
++            <a
++              href={`mailto:${candidate.contact.email}`}
++              className="flex items-center gap-2 break-all text-blue-700 hover:underline"
++            >
++              <Mail className="size-4 shrink-0" />
++              {candidate.contact.email}
++            </a>
++            {candidate.contact.phone && (
++              <a
++                href={`tel:${candidate.contact.phone}`}
++                className="flex items-center gap-2 text-slate-700 hover:underline"
++              >
++                <Phone className="size-4" />
++                {candidate.contact.phone}
++              </a>
++            )}
++            {candidate.contact.address && (
++              <p className="flex items-start gap-2">
++                <MapPin className="mt-0.5 size-4 shrink-0" />
++                {candidate.contact.address}
++              </p>
++            )}
++            <div>
++              {(
++                [
++                  ['LinkedIn', candidate.contact.linkedinUrl],
++                  ['GitHub', candidate.contact.githubUrl],
++                  ['Portfolio', candidate.contact.portfolioUrl],
++                ] as const
++              ).map(([label, value]) => {
++                const href = value ? safeWebLink(value) : null;
++                return href ? (
++                  <a
++                    key={label}
++                    href={href}
++                    target="_blank"
++                    rel="noopener noreferrer"
++                    className="mr-2 inline-flex items-center gap-1.5 rounded-md border border-blue-100 bg-white px-2.5 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50"
++                  >
++                    {label}
++                    <ExternalLink className="size-3" />
++                  </a>
++                ) : null;
++              })}
++            </div>
++            {candidate.resume && (
++              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-100 bg-white px-3 py-2.5">
++                <p className="flex min-w-0 items-center gap-2 text-xs font-semibold text-slate-700">
++                  <FileText className="size-4 shrink-0 text-blue-600" />
++                  <span className="break-all">{candidate.resume.fileName}</span>
++                </p>
++                <button
++                  type="button"
++                  onClick={() => void downloadResume()}
++                  disabled={resumeBusy}
++                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-3 py-2 text-xs font-bold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50"
++                >
++                  {resumeBusy ? (
++                    <Loader2 className="size-3.5 animate-spin" />
++                  ) : (
++                    <Download className="size-3.5" />
++                  )}
++                  {resumeBusy ? 'Đang lấy link...' : 'Xem / tải CV gốc'}
++                </button>
++              </div>
++            )}
++          </div>
++        ) : (
++          <p className="mt-2 text-xs leading-5 text-slate-600">
++            {candidate.privacyNote ||
++              'Thông tin liên hệ được ẩn để bảo vệ quyền riêng tư. Mở khóa bằng 1 lượt trong gói của bạn.'}
++          </p>
++        )}
++      </section>
++      {error ? (
++        <div
++          role="alert"
++          className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs leading-5 text-rose-700"
++        >
++          {error}
++          <button
++            type="button"
++            onClick={onRetry}
++            disabled={loading}
++            className="ml-2 font-bold underline disabled:opacity-50"
++          >
++            Thử lại
++          </button>
++        </div>
++      ) : loading ? (
++        <p role="status" className="flex items-center gap-2 text-xs text-slate-500">
++          <Loader2 className="size-4 animate-spin" />
++          Đang tải kinh nghiệm và học vấn...
++        </p>
++      ) : (
++        <>
++          <section>
++            <h3 className="mb-4 flex items-center gap-2 text-xs font-extrabold text-slate-900">
++              <BriefcaseBusiness className="size-4 text-blue-600" />
++              Kinh nghiệm làm việc
++            </h3>
++            {candidate.workExperiences?.length ? (
++              <div className="space-y-5 border-l-2 border-slate-100 pl-4">
++                {candidate.workExperiences.map((item, i) => (
++                  <div key={i}>
++                    <p className="text-sm font-bold text-slate-800">{item.positionTitle}</p>
++                    <p className="mt-0.5 text-xs text-slate-600">{item.companyName}</p>
++                    <p className="mt-1 text-[11px] text-slate-500">
++                      {month(item.startDate)} –{' '}
++                      {item.isCurrent
++                        ? 'Hiện tại'
++                        : item.endDate
++                          ? month(item.endDate)
++                          : 'Chưa cập nhật'}
++                    </p>
++                    {item.description && (
++                      <p className="mt-2 whitespace-pre-wrap break-words text-xs leading-6 text-slate-600">
++                        {item.description}
++                      </p>
++                    )}
++                  </div>
++                ))}
++              </div>
++            ) : (
++              <p className="text-xs text-slate-500">Chưa bổ sung kinh nghiệm.</p>
++            )}
++          </section>
++          <section>
++            <h3 className="mb-4 flex items-center gap-2 text-xs font-extrabold text-slate-900">
++              <GraduationCap className="size-4 text-blue-600" />
++              Học vấn
++            </h3>
++            <div className="space-y-4">
++              {candidate.educations?.length ? (
++                candidate.educations.map((item, i) => (
++                  <div key={i}>
++                    <p className="text-sm font-bold text-slate-800">{item.schoolName}</p>
++                    <p className="mt-1 text-xs text-slate-600">
++                      {[item.degree, item.major].filter(Boolean).join(' · ')}
++                    </p>
++                  </div>
++                ))
++              ) : (
++                <p className="text-xs text-slate-500">Chưa bổ sung học vấn.</p>
++              )}
++            </div>
++          </section>
++        </>
++      )}
++    </div>
++  );
++}
+diff --git a/frontend/src/components/recruiter/talent-pool/TalentProfileDrawer.tsx b/frontend/src/components/recruiter/talent-pool/TalentProfileDrawer.tsx
+index 4351ea5..fd2fb15 100644
+--- a/frontend/src/components/recruiter/talent-pool/TalentProfileDrawer.tsx
++++ b/frontend/src/components/recruiter/talent-pool/TalentProfileDrawer.tsx
+@@ -3,39 +3,19 @@
+ import Link from 'next/link';
+ import { useEffect, useRef } from 'react';
+ import {
+-  BriefcaseBusiness,
+   CheckCircle2,
+   ExternalLink,
+-  GraduationCap,
+   Loader2,
+   LockKeyhole,
+-  Mail,
+-  MapPin,
+-  Phone,
+-  ShieldCheck,
+   X,
+ } from 'lucide-react';
+ import type { TalentPoolCard } from '@/lib/billing-api';
+-import { TalentSkills } from './TalentCandidateCard';
+-
+-function safeWebLink(value: string) {
+-  try {
+-    const url = new URL(value);
+-    return ['https:', 'http:'].includes(url.protocol) ? url.href : null;
+-  } catch {
+-    return null;
+-  }
+-}
+-
+-function month(value: string) {
+-  const date = new Date(value);
+-  return Number.isNaN(date.getTime())
+-    ? ''
+-    : date.toLocaleDateString('vi-VN', { month: '2-digit', year: 'numeric' });
+-}
++import { TalentProfileContent } from './TalentProfileContent';
+ 
+ export function TalentProfileDrawer({
+   candidate,
++  token,
++  listQuery,
+   loading,
+   unlocking,
+   canUnlock,
+@@ -45,6 +25,9 @@ export function TalentProfileDrawer({
+   onUnlock,
+ }: {
+   candidate: TalentPoolCard | null;
++  token: string;
++  /** Current list query string (filters + page) so the full page can link back to the same list. */
++  listQuery: string;
+   loading: boolean;
+   unlocking: boolean;
+   canUnlock: boolean;
+@@ -65,7 +48,11 @@ export function TalentProfileDrawer({
+       element.close();
+       document.body.style.overflow = previousOverflow;
+     };
+-  }, [open]);
++  }, [open ]);
++
++  const fullProfileHref = candidate
++    ? `/recruiter/talent-pool/${candidate.id}${listQuery ? `?list=${encodeURIComponent(listQuery)}` : ''}`
++    : '#';
+ 
+   return (
+     <dialog
+@@ -89,178 +76,35 @@ export function TalentProfileDrawer({
+                 Chi tiết hồ sơ
+               </h2>
+             </div>
+-            <button
+-              type="button"
+-              autoFocus
+-              onClick={onClose}
+-              aria-label="Đóng hồ sơ"
+-              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600"
+-            >
+-              <X className="size-5" />
+-            </button>
+-          </header>
+-          <div
+-            className="flex-1 space-y-7 overflow-y-auto overscroll-contain p-5 sm:p-6"
+-            aria-busy={loading}
+-          >
+-            <section>
+-              <div className="mb-3 inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
+-                <CheckCircle2 className="size-3.5" />
+-                Đang tìm việc
+-              </div>
+-              <h3 className="break-words text-xl font-extrabold text-slate-900">
+-                {candidate.displayName}
+-              </h3>
+-              <p className="mt-1 text-sm text-slate-600">{candidate.desiredTitle}</p>
+-              {candidate.locationHint && (
+-                <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+-                  <MapPin className="size-3.5" />
+-                  {candidate.locationHint}
+-                </p>
+-              )}
+-              <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">
+-                {candidate.professionalSummary}
+-              </p>
+-            </section>
+-            {candidate.skills.length > 0 && (
+-              <section>
+-                <h3 className="mb-3 text-xs font-extrabold text-slate-900">Kỹ năng chuyên môn</h3>
+-                <TalentSkills key={candidate.id} skills={candidate.skills} />
+-              </section>
+-            )}
+-            <section className="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+-              <h3 className="flex items-center gap-2 text-xs font-extrabold text-slate-900">
+-                <ShieldCheck className="size-4 text-blue-600" />
+-                Thông tin liên hệ
+-              </h3>
+-              {candidate.contactUnlocked && candidate.contact ? (
+-                <div className="mt-3 space-y-3 text-sm">
+-                  <a
+-                    href={`mailto:${candidate.contact.email}`}
+-                    className="flex items-center gap-2 break-all text-blue-700 hover:underline"
+-                  >
+-                    <Mail className="size-4 shrink-0" />
+-                    {candidate.contact.email}
+-                  </a>
+-                  {candidate.contact.phone && (
+-                    <a
+-                      href={`tel:${candidate.contact.phone}`}
+-                      className="flex items-center gap-2 text-slate-700 hover:underline"
+-                    >
+-                      <Phone className="size-4" />
+-                      {candidate.contact.phone}
+-                    </a>
+-                  )}
+-                  {candidate.contact.address && (
+-                    <p className="flex items-start gap-2">
+-                      <MapPin className="mt-0.5 size-4 shrink-0" />
+-                      {candidate.contact.address}
+-                    </p>
+-                  )}
+-                  {(
+-                    [
+-                      ['LinkedIn', candidate.contact.linkedinUrl],
+-                      ['GitHub', candidate.contact.githubUrl],
+-                      ['Portfolio', candidate.contact.portfolioUrl],
+-                    ] as const
+-                  ).map(([label, value]) => {
+-                    const href = value ? safeWebLink(value) : null;
+-                    return href ? (
+-                      <a
+-                        key={label}
+-                        href={href}
+-                        target="_blank"
+-                        rel="noopener noreferrer"
+-                        className="inline-flex items-center gap-1.5 rounded-md border border-blue-100 bg-white px-2.5 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50 mr-2"
+-                      >
+-                        {label}
+-                        <ExternalLink className="size-3" />
+-                      </a>
+-                    ) : null;
+-                  })}
+-                </div>
+-              ) : (
+-                <p className="mt-2 text-xs leading-5 text-slate-600">
+-                  {candidate.privacyNote ||
+-                    'Thông tin liên hệ được ẩn để bảo vệ quyền riêng tư. Mở khóa bằng 1 lượt trong gói của bạn.'}
+-                </p>
+-              )}
+-            </section>
+-            {error ? (
+-              <div
+-                role="alert"
+-                className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs leading-5 text-rose-700"
++            <div className="flex items-center gap-1">
++              <Link
++                href={fullProfileHref}
++                target="_blank"
++                rel="noopener noreferrer"
++                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-bold text-blue-700 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-600"
+               >
+-                {error}
+-                <button
+-                  type="button"
+-                  onClick={onRetry}
+-                  disabled={loading || unlocking}
+-                  className="ml-2 font-bold underline disabled:opacity-50"
+-                >
+-                  Thử lại
+-                </button>
+-              </div>
+-            ) : loading ? (
+-              <p role="status" className="flex items-center gap-2 text-xs text-slate-500">
+-                <Loader2 className="size-4 animate-spin" />
+-                Đang tải kinh nghiệm và học vấn...
+-              </p>
+-            ) : (
+-              <>
+-                <section>
+-                  <h3 className="mb-4 flex items-center gap-2 text-xs font-extrabold text-slate-900">
+-                    <BriefcaseBusiness className="size-4 text-blue-600" />
+-                    Kinh nghiệm làm việc
+-                  </h3>
+-                  {candidate.workExperiences?.length ? (
+-                    <div className="space-y-5 border-l-2 border-slate-100 pl-4">
+-                      {candidate.workExperiences.map((item, i) => (
+-                        <div key={i}>
+-                          <p className="text-sm font-bold text-slate-800">{item.positionTitle}</p>
+-                          <p className="mt-0.5 text-xs text-slate-600">{item.companyName}</p>
+-                          <p className="mt-1 text-[11px] text-slate-500">
+-                            {month(item.startDate)} –{' '}
+-                            {item.isCurrent
+-                              ? 'Hiện tại'
+-                              : item.endDate
+-                                ? month(item.endDate)
+-                                : 'Chưa cập nhật'}
+-                          </p>
+-                          {item.description && (
+-                            <p className="mt-2 whitespace-pre-wrap break-words text-xs leading-6 text-slate-600">
+-                              {item.description}
+-                            </p>
+-                          )}
+-                        </div>
+-                      ))}
+-                    </div>
+-                  ) : (
+-                    <p className="text-xs text-slate-500">Chưa bổ sung kinh nghiệm.</p>
+-                  )}
+-                </section>
+-                <section>
+-                  <h3 className="mb-4 flex items-center gap-2 text-xs font-extrabold text-slate-900">
+-                    <GraduationCap className="size-4 text-blue-600" />
+-                    Học vấn
+-                  </h3>
+-                  <div className="space-y-4">
+-                    {candidate.educations?.length ? (
+-                      candidate.educations.map((item, i) => (
+-                        <div key={i}>
+-                          <p className="text-sm font-bold text-slate-800">{item.schoolName}</p>
+-                          <p className="mt-1 text-xs text-slate-600">
+-                            {[item.degree, item.major].filter(Boolean).join(' · ')}
+-                          </p>
+-                        </div>
+-                      ))
+-                    ) : (
+-                      <p className="text-xs text-slate-500">Chưa bổ sung học vấn.</p>
+-                    )}
+-                  </div>
+-                </section>
+-              </>
+-            )}
++                Mở hồ sơ đầy đủ
++                <ExternalLink className="size-3.5" />
++              </Link>
++              <button
++                type="button"
++                autoFocus
++                onClick={onClose}
++                aria-label="Đóng hồ sơ"
++                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600"
++              >
++                <X className="size-5" />
++              </button>
++            </div>
++          </header>
++          <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6">
++            <TalentProfileContent
++              candidate={candidate}
++              token={token}
++              loading={loading}
++              error={error}
++              onRetry={onRetry}
++            />
+           </div>
+           <footer className="border-t border-slate-200 bg-white p-5 sm:px-6">
+             {candidate.contactUnlocked ? (
+diff --git a/frontend/src/components/recruiter/talent-pool/TalentProfilePage.tsx b/frontend/src/components/recruiter/talent-pool/TalentProfilePage.tsx
+new file mode 100644
+index 0000000..f0079be
+--- /dev/null
++++ b/frontend/src/components/recruiter/talent-pool/TalentProfilePage.tsx
+@@ -0,0 +1,275 @@
++'use client';
++
++import Link from 'next/link';
++import { useEffect, useRef, useState } from 'react';
++import {
++  ArrowLeft,
++  ArrowRight,
++  CheckCircle2,
++  Loader2,
++  LockKeyhole,
++  SearchX,
++  Wallet,
++} from 'lucide-react';
++import { toast } from 'sonner';
++import {
++  getMyEntitlement,
++  getTalentProfile,
++  unlockTalentProfile,
++  type EntitlementStatus,
++  type TalentPoolCard,
++} from '@/lib/billing-api';
++import type { RecruiterProfileData } from '@/lib/recruiter-api';
++import { RecruiterHeader } from '../RecruiterHeader';
++import { RecruiterProfileModal } from '../RecruiterProfileModal';
++import { TalentProfileContent } from './TalentProfileContent';
++
++const message = (error: unknown, fallback: string) =>
++  error instanceof Error ? error.message : fallback;
++
++/** Rebuild the list query from known keys only, safely re-encoded. */
++function sanitizeListQuery(raw: string) {
++  const parsed = new URLSearchParams(raw);
++  const out = new URLSearchParams();
++  for (const key of ['search', 'desiredTitle', 'skill', 'page']) {
++    const value = parsed.get(key);
++    if (value) out.set(key, value);
++  }
++  return out.toString();
++}
++
++export function TalentProfilePage({
++  token,
++  initialProfile,
++  candidateId,
++  listQuery,
++}: {
++  token: string;
++  initialProfile: RecruiterProfileData | null;
++  candidateId: string;
++  /** Encoded list filters/page captured when the recruiter opened this profile. */
++  listQuery: string;
++}) {
++  const [profile, setProfile] = useState(initialProfile);
++  const [showProfile, setShowProfile] = useState(false);
++  const [entitlement, setEntitlement] = useState<EntitlementStatus | null>(null);
++  const [candidate, setCandidate] = useState<TalentPoolCard | null>(null);
++  const [loading, setLoading] = useState(true);
++  const [error, setError] = useState<string | null>(null);
++  const [unlocking, setUnlocking] = useState(false);
++  const [quotaStale, setQuotaStale] = useState(false);
++  const unlockingRef = useRef(false);
++  const mounted = useRef(true);
++
++  const safeListQuery = sanitizeListQuery(listQuery);
++  const backHref = `/recruiter/talent-pool${safeListQuery ? `?${safeListQuery}` : ''}`;
++
++  useEffect(() => {
++    mounted.current = true;
++    const boot = async () => {
++      try {
++        const [status, full] = await Promise.all([
++          getMyEntitlement(token, 'EMPLOYER'),
++          getTalentProfile(token, candidateId),
++        ]);
++        if (!mounted.current) return;
++        setEntitlement(status);
++        setCandidate(full);
++      } catch (e) {
++        if (mounted.current) setError(message(e, 'Không tải được hồ sơ.'));
++      } finally {
++        if (mounted.current) setLoading(false);
++      }
++    };
++    void boot();
++    return () => {
++      mounted.current = false;
++    };
++  }, [token, candidateId]);
++
++  const retry = async () => {
++    setLoading(true);
++    setError(null);
++    try {
++      const full = await getTalentProfile(token, candidateId);
++      if (mounted.current) setCandidate(full);
++    } catch (e) {
++      if (mounted.current) {
++        // Drop any previously shown contact if access is no longer valid.
++        setCandidate(null);
++        setError(message(e, 'Không tải được hồ sơ. Ứng viên có thể đã ngừng chia sẻ.'));
++      }
++    } finally {
++      if (mounted.current) setLoading(false);
++    }
++  };
++
++  const unlock = async () => {
++    if (!candidate || unlockingRef.current || quotaStale) return;
++    if (!entitlement || entitlement.cvUnlockRemaining <= 0) return;
++    unlockingRef.current = true;
++    setUnlocking(true);
++    try {
++      const full = await unlockTalentProfile(token, candidate.id);
++      if (!mounted.current) return;
++      setCandidate(full);
++      toast.success('Đã mở thông tin liên hệ và CV. Xem lại hồ sơ này không mất thêm lượt.');
++      try {
++        const status = await getMyEntitlement(token, 'EMPLOYER');
++        if (mounted.current) {
++          setEntitlement(status);
++          setQuotaStale(false);
++        }
++      } catch {
++        if (mounted.current) setQuotaStale(true);
++      }
++    } catch (e) {
++      if (mounted.current) toast.error(message(e, 'Không thể mở liên hệ. Vui lòng thử lại.'));
++    } finally {
++      unlockingRef.current = false;
++      if (mounted.current) setUnlocking(false);
++    }
++  };
++
++  const canUnlock =
++    !!entitlement?.talentPoolAccess && entitlement.cvUnlockRemaining > 0 && !quotaStale;
++
++  return (
++    <div className="min-h-dvh bg-[#F8FAFC] text-[#1F2937]">
++      <RecruiterHeader
++        token={token}
++        profile={profile}
++        activeSection="talent-pool"
++        onOpenProfile={() => setShowProfile(true)}
++      />
++      <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:px-6">
++        <div className="flex flex-wrap items-center justify-between gap-3">
++          <Link
++            href={backHref}
++            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-blue-200 hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-blue-600"
++          >
++            <ArrowLeft className="size-3.5" />
++            Quay lại kho ứng viên
++          </Link>
++          {entitlement?.talentPoolAccess && (
++            <p className="text-xs text-slate-500">
++              Lượt mở liên hệ còn lại:{' '}
++              <strong className="text-blue-700">
++                {quotaStale ? '—' : entitlement.cvUnlockRemaining}
++              </strong>
++            </p>
++          )}
++        </div>
++
++        {loading ? (
++          <div
++            role="status"
++            aria-label="Đang tải hồ sơ"
++            className="rounded-2xl border border-slate-200 bg-white p-6 motion-safe:animate-pulse"
++          >
++            <div className="h-4 w-1/3 rounded bg-slate-100" />
++            <div className="mt-3 h-6 w-1/2 rounded bg-slate-100" />
++            <div className="mt-6 space-y-2">
++              <div className="h-3 rounded bg-slate-100" />
++              <div className="h-3 rounded bg-slate-100" />
++              <div className="h-3 w-2/3 rounded bg-slate-100" />
++            </div>
++          </div>
++        ) : entitlement && !entitlement.talentPoolAccess ? (
++          <section className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-xs">
++            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
++              <LockKeyhole className="size-6" />
++            </span>
++            <h1 className="mt-5 text-base font-extrabold text-slate-900">
++              Gói hiện tại chưa có quyền truy cập kho ứng viên
++            </h1>
++            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
++              Xem các gói HR để tìm kiếm hồ sơ và mở thông tin liên hệ.
++            </p>
++            <Link
++              href="/recruiter/billing"
++              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-xs font-bold text-white hover:bg-blue-700"
++            >
++              Xem gói dịch vụ
++              <ArrowRight className="size-4" />
++            </Link>
++          </section>
++        ) : error || !candidate ? (
++          <section className="flex flex-col items-center rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-xs">
++            <span className="flex size-14 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 text-slate-400">
++              <SearchX className="size-6" />
++            </span>
++            <h1 className="mt-5 text-base font-extrabold text-slate-900">
++              Không xem được hồ sơ này
++            </h1>
++            <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
++              {error ||
++                'Ứng viên có thể đã ngừng tìm việc hoặc hồ sơ không còn hiển thị trong kho ứng viên.'}
++            </p>
++            <Link
++              href={backHref}
++              className="mt-6 inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-bold text-blue-700 hover:bg-blue-100"
++            >
++              <ArrowLeft className="size-3.5" />
++              Quay lại kho ứng viên
++            </Link>
++          </section>
++        ) : (
++          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
++            <TalentProfileContent
++              candidate={candidate}
++              token={token}
++              loading={false}
++              error={null}
++              onRetry={() => void retry()}
++            />
++            <div className="mt-7 border-t border-slate-100 pt-5">
++              {candidate.contactUnlocked ? (
++                <p className="flex items-center justify-center gap-2 text-xs font-semibold text-emerald-700">
++                  <CheckCircle2 className="size-4" />
++                  Đã mở liên hệ · Xem lại không mất lượt
++                </p>
++              ) : (
++                <>
++                  <button
++                    type="button"
++                    onClick={() => void unlock()}
++                    disabled={!canUnlock || unlocking}
++                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-3 text-xs font-bold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
++                  >
++                    {unlocking ? (
++                      <Loader2 className="size-4 animate-spin" />
++                    ) : (
++                      <LockKeyhole className="size-4" />
++                    )}
++                    {unlocking ? 'Đang mở liên hệ...' : 'Mở liên hệ và CV · 1 lượt'}
++                  </button>
++                  {!canUnlock && (
++                    <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-xs text-slate-600">
++                      <Wallet className="size-3.5" />
++                      {quotaStale
++                        ? 'Chưa cập nhật được hạn mức. Tải lại trang để tiếp tục.'
++                        : 'Bạn đã hết lượt mở liên hệ.'}{' '}
++                      <Link
++                        href="/recruiter/billing"
++                        className="font-semibold text-blue-700 underline"
++                      >
++                        Xem gói dịch vụ
++                      </Link>
++                    </p>
++                  )}
++                </>
++              )}
++            </div>
++          </section>
++        )}
++      </main>
++      <RecruiterProfileModal
++        isOpen={showProfile}
++        onClose={() => setShowProfile(false)}
++        profile={profile}
++        onProfileUpdated={setProfile}
++      />
++    </div>
++  );
++}
+diff --git a/frontend/src/lib/billing-api.ts b/frontend/src/lib/billing-api.ts
+index 459ab7e..035d98d 100644
+--- a/frontend/src/lib/billing-api.ts
++++ b/frontend/src/lib/billing-api.ts
+@@ -302,6 +302,8 @@ export type TalentPoolCard = {
+     portfolioUrl: string | null;
+     address: string | null;
+   } | null;
++  /** Shared original resume; only present after unlock. URL is fetched on demand. */
++  resume: { fileName: string } | null;
+   privacyNote: string | null;
+ };
+ 
+@@ -336,6 +338,13 @@ export function getTalentProfile(accessToken: string, candidateProfileId: string
+   return billingRequest<TalentPoolCard>(`/billing/talent-pool/${candidateProfileId}`, accessToken);
+ }
+ 
++export function getTalentResumeUrl(accessToken: string, candidateProfileId: string) {
++  return billingRequest<{ url: string; fileName: string; mimeType: string; expiresIn: number }>(
++    `/billing/talent-pool/${candidateProfileId}/resume-url`,
++    accessToken,
++  );
++}
++
+ export function formatVnd(amount: number) {
+   return new Intl.NumberFormat("vi-VN", {
+     style: "currency",
+diff --git a/frontend/src/lib/candidate-api.ts b/frontend/src/lib/candidate-api.ts
+index 92001e0..3db4a60 100644
+--- a/frontend/src/lib/candidate-api.ts
++++ b/frontend/src/lib/candidate-api.ts
+@@ -10,9 +10,16 @@ export interface JobSeekingStatus {
+   profileReady: boolean;
+   packageName: string;
+   packageEndsAt: string | null;
++  sharedResumeId: string | null;
++  resumes: Array<{
++    id: string;
++    fileName: string;
++    createdAt: string;
++    isPrimary: boolean;
++  }>;
+ }
+ 
+-async function jobSeekingRequest(token: string, body?: { enabled: boolean; consent?: boolean }): Promise<JobSeekingStatus> {
++async function jobSeekingRequest(token: string, body?: { enabled: boolean; consent?: boolean; resumeId?: string }): Promise<JobSeekingStatus> {
+   const response = await fetchWithTimeout(`${API_URL}/candidates/me/job-seeking`, {
+     method: body ? 'PATCH' : 'GET',
+     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+@@ -27,8 +34,8 @@ export function getJobSeekingStatus(token: string) {
+   return jobSeekingRequest(token);
+ }
+ 
+-export function updateJobSeekingStatus(token: string, enabled: boolean, consent = false) {
+-  return jobSeekingRequest(token, { enabled, consent });
++export function updateJobSeekingStatus(token: string, enabled: boolean, consent = false, resumeId?: string) {
++  return jobSeekingRequest(token, { enabled, consent, resumeId });
+ }
+ 
+ export class CandidateApiError extends Error {

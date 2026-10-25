@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/client';
 const navigation = [
   { href: '/candidate', label: 'Việc làm' },
   { href: '/candidate/applications', label: 'Đơn ứng tuyển' },
+  { href: '/candidate/invitations', label: 'Lời mời ứng tuyển' },
   { href: '/candidate/profile', label: 'Hồ sơ' },
   { href: '/candidate/billing', label: 'Gói dịch vụ' },
 ];
@@ -38,7 +39,7 @@ export function CandidateNav() {
   }, [pathname]);
 
   return (
-    <nav aria-label="Điều hướng ứng viên" className="hidden items-center gap-1 sm:flex font-sans">
+    <nav aria-label="Điều hướng ứng viên" className="hidden items-center gap-1 xl:flex font-sans">
       {navigation.map((item) => {
         const active =
           item.href === '/candidate'

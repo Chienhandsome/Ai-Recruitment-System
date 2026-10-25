@@ -38,9 +38,7 @@ import {
 } from './dto/query-recruiter-applications.dto';
 import { QueryMyApplicationsDto } from './dto/query-my-applications.dto';
 import { UpdateApplicationStageDto } from './dto/update-application-stage.dto';
-import {
-  toPrismaJson,
-} from './application-evaluation.snapshot';
+import { toPrismaJson } from './application-evaluation.snapshot';
 import { EntitlementsService } from '../billing/entitlements.service';
 import { PackageAudience } from '@prisma/client';
 import { EvaluationPayloadBuilderService } from '../evaluation/evaluation-payload.builder.service';
@@ -152,6 +150,7 @@ export class ApplicationsService {
     userId: string,
     createApplicationDto: CreateApplicationDto,
     now = new Date(),
+    talentInvitationId?: string,
   ) {
     const candidateProfile = await this.prisma.candidateProfile.findUnique({
       where: { userId },
@@ -195,7 +194,7 @@ export class ApplicationsService {
       },
       select: { id: true },
     });
-    if (existingApplication) {
+    if (existingApplication && !talentInvitationId) {
       throw new ConflictException('You have already applied for this job.');
     }
 
@@ -216,8 +215,9 @@ export class ApplicationsService {
       );
     }
 
-    const applicantCap =
-      await this.entitlements.getApplicantCapForJobOwner(job.recruiter.userId);
+    const applicantCap = await this.entitlements.getApplicantCapForJobOwner(
+      job.recruiter.userId,
+    );
 
     const profileSnapshot = this.buildProfileSnapshot(
       candidateProfile,
@@ -226,36 +226,139 @@ export class ApplicationsService {
       now,
     );
 
-    let application: { id: string };
+    let application: { id: string; reused?: boolean };
     try {
       const executeTx = this.prisma.$transaction
         ? (fn: any) => this.prisma.$transaction(fn)
         : async (fn: any) => fn(this.prisma);
 
       application = await executeTx(async (tx: any) => {
+        // Follow sending's candidate -> job -> invitation lock order. The
+        // candidate key-share also avoids a later FK check waiting on a sender
+        // that is itself waiting for this job lock.
+        if (tx.$queryRaw) {
+          await tx.$queryRaw`SELECT id FROM candidate_profiles WHERE id = ${candidateProfile.id} FOR KEY SHARE`;
+          await tx.$queryRaw`SELECT id FROM job_postings WHERE id = ${job.id} FOR UPDATE`;
+        }
+        let invitation: { recruiterUserId: string } | null = null;
+        if (talentInvitationId) {
+          const claimed = await tx.talentInvitation.updateMany({
+            where: {
+              id: talentInvitationId,
+              candidateId: candidateProfile.id,
+              jobId: job.id,
+              status: 'PENDING',
+              expiresAt: { gt: now },
+            },
+            data: { status: 'ACCEPTED', respondedAt: now },
+          });
+          const current = await tx.talentInvitation.findFirst({
+            where: {
+              id: talentInvitationId,
+              candidateId: candidateProfile.id,
+              jobId: job.id,
+            },
+          });
+          if (claimed.count !== 1) {
+            if (current?.status === 'ACCEPTED' && current.applicationId) {
+              return { id: current.applicationId, reused: true };
+            }
+            throw new ConflictException(
+              'Lời mời đã hết hạn, bị thu hồi hoặc đã được phản hồi.',
+            );
+          }
+          invitation = current;
+        }
+
+        // Lock the job for both direct applications and invitations. Counting
+        // applicants without this lock can oversubscribe a capped job.
+        if (tx.$queryRaw) {
+          const currentJob = await tx.jobPosting.findFirst({
+            where: {
+              id: job.id,
+              status: JobStatus.PUBLISHED,
+              OR: [{ expiryDate: null }, { expiryDate: { gt: now } }],
+            },
+          });
+          if (!currentJob)
+            throw new NotFoundException('Tin tuyển dụng không còn nhận hồ sơ.');
+          if (
+            currentJob.autoCloseOnQuota &&
+            (await tx.application.count({
+              where: { jobId: job.id, currentStage: ApplicationStage.HIRED },
+            })) >= currentJob.targetHires
+          ) {
+            throw new ForbiddenException(
+              'Tin tuyển dụng đã tuyển đủ chỉ tiêu.',
+            );
+          }
+        }
+
+        // A direct application may have arrived while acceptance was waiting
+        // for the job lock. Link it instead of creating/dispatching another one.
+        const alreadyApplied = talentInvitationId
+          ? await tx.application.findUnique({
+              where: {
+                jobId_candidateId: {
+                  jobId: job.id,
+                  candidateId: candidateProfile.id,
+                },
+              },
+              select: { id: true },
+            })
+          : null;
         if (applicantCap != null) {
           const currentApplicants = await tx.application.count({
             where: { jobId: job.id },
           });
-          if (currentApplicants >= applicantCap) {
+          if (!alreadyApplied && currentApplicants >= applicantCap) {
             throw new ForbiddenException(
               `Tin tuyển dụng đã đạt giới hạn ${applicantCap} ứng viên và tạm ẩn với ứng viên.`,
             );
           }
         }
 
-        return tx.application.create({
-          data: {
-            jobId: job.id,
-            candidateId: candidateProfile.id,
-            resumeId: resume.id,
-            source: 'DIRECT_APPLY',
-            currentStage: ApplicationStage.RECEIVED,
-            processingStatus: ApplicationProcessingStatus.QUEUED,
-            profileSnapshot: toPrismaJson(profileSnapshot),
-          },
-          select: { id: true },
-        });
+        const created =
+          alreadyApplied ??
+          (await tx.application.create({
+            data: {
+              jobId: job.id,
+              candidateId: candidateProfile.id,
+              resumeId: resume.id,
+              source: talentInvitationId
+                ? 'TALENT_POOL_INVITE'
+                : 'DIRECT_APPLY',
+              currentStage: ApplicationStage.RECEIVED,
+              processingStatus: ApplicationProcessingStatus.QUEUED,
+              profileSnapshot: toPrismaJson(profileSnapshot),
+            },
+            select: { id: true },
+          }));
+        if (talentInvitationId && invitation) {
+          await tx.talentInvitation.update({
+            where: { id: talentInvitationId },
+            data: { applicationId: created.id },
+          });
+          if (this.notificationsService)
+            await this.notificationsService.createNotificationOnce(
+              tx,
+              `talent-invitation:${talentInvitationId}:ACCEPTED`,
+              {
+                recipientUserId: invitation.recruiterUserId,
+                applicationId: created.id,
+                type: NotificationType.SYSTEM_ALERT,
+                title: `Ứng viên đã nhận lời mời: ${job.title}`,
+                message: `${candidateProfile.fullName} đã xác nhận ứng tuyển. Bạn có thể xem hồ sơ trong quy trình tuyển dụng.`,
+                payload: {
+                  talentInvitationId,
+                  applicationId: created.id,
+                  jobId: job.id,
+                  href: '/recruiter/talent-invitations',
+                },
+              },
+            );
+        }
+        return { ...created, reused: !!alreadyApplied };
       });
     } catch (error) {
       // The unique constraint is the final authority under concurrent POSTs;
@@ -274,6 +377,13 @@ export class ApplicationsService {
       }
       throw error;
     }
+
+    if (application.reused)
+      return {
+        applicationId: application.id,
+        reused: true,
+        message: 'Hồ sơ ứng tuyển đã tồn tại.',
+      };
 
     let published = false;
     try {
@@ -298,7 +408,11 @@ export class ApplicationsService {
       job.recruiter.userId,
     );
 
-    if (this.notificationsService && job.recruiter?.userId) {
+    if (
+      !talentInvitationId &&
+      this.notificationsService &&
+      job.recruiter?.userId
+    ) {
       await this.notificationsService.createNotification({
         recipientUserId: job.recruiter.userId,
         applicationId: application.id,
@@ -382,25 +496,25 @@ export class ApplicationsService {
           : {},
         effectiveQuery.search?.trim()
           ? {
-            candidate: {
-              user: {
-                OR: [
-                  {
-                    fullName: {
-                      contains: effectiveQuery.search.trim(),
-                      mode: 'insensitive',
+              candidate: {
+                user: {
+                  OR: [
+                    {
+                      fullName: {
+                        contains: effectiveQuery.search.trim(),
+                        mode: 'insensitive',
+                      },
                     },
-                  },
-                  {
-                    email: {
-                      contains: effectiveQuery.search.trim(),
-                      mode: 'insensitive',
+                    {
+                      email: {
+                        contains: effectiveQuery.search.trim(),
+                        mode: 'insensitive',
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          }
+            }
           : {},
       ],
     };
@@ -829,10 +943,7 @@ export class ApplicationsService {
           where: {
             applicationId,
             status: {
-              in: [
-                AiInterviewStatus.CREATED,
-                AiInterviewStatus.IN_PROGRESS,
-              ],
+              in: [AiInterviewStatus.CREATED, AiInterviewStatus.IN_PROGRESS],
             },
           },
           data: {
@@ -1067,11 +1178,11 @@ export class ApplicationsService {
           company: application.job.recruiter.company,
           recruiter: application.job.recruiter
             ? {
-              title: application.job.recruiter.title,
-              fullName: application.job.recruiter.user?.fullName,
-              email: application.job.recruiter.user?.email,
-              phone: application.job.recruiter.user?.phone,
-            }
+                title: application.job.recruiter.title,
+                fullName: application.job.recruiter.user?.fullName,
+                email: application.job.recruiter.user?.email,
+                phone: application.job.recruiter.user?.phone,
+              }
             : null,
         },
         currentStage: application.currentStage,

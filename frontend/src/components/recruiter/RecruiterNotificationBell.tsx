@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Bell,
@@ -37,6 +38,7 @@ export function RecruiterNotificationBell({
   onNavigateToInterviews,
   onNavigateToApplication,
 }: RecruiterNotificationBellProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -165,6 +167,11 @@ export function RecruiterNotificationBell({
       }
     }
 
+    if (typeof item.payload?.talentInvitationId === 'string') {
+      setIsOpen(false);
+      router.push('/recruiter/talent-invitations?invitationId=' + encodeURIComponent(item.payload.talentInvitationId));
+      return;
+    }
     const targetAppId = ((item.payload as Record<string, unknown> | undefined)?.applicationId as string | undefined) || item.applicationId || undefined;
     const targetJobId = (item.payload as Record<string, unknown> | undefined)?.jobId as string | undefined;
 

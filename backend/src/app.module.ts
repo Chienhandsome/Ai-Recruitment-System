@@ -29,6 +29,7 @@ import { BillingModule } from './modules/billing/billing.module';
 import { CandidateInsightsModule } from './modules/candidate-insights/candidate-insights.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { PoliciesModule } from './modules/policies/policies.module';
+import { TalentInvitationsModule } from './modules/talent-invitations/talent-invitations.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 
 @Module({
@@ -66,8 +67,9 @@ import { DisputesModule } from './modules/disputes/disputes.module';
     ContractsModule,
     PoliciesModule,
     DisputesModule,
+    TalentInvitationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

@@ -9,6 +9,7 @@ import {
   X,
   Briefcase,
   FileText,
+  Mail,
   User,
   LogOut,
   LogIn,
@@ -52,6 +53,7 @@ export function CandidateHeader({
     ...(isAuthenticated
       ? [
           { href: '/candidate/applications', label: 'Đơn ứng tuyển', icon: FileText },
+          { href: '/candidate/invitations', label: 'Lời mời ứng tuyển', icon: Mail },
           { href: '/candidate/profile', label: 'Hồ sơ', icon: User },
         ]
       : []),
@@ -63,9 +65,7 @@ export function CandidateHeader({
         <div className="flex h-16 items-center justify-between">
           <Link href="/candidate" className="flex items-center gap-2">
             <BrainCircuit className="h-7 w-7 text-primary" />
-            <span className="text-lg font-bold tracking-tight text-primary">
-              SmartRecruit AI
-            </span>
+            <span className="text-lg font-bold tracking-tight text-primary">SmartRecruit AI</span>
           </Link>
 
           {isAuthenticated ? (
@@ -89,11 +89,7 @@ export function CandidateHeader({
             {isAuthenticated && fullName ? (
               <>
                 <NotificationBell />
-                <UserMenu
-                  fullName={fullName}
-                  avatarUrl={avatarUrl}
-                  packageCode={packageCode}
-                />
+                <UserMenu fullName={fullName} avatarUrl={avatarUrl} packageCode={packageCode} />
               </>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
@@ -110,7 +106,7 @@ export function CandidateHeader({
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 sm:hidden transition"
+              className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 xl:hidden transition"
               aria-label="Toggle mobile menu"
             >
               {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
@@ -121,7 +117,7 @@ export function CandidateHeader({
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="border-t bg-surface px-4 py-4 sm:hidden animate-in slide-in-from-top-2 duration-200 shadow-xl">
+        <div className="border-t bg-surface px-4 py-4 xl:hidden animate-in slide-in-from-top-2 duration-200 shadow-xl">
           {isAuthenticated && fullName && (
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-slate-50 p-3 border border-slate-100">
               <div className="relative shrink-0">

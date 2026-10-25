@@ -4,6 +4,7 @@ import { getSupabasePublicConfig } from "./config";
 
 const protectedPrefixes = [
   "/candidate/applications",
+  "/candidate/invitations",
   "/candidate/profile",
   "/candidate/billing",
   "/recruiter",

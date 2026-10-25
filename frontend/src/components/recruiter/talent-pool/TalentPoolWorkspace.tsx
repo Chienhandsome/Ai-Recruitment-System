@@ -32,6 +32,7 @@ import { RecruiterHeader } from '../RecruiterHeader';
 import { RecruiterProfileModal } from '../RecruiterProfileModal';
 import { TalentCandidateCard, TalentPoolSkeleton } from './TalentCandidateCard';
 import { TalentProfileDrawer } from './TalentProfileDrawer';
+import { InviteTalentModal } from './InviteTalentModal';
 
 type Filters = { search: string; desiredTitle: string; skill: string };
 const emptyFilters: Filters = { search: '', desiredTitle: '', skill: '' };
@@ -60,6 +61,7 @@ export function TalentPoolWorkspace({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<TalentPoolCard | null>(null);
+  const [inviteCandidate, setInviteCandidate] = useState<TalentPoolCard | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -257,6 +259,13 @@ export function TalentPoolWorkspace({
                 <p className="mt-1 text-xs font-extrabold text-slate-800">
                   {entitlement.packageName}
                 </p>
+                <Link
+                  href="/recruiter/talent-invitations"
+                  className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-blue-700 hover:underline"
+                >
+                  Lời mời đã gửi
+                  <ArrowRight className="size-3.5" />
+                </Link>
               </div>
               {entitlement.talentPoolAccess && (
                 <div className="border-l border-blue-100 pl-5">
@@ -535,7 +544,20 @@ export function TalentPoolWorkspace({
         onUnlock={() => {
           if (selected) void unlockProfile(selected);
         }}
+        onInvite={() => {
+          if (!selected?.contactUnlocked) return;
+          setInviteCandidate(selected);
+          detailRequest.current++;
+          setSelected(null);
+        }}
       />
+      {inviteCandidate && (
+        <InviteTalentModal
+          token={token}
+          candidate={inviteCandidate}
+          onClose={() => setInviteCandidate(null)}
+        />
+      )}
       <RecruiterProfileModal
         isOpen={showProfile}
         onClose={() => setShowProfile(false)}

@@ -125,6 +125,15 @@ enum ApplicationSource {
   DIRECT_APPLY
   RECRUITER_UPLOAD
   REFERRAL
+  TALENT_POOL_INVITE
+}
+
+enum TalentInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  WITHDRAWN
 }
 
 enum ApplicationProcessingStatus {
@@ -432,6 +441,7 @@ model User {
   jdFitAnalyses    CandidateJdFitAnalysis[]
   disputes         Dispute[]
   contractSigningOtps ContractSigningOtp[]
+  sentTalentInvitations TalentInvitation[] @relation("TalentInvitationSender")
   warrantyClaims   WarrantyClaim[]
 
   @@index([email])
@@ -529,6 +539,7 @@ model JobPosting {
   requiresProofOfWork Boolean      @default(false) @map("requires_proof_of_work")
   proofOfWorkType     ProofType?   @map("proof_of_work_type")
 
+  talentInvitations TalentInvitation[]
   jobSkills       JobSkill[]
   jobCertificates JobCertificate[]
   applications    Application[]
@@ -652,6 +663,7 @@ model CandidateProfile {
   expectedMaxSalary Decimal?      @map("expected_max_salary") @db.Decimal(12, 2)
   preferredModel    WorkingModel? @map("preferred_model")
 
+  talentInvitations TalentInvitation[]
   resumes         Resume[]
   applications    Application[]
   candidateSkills CandidateSkill[]
@@ -863,6 +875,7 @@ model Application {
   appliedAt             DateTime                    @default(now()) @map("applied_at")
   updatedAt             DateTime                    @updatedAt @map("updated_at")
 
+  talentInvitations TalentInvitation[]
   aiMatchingResults   AiMatchingResult[]
   interviews          Interview[]
   aiInterviewSessions AiInterviewSession[]
@@ -1492,4 +1505,27 @@ model WarrantyClaim {
   @@index([recruiterUserId, status])
   @@index([companyId])
   @@map("warranty_claims")
+}
+
+model TalentInvitation {
+  id              String                 @id @default(uuid())
+  recruiterUserId String                 @map("recruiter_user_id") @db.Uuid
+  recruiterUser   User                   @relation("TalentInvitationSender", fields: [recruiterUserId], references: [id], onDelete: Cascade)
+  candidateId     String                 @map("candidate_id")
+  candidate       CandidateProfile       @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobId           String                 @map("job_id")
+  job             JobPosting             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  applicationId   String?                @map("application_id")
+  application     Application?           @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  message         String?                @db.Text
+  status          TalentInvitationStatus @default(PENDING)
+  expiresAt       DateTime               @map("expires_at")
+  respondedAt     DateTime?              @map("responded_at")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  @@index([recruiterUserId, createdAt])
+  @@index([candidateId, createdAt])
+  @@index([status, expiresAt])
+  @@map("talent_invitations")
 }

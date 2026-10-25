@@ -170,6 +170,10 @@ export function NotificationBell() {
     }
 
     setIsOpen(false);
+    if (typeof item.payload?.talentInvitationId === 'string') {
+      router.push('/candidate/invitations?invitationId=' + encodeURIComponent(item.payload.talentInvitationId));
+      return;
+    }
     const launchUrl = item.payload?.launchUrl;
     if (typeof launchUrl === 'string' && /^https?:\/\//.test(launchUrl)) {
       window.location.assign(launchUrl);

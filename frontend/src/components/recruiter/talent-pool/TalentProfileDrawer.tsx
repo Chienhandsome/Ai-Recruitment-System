@@ -13,6 +13,7 @@ import {
   MapPin,
   Phone,
   ShieldCheck,
+  Send,
   X,
 } from 'lucide-react';
 import type { TalentPoolCard } from '@/lib/billing-api';
@@ -43,6 +44,7 @@ export function TalentProfileDrawer({
   onClose,
   onRetry,
   onUnlock,
+  onInvite,
 }: {
   candidate: TalentPoolCard | null;
   loading: boolean;
@@ -52,6 +54,7 @@ export function TalentProfileDrawer({
   onClose: () => void;
   onRetry: () => void;
   onUnlock: () => void;
+  onInvite: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const open = candidate !== null;
@@ -264,10 +267,21 @@ export function TalentProfileDrawer({
           </div>
           <footer className="border-t border-slate-200 bg-white p-5 sm:px-6">
             {candidate.contactUnlocked ? (
-              <p className="flex items-center justify-center gap-2 text-xs font-semibold text-emerald-700">
-                <CheckCircle2 className="size-4" />
-                Đã mở liên hệ · Xem lại không mất lượt
-              </p>
+              <div className="space-y-3">
+                <p className="flex items-center justify-center gap-2 text-xs font-semibold text-emerald-700">
+                  <CheckCircle2 className="size-4" />
+                  Đã mở liên hệ · Xem lại không mất lượt
+                </p>
+                <button
+                  type="button"
+                  onClick={onInvite}
+                  disabled={loading || !!error || unlocking}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-xs font-bold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50"
+                >
+                  <Send className="size-4" />
+                  Mời ứng tuyển
+                </button>
+              </div>
             ) : (
               <>
                 <button

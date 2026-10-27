@@ -67,7 +67,7 @@ export class UploadResumeUseCase {
 
       await this.prisma.resume.update({
         where: { id: resume.id },
-        data: { objectPath: upload.objectPath },
+        data: { objectPath: upload.objectPath, storageBucket: upload.bucket },
       });
 
       // The primary pointer must be visible before a fast worker result arrives,

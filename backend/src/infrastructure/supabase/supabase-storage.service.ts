@@ -240,6 +240,7 @@ export class SupabaseStorageService implements OnModuleInit {
   async createSignedDownloadUrl(
     objectPath: string,
     expiresIn?: number,
+    options?: { bucket?: string; download?: string },
   ): Promise<SignedUrlResult> {
     if (!this.supabaseClient) {
       throw new BadRequestException(
@@ -251,8 +252,12 @@ export class SupabaseStorageService implements OnModuleInit {
     const ttl = expiresIn ?? this.defaultExpiresIn;
 
     const { data, error } = await this.supabaseClient.storage
-      .from(this.bucketName)
-      .createSignedUrl(sanitizedPath, ttl);
+      .from(options?.bucket ?? this.bucketName)
+      .createSignedUrl(
+        sanitizedPath,
+        ttl,
+        options?.download ? { download: options.download } : undefined,
+      );
 
     if (error || !data?.signedUrl) {
       this.logger.error(

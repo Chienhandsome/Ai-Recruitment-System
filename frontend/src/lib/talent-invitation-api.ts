@@ -9,6 +9,7 @@ export interface TalentInvitation {
   expiresAt: string;
   respondedAt: string | null;
   applicationId: string | null;
+  existingApplicationId?: string | null;
   candidate: { id: string; fullName: string; desiredTitle: string | null };
   recruiterUser: { id: string; fullName: string };
   job: {
@@ -31,6 +32,7 @@ export interface InvitationPage {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 export interface InvitationJob {
+  existingApplicationId?: string | null;
   id: string;
   jobCode: string;
   title: string;
@@ -70,8 +72,11 @@ export function listTalentInvitations(
     `${role}?page=${page}&limit=12${invitationId ? `&invitationId=${encodeURIComponent(invitationId)}` : ''}`,
   );
 }
-export function getInvitationJobs(token: string) {
-  return request<{ data: InvitationJob[] }>(token, 'recruiter/jobs');
+export function getInvitationJobs(token: string, candidateId?: string) {
+  return request<{ data: InvitationJob[] }>(
+    token,
+    `recruiter/jobs${candidateId ? `?candidateId=${encodeURIComponent(candidateId)}` : ''}`,
+  );
 }
 export function getInvitationResumes(token: string) {
   return request<{ data: InvitationResume[] }>(token, 'candidate/resumes');

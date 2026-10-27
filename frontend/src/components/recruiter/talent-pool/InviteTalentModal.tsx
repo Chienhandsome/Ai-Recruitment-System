@@ -41,7 +41,7 @@ export function InviteTalentModal({
   }, []);
   useEffect(() => {
     let cancelled = false;
-    getInvitationJobs(token)
+    getInvitationJobs(token, candidate.id)
       .then(({ data }) => {
         if (cancelled) return;
         setJobs(data);
@@ -57,7 +57,7 @@ export function InviteTalentModal({
     return () => {
       cancelled = true;
     };
-  }, [token, attempt]);
+  }, [token, candidate.id, attempt]);
 
   const send = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -146,6 +146,7 @@ export function InviteTalentModal({
                     {jobs.map((job) => (
                       <option key={job.id} value={job.id}>
                         {job.jobCode} · {job.title}
+                        {job.existingApplicationId ? ' · Đã ứng tuyển' : ''}
                       </option>
                     ))}
                   </select>
@@ -221,7 +222,11 @@ export function InviteTalentModal({
               className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {saving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-              {saving ? 'Đang gửi...' : 'Gửi lời mời'}
+              {saving
+                ? 'Đang xử lý...'
+                : jobs.find((job) => job.id === jobId)?.existingApplicationId
+                  ? 'Mở hồ sơ đã ứng tuyển'
+                  : 'Gửi lời mời'}
             </button>
           )}
         </footer>

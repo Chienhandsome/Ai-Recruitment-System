@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Header,
+  BadRequestException,
   Param,
   ParseUUIDPipe,
   Post,
@@ -17,6 +19,7 @@ import {
 import { PackageAudience } from '@prisma/client';
 import { BillingService } from './billing.service';
 import { TalentPoolService } from './talent-pool.service';
+import { TalentResumeService } from './talent-resume.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -35,6 +38,7 @@ export class BillingController {
   constructor(
     private readonly billingService: BillingService,
     private readonly talentPoolService: TalentPoolService,
+    private readonly talentResumeService: TalentResumeService,
   ) {}
 
   @Get('packages')
@@ -56,7 +60,9 @@ export class BillingController {
 
   @Get('me')
   @Roles('CANDIDATE', 'RECRUITER')
-  @ApiOperation({ summary: 'Current package entitlement for caller role audience' })
+  @ApiOperation({
+    summary: 'Current package entitlement for caller role audience',
+  })
   @ApiQuery({ name: 'audience', required: false, enum: PackageAudience })
   getMyStatus(
     @CurrentUser() user: AuthenticatedUser,
@@ -73,7 +79,10 @@ export class BillingController {
 
   @Post('orders')
   @Roles('CANDIDATE', 'RECRUITER')
-  @ApiOperation({ summary: 'Create pending package order (audience inferred from package code)' })
+  @ApiOperation({
+    summary:
+      'Create pending package order (audience inferred from package code)',
+  })
   createOrder(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateOrderDto,
@@ -104,8 +113,14 @@ export class BillingController {
    */
   @Get('orders/check-status')
   @Roles('CANDIDATE', 'RECRUITER')
-  @ApiOperation({ summary: 'Check payment status and sync with PayOS if needed' })
-  @ApiQuery({ name: 'orderCode', required: true, description: 'orderCode or orderId' })
+  @ApiOperation({
+    summary: 'Check payment status and sync with PayOS if needed',
+  })
+  @ApiQuery({
+    name: 'orderCode',
+    required: true,
+    description: 'orderCode or orderId',
+  })
   checkOrderStatus(
     @CurrentUser() user: AuthenticatedUser,
     @Query('orderCode') orderCode: string,
@@ -116,7 +131,8 @@ export class BillingController {
   @Post('webhook/payos')
   @Public()
   @ApiOperation({
-    summary: 'PayOS webhook notification for automated bank payment confirmation',
+    summary:
+      'PayOS webhook notification for automated bank payment confirmation',
   })
   payosWebhook(@Body() body: any) {
     return this.billingService.handlePayosWebhook(body);
@@ -135,15 +151,17 @@ export class BillingController {
   @Roles('CANDIDATE', 'RECRUITER')
   @ApiOperation({ summary: 'Start sandbox checkout' })
   @ApiResponse({ status: 200, description: 'Returns mock checkout URL' })
-  @ApiQuery({ name: 'path', required: false, description: 'Frontend base path e.g. /candidate/billing' })
+  @ApiQuery({
+    name: 'path',
+    required: false,
+    description: 'Frontend base path e.g. /candidate/billing',
+  })
   checkout(
     @CurrentUser() user: AuthenticatedUser,
     @Param('orderId', ParseUUIDPipe) orderId: string,
     @Query('path') path?: string,
   ) {
-    const checkoutPath = path?.startsWith('/')
-      ? path
-      : '/candidate/billing';
+    const checkoutPath = path?.startsWith('/') ? path : '/candidate/billing';
     return this.billingService.checkout(user.id, orderId, checkoutPath);
   }
 
@@ -178,6 +196,7 @@ export class BillingController {
   // --- HR-only talent pool (kept; Candidate demo does not surface these) ---
 
   @Get('talent-pool')
+  @Header('Cache-Control', 'private, no-store')
   @Roles('RECRUITER')
   searchTalentPool(
     @CurrentUser() user: AuthenticatedUser,
@@ -187,6 +206,7 @@ export class BillingController {
   }
 
   @Get('talent-pool/:candidateProfileId')
+  @Header('Cache-Control', 'private, no-store')
   @Roles('RECRUITER')
   getTalentProfile(
     @CurrentUser() user: AuthenticatedUser,
@@ -196,11 +216,25 @@ export class BillingController {
   }
 
   @Post('talent-pool/:candidateProfileId/unlock')
+  @Header('Cache-Control', 'private, no-store')
   @Roles('RECRUITER')
   unlockTalent(
     @CurrentUser() user: AuthenticatedUser,
     @Param('candidateProfileId', ParseUUIDPipe) candidateProfileId: string,
   ) {
     return this.talentPoolService.unlock(user.id, candidateProfileId);
+  }
+
+  @Post('talent-pool/:candidateProfileId/resume-access')
+  @Roles('RECRUITER')
+  @Header('Cache-Control', 'private, no-store')
+  accessTalentResume(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('candidateProfileId', ParseUUIDPipe) candidateProfileId: string,
+    @Query('mode') mode: string = 'preview',
+  ) {
+    if (mode !== 'preview' && mode !== 'download')
+      throw new BadRequestException('mode phải là preview hoặc download.');
+    return this.talentResumeService.access(user.id, candidateProfileId, mode);
   }
 }

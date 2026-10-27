@@ -160,6 +160,29 @@ export class ApplicationsService {
       throw new NotFoundException('Candidate profile not found.');
     }
 
+    // Reopening a submitted application must not depend on a new CV, the
+    // current job state, or the quota for creating another application.
+    const invitedApplication = talentInvitationId
+      ? await this.prisma.application.findUnique({
+          where: {
+            jobId_candidateId: {
+              jobId: createApplicationDto.jobId,
+              candidateId: candidateProfile.id,
+            },
+          },
+          select: { id: true },
+        })
+      : null;
+    if (talentInvitationId && invitedApplication) {
+      return this.reuseTalentInvitationApplication(
+        talentInvitationId,
+        candidateProfile.id,
+        createApplicationDto.jobId,
+        invitedApplication.id,
+        now,
+      );
+    }
+
     const resumeId =
       createApplicationDto.resumeId ?? candidateProfile.primaryResumeId;
     if (!resumeId) {
@@ -185,15 +208,17 @@ export class ApplicationsService {
       );
     }
 
-    const existingApplication = await this.prisma.application.findUnique({
-      where: {
-        jobId_candidateId: {
-          jobId: createApplicationDto.jobId,
-          candidateId: candidateProfile.id,
-        },
-      },
-      select: { id: true },
-    });
+    const existingApplication = talentInvitationId
+      ? null
+      : await this.prisma.application.findUnique({
+          where: {
+            jobId_candidateId: {
+              jobId: createApplicationDto.jobId,
+              candidateId: candidateProfile.id,
+            },
+          },
+          select: { id: true },
+        });
     if (existingApplication && !talentInvitationId) {
       throw new ConflictException('You have already applied for this job.');
     }
@@ -210,6 +235,27 @@ export class ApplicationsService {
       },
     });
     if (!job) {
+      // A direct application may have filled/closed the job after the first
+      // lookup. Prefer its existing application over a misleading 404.
+      if (talentInvitationId) {
+        const existing = await this.prisma.application.findUnique({
+          where: {
+            jobId_candidateId: {
+              jobId: createApplicationDto.jobId,
+              candidateId: candidateProfile.id,
+            },
+          },
+          select: { id: true },
+        });
+        if (existing)
+          return this.reuseTalentInvitationApplication(
+            talentInvitationId,
+            candidateProfile.id,
+            createApplicationDto.jobId,
+            existing.id,
+            now,
+          );
+      }
       throw new NotFoundException(
         'Job posting is not published or is no longer accepting applications.',
       );
@@ -270,9 +316,23 @@ export class ApplicationsService {
           invitation = current;
         }
 
+        // Recheck after taking the job lock: a direct application may already
+        // exist even if this job was closed while acceptance waited.
+        const alreadyApplied = talentInvitationId
+          ? await tx.application.findUnique({
+              where: {
+                jobId_candidateId: {
+                  jobId: job.id,
+                  candidateId: candidateProfile.id,
+                },
+              },
+              select: { id: true },
+            })
+          : null;
+
         // Lock the job for both direct applications and invitations. Counting
         // applicants without this lock can oversubscribe a capped job.
-        if (tx.$queryRaw) {
+        if (tx.$queryRaw && !alreadyApplied) {
           const currentJob = await tx.jobPosting.findFirst({
             where: {
               id: job.id,
@@ -296,22 +356,11 @@ export class ApplicationsService {
 
         // A direct application may have arrived while acceptance was waiting
         // for the job lock. Link it instead of creating/dispatching another one.
-        const alreadyApplied = talentInvitationId
-          ? await tx.application.findUnique({
-              where: {
-                jobId_candidateId: {
-                  jobId: job.id,
-                  candidateId: candidateProfile.id,
-                },
-              },
-              select: { id: true },
-            })
-          : null;
-        if (applicantCap != null) {
+        if (applicantCap != null && !alreadyApplied) {
           const currentApplicants = await tx.application.count({
             where: { jobId: job.id },
           });
-          if (!alreadyApplied && currentApplicants >= applicantCap) {
+          if (currentApplicants >= applicantCap) {
             throw new ForbiddenException(
               `Tin tuyển dụng đã đạt giới hạn ${applicantCap} ứng viên và tạm ẩn với ứng viên.`,
             );
@@ -437,6 +486,83 @@ export class ApplicationsService {
       evaluationStatus: published ? 'QUEUED' : 'RETRY_SCHEDULED',
       ...(capped ? { jobHiddenDueToApplicantCap: true as const } : {}),
     };
+  }
+
+  private async reuseTalentInvitationApplication(
+    invitationId: string,
+    candidateId: string,
+    jobId: string,
+    applicationId: string,
+    now: Date,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const invitation = await tx.talentInvitation.findFirst({
+        where: { id: invitationId, candidateId, jobId },
+      });
+      if (!invitation)
+        throw new NotFoundException('Không tìm thấy lời mời của hồ sơ này.');
+      if (invitation.status === 'ACCEPTED' && invitation.applicationId) {
+        return {
+          applicationId: invitation.applicationId,
+          reused: true as const,
+          message: 'Hồ sơ ứng tuyển đã tồn tại.',
+        };
+      }
+      if (invitation.status !== 'PENDING' || invitation.expiresAt <= now) {
+        throw new ConflictException(
+          'Lời mời đã hết hạn, bị thu hồi hoặc đã được phản hồi.',
+        );
+      }
+      const changed = await tx.talentInvitation.updateMany({
+        where: {
+          id: invitationId,
+          candidateId,
+          jobId,
+          status: 'PENDING',
+          expiresAt: { gt: now },
+        },
+        data: { status: 'ACCEPTED', respondedAt: now, applicationId },
+      });
+      if (changed.count !== 1) {
+        const current = await tx.talentInvitation.findFirst({
+          where: { id: invitationId, candidateId, jobId },
+        });
+        if (current?.status === 'ACCEPTED' && current.applicationId) {
+          return {
+            applicationId: current.applicationId,
+            reused: true as const,
+            message: 'Hồ sơ ứng tuyển đã tồn tại.',
+          };
+        }
+        throw new ConflictException(
+          'Lời mời đã được xử lý. Vui lòng làm mới danh sách.',
+        );
+      }
+      if (this.notificationsService)
+        await this.notificationsService.createNotificationOnce(
+          tx,
+          `talent-invitation:${invitationId}:ACCEPTED`,
+          {
+            recipientUserId: invitation.recruiterUserId,
+            applicationId,
+            type: NotificationType.SYSTEM_ALERT,
+            title: 'Lời mời đã được liên kết với hồ sơ ứng tuyển',
+            message:
+              'Ứng viên đã có hồ sơ ứng tuyển cho tin này. Hồ sơ và CV đã gửi được giữ nguyên.',
+            payload: {
+              talentInvitationId: invitationId,
+              applicationId,
+              jobId,
+              href: '/recruiter/talent-invitations',
+            },
+          },
+        );
+      return {
+        applicationId,
+        reused: true as const,
+        message: 'Hồ sơ ứng tuyển đã tồn tại.',
+      };
+    });
   }
 
   async findAllForRecruiter(
@@ -1053,6 +1179,7 @@ export class ApplicationsService {
     const candidateId = await this.accessService.candidateProfileId(userId);
     const where: Prisma.ApplicationWhereInput = {
       candidateId,
+      ...(query.applicationId ? { id: query.applicationId } : {}),
       ...(query.stage ? { currentStage: query.stage } : {}),
     };
     const skip = (query.page - 1) * query.limit;

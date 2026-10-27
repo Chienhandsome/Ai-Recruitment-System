@@ -3,14 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  EntitlementStatus,
-  Prisma,
-} from '@prisma/client';
+import { EntitlementStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { EntitlementsService } from './entitlements.service';
 import { QueryTalentPoolDto } from './dto/query-talent-pool.dto';
 import { talentPoolVisibilityWhere } from './talent-pool-visibility';
+import { talentPoolRedactor } from './talent-pool-privacy';
 
 @Injectable()
 export class TalentPoolService {
@@ -189,6 +187,39 @@ export class TalentPoolService {
             endDate: true,
           },
         },
+        projects: {
+          orderBy: { startDate: 'desc' },
+          select: {
+            projectName: true,
+            projectRole: true,
+            description: true,
+            technologies: true,
+            projectUrl: true,
+            startDate: true,
+            endDate: true,
+          },
+        },
+        certificates: {
+          orderBy: { issueDate: 'desc' },
+          select: {
+            certificateName: true,
+            issuingOrganization: true,
+            issueDate: true,
+            expiryDate: true,
+            credentialUrl: true,
+          },
+        },
+        primaryResume: {
+          select: {
+            id: true,
+            candidateId: true,
+            originalFileName: true,
+            mimeType: true,
+            fileSizeBytes: true,
+            parsingStatus: true,
+            updatedAt: true,
+          },
+        },
       },
     });
     if (!profile) {
@@ -257,7 +288,8 @@ export class TalentPoolService {
           where: { id: candidateProfileId, ...talentPoolVisibilityWhere(now) },
           select: { id: true },
         });
-        if (!stillVisible) throw new NotFoundException('Ứng viên đã ngừng hiển thị hồ sơ.');
+        if (!stillVisible)
+          throw new NotFoundException('Ứng viên đã ngừng hiển thị hồ sơ.');
         const updated = await tx.packageEntitlement.updateMany({
           where: {
             id: entitlementId,
@@ -314,23 +346,60 @@ export class TalentPoolService {
       candidateSkills?: unknown;
       workExperiences?: unknown;
       educations?: unknown;
+      projects?: Array<{ projectUrl: string | null }>;
+      certificates?: Array<{ credentialUrl: string | null }>;
+      primaryResume?: {
+        id: string;
+        candidateId: string;
+        originalFileName: string;
+        mimeType: string;
+        fileSizeBytes: number;
+        parsingStatus: string;
+        updatedAt: Date;
+      } | null;
     },
     unlocked: boolean,
   ) {
     const maskedName = this.maskName(profile.fullName);
+    const publicValue = unlocked
+      ? <T>(value: T) => value
+      : talentPoolRedactor(profile);
 
     return {
       id: profile.id,
-      displayName: unlocked ? profile.fullName : maskedName,
-      desiredTitle: profile.desiredTitle,
-      professionalSummary: profile.professionalSummary,
+      displayName: unlocked ? profile.fullName : publicValue(maskedName),
+      desiredTitle: publicValue(profile.desiredTitle),
+      professionalSummary: publicValue(profile.professionalSummary),
       preferredModel: profile.preferredModel,
       expectedMinSalary: profile.expectedMinSalary,
       expectedMaxSalary: profile.expectedMaxSalary,
-      locationHint: this.maskAddress(profile.address),
-      skills: profile.candidateSkills ?? [],
-      workExperiences: profile.workExperiences ?? [],
-      educations: profile.educations ?? [],
+      locationHint: publicValue(this.maskAddress(profile.address)),
+      skills: publicValue(profile.candidateSkills ?? []),
+      workExperiences: publicValue(profile.workExperiences ?? []),
+      educations: publicValue(profile.educations ?? []),
+      projects: publicValue(
+        (profile.projects ?? []).map((project) => ({
+          ...project,
+          projectUrl: unlocked ? project.projectUrl : null,
+        })),
+      ),
+      certificates: publicValue(
+        (profile.certificates ?? []).map((certificate) => ({
+          ...certificate,
+          credentialUrl: unlocked ? certificate.credentialUrl : null,
+        })),
+      ),
+      resume:
+        unlocked && profile.primaryResume?.candidateId === profile.id
+          ? {
+              id: profile.primaryResume.id,
+              fileName: profile.primaryResume.originalFileName,
+              mimeType: profile.primaryResume.mimeType,
+              sizeBytes: profile.primaryResume.fileSizeBytes,
+              status: profile.primaryResume.parsingStatus,
+              updatedAt: profile.primaryResume.updatedAt,
+            }
+          : null,
       contactUnlocked: unlocked,
       contact: unlocked
         ? {
@@ -358,7 +427,10 @@ export class TalentPoolService {
 
   private maskAddress(address: string | null) {
     if (!address) return null;
-    const parts = address.split(',').map((p) => p.trim()).filter(Boolean);
+    const parts = address
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
     if (parts.length <= 1) return '***';
     return parts.slice(-2).join(', ');
   }

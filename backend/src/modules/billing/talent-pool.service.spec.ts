@@ -107,6 +107,48 @@ describe('TalentPoolService paid visibility and contact privacy', () => {
     expect(prisma.packageEntitlement.updateMany).not.toHaveBeenCalled();
   });
 
+  it('redacts contacts embedded in list and detail fields until this HR unlocks the profile', async () => {
+    const privateProfile = {
+      ...profile,
+      professionalSummary:
+        'Email private@example.com hoặc 090 000 0000. Node.js, Java 17.',
+      workExperiences: [
+        {
+          companyName: 'Example',
+          positionTitle: 'Engineer',
+          description: 'github.com/private-person',
+        },
+      ],
+      educations: [
+        {
+          schoolName: 'University - private@example.com',
+          major: 'Computer Science',
+          degree: 'Bachelor',
+        },
+      ],
+    };
+    prisma.candidateProfile.findMany.mockResolvedValue([privateProfile]);
+    prisma.candidateProfile.findFirst.mockResolvedValue(privateProfile);
+    const list = await service.search('hr', { page: 1, limit: 20 });
+    const detail = await service.getCandidate('hr', 'candidate');
+    for (const card of [list.data[0], detail]) {
+      expect(card.contact).toBeNull();
+      expect(JSON.stringify(card)).not.toMatch(
+        /private@example.com|090[ .]*000[ .]*0000|github.com\/private-person/,
+      );
+      expect(card.professionalSummary).toContain('Node.js, Java 17');
+    }
+    prisma.cvUnlock.findUnique.mockResolvedValue({ id: 'unlock' });
+    const unlocked = await service.getCandidate('hr', 'candidate');
+    expect(unlocked.professionalSummary).toBe(
+      privateProfile.professionalSummary,
+    );
+    expect(unlocked.workExperiences).toEqual(privateProfile.workExperiences);
+    expect(unlocked.educations).toEqual(privateProfile.educations);
+    expect(unlocked.contact?.email).toBe(profile.email);
+    expect(privateProfile.professionalSummary).toContain('private@example.com');
+  });
+
   it('does not debit quota if the candidate withdraws before the unlock transaction', async () => {
     prisma.candidateProfile.findFirst
       .mockResolvedValueOnce(profile)

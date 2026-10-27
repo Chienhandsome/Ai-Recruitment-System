@@ -15,6 +15,7 @@ import {
   AcceptTalentInvitationDto,
   CreateTalentInvitationDto,
   QueryTalentInvitationsDto,
+  QueryInvitationJobsDto,
 } from './dto/talent-invitation.dto';
 import { TalentInvitationsService } from './talent-invitations.service';
 
@@ -35,8 +36,11 @@ export class TalentInvitationsController {
 
   @Get('recruiter/jobs')
   @Roles('RECRUITER')
-  jobs(@CurrentUser() user: AuthenticatedUser) {
-    return this.invitations.availableJobs(user.id);
+  jobs(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: QueryInvitationJobsDto,
+  ) {
+    return this.invitations.availableJobs(user.id, query.candidateId);
   }
 
   @Post('recruiter')

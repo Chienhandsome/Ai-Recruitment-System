@@ -1,5 +1,4 @@
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 export interface JobSeekingStatus {
   enabled: boolean;
@@ -12,14 +11,26 @@ export interface JobSeekingStatus {
   packageEndsAt: string | null;
 }
 
-async function jobSeekingRequest(token: string, body?: { enabled: boolean; consent?: boolean }): Promise<JobSeekingStatus> {
-  const response = await fetchWithTimeout(`${API_URL}/candidates/me/job-seeking`, {
-    method: body ? 'PATCH' : 'GET',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    cache: 'no-store',
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  }, 15000, 'Không thể cập nhật trạng thái tìm việc. Vui lòng thử lại.');
-  if (!response.ok) throw new CandidateApiError(await readApiError(response, 'Không tải được trạng thái tìm việc.'), response.status);
+async function jobSeekingRequest(
+  token: string,
+  body?: { enabled: boolean; consent?: boolean },
+): Promise<JobSeekingStatus> {
+  const response = await fetchWithTimeout(
+    `${API_URL}/candidates/me/job-seeking`,
+    {
+      method: body ? 'PATCH' : 'GET',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    },
+    15000,
+    'Không thể cập nhật trạng thái tìm việc. Vui lòng thử lại.',
+  );
+  if (!response.ok)
+    throw new CandidateApiError(
+      await readApiError(response, 'Không tải được trạng thái tìm việc.'),
+      response.status,
+    );
   return response.json();
 }
 
@@ -319,7 +330,12 @@ export async function applyForJob(
 
 export async function getMyApplications(
   token: string,
-  query: { stage?: CandidateApplicationStage; page?: number; limit?: number } = {},
+  query: {
+    applicationId?: string;
+    stage?: CandidateApplicationStage;
+    page?: number;
+    limit?: number;
+  } = {},
 ): Promise<CandidateApplicationsResponse> {
   const params = new URLSearchParams();
   Object.entries(query).forEach(([key, value]) => {

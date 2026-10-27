@@ -67,13 +67,18 @@ export class TalentInvitationsService {
     });
   }
 
-  async availableJobs(userId: string) {
+  async availableJobs(userId: string, candidateId?: string) {
     const cap = await this.entitlements.getApplicantCapForJobOwner(userId);
     const jobs = await this.prisma.jobPosting.findMany({
       where: {
         recruiter: { userId },
-        status: JobStatus.PUBLISHED,
-        OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
+        OR: [
+          {
+            status: JobStatus.PUBLISHED,
+            OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
+          },
+          ...(candidateId ? [{ applications: { some: { candidateId } } }] : []),
+        ],
       },
       select: {
         id: true,
@@ -81,18 +86,29 @@ export class TalentInvitationsService {
         title: true,
         location: true,
         _count: { select: { applications: true } },
+        applications: {
+          where: { candidateId: candidateId ?? '' },
+          select: { id: true },
+          take: 1,
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
     return {
       data: jobs
-        .filter((job) => cap == null || job._count.applications < cap)
+        .filter(
+          (job) =>
+            job.applications.length > 0 ||
+            cap == null ||
+            job._count.applications < cap,
+        )
         .map((job) => ({
           id: job.id,
           jobCode: job.jobCode,
           title: job.title,
           location: job.location,
+          existingApplicationId: job.applications[0]?.id ?? null,
         })),
     };
   }
@@ -116,7 +132,6 @@ export class TalentInvitationsService {
     now = new Date(),
   ) {
     await this.entitlements.assertTalentPool(userId);
-    const cap = await this.entitlements.getApplicantCapForJobOwner(userId);
     try {
       return await this.prisma.$transaction(async (tx) => {
         // Serialize sending with visibility changes and job closure; a withdrawn
@@ -148,14 +163,14 @@ export class TalentInvitationsService {
           where: {
             id: dto.jobId,
             recruiter: { userId },
-            status: JobStatus.PUBLISHED,
-            OR: [{ expiryDate: null }, { expiryDate: { gt: now } }],
           },
           select: {
             id: true,
             title: true,
             autoCloseOnQuota: true,
             targetHires: true,
+            status: true,
+            expiryDate: true,
           },
         });
         if (!job)
@@ -170,6 +185,15 @@ export class TalentInvitationsService {
         });
         if (existing)
           return { applicationId: existing.id, alreadyApplied: true as const };
+        if (
+          job.status !== JobStatus.PUBLISHED ||
+          (job.expiryDate && job.expiryDate <= now)
+        ) {
+          throw new BadRequestException(
+            'Tin tuyển dụng không còn nhận hồ sơ mới.',
+          );
+        }
+        const cap = await this.entitlements.getApplicantCapForJobOwner(userId);
         if (
           cap != null &&
           (await tx.application.count({ where: { jobId: job.id } })) >= cap
@@ -266,10 +290,31 @@ export class TalentInvitationsService {
       this.prisma.talentInvitation.count({ where }),
     ]);
     // Also compute effective status to cover an invitation expiring between queries.
+    // Keep existing applications discoverable even when an old invitation was
+    // declined/withdrawn/expired; reading never re-accepts those invitations.
+    const applications = data.length
+      ? await this.prisma.application.findMany({
+          where: {
+            OR: data.map((item) => ({
+              candidateId: item.candidateId,
+              jobId: item.jobId,
+            })),
+          },
+          select: { id: true, candidateId: true, jobId: true },
+        })
+      : [];
+    const existing = new Map(
+      applications.map((application) => [
+        `${application.candidateId}:${application.jobId}`,
+        application.id,
+      ]),
+    );
     const responseTime = new Date();
     return {
       data: data.map((item) => ({
         ...item,
+        existingApplicationId:
+          existing.get(`${item.candidateId}:${item.jobId}`) ?? null,
         status:
           item.status === 'PENDING' && item.expiresAt <= responseTime
             ? 'EXPIRED'

@@ -37,6 +37,8 @@ function setup() {
         ...pending.job,
         autoCloseOnQuota: false,
         targetHires: 1,
+        status: 'PUBLISHED',
+        expiryDate: null,
       }),
     },
     application: {
@@ -57,6 +59,7 @@ function setup() {
     },
   };
   const prisma = {
+    application: { findMany: jest.fn().mockResolvedValue([]) },
     $transaction: jest.fn(async (fn: (client: typeof tx) => Promise<unknown>) =>
       fn(tx),
     ),
@@ -90,6 +93,63 @@ function setup() {
 }
 
 describe('TalentInvitationsService', () => {
+  it('keeps closed/full jobs with an existing application selectable for this candidate', async () => {
+    const { service, prisma, entitlements } = setup();
+    const jobs = {
+      findMany: jest.fn().mockResolvedValue([
+        {
+          id: 'closed-job',
+          jobCode: 'OLD',
+          title: 'Engineer',
+          location: null,
+          _count: { applications: 20 },
+          applications: [{ id: 'old-application' }],
+        },
+        {
+          id: 'full-job',
+          jobCode: 'FULL',
+          title: 'Engineer',
+          location: null,
+          _count: { applications: 20 },
+          applications: [],
+        },
+        {
+          id: 'open-job',
+          jobCode: 'OPEN',
+          title: 'Engineer',
+          location: null,
+          _count: { applications: 0 },
+          applications: [],
+        },
+      ]),
+    };
+    Object.assign(prisma, { jobPosting: jobs });
+    entitlements.getApplicantCapForJobOwner.mockResolvedValue(5);
+    const result = await service.availableJobs('hr-1', 'candidate-1');
+    expect(result.data.map((job) => job.id)).toEqual([
+      'closed-job',
+      'open-job',
+    ]);
+    expect(result.data[0].existingApplicationId).toBe('old-application');
+    expect(jobs.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          recruiter: { userId: 'hr-1' },
+          OR: expect.arrayContaining([
+            { applications: { some: { candidateId: 'candidate-1' } } },
+          ]),
+        }),
+        select: expect.objectContaining({
+          applications: {
+            where: { candidateId: 'candidate-1' },
+            select: { id: true },
+            take: 1,
+          },
+        }),
+      }),
+    );
+  });
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(now);
@@ -150,7 +210,7 @@ describe('TalentInvitationsService', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('requires a published job owned by the sending HR', async () => {
+  it('requires a job owned by the sending HR', async () => {
     const { service, tx } = setup();
     tx.jobPosting.findFirst.mockResolvedValue(null);
     await expect(
@@ -164,7 +224,6 @@ describe('TalentInvitationsService', () => {
       expect.objectContaining({
         where: expect.objectContaining({
           recruiter: { userId: 'hr-1' },
-          status: 'PUBLISHED',
         }),
       }),
     );
@@ -185,6 +244,86 @@ describe('TalentInvitationsService', () => {
     });
     expect(tx.talentInvitation.create).not.toHaveBeenCalled();
   });
+
+  it.each(['CLOSED', 'DRAFT'])(
+    'opens an existing application for a %s job',
+    async (status) => {
+      const { service, tx, entitlements } = setup();
+      tx.jobPosting.findFirst.mockResolvedValue({
+        ...pending.job,
+        status,
+        expiryDate: new Date('2020-01-01'),
+        autoCloseOnQuota: true,
+        targetHires: 1,
+      });
+      tx.application.findUnique.mockResolvedValue({ id: 'old-application' });
+      await expect(
+        service.create(
+          'hr-1',
+          { jobId: 'job-1', candidateId: 'candidate-1' },
+          now,
+        ),
+      ).resolves.toEqual({
+        applicationId: 'old-application',
+        alreadyApplied: true,
+      });
+      expect(entitlements.getApplicantCapForJobOwner).not.toHaveBeenCalled();
+      expect(tx.talentInvitation.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('still rejects new invitations to a closed job', async () => {
+    const { service, tx } = setup();
+    tx.jobPosting.findFirst.mockResolvedValue({
+      ...pending.job,
+      status: 'CLOSED',
+      expiryDate: null,
+      autoCloseOnQuota: false,
+      targetHires: 1,
+    });
+    await expect(
+      service.create(
+        'hr-1',
+        { jobId: 'job-1', candidateId: 'candidate-1' },
+        now,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(tx.talentInvitation.create).not.toHaveBeenCalled();
+  });
+
+  it.each(['WITHDRAWN', 'EXPIRED'])(
+    'links a submitted application in a %s inbox item without accepting it',
+    async (status) => {
+      const { service, prisma, tx } = setup();
+      prisma.talentInvitation.findMany.mockResolvedValue([
+        { ...pending, status },
+      ]);
+      prisma.application.findMany.mockResolvedValue([
+        {
+          id: 'old-application',
+          candidateId: pending.candidateId,
+          jobId: pending.jobId,
+        },
+      ]);
+      const result = await service.listForCandidate('candidate-user-1', {
+        page: 1,
+        limit: 12,
+      });
+      expect(result.data[0]).toMatchObject({
+        status,
+        applicationId: null,
+        existingApplicationId: 'old-application',
+      });
+      expect(tx.talentInvitation.updateMany).not.toHaveBeenCalled();
+      expect(prisma.application.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            OR: [{ candidateId: pending.candidateId, jobId: pending.jobId }],
+          },
+        }),
+      );
+    },
+  );
 
   it('rejects an applicant-capped job', async () => {
     const { service, tx, entitlements } = setup();

@@ -8,14 +8,17 @@ import { PayosPaymentProvider } from './payment/payos-payment.provider';
 import { PAYMENT_PROVIDER } from './payment/payment-provider.interface';
 import { PrismaModule } from '../../database/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { SupabaseModule } from '../../infrastructure/supabase/supabase.module';
+import { TalentResumeService } from './talent-resume.service';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule, AuthModule, SupabaseModule],
   controllers: [BillingController],
   providers: [
     BillingService,
     EntitlementsService,
     TalentPoolService,
+    TalentResumeService,
     PayosPaymentProvider,
     MockPaymentProvider,
     {
@@ -26,6 +29,11 @@ import { AuthModule } from '../auth/auth.module';
       inject: [PayosPaymentProvider, MockPaymentProvider],
     },
   ],
-  exports: [EntitlementsService, BillingService, TalentPoolService, PayosPaymentProvider],
+  exports: [
+    EntitlementsService,
+    BillingService,
+    TalentPoolService,
+    PayosPaymentProvider,
+  ],
 })
 export class BillingModule {}

@@ -46,7 +46,9 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
 
   useEffect(() => {
     const requests = requestVersion;
-    const initialLoad = setTimeout(() => { void load(); }, 0);
+    const initialLoad = setTimeout(() => {
+      void load();
+    }, 0);
     const refresh = () => {
       void load();
     };
@@ -140,8 +142,9 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
         <div className="mt-4 space-y-4">
           <p className="text-sm text-slate-600">
             HR thấy chức danh, giới thiệu, kỹ năng và khu vực của bạn. Tên được rút gọn, liên hệ bị
-            ẩn cho đến khi HR mở khóa bằng hạn mức gói. Khi tắt, hồ sơ ngừng xuất hiện trong kho ứng
-            viên; các hồ sơ bạn đã ứng tuyển vẫn được xử lý bình thường.
+            ẩn cho đến khi HR mở khóa bằng hạn mức gói. HR đã mở khóa được xem hồ sơ đầy đủ và
+            xem/tải CV chính của bạn trong thời gian chia sẻ. Khi tắt, hồ sơ ngừng xuất hiện trong
+            kho ứng viên; các hồ sơ bạn đã ứng tuyển vẫn được xử lý bình thường.
           </p>
           {status.visible && status.visibleUntil && (
             <p className="text-sm font-medium text-emerald-700">
@@ -179,8 +182,8 @@ export function JobSeekingCard({ onEditProfile }: { onEditProfile: () => void })
                 className="mt-1 size-4 accent-blue-600"
               />
               <span>
-                Tôi đồng ý hiển thị hồ sơ và cho phép HR mở khóa thông tin liên hệ trong thời hạn
-                gói. Gia hạn hoặc mua gói không tự bật chia sẻ.
+                Tôi đồng ý hiển thị hồ sơ và cho phép HR mở khóa thông tin liên hệ, xem và tải CV
+                chính trong thời hạn gói. Gia hạn hoặc mua gói không tự bật chia sẻ.
               </span>
             </label>
           )}

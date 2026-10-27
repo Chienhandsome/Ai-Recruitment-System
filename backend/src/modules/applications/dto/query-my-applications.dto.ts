@@ -1,9 +1,13 @@
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ApplicationStage } from '@prisma/client';
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 
 export class QueryMyApplicationsDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  applicationId?: string;
   @ApiPropertyOptional({ enum: ApplicationStage })
   @IsOptional()
   @IsEnum(ApplicationStage)

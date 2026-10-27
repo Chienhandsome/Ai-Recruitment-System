@@ -10,6 +10,7 @@ import { RetryApplicationEvaluationsUseCase } from './retry-application-evaluati
 import { ApplicationAccessService } from './application-access.service';
 import { BillingModule } from '../billing/billing.module';
 import { EvaluationModule } from '../evaluation/evaluation.module';
+import { AiServiceWakeupService } from '../../infrastructure/ai/ai-service-wakeup.service';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { EvaluationModule } from '../evaluation/evaluation.module';
     ApplicationsService,
     ApplicationsConsumer,
     ApplicationEvaluationService,
+    AiServiceWakeupService,
     RetryApplicationEvaluationsUseCase,
     ApplicationAccessService,
   ],

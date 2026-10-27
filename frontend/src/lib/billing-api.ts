@@ -1,6 +1,4 @@
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:3001/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 export type ServicePackage = {
   id: string;
@@ -93,23 +91,23 @@ async function billingRequest<T>(
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...init?.headers,
     },
-    cache: "no-store",
+    cache: 'no-store',
   });
 
   if (!response.ok) {
-    let message = "Yêu cầu billing thất bại.";
+    let message = 'Yêu cầu billing thất bại.';
     try {
       const payload = (await response.json()) as {
         message?: string | string[];
         error?: string;
       };
       message = Array.isArray(payload.message)
-        ? payload.message.join(", ")
-        : payload.message ?? payload.error ?? message;
+        ? payload.message.join(', ')
+        : (payload.message ?? payload.error ?? message);
     } catch {
       // ignore
     }
@@ -119,47 +117,40 @@ async function billingRequest<T>(
   return (await response.json()) as T;
 }
 
-export function listBillingPackages(audience: "CANDIDATE" | "EMPLOYER" = "CANDIDATE") {
+export function listBillingPackages(audience: 'CANDIDATE' | 'EMPLOYER' = 'CANDIDATE') {
   return billingRequest<ServicePackage[]>(`/billing/packages?audience=${audience}`);
 }
 
 export function getMyEntitlement(
   accessToken: string,
-  audience: "CANDIDATE" | "EMPLOYER" = "CANDIDATE",
+  audience: 'CANDIDATE' | 'EMPLOYER' = 'CANDIDATE',
 ) {
-  return billingRequest<EntitlementStatus>(
-    `/billing/me?audience=${audience}`,
-    accessToken,
-  );
+  return billingRequest<EntitlementStatus>(`/billing/me?audience=${audience}`, accessToken);
 }
 
 export function createPackageOrder(
   accessToken: string,
   packageCode:
-    | "HR_TEST"
-    | "HR_STARTER"
-    | "HR_PRO"
-    | "CANDIDATE_TEST"
-    | "CANDIDATE_PRO"
-    | "CANDIDATE_PREMIUM"
+    | 'HR_TEST'
+    | 'HR_STARTER'
+    | 'HR_PRO'
+    | 'CANDIDATE_TEST'
+    | 'CANDIDATE_PRO'
+    | 'CANDIDATE_PREMIUM'
     | (string & {}),
 ) {
-  return billingRequest<PackageOrder>("/billing/orders", accessToken, {
-    method: "POST",
+  return billingRequest<PackageOrder>('/billing/orders', accessToken, {
+    method: 'POST',
     body: JSON.stringify({ packageCode }),
   });
 }
 
-export function checkoutOrder(
-  accessToken: string,
-  orderId: string,
-  path = "/candidate/billing",
-) {
+export function checkoutOrder(accessToken: string, orderId: string, path = '/candidate/billing') {
   const qs = new URLSearchParams({ path });
   return billingRequest<CheckoutSession>(
     `/billing/orders/${orderId}/checkout?${qs.toString()}`,
     accessToken,
-    { method: "POST" },
+    { method: 'POST' },
   );
 }
 
@@ -168,10 +159,7 @@ export function checkOrderStatus(accessToken: string, orderCode: string) {
     order: PackageOrder;
     entitlement: EntitlementStatus;
     isPaid: boolean;
-  }>(
-    `/billing/orders/check-status?orderCode=${encodeURIComponent(orderCode)}`,
-    accessToken,
-  );
+  }>(`/billing/orders/check-status?orderCode=${encodeURIComponent(orderCode)}`, accessToken);
 }
 
 export function mockPayOrder(accessToken: string, orderId: string) {
@@ -179,29 +167,20 @@ export function mockPayOrder(accessToken: string, orderId: string) {
     order: PackageOrder;
     entitlement: EntitlementStatus;
     alreadyPaid: boolean;
-  }>(`/billing/orders/${orderId}/mock-pay`, accessToken, { method: "POST" });
+  }>(`/billing/orders/${orderId}/mock-pay`, accessToken, { method: 'POST' });
 }
 
 export function getOrder(accessToken: string, orderId: string) {
-  return billingRequest<PackageOrder>(
-    `/billing/orders/${orderId}`,
-    accessToken,
-  );
+  return billingRequest<PackageOrder>(`/billing/orders/${orderId}`, accessToken);
 }
 
-export function listMyOrders(
-  accessToken: string,
-  audience?: "CANDIDATE" | "EMPLOYER",
-) {
-  const qs = audience ? `?audience=${audience}` : "";
+export function listMyOrders(accessToken: string, audience?: 'CANDIDATE' | 'EMPLOYER') {
+  const qs = audience ? `?audience=${audience}` : '';
   return billingRequest<PackageOrder[]>(`/billing/orders${qs}`, accessToken);
 }
 
-export function listMyTransactions(
-  accessToken: string,
-  audience?: "CANDIDATE" | "EMPLOYER",
-) {
-  const qs = audience ? `?audience=${audience}` : "";
+export function listMyTransactions(accessToken: string, audience?: 'CANDIDATE' | 'EMPLOYER') {
+  const qs = audience ? `?audience=${audience}` : '';
   return billingRequest<
     Array<{
       id: string;
@@ -225,11 +204,10 @@ export function analyzeJdFit(
   accessToken: string,
   body: { jobId: string; resumeId?: string; requestId: string },
 ) {
-  return billingRequest<Record<string, unknown>>(
-    "/candidate/insights/jd-fit",
-    accessToken,
-    { method: "POST", body: JSON.stringify(body) },
-  );
+  return billingRequest<Record<string, unknown>>('/candidate/insights/jd-fit', accessToken, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 }
 
 export function getLatestJdFit(accessToken: string, jobId: string) {
@@ -251,17 +229,14 @@ export function createCandidateMockInterview(
       expiresAt: string;
       status: string;
     };
-  }>("/candidate/mock-interviews", accessToken, {
-    method: "POST",
+  }>('/candidate/mock-interviews', accessToken, {
+    method: 'POST',
     body: JSON.stringify(body),
   });
 }
 
-export function adminListPackages(
-  accessToken: string,
-  audience?: "CANDIDATE" | "EMPLOYER",
-) {
-  const qs = audience ? `?audience=${audience}` : "";
+export function adminListPackages(accessToken: string, audience?: 'CANDIDATE' | 'EMPLOYER') {
+  const qs = audience ? `?audience=${audience}` : '';
   return billingRequest<ServicePackage[]>(`/admin/packages${qs}`, accessToken);
 }
 
@@ -270,24 +245,60 @@ export function adminUpdatePackage(
   packageId: string,
   body: Partial<ServicePackage>,
 ) {
-  return billingRequest<ServicePackage>(
-    `/admin/packages/${packageId}`,
-    accessToken,
-    {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    },
-  );
+  return billingRequest<ServicePackage>(`/admin/packages/${packageId}`, accessToken, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
 }
 
 export type TalentPoolCard = {
+  preferredModel?: string | null;
+  expectedMinSalary?: string | number | null;
+  expectedMaxSalary?: string | number | null;
+  projects?: Array<{
+    projectName: string;
+    projectRole: string | null;
+    description: string | null;
+    technologies: unknown;
+    projectUrl: string | null;
+    startDate: string | null;
+    endDate: string | null;
+  }>;
+  certificates?: Array<{
+    certificateName: string;
+    issuingOrganization: string;
+    issueDate: string | null;
+    expiryDate: string | null;
+    credentialUrl: string | null;
+  }>;
+  resume?: {
+    id: string;
+    fileName: string;
+    mimeType: string;
+    sizeBytes: number;
+    status: string;
+    updatedAt: string;
+  } | null;
   id: string;
   displayName: string;
   desiredTitle: string | null;
   professionalSummary: string | null;
   locationHint: string | null;
-  workExperiences?: Array<{ companyName: string; positionTitle: string; startDate: string; endDate: string | null; isCurrent: boolean; description?: string | null }>;
-  educations?: Array<{ schoolName: string; major: string | null; degree: string | null }>;
+  workExperiences?: Array<{
+    companyName: string;
+    positionTitle: string;
+    startDate: string;
+    endDate: string | null;
+    isCurrent: boolean;
+    description?: string | null;
+  }>;
+  educations?: Array<{
+    schoolName: string;
+    major: string | null;
+    degree: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+  }>;
   skills: Array<{
     skill: { id: string; name: string };
     proficiencyLevel: string;
@@ -310,25 +321,22 @@ export function searchTalentPool(
   params: { search?: string; skill?: string; desiredTitle?: string; page?: number },
 ) {
   const qs = new URLSearchParams();
-  if (params.search) qs.set("search", params.search);
-  if (params.skill) qs.set("skill", params.skill);
-  if (params.desiredTitle) qs.set("desiredTitle", params.desiredTitle);
-  if (params.page) qs.set("page", String(params.page));
+  if (params.search) qs.set('search', params.search);
+  if (params.skill) qs.set('skill', params.skill);
+  if (params.desiredTitle) qs.set('desiredTitle', params.desiredTitle);
+  if (params.page) qs.set('page', String(params.page));
   const query = qs.toString();
   return billingRequest<{
     data: TalentPoolCard[];
     meta: { total: number; page: number; limit: number; totalPages: number };
-  }>(`/billing/talent-pool${query ? `?${query}` : ""}`, accessToken);
+  }>(`/billing/talent-pool${query ? `?${query}` : ''}`, accessToken);
 }
 
-export function unlockTalentProfile(
-  accessToken: string,
-  candidateProfileId: string,
-) {
+export function unlockTalentProfile(accessToken: string, candidateProfileId: string) {
   return billingRequest<TalentPoolCard>(
     `/billing/talent-pool/${candidateProfileId}/unlock`,
     accessToken,
-    { method: "POST" },
+    { method: 'POST' },
   );
 }
 
@@ -336,10 +344,28 @@ export function getTalentProfile(accessToken: string, candidateProfileId: string
   return billingRequest<TalentPoolCard>(`/billing/talent-pool/${candidateProfileId}`, accessToken);
 }
 
+export type TalentResumeAccess = {
+  url: string;
+  expiresAt: string;
+  fileName: string;
+  mimeType: string;
+};
+export function accessTalentResume(
+  accessToken: string,
+  candidateProfileId: string,
+  mode: 'preview' | 'download',
+) {
+  return billingRequest<TalentResumeAccess>(
+    `/billing/talent-pool/${encodeURIComponent(candidateProfileId)}/resume-access?mode=${mode}`,
+    accessToken,
+    { method: 'POST' },
+  );
+}
+
 export function formatVnd(amount: number) {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
     maximumFractionDigits: 0,
   }).format(amount);
 }

@@ -29,6 +29,46 @@ const profileSnapshot = {
 };
 
 describe('ApplicationEvaluationService', () => {
+  it.each([true, false])(
+    'wakes a sleeping worker only after a successful queue publish (%s)',
+    async (published) => {
+      const wakeup = { wake: jest.fn().mockResolvedValue(undefined) };
+      const service = new ApplicationEvaluationService(
+        {} as never,
+        { publish: jest.fn().mockResolvedValue(published) } as never,
+        undefined,
+        wakeup as never,
+      );
+      jest.spyOn(service, 'markForRetry').mockResolvedValue(undefined);
+      await expect(
+        service.publishClaimedApplication(
+          'application-1',
+          profileSnapshot,
+          1,
+          now,
+        ),
+      ).resolves.toBe(published);
+      expect(wakeup.wake).toHaveBeenCalledTimes(published ? 1 : 0);
+    },
+  );
+
+  it('keeps a published evaluation successful when the best-effort wake fails', async () => {
+    const service = new ApplicationEvaluationService(
+      {} as never,
+      { publish: jest.fn().mockResolvedValue(true) } as never,
+      undefined,
+      { wake: jest.fn().mockRejectedValue(new Error('timeout')) } as never,
+    );
+    await expect(
+      service.publishClaimedApplication(
+        'application-1',
+        profileSnapshot,
+        1,
+        now,
+      ),
+    ).resolves.toBe(true);
+  });
+
   it('persists the first attempt and publishes the stored snapshot', async () => {
     const prisma = {
       $transaction: jest.fn(),

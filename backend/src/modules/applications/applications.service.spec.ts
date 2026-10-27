@@ -368,7 +368,7 @@ describe('ApplicationsService', () => {
       now,
     );
 
-    expect(result.evaluationStatus).toBe('RETRY_SCHEDULED');
+    expect(result).toMatchObject({ evaluationStatus: 'RETRY_SCHEDULED' });
     expect(result.message).toContain('thử lại');
   });
 
@@ -498,6 +498,149 @@ function invitationApplicationDependencies() {
 }
 
 describe('ApplicationsService invitation acceptance', () => {
+  it.each(['WITHDRAWN', 'ACCEPTED'])(
+    'handles a concurrent %s while linking a submitted application',
+    async (status) => {
+      const { service, tx, notifications, evaluationService } =
+        invitationApplicationDependencies();
+      tx.application.findUnique.mockResolvedValue({ id: 'old-application' });
+      tx.talentInvitation.findFirst
+        .mockResolvedValueOnce({
+          status: 'PENDING',
+          expiresAt: new Date(now.getTime() + 86400000),
+        })
+        .mockResolvedValueOnce({
+          status,
+          applicationId: status === 'ACCEPTED' ? 'old-application' : null,
+        });
+      tx.talentInvitation.updateMany.mockResolvedValue({ count: 0 });
+      const response = service.applyForJob(
+        candidateProfile.userId,
+        { jobId: job.id },
+        now,
+        'invite-1',
+      );
+      if (status === 'ACCEPTED')
+        await expect(response).resolves.toMatchObject({
+          applicationId: 'old-application',
+          reused: true,
+        });
+      else await expect(response).rejects.toBeInstanceOf(ConflictException);
+      expect(notifications.createNotificationOnce).not.toHaveBeenCalled();
+      expect(evaluationService.dispatchNewApplication).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects a pending invitation exactly at its expiry when an application exists', async () => {
+    const { service, tx } = invitationApplicationDependencies();
+    tx.application.findUnique.mockResolvedValue({ id: 'old-application' });
+    tx.talentInvitation.findFirst.mockResolvedValue({
+      status: 'PENDING',
+      expiresAt: now,
+    });
+    await expect(
+      service.applyForJob(
+        candidateProfile.userId,
+        { jobId: job.id },
+        now,
+        'invite-1',
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(tx.talentInvitation.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('reuses a submitted application before checking CV, job state or quotas and does not rescore', async () => {
+    const { service, tx, evaluationService, entitlements } =
+      invitationApplicationDependencies();
+    tx.application.findUnique.mockResolvedValue({ id: 'old-application' });
+    tx.resume.findFirst.mockResolvedValue(null);
+    tx.jobPosting.findFirst.mockResolvedValue(null);
+    tx.talentInvitation.findFirst.mockResolvedValue({
+      id: 'invite-1',
+      status: 'PENDING',
+      applicationId: null,
+      recruiterUserId: 'recruiter-user-1',
+      expiresAt: new Date(now.getTime() + 86400000),
+    });
+    const result = await service.applyForJob(
+      candidateProfile.userId,
+      { jobId: job.id, resumeId: 'deleted-cv' },
+      now,
+      'invite-1',
+    );
+    expect(result).toMatchObject({
+      applicationId: 'old-application',
+      reused: true,
+    });
+    expect(tx.resume.findFirst).not.toHaveBeenCalled();
+    expect(tx.jobPosting.findFirst).not.toHaveBeenCalled();
+    expect(entitlements.getApplicantCapForJobOwner).not.toHaveBeenCalled();
+    expect(tx.application.create).not.toHaveBeenCalled();
+    expect(evaluationService.dispatchNewApplication).not.toHaveBeenCalled();
+    expect(tx.talentInvitation.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          id: 'invite-1',
+          candidateId: candidateProfile.id,
+          jobId: job.id,
+          status: 'PENDING',
+          expiresAt: { gt: now },
+        },
+        data: expect.objectContaining({
+          applicationId: 'old-application',
+          status: 'ACCEPTED',
+        }),
+      }),
+    );
+  });
+
+  it.each(['WITHDRAWN', 'EXPIRED', 'DECLINED'])(
+    'does not reopen a %s invitation even when an application exists',
+    async (status) => {
+      const { service, tx, evaluationService } =
+        invitationApplicationDependencies();
+      tx.application.findUnique.mockResolvedValue({ id: 'old-application' });
+      tx.talentInvitation.findFirst.mockResolvedValue({
+        status,
+        expiresAt: new Date(now.getTime() + 86400000),
+      });
+      await expect(
+        service.applyForJob(
+          candidateProfile.userId,
+          { jobId: job.id },
+          now,
+          'invite-1',
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(tx.talentInvitation.updateMany).not.toHaveBeenCalled();
+      expect(evaluationService.dispatchNewApplication).not.toHaveBeenCalled();
+    },
+  );
+
+  it('does not link another candidate invitation to an existing application', async () => {
+    const { service, tx } = invitationApplicationDependencies();
+    tx.application.findUnique.mockResolvedValue({ id: 'old-application' });
+    tx.talentInvitation.findFirst.mockResolvedValue(null);
+    await expect(
+      service.applyForJob(
+        candidateProfile.userId,
+        { jobId: job.id },
+        now,
+        'invite-1',
+      ),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(tx.talentInvitation.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          id: 'invite-1',
+          candidateId: candidateProfile.id,
+          jobId: job.id,
+        },
+      }),
+    );
+    expect(tx.talentInvitation.updateMany).not.toHaveBeenCalled();
+  });
+
   it('creates a TALENT_POOL_INVITE application, links it atomically and dispatches normal evaluation', async () => {
     const { service, tx, evaluationService, notifications } =
       invitationApplicationDependencies();

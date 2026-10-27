@@ -266,6 +266,12 @@ export function TalentProfileDrawer({
             )}
           </div>
           <footer className="border-t border-slate-200 bg-white p-5 sm:px-6">
+            <Link
+              href={`/recruiter/talent-pool/${encodeURIComponent(candidate.id)}`}
+              className="mb-3 flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-xs font-bold text-blue-700 hover:bg-blue-50"
+            >
+              <ExternalLink className="size-4" /> Xem hồ sơ đầy đủ
+            </Link>
             {candidate.contactUnlocked ? (
               <div className="space-y-3">
                 <p className="flex items-center justify-center gap-2 text-xs font-semibold text-emerald-700">

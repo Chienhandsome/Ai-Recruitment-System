@@ -9,6 +9,7 @@ import { RabbitMQService } from '../../infrastructure/rabbitmq/rabbitmq.service'
 import { RABBITMQ_ROUTING_KEYS } from '../../infrastructure/rabbitmq/rabbitmq.constants';
 import { createEvaluationMessage } from './application-evaluation.snapshot';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AiServiceWakeupService } from '../../infrastructure/ai/ai-service-wakeup.service';
 
 export const MAX_EVALUATION_ATTEMPTS = 5;
 export const EVALUATION_RETRY_BASE_DELAY_MS = 60_000;
@@ -22,6 +23,7 @@ export class ApplicationEvaluationService {
     private readonly prisma: PrismaService,
     private readonly rabbitMQService: RabbitMQService,
     private readonly notificationsService?: NotificationsService,
+    private readonly aiServiceWakeupService?: AiServiceWakeupService,
   ) {}
 
   async dispatchNewApplication(
@@ -93,6 +95,15 @@ export class ApplicationEvaluationService {
     this.logger.log(
       `Queued evaluation for application ${applicationId} (attempt ${evaluationAttempts})`,
     );
+    // A successful queue publish does not wake a sleeping HTTP-hosted worker.
+    // Keep acceptance fast; waking is best-effort and must not undo the queued job.
+    if (this.aiServiceWakeupService) {
+      void this.aiServiceWakeupService.wake().catch(() => {
+        this.logger.warn(
+          'Could not wake AI service; the queued evaluation is retained.',
+        );
+      });
+    }
     return true;
   }
 

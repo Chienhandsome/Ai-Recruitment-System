@@ -1,18 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import {
-  ArrowRight,
-  BriefcaseBusiness,
-  Building2,
-  CalendarDays,
-  MapPin,
-} from 'lucide-react';
+import { ArrowRight, BriefcaseBusiness, Building2, CalendarDays, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  type CandidateApplicationStage,
-  getMyApplications,
-} from '@/lib/candidate-api';
+import { type CandidateApplicationStage, getMyApplications } from '@/lib/candidate-api';
 import { applicationStageLabels, applicationStageStyles } from '@/lib/application-stage';
 import { CandidateApplicationInterviews } from '@/components/candidate/CandidateApplicationInterviews';
 import { CandidateOfferCard } from '@/components/candidate/offers/CandidateOfferCard';
@@ -55,6 +46,14 @@ export default async function CandidateApplicationsPage({
   searchParams: SearchParams;
 }) {
   const params = await searchParams;
+  const rawApplicationId = first(params.applicationId);
+  const applicationId =
+    rawApplicationId &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      rawApplicationId,
+    )
+      ? rawApplicationId
+      : undefined;
   const rawStage = first(params.stage);
   const stage = stages.includes(rawStage as CandidateApplicationStage)
     ? (rawStage as CandidateApplicationStage)
@@ -69,8 +68,9 @@ export default async function CandidateApplicationsPage({
   if (!session?.access_token) redirect('/login');
 
   const applications = await getMyApplications(session.access_token, {
-    stage,
-    page,
+    applicationId,
+    stage: applicationId ? undefined : stage,
+    page: applicationId ? 1 : page,
     limit: 20,
   });
 
@@ -103,6 +103,14 @@ export default async function CandidateApplicationsPage({
             className="mt-5 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1"
             aria-label="Lọc theo trạng thái"
           >
+            {applicationId && (
+              <Link
+                href="/candidate/applications"
+                className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-xs font-bold text-blue-700"
+              >
+                Đang xem hồ sơ được liên kết · Xem tất cả
+              </Link>
+            )}
             <Link
               href={applicationsHref(undefined, 1)}
               className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors ${
@@ -137,11 +145,9 @@ export default async function CandidateApplicationsPage({
             <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
               <BriefcaseBusiness className="size-7" strokeWidth={1.6} />
             </div>
-            <h2 className="mt-4 text-lg font-extrabold text-[#1F2937]">
-              Chưa có đơn ứng tuyển
-            </h2>
+            <h2 className="mt-4 text-lg font-extrabold text-[#1F2937]">{applicationId ? 'Không tìm thấy hồ sơ được liên kết' : 'Chưa có đơn ứng tuyển'}</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-              Khám phá các vị trí phù hợp và gửi hồ sơ đầu tiên của bạn.
+              {applicationId ? 'Hồ sơ không thuộc tài khoản hiện tại hoặc không còn tồn tại. Chọn Xem tất cả để trở về danh sách của bạn.' : 'Khám phá các vị trí phù hợp và gửi hồ sơ đầu tiên của bạn.'}
             </p>
             <Button asChild className="mt-5 bg-[#2563EB] hover:bg-[#1D4ED8]">
               <Link href="/candidate/jobs">Tìm việc làm</Link>
@@ -155,9 +161,7 @@ export default async function CandidateApplicationsPage({
                 <article
                   key={application.id}
                   className={`overflow-hidden rounded-2xl border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-[0_8px_24px_rgba(37,99,235,0.08)] ${
-                    unread
-                      ? 'border-[#93C5FD] ring-1 ring-[#BFDBFE]'
-                      : 'border-slate-200'
+                    unread ? 'border-[#93C5FD] ring-1 ring-[#BFDBFE]' : 'border-slate-200'
                   }`}
                 >
                   <div
@@ -175,12 +179,14 @@ export default async function CandidateApplicationsPage({
                           </h2>
                           <span
                             className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
-                              application.currentStage === 'OFFERED' && application.offer?.status === 'ACCEPTED'
+                              application.currentStage === 'OFFERED' &&
+                              application.offer?.status === 'ACCEPTED'
                                 ? 'border-blue-300 bg-blue-50 text-blue-700'
                                 : applicationStageStyles[application.currentStage]
                             }`}
                           >
-                            {application.currentStage === 'OFFERED' && application.offer?.status === 'ACCEPTED'
+                            {application.currentStage === 'OFFERED' &&
+                            application.offer?.status === 'ACCEPTED'
                               ? 'Đã đồng ý Offer (Chờ ký HĐ)'
                               : applicationStageLabels[application.currentStage]}
                           </span>
@@ -273,9 +279,7 @@ export default async function CandidateApplicationsPage({
           >
             {applications.meta.page > 1 ? (
               <Button asChild variant="outline" size="sm">
-                <Link href={applicationsHref(stage, applications.meta.page - 1)}>
-                  Trang trước
-                </Link>
+                <Link href={applicationsHref(stage, applications.meta.page - 1)}>Trang trước</Link>
               </Button>
             ) : (
               <Button variant="outline" size="sm" disabled>
@@ -287,9 +291,7 @@ export default async function CandidateApplicationsPage({
             </span>
             {applications.meta.page < applications.meta.totalPages ? (
               <Button asChild variant="outline" size="sm">
-                <Link href={applicationsHref(stage, applications.meta.page + 1)}>
-                  Trang sau
-                </Link>
+                <Link href={applicationsHref(stage, applications.meta.page + 1)}>Trang sau</Link>
               </Button>
             ) : (
               <Button variant="outline" size="sm" disabled>

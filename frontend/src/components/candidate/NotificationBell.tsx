@@ -179,7 +179,7 @@ export function NotificationBell() {
       window.location.assign(launchUrl);
       return;
     }
-    router.push('/candidate/applications');
+    router.push(item.applicationId ? `/candidate/applications?applicationId=${encodeURIComponent(item.applicationId)}` : '/candidate/applications');
   };
 
   const getIcon = (type: string) => {

@@ -381,6 +381,7 @@ export function TalentInvitationInbox({
         !error && (
           <div className="space-y-4">
             {result?.data.map((invitation) => {
+              const applicationId = invitation.applicationId || invitation.existingApplicationId;
               const status =
                 invitation.status === 'PENDING' && new Date(invitation.expiresAt).getTime() <= now
                   ? 'EXPIRED'
@@ -441,18 +442,23 @@ export function TalentInvitationInbox({
                     </div>
                   </details>
                   <footer className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-                    {invitation.applicationId ? (
-                      <Link
-                        href={
-                          role === 'candidate'
-                            ? '/candidate/applications'
-                            : `/recruiter/dashboard?applicationId=${encodeURIComponent(invitation.applicationId)}`
-                        }
-                        className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white"
-                      >
-                        <FileText className="size-4" />
-                        Mở hồ sơ ứng tuyển
-                      </Link>
+                    {applicationId ? (
+                      <>
+                        <p className="text-xs text-slate-500">
+                          Đã có hồ sơ ứng tuyển. CV và thông tin đã gửi được giữ nguyên.
+                        </p>
+                        <Link
+                          href={
+                            role === 'candidate'
+                              ? `/candidate/applications?applicationId=${encodeURIComponent(applicationId)}`
+                              : `/recruiter/dashboard?applicationId=${encodeURIComponent(applicationId)}`
+                          }
+                          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white"
+                        >
+                          <FileText className="size-4" />
+                          Mở hồ sơ ứng tuyển
+                        </Link>
+                      </>
                     ) : status === 'PENDING' ? (
                       <>
                         <div className="text-xs text-slate-500">

@@ -30,6 +30,12 @@ export class AcceptTalentInvitationDto {
   resumeId!: string;
 }
 
+export class QueryInvitationJobsDto {
+  @IsOptional()
+  @IsUUID()
+  candidateId?: string;
+}
+
 export class QueryTalentInvitationsDto {
   @Type(() => Number)
   @IsInt()

@@ -25,7 +25,10 @@ describe('UploadResumeUseCase', () => {
     const storage = {
       uploadCandidateResume: jest
         .fn()
-        .mockResolvedValue({ objectPath: 'candidate/resume.pdf' }),
+        .mockResolvedValue({
+          objectPath: 'candidate/resume.pdf',
+          bucket: 'custom-resumes',
+        }),
       createSignedDownloadUrl: jest.fn().mockResolvedValue({
         signedUrl: 'https://storage.example/signed',
       }),
@@ -47,6 +50,13 @@ describe('UploadResumeUseCase', () => {
     });
 
     expect(result.parsingStatus).toBe('PENDING');
+    expect(prisma.resume.update).toHaveBeenCalledWith({
+      where: { id: 'resume' },
+      data: {
+        objectPath: 'candidate/resume.pdf',
+        storageBucket: 'custom-resumes',
+      },
+    });
     expect(result.warning).toBeDefined();
     expect(prisma.$transaction).not.toHaveBeenCalled();
     expect(prisma.candidateProfile.update).toHaveBeenCalledWith({

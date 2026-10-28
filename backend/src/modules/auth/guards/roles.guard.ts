@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../../database/prisma.service';
-import { PUBLIC_ROUTE_KEY, REQUIRED_ROLES_KEY, type AuthRole } from '../auth.constants';
+import { PUBLIC_ROUTE_KEY, REQUIRED_ROLES_KEY, BOOTSTRAP_ROUTE_KEY, type AuthRole } from '../auth.constants';
 import type { AuthenticatedRequest } from '../auth.types';
 
 const CACHE_TTL_MS = 15 * 1000; // 15 seconds (prevents DB flooding while ensuring near-instant revocation)
@@ -43,9 +43,17 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedException('Authenticated user is unavailable.');
     }
 
-    const routeUrl = request.url ?? '';
-    // Allow initial bootstrap to execute without requiring pre-existing DB user record
-    if (routeUrl.includes('/auth/bootstrap')) {
+    // Bootstrap is identified by handler metadata, never by URL substring.
+    // request.url includes the query string, so any route whose query
+    // contained '/auth/bootstrap' previously skipped every check below.
+    // Only the real bootstrap handler skips the DB-record/status/role
+    // checks, because a Supabase user without a DB record cannot pass them
+    // yet. Authentication itself is still enforced above.
+    const isBootstrap = this.reflector.getAllAndOverride<boolean>(
+      BOOTSTRAP_ROUTE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (isBootstrap) {
       return true;
     }
 

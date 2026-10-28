@@ -10,6 +10,7 @@ import { SupabaseAuthService } from './supabase-auth.service';
 import type { AuthenticatedUser } from './auth.types';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Roles } from './decorators/roles.decorator';
+import { Bootstrap } from './decorators/bootstrap.decorator';
 import { BootstrapAuthDto } from './dto/bootstrap-auth.dto';
 import { InviteAdminDto } from './dto/invite-admin.dto';
 
@@ -23,6 +24,7 @@ export class AuthController {
   ) {}
 
   @Post('bootstrap')
+  @Bootstrap()
   @ApiOperation({
     summary: 'Create or refresh the application profile for a Supabase user',
   })

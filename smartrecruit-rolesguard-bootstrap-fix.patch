@@ -1,0 +1,196 @@
+diff --git a/backend/src/modules/auth/auth.constants.ts b/backend/src/modules/auth/auth.constants.ts
+index d19e480..cb559b3 100644
+--- a/backend/src/modules/auth/auth.constants.ts
++++ b/backend/src/modules/auth/auth.constants.ts
+@@ -1,5 +1,6 @@
+ export const PUBLIC_ROUTE_KEY = 'auth:is-public';
+ export const REQUIRED_ROLES_KEY = 'auth:required-roles';
++export const BOOTSTRAP_ROUTE_KEY = 'auth:bootstrap';
+ 
+ export const AUTH_ROLES = ['ADMIN', 'RECRUITER', 'CANDIDATE'] as const;
+ export const PUBLIC_SIGNUP_ROLES = ['RECRUITER', 'CANDIDATE'] as const;
+diff --git a/backend/src/modules/auth/auth.controller.ts b/backend/src/modules/auth/auth.controller.ts
+index 80cf3d5..3bc9177 100644
+--- a/backend/src/modules/auth/auth.controller.ts
++++ b/backend/src/modules/auth/auth.controller.ts
+@@ -10,6 +10,7 @@ import { SupabaseAuthService } from './supabase-auth.service';
+ import type { AuthenticatedUser } from './auth.types';
+ import { CurrentUser } from './decorators/current-user.decorator';
+ import { Roles } from './decorators/roles.decorator';
++import { Bootstrap } from './decorators/bootstrap.decorator';
+ import { BootstrapAuthDto } from './dto/bootstrap-auth.dto';
+ import { InviteAdminDto } from './dto/invite-admin.dto';
+ 
+@@ -23,6 +24,7 @@ export class AuthController {
+   ) {}
+ 
+   @Post('bootstrap')
++  @Bootstrap()
+   @ApiOperation({
+     summary: 'Create or refresh the application profile for a Supabase user',
+   })
+diff --git a/backend/src/modules/auth/decorators/bootstrap.decorator.ts b/backend/src/modules/auth/decorators/bootstrap.decorator.ts
+new file mode 100644
+index 0000000..e2604e6
+--- /dev/null
++++ b/backend/src/modules/auth/decorators/bootstrap.decorator.ts
+@@ -0,0 +1,10 @@
++import { SetMetadata } from '@nestjs/common';
++import { BOOTSTRAP_ROUTE_KEY } from '../auth.constants';
++
++/**
++ * Marks the real bootstrap handler. RolesGuard skips the DB-record, status
++ * and role checks ONLY for handlers carrying this metadata, because a
++ * Supabase user without a DB record cannot pass them yet. Never identify
++ * bootstrap by URL substring: request.url includes the query string.
++ */
++export const Bootstrap = () => SetMetadata(BOOTSTRAP_ROUTE_KEY, true);
+diff --git a/backend/src/modules/auth/guards/roles.guard.spec.ts b/backend/src/modules/auth/guards/roles.guard.spec.ts
+new file mode 100644
+index 0000000..17736ed
+--- /dev/null
++++ b/backend/src/modules/auth/guards/roles.guard.spec.ts
+@@ -0,0 +1,109 @@
++import {
++  ForbiddenException,
++  UnauthorizedException,
++} from '@nestjs/common';
++import {
++  BOOTSTRAP_ROUTE_KEY,
++  PUBLIC_ROUTE_KEY,
++  REQUIRED_ROLES_KEY,
++} from '../auth.constants';
++import { RolesGuard, clearAllUserRoleCache } from './roles.guard';
++
++function buildGuard(options: {
++  isBootstrap: boolean;
++  dbUser: { status: string; userRoles: { role: { code: string } }[] } | null;
++  authUser?: { id: string } | undefined;
++  url?: string;
++}) {
++  const meta: Record<string, unknown> = {
++    [PUBLIC_ROUTE_KEY]: false,
++    [BOOTSTRAP_ROUTE_KEY]: options.isBootstrap,
++    [REQUIRED_ROLES_KEY]: ['ADMIN'],
++  };
++  const reflector = {
++    getAllAndOverride: jest.fn((key: string) => meta[key]),
++  };
++  const prisma = {
++    user: {
++      findUnique: jest.fn().mockResolvedValue(options.dbUser),
++    },
++  };
++  const guard = new RolesGuard(reflector as any, prisma as any);
++  const context = {
++    getHandler: jest.fn(),
++    getClass: jest.fn(),
++    switchToHttp: () => ({
++      getRequest: () => ({
++        // 'authUser' in options distinguishes "no authUser" from default.
++        authUser: ('authUser' in options ? options.authUser : { id: 'user-1' }),
++        url: options.url ?? '/contracts/admin/all',
++      }),
++    }),
++  };
++  return { guard, context: context as any, prisma };
++}
++
++describe('RolesGuard bootstrap narrowing (audit run-2)', () => {
++  beforeEach(() => {
++    clearAllUserRoleCache();
++  });
++
++  it('blocks a locked user even when the query string contains /auth/bootstrap', async () => {
++    const { guard, context, prisma } = buildGuard({
++      isBootstrap: false,
++      dbUser: { status: 'LOCKED', userRoles: [{ role: { code: 'ADMIN' } }] },
++      url: '/contracts/admin/all?search=/auth/bootstrap',
++    });
++
++    await expect(guard.canActivate(context)).rejects.toThrow(
++      ForbiddenException,
++    );
++    // The status check ran: the query string did NOT trigger a bypass.
++    expect(prisma.user.findUnique).toHaveBeenCalled();
++  });
++
++  it('blocks a non-ADMIN active user on an admin route with a bootstrap query string', async () => {
++    const { guard, context } = buildGuard({
++      isBootstrap: false,
++      dbUser: { status: 'ACTIVE', userRoles: [{ role: { code: 'CANDIDATE' } }] },
++      url: '/contracts/admin/all?search=/auth/bootstrap',
++    });
++
++    await expect(guard.canActivate(context)).rejects.toThrow(
++      ForbiddenException,
++    );
++  });
++
++  it('lets the real bootstrap handler through without a DB record', async () => {
++    const { guard, context, prisma } = buildGuard({
++      isBootstrap: true,
++      dbUser: null,
++      url: '/auth/bootstrap',
++    });
++
++    await expect(guard.canActivate(context)).resolves.toBe(true);
++    expect(prisma.user.findUnique).not.toHaveBeenCalled();
++  });
++
++  it('lets an ACTIVE ADMIN through an admin route', async () => {
++    const { guard, context } = buildGuard({
++      isBootstrap: false,
++      dbUser: { status: 'ACTIVE', userRoles: [{ role: { code: 'ADMIN' } }] },
++    });
++
++    await expect(guard.canActivate(context)).resolves.toBe(true);
++  });
++
++  it('still requires authentication even on the bootstrap handler', async () => {
++    const { guard, context } = buildGuard({
++      isBootstrap: true,
++      dbUser: null,
++      authUser: undefined,
++      url: '/auth/bootstrap',
++    });
++
++    await expect(guard.canActivate(context)).rejects.toThrow(
++      UnauthorizedException,
++    );
++  });
++});
+diff --git a/backend/src/modules/auth/guards/roles.guard.ts b/backend/src/modules/auth/guards/roles.guard.ts
+index cf21b51..2f071df 100644
+--- a/backend/src/modules/auth/guards/roles.guard.ts
++++ b/backend/src/modules/auth/guards/roles.guard.ts
+@@ -7,7 +7,7 @@ import {
+ } from '@nestjs/common';
+ import { Reflector } from '@nestjs/core';
+ import { PrismaService } from '../../../database/prisma.service';
+-import { PUBLIC_ROUTE_KEY, REQUIRED_ROLES_KEY, type AuthRole } from '../auth.constants';
++import { PUBLIC_ROUTE_KEY, REQUIRED_ROLES_KEY, BOOTSTRAP_ROUTE_KEY, type AuthRole } from '../auth.constants';
+ import type { AuthenticatedRequest } from '../auth.types';
+ 
+ const CACHE_TTL_MS = 15 * 1000; // 15 seconds (prevents DB flooding while ensuring near-instant revocation)
+@@ -43,9 +43,17 @@ export class RolesGuard implements CanActivate {
+       throw new UnauthorizedException('Authenticated user is unavailable.');
+     }
+ 
+-    const routeUrl = request.url ?? '';
+-    // Allow initial bootstrap to execute without requiring pre-existing DB user record
+-    if (routeUrl.includes('/auth/bootstrap')) {
++    // Bootstrap is identified by handler metadata, never by URL substring.
++    // request.url includes the query string, so any route whose query
++    // contained '/auth/bootstrap' previously skipped every check below.
++    // Only the real bootstrap handler skips the DB-record/status/role
++    // checks, because a Supabase user without a DB record cannot pass them
++    // yet. Authentication itself is still enforced above.
++    const isBootstrap = this.reflector.getAllAndOverride<boolean>(
++      BOOTSTRAP_ROUTE_KEY,
++      [context.getHandler(), context.getClass()],
++    );
++    if (isBootstrap) {
+       return true;
+     }
+ 

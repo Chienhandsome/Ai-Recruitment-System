@@ -25,6 +25,7 @@ import {
   adminRejectWarranty,
   type WarrantyClaimInfo,
 } from '@/lib/contract-api';
+import { resolveEvidenceUrl } from '@/lib/dispute-api';
 
 interface AdminWarrantyReviewModalProps {
   isOpen: boolean;
@@ -264,6 +265,7 @@ export function AdminWarrantyReviewModal({
                       <div className="flex flex-wrap gap-2">
                         {claim.evidenceUrl.split(',').map((url, i) => {
                           const trimmed = url.trim();
+                          const resolvedUrl = resolveEvidenceUrl(trimmed);
                           const isImg =
                             trimmed.startsWith('data:image/') ||
                             /\.(png|jpe?g|webp|gif)($|\?)/i.test(trimmed) ||
@@ -275,13 +277,13 @@ export function AdminWarrantyReviewModal({
                               <button
                                 key={i}
                                 type="button"
-                                onClick={() => setZoomedImageUrl(trimmed)}
+                                onClick={() => setZoomedImageUrl(resolvedUrl)}
                                 className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:border-[#2563EB] transition-all bg-white cursor-pointer"
                                 title="Bấm để xem ảnh phóng to"
                               >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                  src={trimmed}
+                                  src={resolvedUrl}
                                   alt={`Bằng chứng HR #${i + 1}`}
                                   className="h-16 w-20 object-cover group-hover:scale-105 transition-transform"
                                 />
@@ -296,7 +298,7 @@ export function AdminWarrantyReviewModal({
                           return (
                             <a
                               key={i}
-                              href={trimmed}
+                              href={resolvedUrl}
                               target="_blank"
                               rel="noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-2xs font-bold bg-white border border-slate-200 text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"
@@ -384,6 +386,7 @@ export function AdminWarrantyReviewModal({
                             <div className="flex flex-wrap gap-2">
                               {candEvidenceUrls.map((url, i) => {
                                 const trimmed = url.trim();
+                                const resolvedUrl = resolveEvidenceUrl(trimmed);
                                 const isImg =
                                   trimmed.startsWith('data:image/') ||
                                   /\.(png|jpe?g|webp|gif)($|\?)/i.test(trimmed) ||
@@ -395,13 +398,13 @@ export function AdminWarrantyReviewModal({
                                     <button
                                       key={i}
                                       type="button"
-                                      onClick={() => setZoomedImageUrl(trimmed)}
+                                      onClick={() => setZoomedImageUrl(resolvedUrl)}
                                       className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:border-[#2563EB] transition-all bg-white cursor-pointer"
                                       title="Bấm để xem ảnh phóng to"
                                     >
                                       {/* eslint-disable-next-line @next/next/no-img-element */}
                                       <img
-                                        src={trimmed}
+                                        src={resolvedUrl}
                                         alt={`Bằng chứng ứng viên #${i + 1}`}
                                         className="h-16 w-20 object-cover group-hover:scale-105 transition-transform"
                                       />
@@ -416,7 +419,7 @@ export function AdminWarrantyReviewModal({
                                 return (
                                   <a
                                     key={i}
-                                    href={trimmed}
+                                    href={resolvedUrl}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-2xs font-bold bg-white border border-slate-200 text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"
@@ -440,19 +443,25 @@ export function AdminWarrantyReviewModal({
                 </div>
               </div>
 
-              {/* Automatic Compensation Package Preview */}
+              {/* Automatic Compensation & Sanctions Preview */}
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2">
                 <span className="font-bold text-slate-900 block text-xs">
-                  2. Quyền lợi thực thi nếu Admin Phê Duyệt:
+                  2. Chế tài & Quyền lợi thực thi tự động nếu Admin Phê Duyệt:
                 </span>
-                <div className="grid grid-cols-2 gap-2 text-2xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-2xs">
                   <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center gap-2">
-                    <span className="font-bold text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded">+1 Credit</span>
-                    <span className="text-slate-600">Hoàn lại 1 lượt mở khóa CV vào tài khoản HR</span>
+                    <span className="font-bold text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded shrink-0">+1 Credit</span>
+                    <span className="text-slate-600">Hoàn lại 1 lượt mở khóa CV cho Doanh nghiệp</span>
                   </div>
                   <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center gap-2">
-                    <span className="font-bold text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded">+30 Ngày</span>
-                    <span className="text-slate-600">Tự động gia hạn hạn nộp hồ sơ tin tuyển dụng</span>
+                    <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded shrink-0">+30 Ngày</span>
+                    <span className="text-slate-600">Tự động gia hạn hạn tin tuyển dụng</span>
+                  </div>
+                  <div className="bg-white p-2.5 rounded-lg border border-amber-200 flex items-center gap-2">
+                    <span className="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded shrink-0">
+                      {claim.reason === 'NO_SHOW' ? '-20đ & 14 ngày' : '-15đ & 7 ngày'}
+                    </span>
+                    <span className="text-slate-600">Chế tài Ứng viên: Trừ điểm tin cậy & Tạm dừng nộp đơn</span>
                   </div>
                 </div>
               </div>

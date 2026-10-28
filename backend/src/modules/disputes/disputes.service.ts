@@ -16,6 +16,8 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { CreateDisputeDto } from './dto/create-dispute.dto';
 import { ResolveDisputeDto } from './dto/resolve-dispute.dto';
 import { RespondDisputeDto } from './dto/respond-dispute.dto';
+import { AcknowledgeDisputeDto } from './dto/acknowledge-dispute.dto';
+import { CloseDisputeDto } from './dto/close-dispute.dto';
 import { invalidateUserRoleCache } from '../auth/guards/roles.guard';
 
 @Injectable()
@@ -159,6 +161,9 @@ export class DisputesService {
                 fullName: true,
                 email: true,
                 phone: true,
+                reliabilityScore: true,
+                strikeCount: true,
+                suspendedUntil: true,
               },
             },
             offer: true,
@@ -401,7 +406,17 @@ export class DisputesService {
                 },
               },
             },
-            candidate: { select: { id: true, fullName: true, email: true } },
+            candidate: {
+              select: {
+                id: true,
+                userId: true,
+                fullName: true,
+                email: true,
+                reliabilityScore: true,
+                strikeCount: true,
+                suspendedUntil: true,
+              },
+            },
             offer: true,
             contract: {
               include: {
@@ -435,7 +450,15 @@ export class DisputesService {
                 recruiter: { select: { userId: true } },
               },
             },
-            candidate: { select: { userId: true, fullName: true } },
+            candidate: {
+              select: {
+                id: true,
+                userId: true,
+                fullName: true,
+                reliabilityScore: true,
+                strikeCount: true,
+              },
+            },
           },
         },
       },
@@ -465,6 +488,10 @@ export class DisputesService {
         penaltyNotes: dto.penaltyNotes,
         penaltyAmount: dto.penaltyAmount,
         compensationAmount: dto.compensationAmount,
+        candidateEnforcementAction: dto.candidateEnforcementAction || 'NONE',
+        candidatePenaltyNotes: dto.candidatePenaltyNotes,
+        candidateReliabilityDeduction: dto.candidateReliabilityDeduction,
+        candidateSuspensionDays: dto.candidateSuspensionDays,
       },
     };
 
@@ -483,6 +510,10 @@ export class DisputesService {
           penaltyNotes: dto.penaltyNotes || null,
           penaltyAmount: dto.penaltyAmount !== undefined && dto.penaltyAmount !== null ? new Prisma.Decimal(dto.penaltyAmount) : undefined,
           compensationAmount: dto.compensationAmount !== undefined && dto.compensationAmount !== null ? new Prisma.Decimal(dto.compensationAmount) : undefined,
+          candidatePenaltyAction: dto.candidateEnforcementAction || 'NONE',
+          candidatePenaltyNotes: dto.candidatePenaltyNotes || null,
+          candidateReliabilityDeduction: dto.candidateReliabilityDeduction ?? null,
+          candidateSuspensionDays: dto.candidateSuspensionDays ?? null,
           timeline: updatedTimeline as unknown as Prisma.InputJsonValue,
         },
       });
@@ -506,20 +537,107 @@ export class DisputesService {
         }
       }
 
+      // Enforcement on Candidate
+      const candidateProfile = dispute.application?.candidate;
+      const candidateUserId = candidateProfile?.userId;
+
+      if (candidateProfile && dto.candidateEnforcementAction && dto.candidateEnforcementAction !== 'NONE') {
+        const action = dto.candidateEnforcementAction;
+
+        if (action === 'WARN') {
+          await tx.candidateProfile.update({
+            where: { id: candidateProfile.id },
+            data: { strikeCount: { increment: 1 } },
+          });
+        } else if (action === 'DEDUCT_RELIABILITY') {
+          const deductPoints = Math.max(1, dto.candidateReliabilityDeduction || 15);
+          const currentScore = candidateProfile.reliabilityScore ?? 100;
+          const newScore = Math.max(0, currentScore - deductPoints);
+
+          await tx.candidateProfile.update({
+            where: { id: candidateProfile.id },
+            data: {
+              reliabilityScore: newScore,
+              strikeCount: { increment: 1 },
+            },
+          });
+        } else if (action === 'SUSPEND_APPLY') {
+          const days = Math.max(1, dto.candidateSuspensionDays || 14);
+          const suspendUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+          const deductPoints = Math.max(1, dto.candidateReliabilityDeduction || 25);
+          const currentScore = candidateProfile.reliabilityScore ?? 100;
+          const newScore = Math.max(0, currentScore - deductPoints);
+
+          await tx.candidateProfile.update({
+            where: { id: candidateProfile.id },
+            data: {
+              suspendedUntil: suspendUntil,
+              reliabilityScore: newScore,
+              strikeCount: { increment: 1 },
+              isTalentPoolBanned: true,
+            },
+          });
+        } else if (action === 'LOCK_CANDIDATE') {
+          if (candidateUserId) {
+            await tx.user.update({
+              where: { id: candidateUserId },
+              data: { status: AccountStatus.LOCKED },
+            });
+            invalidateUserRoleCache(candidateUserId);
+          }
+          await tx.candidateProfile.update({
+            where: { id: candidateProfile.id },
+            data: {
+              reliabilityScore: 0,
+              strikeCount: { increment: 2 },
+              isTalentPoolBanned: true,
+            },
+          });
+        }
+      }
+
       return res;
     });
 
-    // Notify Reporter (Candidate)
+    // Notify Reporter
     try {
       await this.notificationsService.createNotification({
         recipientUserId: dispute.reportedByUserId,
         applicationId: dispute.applicationId,
         title: `Phán quyết khiếu nại (${dispute.disputeNumber})`,
-        message: `Ban quản trị đã ban hành phán quyết chính thức: "${dto.adminResolution.slice(0, 100)}...". Vui lòng mở chi tiết để xem toàn văn kết luận và gửi kháng nghị nếu cần.`,
+        message: `Ban quản trị đã ban hành phán quyết chính thức: "${dto.adminResolution.slice(0, 100)}...". Vui lòng mở chi tiết để xem toàn văn kết luận.`,
         payload: { disputeId: dispute.id, status: dto.status, disputeNumber: dispute.disputeNumber },
       });
     } catch (err) {
       this.logger.warn(`Failed to notify reporter: ${err}`);
+    }
+
+    // Notify Candidate if candidate wasn't the sole reporter (or if candidate was sanctioned)
+    const candidateUserId = dispute.application?.candidate?.userId;
+    if (candidateUserId && candidateUserId !== dispute.reportedByUserId) {
+      const candidateAction = dto.candidateEnforcementAction;
+      let candidatePenaltyMsg = '';
+      if (candidateAction === 'LOCK_CANDIDATE') {
+        candidatePenaltyMsg = ' [CHẾ TÀI: Tài khoản ứng viên của bạn đã bị khóa do vi phạm quy chế].';
+      } else if (candidateAction === 'SUSPEND_APPLY') {
+        candidatePenaltyMsg = ` [CHẾ TÀI: Tạm dừng quyền nộp đơn ${dto.candidateSuspensionDays || 14} ngày & trừ điểm tin cậy].`;
+      } else if (candidateAction === 'DEDUCT_RELIABILITY') {
+        candidatePenaltyMsg = ` [CHẾ TÀI: Trừ ${dto.candidateReliabilityDeduction || 15} điểm Tin cậy].`;
+      } else if (candidateAction === 'WARN') {
+        candidatePenaltyMsg = ' [CHẾ TÀI: Ban quản trị gửi cảnh cáo và ghi nhận vi phạm].';
+      }
+
+      try {
+        await this.notificationsService.createNotification({
+          recipientUserId: candidateUserId,
+          applicationId: dispute.applicationId,
+          title: `Kết luận xử lý khiếu nại (${dispute.disputeNumber})`,
+          message: `Ban quản trị đã ban hành phán quyết: "${dto.adminResolution.slice(0, 100)}..."${candidatePenaltyMsg} Mở chi tiết để xem toàn bộ nội dung.`,
+          payload: { disputeId: dispute.id, status: dto.status, disputeNumber: dispute.disputeNumber },
+        });
+      } catch (err) {
+        this.logger.warn(`Failed to notify candidate: ${err}`);
+      }
     }
 
     // Also Notify Recruiter if reported by Candidate
@@ -549,14 +667,17 @@ export class DisputesService {
       throw new BadRequestException('Vui lòng chọn ít nhất một file ảnh hoặc tài liệu bằng chứng.');
     }
 
-    const uploadDir = path.resolve(process.cwd(), 'uploads', 'evidence');
+    const uploadDir = fs.existsSync(path.resolve(process.cwd(), 'backend', 'uploads'))
+      ? path.resolve(process.cwd(), 'backend', 'uploads', 'evidence')
+      : path.resolve(process.cwd(), 'uploads', 'evidence');
+
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
     const results = files.map((file) => {
+      const safeOriginalName = (file.originalname || 'file').replace(/[^a-zA-Z0-9._-]/g, '_');
       const sha256Hash = crypto.createHash('sha256').update(file.buffer).digest('hex');
-      const safeOriginalName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
       const savedFileName = `${Date.now()}_${sha256Hash.slice(0, 10)}_${safeOriginalName}`;
       const targetPath = path.join(uploadDir, savedFileName);
 
@@ -588,9 +709,23 @@ export class DisputesService {
    */
   streamEvidenceFile(fileName: string, res: Response) {
     const safeName = path.basename(fileName);
-    const filePath = path.resolve(process.cwd(), 'uploads', 'evidence', safeName);
+    const candidateDirs = [
+      path.resolve(process.cwd(), 'uploads', 'evidence'),
+      path.resolve(process.cwd(), 'backend', 'uploads', 'evidence'),
+      path.resolve(__dirname, '..', '..', '..', 'uploads', 'evidence'),
+      path.resolve(__dirname, '..', '..', '..', 'backend', 'uploads', 'evidence'),
+    ];
 
-    if (!fs.existsSync(filePath)) {
+    let filePath: string | null = null;
+    for (const dir of candidateDirs) {
+      const candidatePath = path.join(dir, safeName);
+      if (fs.existsSync(candidatePath)) {
+        filePath = candidatePath;
+        break;
+      }
+    }
+
+    if (!filePath) {
       throw new NotFoundException('Tệp bằng chứng không tồn tại hoặc đã bị gỡ bỏ.');
     }
 
@@ -611,6 +746,277 @@ export class DisputesService {
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     const stream = fs.createReadStream(filePath);
     return stream.pipe(res);
+  }
+
+  /**
+   * Candidate or Recruiter formally acknowledges and accepts the Admin verdict
+   */
+  async acknowledgeDispute(userId: string, disputeId: string, dto: AcknowledgeDisputeDto) {
+    const dispute = await this.prisma.dispute.findUnique({
+      where: { id: disputeId },
+      include: {
+        application: {
+          include: {
+            job: {
+              select: {
+                id: true,
+                title: true,
+                recruiter: {
+                  select: {
+                    userId: true,
+                    user: { select: { fullName: true } },
+                  },
+                },
+              },
+            },
+            candidate: { select: { userId: true, fullName: true } },
+          },
+        },
+      },
+    });
+
+    if (!dispute) {
+      throw new NotFoundException('Khiếu nại không tồn tại.');
+    }
+
+    if (dispute.status !== DisputeStatus.RESOLVED && dispute.status !== DisputeStatus.DISMISSED) {
+      throw new BadRequestException('Chỉ có thể xác nhận khi Ban Quản Trị đã ban hành kết luận giải quyết hoặc bác bỏ khiếu nại.');
+    }
+
+    const isCandidate = dispute.application?.candidate?.userId === userId;
+    const isRecruiter = dispute.application?.job?.recruiter?.userId === userId;
+
+    if (!isCandidate && !isRecruiter) {
+      throw new ForbiddenException('Bạn không phải là bên liên quan để xác nhận phán quyết này.');
+    }
+
+    const now = new Date();
+    const existingTimeline = Array.isArray(dispute.timeline) ? (dispute.timeline as any[]) : [];
+    const updatedData: Record<string, any> = {};
+    let ackMessage = '';
+    let actorRole = '';
+    let actorName = '';
+
+    if (isCandidate) {
+      if (dispute.candidateAcknowledgedAt) {
+        throw new BadRequestException('Bạn đã xác nhận đồng thuận với phán quyết này trước đó.');
+      }
+      actorRole = 'CANDIDATE';
+      actorName = dispute.application.candidate.fullName || 'Ứng viên';
+      ackMessage = dto.note
+        ? `Ứng viên ${actorName} đã xác nhận đồng thuận với phán quyết. Ghi chú cam kết: "${dto.note}"`
+        : `Ứng viên ${actorName} đã chính thức xác nhận đồng thuận và cam kết tuân thủ phán quyết của Ban Quản Trị.`;
+
+      updatedData.candidateAcknowledgedAt = now;
+      updatedData.candidateAcknowledgeNote = dto.note || 'Đã xác nhận đồng thuận với phán quyết của BQT.';
+    } else if (isRecruiter) {
+      if (dispute.recruiterAcknowledgedAt) {
+        throw new BadRequestException('Doanh nghiệp đã xác nhận chấp hành phán quyết này trước đó.');
+      }
+      actorRole = 'RECRUITER';
+      actorName = dispute.application.job.recruiter?.user?.fullName || 'Nhà tuyển dụng';
+      ackMessage = dto.note
+        ? `Nhà tuyển dụng (${actorName}) đã xác nhận chấp hành phán quyết. Ghi chú cam kết: "${dto.note}"`
+        : `Nhà tuyển dụng (${actorName}) đã chính thức xác nhận chấp hành toàn bộ kết luận và chế tài của Ban Quản Trị.`;
+
+      updatedData.recruiterAcknowledgedAt = now;
+      updatedData.recruiterAcknowledgeNote = dto.note || 'Đã xác nhận chấp hành phán quyết và chế tài của BQT.';
+    }
+
+    const ackTimelineEntry = {
+      id: randomUUID(),
+      senderId: userId,
+      senderName: actorName,
+      senderRole: actorRole,
+      type: 'ACKNOWLEDGEMENT',
+      message: ackMessage,
+      evidenceUrls: [],
+      createdAt: now.toISOString(),
+    };
+
+    const newTimeline = [...existingTimeline, ackTimelineEntry];
+
+    // Check if BOTH parties have now acknowledged!
+    const willBothAcknowledge =
+      (isCandidate && !!dispute.recruiterAcknowledgedAt) ||
+      (isRecruiter && !!dispute.candidateAcknowledgedAt);
+
+    if (willBothAcknowledge) {
+      updatedData.status = DisputeStatus.CLOSED;
+      updatedData.closedAt = now;
+
+      const autoClosureEntry = {
+        id: randomUUID(),
+        senderId: 'SYSTEM',
+        senderName: 'Hệ Thống Trọng Tài Tự Động',
+        senderRole: 'ADMIN',
+        type: 'SYSTEM_CLOSURE',
+        message: 'Cả hai bên (Ứng viên & Nhà tuyển dụng) đã hoàn tất xác nhận đồng thuận với phán quyết. Vụ việc chính thức được đóng hồ sơ và lưu trữ vĩnh viễn.',
+        evidenceUrls: [],
+        createdAt: new Date(now.getTime() + 1000).toISOString(),
+      };
+      newTimeline.push(autoClosureEntry);
+    }
+
+    updatedData.timeline = newTimeline as unknown as Prisma.InputJsonValue;
+
+    const result = await this.prisma.dispute.update({
+      where: { id: disputeId },
+      data: updatedData,
+      include: {
+        application: {
+          include: {
+            job: { select: { title: true } },
+            candidate: { select: { fullName: true } },
+          },
+        },
+      },
+    });
+
+    // Notify the other party
+    const candidateUserId = dispute.application.candidate?.userId;
+    const recruiterUserId = dispute.application.job.recruiter?.userId;
+
+    if (isCandidate && recruiterUserId) {
+      try {
+        await this.notificationsService.createNotification({
+          recipientUserId: recruiterUserId,
+          applicationId: dispute.applicationId,
+          title: willBothAcknowledge
+            ? `Vụ việc ${dispute.disputeNumber} đã hoàn tất và đóng hồ sơ`
+            : `Ứng viên đã xác nhận phán quyết (${dispute.disputeNumber})`,
+          message: willBothAcknowledge
+            ? `Cả hai bên đã hoàn tất xác nhận phán quyết khiếu nại. Vụ việc chính thức đóng hồ sơ.`
+            : `Ứng viên ${actorName} đã xác nhận đồng thuận với phán quyết khiếu nại của Ban Quản Trị.`,
+          payload: { disputeId: dispute.id, disputeNumber: dispute.disputeNumber },
+        });
+      } catch (err) {
+        this.logger.warn(`Failed to notify recruiter on dispute ack: ${err}`);
+      }
+    } else if (isRecruiter && candidateUserId) {
+      try {
+        await this.notificationsService.createNotification({
+          recipientUserId: candidateUserId,
+          applicationId: dispute.applicationId,
+          title: willBothAcknowledge
+            ? `Vụ việc ${dispute.disputeNumber} đã hoàn tất và đóng hồ sơ`
+            : `Nhà tuyển dụng đã xác nhận phán quyết (${dispute.disputeNumber})`,
+          message: willBothAcknowledge
+            ? `Cả hai bên đã hoàn tất xác nhận phán quyết khiếu nại. Vụ việc chính thức đóng hồ sơ.`
+            : `Nhà tuyển dụng đã xác nhận chấp hành phán quyết khiếu nại của Ban Quản Trị.`,
+          payload: { disputeId: dispute.id, disputeNumber: dispute.disputeNumber },
+        });
+      } catch (err) {
+        this.logger.warn(`Failed to notify candidate on dispute ack: ${err}`);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Admin formally closes and archives the dispute case
+   */
+  async closeDispute(adminUserId: string, disputeId: string, dto: CloseDisputeDto) {
+    const dispute = await this.prisma.dispute.findUnique({
+      where: { id: disputeId },
+      include: {
+        application: {
+          include: {
+            job: {
+              select: {
+                id: true,
+                title: true,
+                recruiter: { select: { userId: true } },
+              },
+            },
+            candidate: { select: { userId: true, fullName: true } },
+          },
+        },
+      },
+    });
+
+    if (!dispute) {
+      throw new NotFoundException('Khiếu nại không tồn tại.');
+    }
+
+    if (dispute.status === DisputeStatus.CLOSED) {
+      throw new BadRequestException('Hồ sơ khiếu nại này đã được đóng trước đó.');
+    }
+
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminUserId },
+      select: { fullName: true },
+    });
+
+    const now = new Date();
+    const existingTimeline = Array.isArray(dispute.timeline) ? (dispute.timeline as any[]) : [];
+    const closeEntry = {
+      id: randomUUID(),
+      senderId: adminUserId,
+      senderName: admin?.fullName || 'Ban Quản Trị Hệ Thống',
+      senderRole: 'ADMIN',
+      type: 'ADMIN_CLOSURE',
+      message: dto.closeReason
+        ? `Ban Quản Trị đã chính thức đóng và lưu trữ hồ sơ tranh chấp. Ghi chú đóng: "${dto.closeReason}"`
+        : 'Ban Quản Trị đã chính thức đóng và lưu trữ hồ sơ tranh chấp.',
+      evidenceUrls: [],
+      createdAt: now.toISOString(),
+    };
+
+    const updatedTimeline = [...existingTimeline, closeEntry];
+
+    const result = await this.prisma.dispute.update({
+      where: { id: disputeId },
+      data: {
+        status: DisputeStatus.CLOSED,
+        closedAt: now,
+        closedByUserId: adminUserId,
+        timeline: updatedTimeline as unknown as Prisma.InputJsonValue,
+      },
+      include: {
+        application: {
+          include: {
+            job: { select: { title: true } },
+            candidate: { select: { fullName: true } },
+          },
+        },
+      },
+    });
+
+    // Notify both candidate and recruiter
+    const candidateUserId = dispute.application?.candidate?.userId;
+    const recruiterUserId = dispute.application?.job?.recruiter?.userId;
+
+    if (candidateUserId) {
+      try {
+        await this.notificationsService.createNotification({
+          recipientUserId: candidateUserId,
+          applicationId: dispute.applicationId,
+          title: `Hồ sơ khiếu nại đã chính thức đóng (${dispute.disputeNumber})`,
+          message: `Ban Quản Trị đã chính thức đóng và lưu trữ hồ sơ tranh chấp vị trí ${dispute.application.job.title}.`,
+          payload: { disputeId: dispute.id, disputeNumber: dispute.disputeNumber },
+        });
+      } catch (err) {
+        this.logger.warn(`Failed to notify candidate on close: ${err}`);
+      }
+    }
+
+    if (recruiterUserId) {
+      try {
+        await this.notificationsService.createNotification({
+          recipientUserId: recruiterUserId,
+          applicationId: dispute.applicationId,
+          title: `Hồ sơ khiếu nại đã chính thức đóng (${dispute.disputeNumber})`,
+          message: `Ban Quản Trị đã chính thức đóng và lưu trữ hồ sơ tranh chấp vị trí ${dispute.application.job.title}.`,
+          payload: { disputeId: dispute.id, disputeNumber: dispute.disputeNumber },
+        });
+      } catch (err) {
+        this.logger.warn(`Failed to notify recruiter on close: ${err}`);
+      }
+    }
+
+    return result;
   }
 }
 

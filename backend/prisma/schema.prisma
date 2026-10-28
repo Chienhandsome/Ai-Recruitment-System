@@ -223,6 +223,7 @@ enum DisputeStatus {
   INVESTIGATING
   RESOLVED
   DISMISSED
+  CLOSED
 }
 
 enum DisputeCategory {
@@ -658,6 +659,12 @@ model CandidateProfile {
   primaryResume       Resume?                @relation("PrimaryResume", fields: [primaryResumeId], references: [id], onDelete: SetNull)
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @updatedAt @map("updated_at")
+
+  // Candidate Reliability & Sanction enforcement
+  reliabilityScore    Int                    @default(100) @map("reliability_score")
+  strikeCount         Int                    @default(0) @map("strike_count")
+  suspendedUntil      DateTime?              @map("suspended_until")
+  isTalentPoolBanned  Boolean                @default(false) @map("is_talent_pool_banned")
 
   expectedMinSalary Decimal?      @map("expected_min_salary") @db.Decimal(12, 2)
   expectedMaxSalary Decimal?      @map("expected_max_salary") @db.Decimal(12, 2)
@@ -1285,9 +1292,19 @@ model Dispute {
   penaltyNotes       String?         @map("penalty_notes") @db.Text
   penaltyAmount      Decimal?        @map("penalty_amount") @db.Decimal(12, 2)
   compensationAmount Decimal?        @map("compensation_amount") @db.Decimal(12, 2)
+  candidatePenaltyAction        String?         @map("candidate_penalty_action")
+  candidatePenaltyNotes         String?         @map("candidate_penalty_notes") @db.Text
+  candidateReliabilityDeduction Int?            @map("candidate_reliability_deduction")
+  candidateSuspensionDays       Int?            @map("candidate_suspension_days")
   timeline           Json?           @default("[]") @map("timeline")
   resolvedByUserId   String?         @map("resolved_by_user_id") @db.Uuid
   resolvedAt         DateTime?       @map("resolved_at")
+  candidateAcknowledgedAt    DateTime?       @map("candidate_acknowledged_at")
+  candidateAcknowledgeNote  String?         @map("candidate_acknowledge_note") @db.Text
+  recruiterAcknowledgedAt    DateTime?       @map("recruiter_acknowledged_at")
+  recruiterAcknowledgeNote  String?         @map("recruiter_acknowledge_note") @db.Text
+  closedAt                  DateTime?       @map("closed_at")
+  closedByUserId            String?         @map("closed_by_user_id") @db.Uuid
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")
 

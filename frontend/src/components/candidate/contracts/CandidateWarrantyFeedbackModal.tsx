@@ -18,7 +18,7 @@ import {
   candidateRespondWarranty,
   type WarrantyClaimInfo,
 } from '@/lib/contract-api';
-import { uploadDisputeEvidence } from '@/lib/dispute-api';
+import { uploadDisputeEvidence, resolveEvidenceUrl } from '@/lib/dispute-api';
 
 interface CandidateWarrantyFeedbackModalProps {
   isOpen: boolean;
@@ -185,6 +185,62 @@ export function CandidateWarrantyFeedbackModal({
                   "{existingClaim.note}"
                 </div>
               )}
+              {existingClaim?.evidenceUrl && (
+                <div className="pt-2 border-t border-amber-200/70">
+                  <span className="text-3xs font-extrabold text-amber-900 uppercase tracking-wider block mb-1.5 flex items-center gap-1">
+                    <ShieldCheck className="size-3 text-emerald-600" />
+                    Minh chứng do Nhà tuyển dụng đính kèm (SHA-256):
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {existingClaim.evidenceUrl.split(',').map((url, i) => {
+                      const trimmed = url.trim();
+                      const resolvedUrl = resolveEvidenceUrl(trimmed);
+                      const isImg =
+                        trimmed.startsWith('data:image/') ||
+                        /\.(png|jpe?g|webp|gif)($|\?)/i.test(trimmed) ||
+                        trimmed.includes('.png') ||
+                        trimmed.includes('.jpg');
+
+                      if (isImg) {
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setZoomedImageUrl(resolvedUrl)}
+                            className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:border-[#2563EB] transition-all bg-white cursor-pointer"
+                            title="Bấm để xem ảnh phóng to"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={resolvedUrl}
+                              alt={`Minh chứng HR #${i + 1}`}
+                              className="h-16 w-20 object-cover group-hover:scale-105 transition-transform"
+                            />
+                            <span className="absolute bottom-0 inset-x-0 bg-slate-900/70 text-white text-3xs py-0.5 text-center font-bold">
+                              Ảnh #{i + 1}
+                            </span>
+                          </button>
+                        );
+                      }
+
+                      const fileName = trimmed.split('/').pop()?.split('_').pop() || `Tài liệu #${i + 1}`;
+                      return (
+                        <a
+                          key={i}
+                          href={resolvedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-2xs font-bold bg-white border border-slate-200 text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"
+                        >
+                          <FileText className="size-3.5 text-slate-500" />
+                          <span className="max-w-[150px] truncate">{fileName}</span>
+                          <ExternalLink className="size-2.5 text-slate-400" />
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -216,6 +272,7 @@ export function CandidateWarrantyFeedbackModal({
                       <div className="flex flex-wrap gap-2">
                         {evidenceUrls.map((url, i) => {
                           const trimmed = url.trim();
+                          const resolvedUrl = resolveEvidenceUrl(trimmed);
                           const isImg =
                             trimmed.startsWith('data:image/') ||
                             /\.(png|jpe?g|webp|gif)($|\?)/i.test(trimmed) ||
@@ -227,13 +284,13 @@ export function CandidateWarrantyFeedbackModal({
                               <button
                                 key={i}
                                 type="button"
-                                onClick={() => setZoomedImageUrl(trimmed)}
+                                onClick={() => setZoomedImageUrl(resolvedUrl)}
                                 className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:border-[#2563EB] transition-all bg-white cursor-pointer"
                                 title="Bấm để xem ảnh phóng to"
                               >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                  src={trimmed}
+                                  src={resolvedUrl}
                                   alt={`Bằng chứng đối chất #${i + 1}`}
                                   className="h-16 w-20 object-cover group-hover:scale-105 transition-transform"
                                 />
@@ -248,7 +305,7 @@ export function CandidateWarrantyFeedbackModal({
                           return (
                             <a
                               key={i}
-                              href={trimmed}
+                              href={resolvedUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-2xs font-bold bg-white border border-slate-200 text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"

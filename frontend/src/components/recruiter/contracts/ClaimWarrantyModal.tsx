@@ -25,7 +25,7 @@ import {
   type ContractWarrantyStatus,
   type WarrantyReason,
 } from '@/lib/contract-api';
-import { uploadDisputeEvidence } from '@/lib/dispute-api';
+import { uploadDisputeEvidence, resolveEvidenceUrl } from '@/lib/dispute-api';
 
 interface ClaimWarrantyModalProps {
   isOpen: boolean;
@@ -368,6 +368,7 @@ export function ClaimWarrantyModal({
                     <div className="flex flex-wrap gap-2">
                       {existingClaim.evidenceUrl.split(',').map((url, i) => {
                         const trimmed = url.trim();
+                        const resolvedUrl = resolveEvidenceUrl(trimmed);
                         const isImg =
                           trimmed.startsWith('data:image/') ||
                           /\.(png|jpe?g|webp|gif)($|\?)/i.test(trimmed) ||
@@ -379,13 +380,13 @@ export function ClaimWarrantyModal({
                             <button
                               key={i}
                               type="button"
-                              onClick={() => setZoomedImageUrl(trimmed)}
+                              onClick={() => setZoomedImageUrl(resolvedUrl)}
                               className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:border-[#2563EB] transition-all bg-white cursor-pointer"
                               title="Bấm để xem ảnh phóng to"
                             >
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
-                                src={trimmed}
+                                src={resolvedUrl}
                                 alt={`Minh chứng #${i + 1}`}
                                 className="h-16 w-20 object-cover group-hover:scale-105 transition-transform"
                               />
@@ -400,7 +401,7 @@ export function ClaimWarrantyModal({
                         return (
                           <a
                             key={i}
-                            href={trimmed}
+                            href={resolvedUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-2xs font-bold bg-white border border-slate-200 text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"

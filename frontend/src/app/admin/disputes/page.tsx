@@ -26,11 +26,14 @@ import {
   Copy,
   Scale,
   X,
+  UserX,
+  Printer,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { ContractDocumentView } from '@/components/common/contracts/ContractDocumentView';
 import { DisputeDetailModal } from '@/components/common/disputes/DisputeDetailModal';
+import { DisputeResolutionMinutesModal } from '@/components/common/disputes/DisputeResolutionMinutesModal';
 import {
   type DisputeData,
   type DisputeStatus,
@@ -39,6 +42,7 @@ import {
   disputeStatusLabels,
   getAdminDisputes,
   resolveAdminDispute,
+  closeDispute,
 } from '@/lib/dispute-api';
 import {
   getAdminWarrantyClaims,
@@ -62,9 +66,23 @@ export default function AdminDisputesPage() {
   const [penaltyNotes, setPenaltyNotes] = useState<string>('');
   const [penaltyAmount, setPenaltyAmount] = useState<string>('');
   const [compensationAmount, setCompensationAmount] = useState<string>('');
+  const [candidateEnforcementAction, setCandidateEnforcementAction] = useState<
+    'NONE' | 'WARN' | 'DEDUCT_RELIABILITY' | 'SUSPEND_APPLY' | 'LOCK_CANDIDATE'
+  >('NONE');
+  const [candidatePenaltyNotes, setCandidatePenaltyNotes] = useState<string>('');
+  const [candidateReliabilityDeduction, setCandidateReliabilityDeduction] = useState<string>('15');
+  const [candidateSuspensionDays, setCandidateSuspensionDays] = useState<string>('14');
   const [showContractHistory, setShowContractHistory] = useState<boolean>(true);
   const [viewingContractDoc, setViewingContractDoc] = useState<boolean>(false);
   const [showDisputeDetailModal, setShowDisputeDetailModal] = useState<boolean>(false);
+
+  // End-to-End Resolution and Closure confirmation states
+  const [showConfirmVerdictDialog, setShowConfirmVerdictDialog] = useState<boolean>(false);
+  const [confirmCheckbox, setConfirmCheckbox] = useState<boolean>(false);
+  const [showAdminCloseDialog, setShowAdminCloseDialog] = useState<boolean>(false);
+  const [adminCloseReason, setAdminCloseReason] = useState<string>('');
+  const [adminClosing, setAdminClosing] = useState<boolean>(false);
+  const [showMinutesModal, setShowMinutesModal] = useState<boolean>(false);
 
   // Warranty claims state
   const [activeMainTab, setActiveMainTab] = useState<'DISPUTES' | 'WARRANTY'>('DISPUTES');
@@ -127,14 +145,19 @@ export default function AdminDisputesPage() {
     loadDisputes(token, status === 'ALL' ? undefined : (status as DisputeStatus));
   };
 
-  const handleResolve = async (e: React.FormEvent) => {
+  const handleResolve = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDisputeId) return;
     if (!adminResolution.trim()) {
       toast.error('Vui lòng nhập nội dung phán quyết giải quyết.');
       return;
     }
+    setConfirmCheckbox(false);
+    setShowConfirmVerdictDialog(true);
+  };
 
+  const executeResolve = async () => {
+    if (!selectedDisputeId) return;
     setResolving(true);
     try {
       await resolveAdminDispute(token, selectedDisputeId, {
@@ -144,18 +167,43 @@ export default function AdminDisputesPage() {
         penaltyNotes: penaltyNotes.trim() || undefined,
         penaltyAmount: penaltyAmount ? Number(penaltyAmount) : undefined,
         compensationAmount: compensationAmount ? Number(compensationAmount) : undefined,
+        candidateEnforcementAction,
+        candidatePenaltyNotes: candidatePenaltyNotes.trim() || undefined,
+        candidateReliabilityDeduction: candidateReliabilityDeduction ? Number(candidateReliabilityDeduction) : undefined,
+        candidateSuspensionDays: candidateSuspensionDays ? Number(candidateSuspensionDays) : undefined,
       });
 
-      toast.success('Đã cập nhật phán quyết giải quyết khiếu nại thành công!');
+      toast.success('Đã chính thức ban hành phán quyết và áp đặt chế tài thành công!');
+      setShowConfirmVerdictDialog(false);
       setAdminResolution('');
       setPenaltyNotes('');
       setPenaltyAmount('');
       setCompensationAmount('');
+      setCandidateEnforcementAction('NONE');
+      setCandidatePenaltyNotes('');
+      setCandidateReliabilityDeduction('15');
+      setCandidateSuspensionDays('14');
       await loadDisputes(token, statusFilter === 'ALL' ? undefined : (statusFilter as DisputeStatus));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Lỗi khi xử lý khiếu nại');
     } finally {
       setResolving(false);
+    }
+  };
+
+  const handleAdminCloseCase = async () => {
+    if (!selectedDisputeId) return;
+    setAdminClosing(true);
+    try {
+      await closeDispute(token, selectedDisputeId, adminCloseReason.trim() || undefined);
+      toast.success('Ban Quản Trị đã chính thức đóng và lưu trữ hồ sơ vụ việc thành công!');
+      setShowAdminCloseDialog(false);
+      setAdminCloseReason('');
+      await loadDisputes(token, statusFilter === 'ALL' ? undefined : (statusFilter as DisputeStatus));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Lỗi khi đóng hồ sơ');
+    } finally {
+      setAdminClosing(false);
     }
   };
 
@@ -231,8 +279,8 @@ export default function AdminDisputesPage() {
           )}
 
           {/* Filter */}
-          <div className="flex items-center gap-2">
-            {['ALL', 'PENDING', 'INVESTIGATING', 'RESOLVED', 'DISMISSED'].map((st) => (
+          <div className="flex items-center gap-2 flex-wrap">
+            {['ALL', 'PENDING', 'INVESTIGATING', 'RESOLVED', 'DISMISSED', 'CLOSED'].map((st) => (
               <button
                 key={st}
                 type="button"
@@ -251,7 +299,9 @@ export default function AdminDisputesPage() {
                   ? 'Đang xác minh'
                   : st === 'RESOLVED'
                   ? 'Đã xử lý'
-                  : 'Bác đơn'}
+                  : st === 'DISMISSED'
+                  ? 'Bác đơn'
+                  : 'Đã đóng (CLOSED)'}
               </button>
             ))}
           </div>
@@ -543,12 +593,25 @@ export default function AdminDisputesPage() {
                 )}
 
                 {/* Parties info */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-2xs text-slate-600 pt-2 border-t border-slate-200">
-                  <div>
-                    <strong>Ứng viên (Bên B):</strong> {activeDispute.application?.candidate?.fullName} ({activeDispute.application?.candidate?.email})
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-2xs text-slate-600 pt-2 border-t border-slate-200">
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-800">Ứng viên (Bên B): {activeDispute.application?.candidate?.fullName}</span>
+                      <span className="inline-flex items-center gap-1 font-bold text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded text-3xs border border-blue-200">
+                        Tin cậy: {activeDispute.application?.candidate?.reliabilityScore ?? 100}/100
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-3xs text-slate-500 mt-1.5">
+                      <span>{activeDispute.application?.candidate?.email}</span>
+                      <span className="text-amber-700 font-semibold">Vi phạm: {activeDispute.application?.candidate?.strikeCount ?? 0} lần</span>
+                    </div>
                   </div>
-                  <div>
-                    <strong>Nhà tuyển dụng (Bên A):</strong> {activeDispute.application?.job?.recruiter?.company?.name || 'Doanh nghiệp'} ({activeDispute.application?.job?.recruiter?.user?.email})
+
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
+                    <div className="font-bold text-slate-800">Nhà tuyển dụng (Bên A): {activeDispute.application?.job?.recruiter?.company?.name || 'Doanh nghiệp'}</div>
+                    <div className="text-3xs text-slate-500 mt-1.5">
+                      {activeDispute.application?.job?.recruiter?.user?.email}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -584,6 +647,80 @@ export default function AdminDisputesPage() {
                     <ArrowRight className="size-3.5" />
                   </button>
                 </div>
+
+                {/* 3-Party Verdict & Acknowledgment Status Bar */}
+                {(activeDispute.status === 'RESOLVED' || activeDispute.status === 'DISMISSED' || activeDispute.status === 'CLOSED') && (
+                  <div className="rounded-xl border border-blue-200 bg-[#EFF6FF] p-3.5 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-blue-200/60 pb-2">
+                      <span className="text-2xs font-extrabold uppercase text-[#2563EB] tracking-wider flex items-center gap-1.5">
+                        <Scale className="size-3.5" />
+                        Tiến trình xác nhận & Cam kết của 3 bên:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowMinutesModal(true)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-blue-300 text-[#2563EB] hover:bg-blue-50 text-3xs font-extrabold shadow-2xs transition cursor-pointer"
+                      >
+                        <Printer className="size-3" /> In Biên Bản Trọng Tài Số
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-2xs">
+                      {/* Candidate Ack */}
+                      <div className={`p-2.5 rounded-lg border ${activeDispute.candidateAcknowledgedAt ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900' : 'bg-white border-slate-200 text-slate-700'}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-3xs uppercase tracking-wider text-slate-500">Ứng viên:</span>
+                          {activeDispute.candidateAcknowledgedAt ? (
+                            <span className="inline-flex items-center gap-1 font-bold text-emerald-700 text-3xs">
+                              <CheckCircle2 className="size-3 text-emerald-600" /> Đã đồng thuận
+                            </span>
+                          ) : (
+                            <span className="text-3xs font-semibold text-amber-600">⏳ Chờ xác nhận</span>
+                          )}
+                        </div>
+                        {activeDispute.candidateAcknowledgedAt ? (
+                          <p className="text-3xs text-slate-500 mt-0.5 font-mono">
+                            {new Date(activeDispute.candidateAcknowledgedAt).toLocaleString('vi-VN')}
+                          </p>
+                        ) : null}
+                      </div>
+
+                      {/* Recruiter Ack */}
+                      <div className={`p-2.5 rounded-lg border ${activeDispute.recruiterAcknowledgedAt ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900' : 'bg-white border-slate-200 text-slate-700'}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-3xs uppercase tracking-wider text-slate-500">Doanh nghiệp:</span>
+                          {activeDispute.recruiterAcknowledgedAt ? (
+                            <span className="inline-flex items-center gap-1 font-bold text-emerald-700 text-3xs">
+                              <CheckCircle2 className="size-3 text-emerald-600" /> Đã chấp hành
+                            </span>
+                          ) : (
+                            <span className="text-3xs font-semibold text-amber-600">⏳ Chờ xác nhận</span>
+                          )}
+                        </div>
+                        {activeDispute.recruiterAcknowledgedAt ? (
+                          <p className="text-3xs text-slate-500 mt-0.5 font-mono">
+                            {new Date(activeDispute.recruiterAcknowledgedAt).toLocaleString('vi-VN')}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    {activeDispute.status !== 'CLOSED' && (
+                      <div className="flex items-center justify-between pt-1 border-t border-blue-200/60">
+                        <span className="text-3xs text-slate-500">
+                          Admin có thể chủ động đóng hồ sơ nếu quá hạn 72 giờ không có kháng nghị:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowAdminCloseDialog(true)}
+                          className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-black text-white text-3xs font-extrabold transition cursor-pointer shadow-xs"
+                        >
+                          🔒 Đóng Hồ Sơ Vụ Việc
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Appeal Alert if any */}
                 {activeDispute.timeline?.some((t) => t.isAppeal || t.type === 'APPEAL') && (
@@ -632,54 +769,166 @@ export default function AdminDisputesPage() {
 
               {/* Resolution Form */}
               <form onSubmit={handleResolve} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                  <ShieldAlert className="size-4 text-blue-600" />
-                  Ban hành Phán Quyết & Chế Tài
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Kết quả giải quyết
-                    </label>
-                    <select
-                      value={resolutionStatus}
-                      onChange={(e) => setResolutionStatus(e.target.value as DisputeStatus)}
-                      className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500"
-                    >
-                      <option value="RESOLVED">Xác nhận có vi phạm (RESOLVED)</option>
-                      <option value="INVESTIGATING">Yêu cầu thêm bằng chứng (INVESTIGATING)</option>
-                      <option value="DISMISSED">Bác đơn - Không đủ căn cứ (DISMISSED)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Biện pháp chế tài Doanh nghiệp
-                    </label>
-                    <select
-                      value={enforcementAction}
-                      onChange={(e) => setEnforcementAction(e.target.value as any)}
-                      className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-semibold text-rose-700 outline-none focus:border-blue-500"
-                    >
-                      <option value="NONE">Không áp dụng chế tài tài khoản</option>
-                      <option value="WARN">Gửi thông báo cảnh cáo Doanh nghiệp</option>
-                      <option value="LOCK_RECRUITER">🚨 Khóa tài khoản Doanh nghiệp & Tạm dừng tin tuyển dụng</option>
-                    </select>
-                  </div>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                    <ShieldAlert className="size-4 text-blue-600" />
+                    Ban hành Phán Quyết & Chế Tài Hai Chiều
+                  </h3>
+                  <span className="text-3xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                    Cơ chế bảo vệ môi trường tuyển dụng minh bạch
+                  </span>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Ghi chú thi hành / Yêu cầu khắc phục (nếu có)
+                    Kết quả giải quyết hồ sơ khiếu nại *
                   </label>
-                  <input
-                    type="text"
-                    value={penaltyNotes}
-                    onChange={(e) => setPenaltyNotes(e.target.value)}
-                    placeholder="Ví dụ: Yêu cầu Nhà tuyển dụng đối chiếu lại thỏa thuận hoặc hoàn trả tài liệu trước ngày..."
-                    className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-800 outline-none focus:border-blue-500"
-                  />
+                  <select
+                    value={resolutionStatus}
+                    onChange={(e) => setResolutionStatus(e.target.value as DisputeStatus)}
+                    className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500"
+                  >
+                    <option value="RESOLVED">Xác nhận có vi phạm / Ban hành phán quyết (RESOLVED)</option>
+                    <option value="INVESTIGATING">Yêu cầu thêm bằng chứng / Tiếp tục thẩm tra (INVESTIGATING)</option>
+                    <option value="DISMISSED">Bác đơn - Không đủ căn cứ xử lý (DISMISSED)</option>
+                  </select>
+                </div>
+
+                {/* Two-Sided Sanction Panels */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                  {/* Recruiter Sanction Card */}
+                  <div className="rounded-xl border border-rose-200 bg-rose-50/30 p-3.5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-rose-900 flex items-center gap-1.5">
+                        <Building2 className="size-3.5 text-rose-600" />
+                        Chế tài Doanh nghiệp (Bên A)
+                      </span>
+                      <span className="text-3xs font-semibold text-rose-600 bg-rose-100/60 px-2 py-0.5 rounded">
+                        Employer Sanction
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="block text-2xs font-bold text-slate-700 mb-1">
+                        Biện pháp chế tài áp dụng
+                      </label>
+                      <select
+                        value={enforcementAction}
+                        onChange={(e) => setEnforcementAction(e.target.value as any)}
+                        className="w-full rounded-lg border border-rose-200 bg-white p-2 text-xs font-semibold text-rose-700 outline-none focus:border-rose-400"
+                      >
+                        <option value="NONE">Không áp dụng chế tài tài khoản</option>
+                        <option value="WARN">Gửi thông báo cảnh cáo Doanh nghiệp</option>
+                        <option value="LOCK_RECRUITER">🚨 Khóa tài khoản Doanh nghiệp & Tạm dừng tin</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-2xs font-bold text-slate-700 mb-1">
+                        Ghi chú khắc phục / Yêu cầu DN (nếu có)
+                      </label>
+                      <input
+                        type="text"
+                        value={penaltyNotes}
+                        onChange={(e) => setPenaltyNotes(e.target.value)}
+                        placeholder="Yêu cầu đối soát lại thỏa thuận hoặc bồi thường..."
+                        className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-800 outline-none focus:border-rose-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Candidate Sanction Card */}
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/30 p-3.5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                        <UserX className="size-3.5 text-amber-600" />
+                        Chế tài Ứng viên (Bên B)
+                      </span>
+                      <span className="text-3xs font-semibold text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded">
+                        Candidate Sanction
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="block text-2xs font-bold text-slate-700 mb-1">
+                        Biện pháp chế tài áp dụng
+                      </label>
+                      <select
+                        value={candidateEnforcementAction}
+                        onChange={(e) => setCandidateEnforcementAction(e.target.value as any)}
+                        className="w-full rounded-lg border border-amber-200 bg-white p-2 text-xs font-semibold text-amber-800 outline-none focus:border-amber-400"
+                      >
+                        <option value="NONE">Không áp dụng chế tài ứng viên</option>
+                        <option value="WARN">Gửi thông báo cảnh cáo & Ghi nhận Strike (+1)</option>
+                        <option value="DEDUCT_RELIABILITY">Trừ điểm Tin cậy (Reliability Score)</option>
+                        <option value="SUSPEND_APPLY">Đóng băng quyền ứng tuyển & Ẩn Talent Pool</option>
+                        <option value="LOCK_CANDIDATE">🚨 Khóa vĩnh viễn tài khoản Ứng viên (LOCKED)</option>
+                      </select>
+                    </div>
+
+                    {candidateEnforcementAction === 'DEDUCT_RELIABILITY' && (
+                      <div>
+                        <label className="block text-2xs font-bold text-slate-700 mb-1">
+                          Số điểm tin cậy trừ (Hiện tại: {activeDispute?.application?.candidate?.reliabilityScore ?? 100}đ)
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={candidateReliabilityDeduction}
+                          onChange={(e) => setCandidateReliabilityDeduction(e.target.value)}
+                          placeholder="Ví dụ: 15"
+                          className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-800 outline-none focus:border-amber-400"
+                        />
+                      </div>
+                    )}
+
+                    {candidateEnforcementAction === 'SUSPEND_APPLY' && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-2xs font-bold text-slate-700 mb-1">
+                            Số ngày tạm dừng
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={90}
+                            value={candidateSuspensionDays}
+                            onChange={(e) => setCandidateSuspensionDays(e.target.value)}
+                            placeholder="14"
+                            className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-800 outline-none focus:border-amber-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-2xs font-bold text-slate-700 mb-1">
+                            Điểm trừ kèm theo
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={candidateReliabilityDeduction}
+                            onChange={(e) => setCandidateReliabilityDeduction(e.target.value)}
+                            placeholder="25"
+                            className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-800 outline-none focus:border-amber-400"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-2xs font-bold text-slate-700 mb-1">
+                        Lý do chế tài ứng viên (nếu có)
+                      </label>
+                      <input
+                        type="text"
+                        value={candidatePenaltyNotes}
+                        onChange={(e) => setCandidatePenaltyNotes(e.target.value)}
+                        placeholder="Ví dụ: No-show phỏng vấn / Khai man bằng cấp..."
+                        className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-800 outline-none focus:border-amber-400"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -851,7 +1100,7 @@ export default function AdminDisputesPage() {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40">
-              <ContractDocumentView contract={activeDispute.application.contract} showPrintButton={true} />
+              <ContractDocumentView contract={activeDispute.application.contract as any} showPrintButton={true} />
             </div>
             <div className="border-t border-slate-200 bg-slate-50 px-6 py-3 flex justify-end">
               <button
@@ -891,6 +1140,201 @@ export default function AdminDisputesPage() {
             setSelectedWarrantyClaimId(null);
             await loadWarrantyClaims(token, warrantyStatusFilter);
           }}
+        />
+      )}
+
+      {/* Admin Verdict Confirmation Dialog */}
+      {showConfirmVerdictDialog && (
+        <div
+          className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-2xs p-4 animate-in fade-in duration-150"
+          onClick={() => setShowConfirmVerdictDialog(false)}
+        >
+          <div
+            className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                  <Scale className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Xác Nhận Ban Hành Phán Quyết & Chế Tài</h3>
+                  <p className="text-2xs text-slate-500">Mã khiếu nại: {activeDispute?.disputeNumber}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowConfirmVerdictDialog(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-700 space-y-3">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-2xs space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Kết quả vụ việc:</span>
+                  <strong className="text-slate-900 uppercase">{resolutionStatus}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Chế tài Doanh nghiệp:</span>
+                  <strong className="text-rose-700">{enforcementAction}</strong>
+                </div>
+                {penaltyAmount ? (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Số tiền phạt DN:</span>
+                    <strong className="font-mono text-rose-700">{Number(penaltyAmount).toLocaleString('vi-VN')} VND</strong>
+                  </div>
+                ) : null}
+                {compensationAmount ? (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Bồi thường cho Ứng viên:</span>
+                    <strong className="font-mono text-emerald-700">{Number(compensationAmount).toLocaleString('vi-VN')} VND</strong>
+                  </div>
+                ) : null}
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Chế tài Ứng viên:</span>
+                  <strong className="text-amber-800">{candidateEnforcementAction}</strong>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200 text-2xs">
+                <span className="font-bold text-[#2563EB] block mb-1">Toàn văn kết luận giải quyết:</span>
+                <p className="text-slate-800 italic bg-white p-2 rounded border border-blue-100 whitespace-pre-wrap">
+                  "{adminResolution}"
+                </p>
+              </div>
+
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 border border-amber-200 text-2xs text-amber-950">
+                <input
+                  type="checkbox"
+                  id="confirmCheck"
+                  checked={confirmCheckbox}
+                  onChange={(e) => setConfirmCheckbox(e.target.checked)}
+                  className="mt-0.5 rounded text-[#2563EB] focus:ring-[#2563EB]"
+                />
+                <label htmlFor="confirmCheck" className="font-semibold cursor-pointer">
+                  Tôi đã thẩm tra đầy đủ chứng cứ đối soát và xác nhận ban hành phán quyết chính thức này tới cả hai bên.
+                </label>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowConfirmVerdictDialog(false)}
+                disabled={resolving}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Quay lại chỉnh sửa
+              </button>
+              <button
+                type="button"
+                onClick={executeResolve}
+                disabled={resolving || !confirmCheckbox}
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#2563EB] hover:bg-blue-700 shadow-xs transition cursor-pointer disabled:opacity-50"
+              >
+                {resolving ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" /> Đang ban hành...
+                  </>
+                ) : (
+                  <>
+                    <Check className="size-3.5" /> Phê Chuẩn & Ban Hành
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Close Case Dialog */}
+      {showAdminCloseDialog && (
+        <div
+          className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-2xs p-4 animate-in fade-in duration-150"
+          onClick={() => setShowAdminCloseDialog(false)}
+        >
+          <div
+            className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-slate-900 text-white">
+                  <Lock className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Chính Thức Đóng & Lưu Trữ Hồ Sơ Vụ Việc</h3>
+                  <p className="text-2xs text-slate-500">Mã khiếu nại: {activeDispute?.disputeNumber}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAdminCloseDialog(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-700 space-y-3">
+              <p>
+                Sau khi đóng hồ sơ, vụ việc sẽ chuyển sang trạng thái <strong>ĐÃ ĐÓNG (CLOSED)</strong> vĩnh viễn. Không bên nào có thể gửi thêm tin nhắn hay kháng nghị.
+              </p>
+
+              <div>
+                <label className="block text-2xs font-bold text-slate-700 mb-1">
+                  Lý do hoặc ghi chú đóng vụ việc (tùy chọn):
+                </label>
+                <textarea
+                  rows={3}
+                  value={adminCloseReason}
+                  onChange={(e) => setAdminCloseReason(e.target.value)}
+                  placeholder="Nhập lý do đóng hồ sơ (ví dụ: Các bên đã thi hành xong hoặc đã hết 72 giờ không có kháng nghị)..."
+                  className="w-full rounded-xl border border-slate-300 p-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-slate-900 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowAdminCloseDialog(false)}
+                disabled={adminClosing}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleAdminCloseCase}
+                disabled={adminClosing}
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-black shadow-xs transition cursor-pointer disabled:opacity-50"
+              >
+                {adminClosing ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" /> Đang đóng...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="size-3.5" /> Xác Nhận Đóng Vụ Việc
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Minutes Modal */}
+      {showMinutesModal && activeDispute && (
+        <DisputeResolutionMinutesModal
+          isOpen={showMinutesModal}
+          onClose={() => setShowMinutesModal(false)}
+          dispute={activeDispute}
         />
       )}
     </div>

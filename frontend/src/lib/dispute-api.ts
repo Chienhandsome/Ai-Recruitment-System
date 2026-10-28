@@ -1,4 +1,4 @@
-export type DisputeStatus = 'PENDING' | 'INVESTIGATING' | 'RESOLVED' | 'DISMISSED';
+export type DisputeStatus = 'PENDING' | 'INVESTIGATING' | 'RESOLVED' | 'DISMISSED' | 'CLOSED';
 
 export type DisputeCategory =
   | 'SALARY_MISMATCH'
@@ -22,6 +22,7 @@ export const disputeStatusLabels: Record<DisputeStatus, string> = {
   INVESTIGATING: 'Đang xác minh',
   RESOLVED: 'Đã xử lý & Có phán quyết',
   DISMISSED: 'Bác bỏ / Không đủ căn cứ',
+  CLOSED: 'Đã đóng & Lưu trữ hồ sơ',
 };
 
 export interface DisputeTimelineEntry {
@@ -29,7 +30,16 @@ export interface DisputeTimelineEntry {
   senderId: string;
   senderName: string;
   senderRole: 'CANDIDATE' | 'RECRUITER' | 'ADMIN';
-  type: 'INITIAL_CLAIM' | 'MESSAGE' | 'EXPLANATION' | 'ADMIN_NOTE' | 'ADMIN_RESOLUTION' | 'APPEAL';
+  type:
+    | 'INITIAL_CLAIM'
+    | 'MESSAGE'
+    | 'EXPLANATION'
+    | 'ADMIN_NOTE'
+    | 'ADMIN_RESOLUTION'
+    | 'APPEAL'
+    | 'ACKNOWLEDGEMENT'
+    | 'SYSTEM_CLOSURE'
+    | 'ADMIN_CLOSURE';
   message: string;
   evidenceUrls?: string[];
   createdAt: string;
@@ -61,7 +71,17 @@ export interface DisputeData {
   penaltyNotes?: string | null;
   penaltyAmount?: number | null;
   compensationAmount?: number | null;
+  candidatePenaltyAction?: string | null;
+  candidatePenaltyNotes?: string | null;
+  candidateReliabilityDeduction?: number | null;
+  candidateSuspensionDays?: number | null;
   timeline?: DisputeTimelineEntry[] | null;
+  candidateAcknowledgedAt?: string | null;
+  candidateAcknowledgeNote?: string | null;
+  recruiterAcknowledgedAt?: string | null;
+  recruiterAcknowledgeNote?: string | null;
+  closedAt?: string | null;
+  closedByUserId?: string | null;
   createdAt: string;
   updatedAt: string;
   reportedByUser?: {
@@ -91,6 +111,9 @@ export interface DisputeData {
       fullName: string;
       email: string;
       phone?: string;
+      reliabilityScore?: number;
+      strikeCount?: number;
+      suspendedUntil?: string | null;
     };
     offer?: any;
     contract?: any;
@@ -113,6 +136,10 @@ export interface ResolveDisputeInput {
   penaltyNotes?: string;
   penaltyAmount?: number;
   compensationAmount?: number;
+  candidateEnforcementAction?: 'NONE' | 'WARN' | 'DEDUCT_RELIABILITY' | 'SUSPEND_APPLY' | 'LOCK_CANDIDATE';
+  candidatePenaltyNotes?: string;
+  candidateReliabilityDeduction?: number;
+  candidateSuspensionDays?: number;
 }
 
 export interface RespondDisputeInput {
@@ -217,6 +244,38 @@ export async function resolveAdminDispute(
   return handleResponse<DisputeData>(res);
 }
 
+export async function acknowledgeDispute(
+  token: string,
+  disputeId: string,
+  note?: string,
+): Promise<DisputeData> {
+  const res = await fetch(`${API_BASE}/disputes/${disputeId}/acknowledge`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ note }),
+  });
+  return handleResponse<DisputeData>(res);
+}
+
+export async function closeDispute(
+  token: string,
+  disputeId: string,
+  closeReason?: string,
+): Promise<DisputeData> {
+  const res = await fetch(`${API_BASE}/disputes/admin/${disputeId}/close`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ closeReason }),
+  });
+  return handleResponse<DisputeData>(res);
+}
+
 export interface UploadedEvidenceFile {
   fileName: string;
   savedFileName: string;
@@ -243,5 +302,34 @@ export async function uploadDisputeEvidence(
   });
   return handleResponse<UploadedEvidenceFile[]>(res);
 }
+
+/**
+ * Resolves an evidence URL (relative, API path, or filename) to a full, loadable URL
+ * across Admin, Recruiter, and Candidate frontends.
+ */
+export function resolveEvidenceUrl(url?: string | null): string {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('blob:') ||
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://')
+  ) {
+    return trimmed;
+  }
+  const backendBase = (
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+  ).replace(/\/api\/?$/, '');
+
+  if (trimmed.startsWith('/api')) {
+    return `${backendBase}${trimmed}`;
+  }
+  if (trimmed.startsWith('/')) {
+    return `${backendBase}/api${trimmed}`;
+  }
+  return `${backendBase}/api/disputes/evidence-file/${trimmed}`;
+}
+
 
 

@@ -30,12 +30,20 @@ Bằng việc đăng ký tài khoản hoặc sử dụng dịch vụ, bạn xác
 
 ---
 
-## 3. CHẾ TÀI XỬ LÝ VI PHẠM
-Quản trị viên (Admin) có toàn quyền áp dụng các biện pháp chế tài sau đối với các tài khoản vi phạm quy chế:
-1. **Cảnh cáo và hạ điểm uy tín:** Đối với các hành vi chậm trễ phản hồi hoặc hủy offer không lý do chính đáng.
-2. **Tạm dừng tin tuyển dụng (PAUSED):** Đóng băng tin tuyển dụng đang có tranh chấp để xác minh.
-3. **Khóa tài khoản vĩnh viễn (LOCKED):** Áp dụng ngay lập tức đối với các hành vi lừa đảo, thu phí người tìm việc trái phép, hoặc giả mạo pháp nhân doanh nghiệp.
-4. **Bàn giao cơ quan điều tra:** Trong các trường hợp có dấu hiệu cấu thành tội phạm lừa đảo chiếm đoạt tài sản theo pháp luật Việt Nam.`,
+## 3. CHẾ TÀI XỬ LÝ VI PHẠM HAI CHIỀU (TWO-SIDED ENFORCEMENT)
+Quản trị viên (Admin) có toàn quyền áp dụng các biện pháp chế tài sau đối với các tài khoản vi phạm quy chế nền tảng:
+
+### 3.1. Chế tài đối với Doanh nghiệp (Nhà tuyển dụng):
+1. **Cảnh cáo và hạ điểm uy tín (Trust Score):** Đối với các hành vi chậm trễ phản hồi kết quả phỏng vấn hoặc hủy lịch hẹn không lý do chính đáng.
+2. **Tạm dừng tin tuyển dụng (PAUSED):** Đóng băng tin tuyển dụng đang có tranh chấp hoặc vi phạm cam kết mức lương/chức danh để xác minh đối soát.
+3. **Thu hồi quyền lợi & Buộc bồi thường:** Trừ số lượt đăng tin/mở hồ sơ trong gói dịch vụ hoặc bồi thường thiệt hại cho ứng viên khi đơn phương hủy offer đã ký kết.
+4. **Khóa tài khoản vĩnh viễn (LOCKED):** Áp dụng ngay lập tức đối với các hành vi lừa đảo, thu phí người tìm việc trái pháp luật (Điều 165 BLLĐ 2019), giữ giấy tờ tùy thân hoặc giả mạo pháp nhân.
+
+### 3.2. Chế tài đối với Ứng viên (Người tìm việc):
+1. **Cảnh cáo & Trừ điểm Tin cậy (Reliability Score):** Trừ 10 - 20 điểm đối với hành vi bỏ buổi phỏng vấn (No-show) không xin dời lịch hoặc spam nộp đơn bừa bãi.
+2. **Đóng băng quyền ứng tuyển (Application Cooldown 14 - 30 ngày):** Áp dụng khi ứng viên đã xác nhận Thư mời nhận việc hoặc ký hợp đồng lao động nhưng bùng việc không đến nhận việc (No-show Onboarding) hoặc nghỉ ngang không báo trước (Early Resignation), dẫn đến yêu cầu bồi hoàn bảo hành của Doanh nghiệp.
+3. **Tạm ẩn hồ sơ khỏi Talent Pool:** Ứng viên đang trong thời gian chấp hành chế tài sẽ không xuất hiện trong cơ sở dữ liệu nhân tài để bảo vệ quyền lợi của các nhà tuyển dụng khác.
+4. **Khóa tài khoản vĩnh viễn (LOCKED):** Áp dụng đối với hành vi gian lận hồ sơ (làm giả bằng cấp/chứng chỉ), sử dụng deepfake hoặc người thi hộ trong phỏng vấn AI, hoặc vu khống tống tiền doanh nghiệp.`,
   },
   {
     code: 'PRIVACY_POLICY',
@@ -120,8 +128,9 @@ Nền tảng đóng vai trò làm trung gian đối soát khách quan, căn cứ
 2. **Bước 2 - Đóng băng & Xác minh (Investigation):** Quản trị viên (Admin) tiếp nhận hồ sơ trong 24 giờ. Hệ thống tự động trích xuất bảng đối chiếu dữ liệu (Offer vs Contract).
 3. **Bước 3 - Yêu cầu giải trình (Clarification):** Admin gửi thông báo yêu cầu bên bị tố cáo phản hồi giải trình trong vòng 48 giờ.
 4. **Bước 4 - Phán quyết & Chế tài (Resolution):**
-   - Nếu vi phạm rõ ràng: Admin khóa tài khoản bên vi phạm, hỗ trợ người bị hại xuất Biên bản chứng nhận điện tử để nộp cho cơ quan chức năng.
-   - Nếu không đủ căn cứ: Admin giải thích rõ ràng và đóng hồ sơ khiếu nại.`,
+   - **Đối với Doanh nghiệp vi phạm:** Admin áp dụng cảnh cáo, tạm dừng tin tuyển dụng, trừ hạn mức gói dịch vụ hoặc khóa vĩnh viễn tài khoản.
+   - **Đối với Ứng viên vi phạm:** Admin áp dụng cảnh cáo, trừ điểm Tin cậy, tạm đình chỉ quyền ứng tuyển (14 - 30 ngày), hoặc khóa vĩnh viễn tài khoản nếu làm giả hồ sơ / gian lận phỏng vấn AI.
+   - **Nếu không đủ căn cứ:** Admin giải thích rõ ràng căn cứ đối soát và đóng hồ sơ khiếu nại (DISMISSED).`,
   },
 ];
 

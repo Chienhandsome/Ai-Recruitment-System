@@ -58,6 +58,10 @@ export function DigitalSignatureModal({
   const [countdown, setCountdown] = useState(0);
   const [demoOtp, setDemoOtp] = useState<string | null>(null);
 
+  // Custom email override state
+  const [customEmail, setCustomEmail] = useState('');
+  const [showEmailInput, setShowEmailInput] = useState(false);
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdown > 0) {
@@ -75,6 +79,8 @@ export function DigitalSignatureModal({
       setAcceptedContractTerms(false);
       setAcceptedPlatformTerms(false);
       setViewingPolicyCode(null);
+      setCustomEmail('');
+      setShowEmailInput(false);
       setTimeout(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -91,10 +97,6 @@ export function DigitalSignatureModal({
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  // Custom email override state
-  const [customEmail, setCustomEmail] = useState('');
-  const [showEmailInput, setShowEmailInput] = useState(false);
 
   const handleRequestOtp = async () => {
     if (countdown > 0) return;

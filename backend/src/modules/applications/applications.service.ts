@@ -160,6 +160,13 @@ export class ApplicationsService {
       throw new NotFoundException('Candidate profile not found.');
     }
 
+    if (candidateProfile.suspendedUntil && candidateProfile.suspendedUntil > now) {
+      const formattedDate = new Date(candidateProfile.suspendedUntil).toLocaleDateString('vi-VN');
+      throw new ForbiddenException(
+        `Tài khoản ứng viên đang trong thời gian chấp hành chế tài tạm dừng ứng tuyển (đến ngày ${formattedDate}) do vi phạm cam kết hợp đồng hoặc phán quyết tranh chấp.`,
+      );
+    }
+
     // Reopening a submitted application must not depend on a new CV, the
     // current job state, or the quota for creating another application.
     const invitedApplication = talentInvitationId

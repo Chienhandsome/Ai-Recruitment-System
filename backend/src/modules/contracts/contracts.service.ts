@@ -2207,10 +2207,38 @@ export class ContractsService {
         },
       });
 
+      // 5. Candidate Sanction: Apply contract breach penalty for NO_SHOW or EARLY_RESIGNATION
+      const candidateProfileId = contract.application?.candidateId || contract.application?.candidate?.id;
+      if (candidateProfileId) {
+        const isNoShow = claim.reason === WarrantyReason.NO_SHOW;
+        const deductPoints = isNoShow ? 20 : 15;
+        const freezeDays = isNoShow ? 14 : 7;
+        const freezeUntil = new Date(now.getTime() + freezeDays * 24 * 60 * 60 * 1000);
+
+        const currentCand = await tx.candidateProfile.findUnique({
+          where: { id: candidateProfileId },
+          select: { id: true, userId: true, reliabilityScore: true, strikeCount: true },
+        });
+
+        if (currentCand) {
+          const currentScore = currentCand.reliabilityScore ?? 100;
+          const newScore = Math.max(0, currentScore - deductPoints);
+
+          await tx.candidateProfile.update({
+            where: { id: candidateProfileId },
+            data: {
+              reliabilityScore: newScore,
+              strikeCount: { increment: 1 },
+              suspendedUntil: freezeUntil,
+            },
+          });
+        }
+      }
+
       return approvedClaim;
     });
 
-    // 5. Notifications
+    // 6. Notifications
     try {
       await this.notificationsService.createNotification({
         recipientUserId: claim.recruiterUserId,
@@ -2224,16 +2252,19 @@ export class ContractsService {
     }
 
     if (contract.application.candidate.userId) {
+      const isNoShow = claim.reason === WarrantyReason.NO_SHOW;
+      const deductPoints = isNoShow ? 20 : 15;
+      const freezeDays = isNoShow ? 14 : 7;
       try {
         await this.notificationsService.createNotification({
           recipientUserId: contract.application.candidate.userId,
           applicationId: contract.application.id,
-          title: `Cập nhật kết quả tuyển dụng vị trí ${contract.jobTitle}`,
-          message: `Hồ sơ bảo hành tuyển dụng đã được Ban Quản trị xác nhận xử lý thành công.`,
+          title: `Chế tài vi phạm cam kết hợp đồng (${isNoShow ? 'Bùng việc' : 'Nghỉ việc sớm'})`,
+          message: `Doanh nghiệp đã được duyệt yêu cầu bảo hành hợp đồng "${contract.jobTitle}". Hệ thống đã ghi nhận 1 lần vi phạm, trừ ${deductPoints} điểm Tin cậy và tạm dừng quyền ứng tuyển ${freezeDays} ngày theo Quy chế Nền tảng.`,
           payload: { contractId: contract.id, claimNumber: claim.claimNumber, status: 'APPROVED' },
         });
       } catch (err) {
-        this.logger.warn(`Failed to notify candidate about approval: ${err}`);
+        this.logger.warn(`Failed to notify candidate about warranty approval: ${err}`);
       }
     }
 

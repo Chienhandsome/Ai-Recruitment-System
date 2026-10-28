@@ -16,6 +16,15 @@ export function talentPoolVisibilityWhere(
     jobSeekingUntil: { gt: now },
     desiredTitle: { not: '' },
     professionalSummary: { not: '' },
+    isTalentPoolBanned: false,
+    AND: [
+      {
+        OR: [
+          { suspendedUntil: null },
+          { suspendedUntil: { lte: now } },
+        ],
+      },
+    ],
     status: {
       in: [CandidateProfileStatus.READY, CandidateProfileStatus.NEEDS_REVIEW],
     },

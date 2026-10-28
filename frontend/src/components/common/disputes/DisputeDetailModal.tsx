@@ -23,6 +23,8 @@ import {
   RefreshCw,
   Scale,
   MessageSquare,
+  Printer,
+  Award,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -35,7 +37,11 @@ import {
   respondDispute,
   uploadDisputeEvidence,
   type UploadedEvidenceFile,
+  resolveEvidenceUrl,
+  acknowledgeDispute,
+  closeDispute,
 } from '@/lib/dispute-api';
+import { DisputeResolutionMinutesModal } from './DisputeResolutionMinutesModal';
 
 interface DisputeDetailModalProps {
   isOpen: boolean;
@@ -57,6 +63,15 @@ export function DisputeDetailModal({
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [dispute, setDispute] = useState<DisputeData | null>(null);
+
+  // 3-Party Acknowledgment and Closure states
+  const [showMinutesModal, setShowMinutesModal] = useState<boolean>(false);
+  const [showAcknowledgeDialog, setShowAcknowledgeDialog] = useState<boolean>(false);
+  const [acknowledgeNote, setAcknowledgeNote] = useState<string>('');
+  const [acknowledging, setAcknowledging] = useState<boolean>(false);
+  const [showCloseDialog, setShowCloseDialog] = useState<boolean>(false);
+  const [closeReason, setCloseReason] = useState<string>('');
+  const [closing, setClosing] = useState<boolean>(false);
 
   // Form reply state
   const [message, setMessage] = useState<string>('');
@@ -162,6 +177,44 @@ export function DisputeDetailModal({
     }
   };
 
+  const handleAcknowledge = async () => {
+    if (!dispute) return;
+    setAcknowledging(true);
+    try {
+      await acknowledgeDispute(token, dispute.id, acknowledgeNote.trim() || undefined);
+      toast.success(
+        currentUserRole === 'CANDIDATE'
+          ? 'Đã xác nhận đồng thuận với phán quyết của Ban Quản Trị thành công!'
+          : 'Đã xác nhận chấp hành phán quyết và các biện pháp chế tài thành công!',
+      );
+      setShowAcknowledgeDialog(false);
+      setAcknowledgeNote('');
+      await fetchDetail();
+      if (onDisputeUpdated) onDisputeUpdated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Lỗi khi gửi xác nhận');
+    } finally {
+      setAcknowledging(false);
+    }
+  };
+
+  const handleCloseDispute = async () => {
+    if (!dispute) return;
+    setClosing(true);
+    try {
+      await closeDispute(token, dispute.id, closeReason.trim() || undefined);
+      toast.success('Ban Quản Trị đã chính thức đóng và lưu trữ hồ sơ tranh chấp thành công!');
+      setShowCloseDialog(false);
+      setCloseReason('');
+      await fetchDetail();
+      if (onDisputeUpdated) onDisputeUpdated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Lỗi khi đóng hồ sơ');
+    } finally {
+      setClosing(false);
+    }
+  };
+
   const getStatusBadge = (status: DisputeStatus) => {
     switch (status) {
       case 'PENDING':
@@ -190,6 +243,13 @@ export function DisputeDetailModal({
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300">
             <XCircle className="size-3.5 text-slate-500" />
             {disputeStatusLabels.DISMISSED}
+          </span>
+        );
+      case 'CLOSED':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-900 text-white border border-slate-700 shadow-2xs">
+            <Lock className="size-3.5 text-blue-400" />
+            {disputeStatusLabels.CLOSED}
           </span>
         );
     }
@@ -347,14 +407,14 @@ export function DisputeDetailModal({
                       {dispute.adminResolution}
                     </p>
 
-                    {/* Enforcement details */}
+                    {/* Recruiter Enforcement details */}
                     {(dispute.penaltyAction || dispute.penaltyNotes) && (
                       <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-1 gap-2 text-xs">
                         {dispute.penaltyAction && dispute.penaltyAction !== 'NONE' && (
                           <div className="flex items-center gap-2 text-rose-700 bg-rose-50 px-3 py-2 rounded-lg border border-rose-200">
                             <Lock className="size-4 shrink-0" />
                             <span>
-                              <strong>Biện pháp chế tài hệ thống:</strong>{' '}
+                              <strong>Chế tài Doanh nghiệp:</strong>{' '}
                               {dispute.penaltyAction === 'LOCK_RECRUITER'
                                 ? 'Khóa vĩnh viễn tài khoản Nhà tuyển dụng vi phạm & Tạm dừng tin tuyển dụng'
                                 : 'Ban hành cảnh cáo vi phạm tiêu chuẩn tuyển dụng'}
@@ -363,7 +423,33 @@ export function DisputeDetailModal({
                         )}
                         {dispute.penaltyNotes && (
                           <div className="text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-2xs">
-                            <strong>Yêu cầu thi hành / Khắc phục:</strong> {dispute.penaltyNotes}
+                            <strong>Yêu cầu thi hành / Khắc phục (DN):</strong> {dispute.penaltyNotes}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Candidate Enforcement details */}
+                    {(dispute.candidatePenaltyAction || dispute.candidatePenaltyNotes) && (
+                      <div className="mt-2 grid grid-cols-1 gap-2 text-xs">
+                        {dispute.candidatePenaltyAction && dispute.candidatePenaltyAction !== 'NONE' && (
+                          <div className="flex items-center gap-2 text-amber-800 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
+                            <Lock className="size-4 shrink-0" />
+                            <span>
+                              <strong>Chế tài Ứng viên:</strong>{' '}
+                              {dispute.candidatePenaltyAction === 'LOCK_CANDIDATE'
+                                ? '🚨 Khóa vĩnh viễn tài khoản Ứng viên (LOCKED)'
+                                : dispute.candidatePenaltyAction === 'SUSPEND_APPLY'
+                                ? `Đóng băng quyền ứng tuyển (${dispute.candidateSuspensionDays || 14} ngày) & Trừ ${dispute.candidateReliabilityDeduction || 25} điểm Tin cậy`
+                                : dispute.candidatePenaltyAction === 'DEDUCT_RELIABILITY'
+                                ? `Trừ ${dispute.candidateReliabilityDeduction || 15} điểm Tin cậy (Reliability Score)`
+                                : 'Ban hành cảnh cáo & Ghi nhận vi phạm (+1 Strike)'}
+                            </span>
+                          </div>
+                        )}
+                        {dispute.candidatePenaltyNotes && (
+                          <div className="text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-2xs">
+                            <strong>Lý do chế tài Ứng viên:</strong> {dispute.candidatePenaltyNotes}
                           </div>
                         )}
                       </div>
@@ -419,6 +505,7 @@ export function DisputeDetailModal({
                             </span>
                             <div className="flex flex-wrap gap-2.5">
                               {dispute.evidenceUrls.map((url: string, idx: number) => {
+                                const resolvedUrl = resolveEvidenceUrl(url);
                                 const isImg =
                                   url.startsWith('data:image/') ||
                                   /\.(png|jpe?g|webp|gif)($|\?)/i.test(url) ||
@@ -430,13 +517,13 @@ export function DisputeDetailModal({
                                     <button
                                       key={idx}
                                       type="button"
-                                      onClick={() => setZoomedImageUrl(url)}
+                                      onClick={() => setZoomedImageUrl(resolvedUrl)}
                                       className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:border-[#2563EB] transition-all bg-white cursor-pointer"
                                       title="Bấm để xem ảnh phóng to"
                                     >
                                       {/* eslint-disable-next-line @next/next/no-img-element */}
                                       <img
-                                        src={url}
+                                        src={resolvedUrl}
                                         alt={`Bằng chứng #${idx + 1}`}
                                         className="h-16 w-20 object-cover group-hover:scale-105 transition-transform"
                                       />
@@ -451,7 +538,7 @@ export function DisputeDetailModal({
                                 return (
                                   <a
                                     key={idx}
-                                    href={url}
+                                    href={resolvedUrl}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-2xs font-bold bg-white border border-slate-200 text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"
@@ -497,6 +584,21 @@ export function DisputeDetailModal({
                                 <AlertTriangle className="size-2.5" /> ĐƠN KHÁNG NGHỊ
                               </span>
                             )}
+                            {entry.type === 'ACKNOWLEDGEMENT' && (
+                              <span className="inline-flex items-center gap-1 text-3xs font-black uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded-full shadow-2xs">
+                                <CheckCircle2 className="size-2.5" /> ĐÃ XÁC NHẬN ĐỒNG THUẬN
+                              </span>
+                            )}
+                            {entry.type === 'SYSTEM_CLOSURE' && (
+                              <span className="inline-flex items-center gap-1 text-3xs font-black uppercase tracking-wider bg-slate-900 text-white px-2 py-0.5 rounded-full shadow-2xs">
+                                <Lock className="size-2.5 text-blue-400" /> TỰ ĐỘNG ĐÓNG HỒ SƠ
+                              </span>
+                            )}
+                            {entry.type === 'ADMIN_CLOSURE' && (
+                              <span className="inline-flex items-center gap-1 text-3xs font-black uppercase tracking-wider bg-slate-900 text-white px-2 py-0.5 rounded-full shadow-2xs">
+                                <Lock className="size-2.5 text-amber-400" /> BQT ĐÓNG VỤ VIỆC
+                              </span>
+                            )}
                             {entry.type === 'EXPLANATION' && (
                               <span className="text-3xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
                                 GIẢI TRÌNH CỦA HR
@@ -526,6 +628,7 @@ export function DisputeDetailModal({
                             </span>
                             <div className="flex flex-wrap gap-2.5">
                               {entry.evidenceUrls.map((url, i) => {
+                                const resolvedUrl = resolveEvidenceUrl(url);
                                 const isImg =
                                   url.startsWith('data:image/') ||
                                   /\.(png|jpe?g|webp|gif)($|\?)/i.test(url) ||
@@ -537,13 +640,13 @@ export function DisputeDetailModal({
                                     <button
                                       key={i}
                                       type="button"
-                                      onClick={() => setZoomedImageUrl(url)}
+                                      onClick={() => setZoomedImageUrl(resolvedUrl)}
                                       className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:border-[#2563EB] transition-all bg-white"
                                       title="Bấm để xem ảnh phóng to"
                                     >
                                       {/* eslint-disable-next-line @next/next/no-img-element */}
                                       <img
-                                        src={url}
+                                        src={resolvedUrl}
                                         alt={`Bằng chứng #${i + 1}`}
                                         className="h-16 w-20 object-cover group-hover:scale-105 transition-transform"
                                       />
@@ -558,7 +661,7 @@ export function DisputeDetailModal({
                                 return (
                                   <a
                                     key={i}
-                                    href={url}
+                                    href={resolvedUrl}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-2xs font-bold bg-white border border-slate-200 text-[#2563EB] hover:bg-blue-50 transition-colors shadow-2xs"
@@ -578,21 +681,188 @@ export function DisputeDetailModal({
                 </div>
               </div>
 
-              {/* SECTION: INTERACTIVE REPLY / APPEAL BOX */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                    <Send className="size-3.5 text-[#2563EB]" />
-                    {currentUserRole === 'ADMIN'
-                      ? 'Gửi Chỉ Đạo / Yêu Cầu Bổ Sung Chứng Từ'
-                      : currentUserRole === 'RECRUITER'
-                      ? 'Gửi Văn Bản Giải Trình / Chứng Cứ (Bên Tuyển Dụng)'
-                      : 'Gửi Ý Kiến Phản Hồi / Đơn Kháng Nghị (Ứng Viên)'}
-                  </h4>
-                  <span className="text-2xs text-slate-400">
-                    Cả 3 bên đều theo dõi được phản hồi này
-                  </span>
+              {/* SECTION: 3-PARTY VERDICT & ACKNOWLEDGEMENT STUDIO */}
+              {(dispute.status === 'RESOLVED' || dispute.status === 'DISMISSED' || dispute.status === 'CLOSED') && (
+                <div className="rounded-2xl border-2 border-[#2563EB]/20 bg-[#EFF6FF] p-4.5 space-y-3.5 shadow-2xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-blue-200/80 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex size-8 items-center justify-center rounded-xl bg-[#2563EB] text-white shadow-2xs">
+                        <Scale className="size-4.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-tight">
+                          Kết Luận Trọng Tài & Trạng Thái Đồng Thuận 3 Bên
+                        </h4>
+                        <p className="text-3xs text-slate-600">
+                          {dispute.status === 'CLOSED'
+                            ? 'Vụ việc đã được hoàn tất và đóng hồ sơ chính thức.'
+                            : 'Yêu cầu cả 3 bên xác nhận chấp hành phán quyết để kết thúc tranh chấp.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowMinutesModal(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-blue-300 text-[#2563EB] hover:bg-blue-50 text-2xs font-extrabold shadow-2xs transition-colors cursor-pointer"
+                    >
+                      <Printer className="size-3.5" /> Xem Biên Bản Trọng Tài Số
+                    </button>
+                  </div>
+
+                  {/* 3-Party Status Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-2xs">
+                    {/* 1. Admin */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <span className="text-3xs font-bold text-slate-500 uppercase tracking-wider block">
+                        1. Ban Quản Trị Trọng Tài
+                      </span>
+                      <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                        <ShieldCheck className="size-3.5 text-[#2563EB]" />
+                        <span>Đã ban hành phán quyết</span>
+                      </div>
+                      <p className="text-3xs text-slate-500 font-mono">
+                        {dispute.resolvedAt ? new Date(dispute.resolvedAt).toLocaleString('vi-VN') : '—'}
+                      </p>
+                      {currentUserRole === 'ADMIN' && dispute.status !== 'CLOSED' && (
+                        <button
+                          type="button"
+                          onClick={() => setShowCloseDialog(true)}
+                          className="w-full mt-2 py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-3xs font-extrabold transition cursor-pointer shadow-xs"
+                        >
+                          🔒 Đóng Hồ Sơ Vụ Việc
+                        </button>
+                      )}
+                    </div>
+
+                    {/* 2. Candidate */}
+                    <div
+                      className={`p-3 rounded-xl border space-y-1 ${
+                        dispute.candidateAcknowledgedAt
+                          ? 'bg-emerald-50/60 border-emerald-200'
+                          : 'bg-white border-slate-200'
+                      }`}
+                    >
+                      <span className="text-3xs font-bold text-slate-500 uppercase tracking-wider block">
+                        2. Đại diện Ứng viên
+                      </span>
+                      {dispute.candidateAcknowledgedAt ? (
+                        <>
+                          <div className="flex items-center gap-1.5 font-bold text-emerald-800">
+                            <CheckCircle2 className="size-3.5 text-emerald-600" />
+                            <span>Đã xác nhận đồng thuận</span>
+                          </div>
+                          <p className="text-3xs text-emerald-700 font-mono">
+                            {new Date(dispute.candidateAcknowledgedAt).toLocaleString('vi-VN')}
+                          </p>
+                          {dispute.candidateAcknowledgeNote && (
+                            <p className="text-3xs text-slate-600 italic bg-white/70 p-1 rounded border border-emerald-100 line-clamp-2">
+                              "{dispute.candidateAcknowledgeNote}"
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-1.5 font-semibold text-amber-700">
+                            <Clock className="size-3.5 text-amber-500" />
+                            <span>Đang chờ xác nhận</span>
+                          </div>
+                          <p className="text-3xs text-slate-400">Ứng viên chưa bấm đồng thuận</p>
+                          {currentUserRole === 'CANDIDATE' && dispute.status !== 'CLOSED' && (
+                            <button
+                              type="button"
+                              onClick={() => setShowAcknowledgeDialog(true)}
+                              className="w-full mt-2 py-1.5 px-2.5 rounded-lg bg-[#2563EB] hover:bg-blue-700 text-white text-3xs font-black shadow-xs transition cursor-pointer"
+                            >
+                              ✓ Xác Nhận & Đồng Thuận
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    {/* 3. Recruiter */}
+                    <div
+                      className={`p-3 rounded-xl border space-y-1 ${
+                        dispute.recruiterAcknowledgedAt
+                          ? 'bg-emerald-50/60 border-emerald-200'
+                          : 'bg-white border-slate-200'
+                      }`}
+                    >
+                      <span className="text-3xs font-bold text-slate-500 uppercase tracking-wider block">
+                        3. Đại diện Doanh nghiệp
+                      </span>
+                      {dispute.recruiterAcknowledgedAt ? (
+                        <>
+                          <div className="flex items-center gap-1.5 font-bold text-emerald-800">
+                            <CheckCircle2 className="size-3.5 text-emerald-600" />
+                            <span>Đã xác nhận chấp hành</span>
+                          </div>
+                          <p className="text-3xs text-emerald-700 font-mono">
+                            {new Date(dispute.recruiterAcknowledgedAt).toLocaleString('vi-VN')}
+                          </p>
+                          {dispute.recruiterAcknowledgeNote && (
+                            <p className="text-3xs text-slate-600 italic bg-white/70 p-1 rounded border border-emerald-100 line-clamp-2">
+                              "{dispute.recruiterAcknowledgeNote}"
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-1.5 font-semibold text-amber-700">
+                            <Clock className="size-3.5 text-amber-500" />
+                            <span>Đang chờ xác nhận</span>
+                          </div>
+                          <p className="text-3xs text-slate-400">HR chưa bấm chấp hành</p>
+                          {currentUserRole === 'RECRUITER' && dispute.status !== 'CLOSED' && (
+                            <button
+                              type="button"
+                              onClick={() => setShowAcknowledgeDialog(true)}
+                              className="w-full mt-2 py-1.5 px-2.5 rounded-lg bg-[#2563EB] hover:bg-blue-700 text-white text-3xs font-black shadow-xs transition cursor-pointer"
+                            >
+                              ✓ Xác Nhận & Chấp Hành
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
+              )}
+
+              {/* SECTION: INTERACTIVE REPLY / APPEAL BOX (Disabled when CLOSED) */}
+              {dispute.status === 'CLOSED' ? (
+                <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300 text-center space-y-2">
+                  <div className="flex items-center justify-center gap-2 text-slate-800 font-bold text-xs">
+                    <Lock className="size-4 text-slate-600" />
+                    <span>Hồ sơ tranh chấp đã được đóng và lưu trữ vĩnh viễn</span>
+                  </div>
+                  <p className="text-2xs text-slate-500 max-w-md mx-auto">
+                    Tất cả các bên đã hoàn tất xác nhận hoặc Ban Quản Trị đã đóng vụ việc. Bạn có thể xem hoặc in Biên bản hòa giải & phán quyết trọng tài số bất kỳ lúc nào.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowMinutesModal(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition shadow-xs cursor-pointer mt-1"
+                  >
+                    <Printer className="size-3.5" /> Mở Biên Bản Trọng Tài Số
+                  </button>
+                </div>
+              ) : (
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                      <Send className="size-3.5 text-[#2563EB]" />
+                      {currentUserRole === 'ADMIN'
+                        ? 'Gửi Chỉ Đạo / Yêu Cầu Bổ Sung Chứng Từ'
+                        : currentUserRole === 'RECRUITER'
+                        ? 'Gửi Văn Bản Giải Trình / Chứng Cứ (Bên Tuyển Dụng)'
+                        : 'Gửi Ý Kiến Phản Hồi / Đơn Kháng Nghị (Ứng Viên)'}
+                    </h4>
+                    <span className="text-2xs text-slate-400">
+                      Cả 3 bên đều theo dõi được phản hồi này
+                    </span>
+                  </div>
 
                 <form onSubmit={handleSendMessage} className="space-y-3">
                   <div>
@@ -724,10 +994,11 @@ export function DisputeDetailModal({
                   </div>
                 </form>
               </div>
-            </>
-          )}
-        </div>
+            )}
+          </>
+        )}
       </div>
+    </div>
 
       {/* Lightbox for zooming evidence images */}
       {zoomedImageUrl && (
@@ -769,6 +1040,182 @@ export function DisputeDetailModal({
                 alt="Chứng cứ phóng to"
                 className="max-h-[75vh] w-auto max-w-full rounded-lg object-contain shadow-md"
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Minutes Modal */}
+      <DisputeResolutionMinutesModal
+        isOpen={showMinutesModal}
+        onClose={() => setShowMinutesModal(false)}
+        dispute={dispute}
+      />
+
+      {/* Acknowledge Confirmation Dialog */}
+      {showAcknowledgeDialog && (
+        <div
+          className="fixed inset-0 z-[160] flex items-center justify-center bg-black/60 backdrop-blur-2xs p-4 animate-in fade-in duration-150"
+          onClick={() => setShowAcknowledgeDialog(false)}
+        >
+          <div
+            className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-slate-900">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                  <CheckCircle2 className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">
+                    {currentUserRole === 'CANDIDATE'
+                      ? 'Xác Nhận & Đồng Thuận Phán Quyết'
+                      : 'Xác Nhận Chấp Hành Phán Quyết & Chế Tài'}
+                  </h3>
+                  <p className="text-2xs text-slate-500">Mã vụ việc: {dispute?.disputeNumber}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAcknowledgeDialog(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-700 space-y-3">
+              <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200 text-2xs space-y-1">
+                <span className="font-bold text-[#2563EB] uppercase block">
+                  Toàn văn kết luận của Ban Quản Trị:
+                </span>
+                <p className="text-slate-800 italic bg-white p-2 rounded border border-blue-100">
+                  "{dispute?.adminResolution || 'Đã có kết luận.'}"
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-2xs text-amber-900">
+                <strong>Cam kết có giá trị pháp lý:</strong> Bằng việc nhấn xác nhận, bạn cam kết hiểu rõ, đồng ý và tuân thủ tuyệt đối phán quyết của Ban Quản Trị. Hai bên cam kết không phát sinh khiếu nại hay tranh chấp tiếp theo về sự việc này.
+              </div>
+
+              <div>
+                <label className="block text-2xs font-bold text-slate-700 mb-1">
+                  Ý kiến / Lời nhắn xác nhận (tùy chọn):
+                </label>
+                <textarea
+                  rows={3}
+                  value={acknowledgeNote}
+                  onChange={(e) => setAcknowledgeNote(e.target.value)}
+                  placeholder="Nhập ghi chú cam kết hoặc lời nhắn của bạn..."
+                  className="w-full rounded-xl border border-slate-300 p-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#2563EB] outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowAcknowledgeDialog(false)}
+                disabled={acknowledging}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleAcknowledge}
+                disabled={acknowledging}
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#2563EB] hover:bg-blue-700 shadow-xs transition cursor-pointer disabled:opacity-50"
+              >
+                {acknowledging ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" /> Đang ghi nhận...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="size-3.5" /> Tôi Đồng Thuận & Xác Nhận
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Close Case Dialog */}
+      {showCloseDialog && (
+        <div
+          className="fixed inset-0 z-[160] flex items-center justify-center bg-black/60 backdrop-blur-2xs p-4 animate-in fade-in duration-150"
+          onClick={() => setShowCloseDialog(false)}
+        >
+          <div
+            className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-slate-900">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-slate-900 text-white">
+                  <Lock className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Chính Thức Đóng & Lưu Trữ Hồ Sơ Vụ Việc</h3>
+                  <p className="text-2xs text-slate-500">Mã vụ việc: {dispute?.disputeNumber}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCloseDialog(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-700 space-y-3">
+              <p>
+                Sau khi đóng hồ sơ, vụ việc sẽ chuyển sang trạng thái <strong>ĐÃ ĐÓNG (CLOSED)</strong> vĩnh viễn. Không bên nào có thể gửi thêm tin nhắn hay kháng nghị.
+              </p>
+
+              <div>
+                <label className="block text-2xs font-bold text-slate-700 mb-1">
+                  Lý do hoặc ghi chú lưu trữ hồ sơ (tùy chọn):
+                </label>
+                <textarea
+                  rows={3}
+                  value={closeReason}
+                  onChange={(e) => setCloseReason(e.target.value)}
+                  placeholder="Nhập lý do đóng hồ sơ (ví dụ: Các bên đã hoàn tất bồi thường và chấp hành phán quyết)..."
+                  className="w-full rounded-xl border border-slate-300 p-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-slate-900 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowCloseDialog(false)}
+                disabled={closing}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleCloseDispute}
+                disabled={closing}
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-black shadow-xs transition cursor-pointer disabled:opacity-50"
+              >
+                {closing ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" /> Đang đóng...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="size-3.5" /> Xác Nhận Đóng Vụ Việc
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

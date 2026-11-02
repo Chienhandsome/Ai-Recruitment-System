@@ -1,129 +1,92 @@
-# Chuẩn viết Use Case — SkyGo
+# Chuẩn viết Use Case — SmartRecruit AI
 
-Tài liệu này định nghĩa format nội dung một file Use Case. Quy ước module, mã UC/BR/OQ và vòng đời mã nằm trong [CONVENTIONS.md](./CONVENTIONS.md).
+Quy ước mã và trạng thái theo [CONVENTIONS.md](CONVENTIONS.md); phạm vi theo [00-module.md](00-module.md).
 
 ## 1. Vị trí và tên file
 
-Use Case nằm trong `docs/usecase_spec/<module>/use-cases/`.
+Nguồn nằm tại `docs/usecase_spec/<module>/use-cases/<MODULE>-UC-<NNN>_<slug>.md`. Có thể thêm tầng feature khi cần. Mỗi mã chỉ có một Markdown, một Activity và một Sequence. Sơ đồ đặt trong `diagrams/` cùng module/feature, ví dụ `CV-UC-001_activity.act` và `CV-UC-001_sequence.seq`.
 
-`<MODULE>-UC-<NNN>_<slug>.md`
+## 2. Cấu trúc bắt buộc
 
-Ví dụ: `AUTH-UC-001_dang-ky.md`.
-
-Sơ đồ nguồn gắn với UC có thể đặt cạnh file hoặc trong thư mục `diagrams/` cùng module:
-
-```text
-diagrams/
-  AUTH-UC-001_activity.act
-  AUTH-UC-001_sequence.seq
-```
-
-Tên file sơ đồ phải chứa đúng mã UC và loại sơ đồ để công cụ có thể ghép đầu ra.
-
-## 2. Cấu trúc file bắt buộc
+Giữ nguyên heading và sáu nhãn trường để tool đọc được. Thay actor trong bảng theo UC thực tế.
 
 ```markdown
-### AUTH-UC-001_Đăng ký tài khoản
+### CV-UC-001_Tải CV để phân tích hồ sơ
 
-### Mô tả use case AUTH-UC-001
+### Mô tả use case CV-UC-001
 
 | Trường | Nội dung |
 |---|---|
-| Use case: | AUTH-UC-001_Đăng ký tài khoản |
+| Use case: | CV-UC-001_Tải CV để phân tích hồ sơ |
 | Mục đích: | ... |
 | Mô tả: | ... |
-| Actor: | User |
+| Actor: | Ứng viên |
 | Tiền điều kiện: | ... |
 | Hậu điều kiện: | ... |
 
 ### Luồng sự kiện chính
 
-| User | Hệ thống |
+| Ứng viên | Hệ thống |
 |---|---|
 | 1. ... | 2. ... |
 
 ### Luồng sự kiện phụ
 
-| User | Hệ thống |
+| Ứng viên | Hệ thống |
 |---|---|
-| 1.1. ... | 1.1.1. ... |
+| | 2.1. Nếu ..., hệ thống ...; kết thúc UC |
 
 ### Biểu đồ
 
-Activity: `diagrams/AUTH-UC-001_activity.act`
+Activity: `../diagrams/CV-UC-001_activity.act`
 
-Sequence: `diagrams/AUTH-UC-001_sequence.seq`
+Sequence: `../diagrams/CV-UC-001_sequence.seq`
 ```
 
-Các mục, tiêu đề và nhãn trường giữ ổn định để sau này có thể kiểm tra tự động.
+## 3. Thông tin UC
 
-## 3. Thông tin Use Case
+- **Use case:** mã/tên khớp danh mục.
+- **Mục đích:** kết quả actor muốn đạt.
+- **Mô tả:** ranh giới tương tác và tham chiếu rule; không chép toàn bộ chính sách.
+- **Actor:** actor chính, actor phụ/hệ thống ngoài nếu trực tiếp tham gia.
+- **Tiền điều kiện:** điều kiện phải đúng khi bắt đầu, ví dụ phiên đăng nhập và hồ sơ ứng viên tồn tại. Kiểm tra trong luồng không mặc nhiên là tiền điều kiện.
+- **Hậu điều kiện:** kết quả thành công của đúng phạm vi UC. Upload được lưu/chờ xử lý không đồng nghĩa AI đã phân tích xong; điểm AI không đồng nghĩa quyết định tuyển dụng.
 
-- **Use case:** mã và tên đã đăng ký trong danh mục.
-- **Mục đích:** kết quả actor muốn đạt, viết ngắn gọn.
-- **Mô tả:** tóm tắt phạm vi tương tác, không chép toàn bộ rule.
-- **Actor:** actor chính; nêu PayOS hoặc hệ thống ngoài khác nếu trực tiếp tham gia luồng.
-- **Tiền điều kiện:** điều kiện phải đúng trước khi bắt đầu UC, ví dụ đăng nhập khi bắt đầu đặt chỗ.
-- **Hậu điều kiện:** kết quả nghiệp vụ sau khi luồng thành công. Trạng thái thanh toán chỉ ghi theo điều đã được xác minh; không giả định trạng thái còn đang mở OQ.
+Nhiều điều kiện trong một ô dùng `<br>`, không bullet. Không ghi OQ chưa quyết định thành hậu điều kiện chắc chắn.
 
-Nếu tiền điều kiện hoặc hậu điều kiện gồm nhiều ý, đặt mỗi ý trên một dòng riêng và ngăn cách trong Markdown bằng `<br>`. Không thêm ký hiệu bullet hoặc dấu chấm ở cuối dòng. Không để OQ chưa chốt thành điều kiện được khẳng định.
+## 4. Luồng chính, thay thế và lỗi
 
-## 4. Luồng sự kiện chính
+- Hai cột actor chính và `Hệ thống`; bước chính đánh số liên tục từ 1 khi đọc từng hàng từ trái sang phải. Ô không có hành động để trống.
+- Mỗi bước nêu hành động/phản hồi hoặc thay đổi nghiệp vụ rõ ràng. Luồng chính phải đạt hậu điều kiện.
+- Nhánh rẽ dùng `N.1`, `N.2`; bước con dùng `N.1.1`, `N.1.2`. N phải là bước chính có thật. Ghi điều kiện, phản hồi và nơi quay lại/kết thúc.
+- Chọn lỗi theo code của UC: dữ liệu không hợp lệ, phiên hết hạn, sai phạm vi sở hữu, CV chưa sẵn sàng, tin hết hạn/hạn mức, ứng tuyển trùng, chuyển giai đoạn sai, dịch vụ ngoài không phản hồi.
+- Với tác vụ nền, mô tả rõ trạng thái chờ, kết quả thành công/thất bại, retry và kết quả đến muộn khi có căn cứ. Nếu UC kết thúc khi yêu cầu được tiếp nhận, không kéo hậu điều kiện sang lúc worker hoàn thành.
+- Không tự đặt chính sách hoàn tiền, hạn mức, số vòng, thời hạn hay công thức điểm. Ghi nguồn service/policy hiện tại; phần chưa rõ thành OQ.
 
-- Dùng bảng hai cột: actor chính và `Hệ thống`.
-- Đánh số các bước chính liên tục bắt đầu từ 1. Số thứ tự bước mô tả diễn tiến, không phải mã UC.
-- Mỗi ô nên nêu một hành động hoặc phản hồi rõ ràng, thường tối đa 1–2 câu.
-- Hành động của actor bắt đầu bằng động từ: “Chọn…”, “Nhập…”, “Xác nhận…”.
-- Hệ thống nêu kết quả actor quan sát được và thay đổi nghiệp vụ cần thiết.
-- Luồng chính đi tới hậu điều kiện của UC; không bỏ qua kết quả thành công.
-- Nếu một hành động chỉ được phép sau xác thực, thể hiện điều kiện đăng nhập theo rule chung và luồng thay thế phù hợp.
+## 5. Tham chiếu và truy vết
 
-## 5. Luồng thay thế và ngoại lệ
+Dùng `{{ref: BR-CV-001}}`, `{{ref: BR-SRA-001}}`, `{{ref: APP-UC-001}}` ở cuối câu/ô. Rule phải được định nghĩa trong `00-module.md` hoặc `rules.md`; UC có trong danh mục hoặc có file nguồn. Không dùng tham chiếu thay cho nội dung bước. Nguồn code và test ghi trong README/rules module để không làm bảng UC khó đọc.
 
-- Dùng cho nhánh phát sinh từ luồng chính, bao gồm dữ liệu không hợp lệ, không có chuyến, lỗi xác thực, PayOS từ chối/hủy/hết hạn, webhook không hợp lệ, lỗi mạng và yêu cầu gửi lặp khi thuộc phạm vi rule đã chốt.
-- Đánh số nhánh theo bước rẽ: `N.1`, `N.2`; các bước tiếp theo trong nhánh dùng `N.1.1`, `N.1.2`.
-- Bước đầu nhánh ghi rõ điều kiện và hành động/phản hồi; không để một dòng “Nếu…” trơ trọi mà không có kết quả.
-- Nêu nhánh kết thúc UC, quay lại bước nào, hoặc giữ trạng thái chờ nếu đã có rule xác nhận.
-- Không tự đặt hành vi cho tình huống đang là OQ. Ghi tình huống trong README của module/feature sở hữu dưới dạng câu hỏi mở cho tới khi được quyết định.
-
-## 6. Tham chiếu business rule và UC
-
-- Dùng cú pháp `{{ref: BR-AUTH-001}}`, `{{ref: BR-SKYGO-001}}` hoặc `{{ref: FLT-UC-001}}` ở cuối câu/ô cần truy vết.
-- Chỉ tham chiếu mã đã được định nghĩa và đăng ký.
-- Tham chiếu là truy vết, không thay thế nội dung bước cần thiết để hiểu luồng.
-- Không chép công thức, điều kiện chi tiết hoặc danh sách lựa chọn từ `rules.md` sang UC; diễn đạt hành vi liên quan và gắn tham chiếu.
-- Không để mã lịch sử hoặc ghi chú chỉnh sửa trong nội dung chuẩn của Use Case.
-
-## 7. Activity và Sequence
+## 6. Activity và Sequence
 
 ### Activity
 
-- File nguồn `.act` mô tả luồng actor/hệ thống, các quyết định, nhánh lỗi và điểm kết thúc.
-- Activity dùng đúng hai swimlane mặc định: actor chính (SkyGo là `User`) và `Hệ thống`. Gộp xử lý ứng dụng, backend, cơ sở dữ liệu và service nội bộ vào lane `Hệ thống`; không tạo lane riêng cho từng tầng kỹ thuật. PayOS vẫn là participant trong Sequence; không tách thành lane Activity.
-- Mọi quyết định trong sơ đồ phải tương ứng với một nhánh trong UC hoặc một rule đã chốt.
+Dùng hai lane mặc định: actor chính (`Ứng viên`, `Nhà tuyển dụng` hoặc `Quản trị viên`) và `Hệ thống`. Backend, database, RabbitMQ, AI worker và subsystem nội bộ gộp vào hệ thống. Mọi quyết định/điểm kết thúc phải khớp nhánh UC. Nếu xử lý nền xảy ra sau khi UC kết thúc, thể hiện trong UC theo dõi kết quả hoặc tài liệu pipeline liên quan.
 
 ### Sequence
 
-- File nguồn `.seq` mô tả thông điệp theo thời gian giữa actor và các thành phần cần thiết.
-- Dùng đúng ý nghĩa participant của SkyGo: `actor` cho User/hệ thống ngoài; `boundary` cho giao diện người dùng; `control` cho service xử lý nghiệp vụ; `entity` cho DAO/repository truy cập dữ liệu. Không đặt trực tiếp MySQL hoặc entity nghiệp vụ vào vị trí DAO.
-- Thể hiện User, giao diện (`boundary`), service (`control`) và DAO/repository (`entity`) có liên quan. PayOS là hệ thống ngoài và có thể xuất hiện như actor. DAO/repository đại diện cho tương tác lưu trữ; không cần thêm MySQL thành một participant riêng trong sequence nghiệp vụ.
-- Với thanh toán, thể hiện PayOS gửi webhook đến backend và backend xác minh trước khi cập nhật trạng thái; không mô tả ứng dụng tự xác nhận thanh toán.
-- Không đưa chi tiết class, hàm nội bộ hoặc endpoint chưa được thống nhất vào sơ đồ nghiệp vụ. Chi tiết hợp đồng API thuộc tài liệu API ở giai đoạn sau.
+- `actor`: người dùng hoặc hệ thống ngoài; `boundary`: Next.js/Interview Web; `control`: service nghiệp vụ/subsystem/adapter; `entity`: Prisma/repository/adapter lưu trữ.
+- Chỉ đưa participant thực sự tham gia. Dùng tên thành phần hiện có; không tự thêm DAO/lớp Java hoặc MySQL vào kiến trúc NestJS/Prisma/PostgreSQL.
+- Supabase Auth là dịch vụ xác thực bên ngoài; AI worker và RabbitMQ là xử lý nội bộ. Interview Service có API/callback riêng. Endpoint hoặc event chỉ ghi khi đối chiếu code.
+- Phân biệt gửi yêu cầu, phản hồi tiếp nhận và kết quả bất đồng bộ. Với PayOS, không lấy redirect trình duyệt làm bằng chứng đã thanh toán; mô tả xác minh webhook/đồng bộ trạng thái theo code. Với callback phỏng vấn AI, đối chiếu xác minh chữ ký và xử lý lặp trong service.
+- DSL chỉ hỗ trợ `alt/else/end`, `loop/end` cùng message gọi/trả về, không có `par/async/opt` hay self-message; dùng nhãn để diễn đạt giới hạn này. Xem [SYNTAX.md](../tools/usecase_flow/diagram_gen/SYNTAX.md).
 
-## 8. Nguyên tắc nghiệp vụ và phạm vi
+## 7. Checklist
 
-- Chỉ mô tả phạm vi MVP theo kế hoạch triển khai SkyGo.
-- Khứ hồi, hành trình nhiều chặng, chọn ghế, API hãng bay/thời gian thực, Manager, đăng nhập bên thứ ba, OTP/email xác thực và quên mật khẩu qua email là ngoài phạm vi MVP.
-- Chỉ ghi rule đã xác nhận. Các chi tiết chưa rõ như công thức giá/thuế, thời hạn giữ booking, trạng thái PayOS, hoàn tiền và khóa đăng nhập phải tiếp tục là OQ.
-- Nội dung Use Case tập trung vào hành vi nghiệp vụ; bố cục UI và chi tiết cài đặt không đưa vào đây.
-
-## 9. Checklist rà soát UC
-
-- [ ] UC có một mục tiêu actor rõ và có trong danh mục module.
-- [ ] Tiền điều kiện, luồng chính và hậu điều kiện nhất quán.
-- [ ] Bước actor bắt đầu bằng hành động; phản hồi hệ thống dễ hiểu.
-- [ ] Các nhánh ngoại lệ có điều kiện, kết quả và điểm tiếp tục/kết thúc.
-- [ ] Business rule được định nghĩa ở nguồn chính và mã tham chiếu hợp lệ.
-- [ ] Không biến OQ thành hành vi đã chốt.
-- [ ] Activity và Sequence phản ánh cùng luồng/nhánh trong UC.
-- [ ] Không đưa chức năng ngoài phạm vi MVP vào đặc tả.
+- [ ] Mục tiêu, actor, mã và module có trong danh mục; nguồn code truy vết được.
+- [ ] Tiền/hậu điều kiện khớp phạm vi đồng bộ hoặc bất đồng bộ.
+- [ ] Luồng chính có kết quả thành công; nhánh lỗi có điểm tiếp tục/kết thúc.
+- [ ] Quyền truy cập, phạm vi sở hữu và trạng thái được đối chiếu service/guard.
+- [ ] Rule/UC tham chiếu có nguồn; không biến OQ hoặc scaffold thành chức năng đã có.
+- [ ] Activity và Sequence cùng nhánh với UC và đúng kiến trúc hiện tại.
+- [ ] `build.py check` thành công; đã rà nghiệp vụ riêng vì tool chỉ kiểm tra cấu trúc/cú pháp.

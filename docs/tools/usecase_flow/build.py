@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List, validate, and generate SkyGo Use Case diagrams and DOCX files."""
+"""List, validate, and generate SmartRecruit AI Use Case diagrams and DOCX files."""
 
 from __future__ import annotations
 
@@ -30,9 +30,22 @@ MD2DOCX = TOOLS / "doc_gen" / "md2docx.py"
 
 PREFIX_TO_MODULE = {
     "AUTH": "auth",
-    "FLT": "flight",
-    "BKG": "booking",
-    "PAY": "payment",
+    "CAN": "candidates",
+    "REC": "recruiters",
+    "CV": "resumes",
+    "JOB": "jobs",
+    "APP": "applications",
+    "INT": "interviews",
+    "INS": "candidate-insights",
+    "OFF": "offers",
+    "CTR": "contracts",
+    "BILL": "billing",
+    "TAL": "talent-pool",
+    "INV": "talent-invitations",
+    "NOT": "notifications",
+    "ADM": "admin",
+    "DSP": "disputes",
+    "POL": "policies",
 }
 ID_PATTERN = r"(?P<code>[A-Z][A-Z0-9]*-UC-\d{3})"
 MD_RE = re.compile(rf"^{ID_PATTERN}_.+\.md$")
@@ -93,7 +106,9 @@ def discover() -> tuple[dict[tuple[str, str], Unit], list[str]]:
             matched = True
             prefix = code.split("-", 1)[0]
             expected_module = PREFIX_TO_MODULE.get(prefix)
-            if expected_module and module != expected_module:
+            if expected_module is None:
+                problems.append(f"{rel}: prefix {prefix} chưa đăng ký trong PREFIX_TO_MODULE")
+            elif module != expected_module:
                 problems.append(
                     f"{rel}: prefix {prefix} thuộc module '{expected_module}', không phải '{module}'"
                 )
@@ -244,6 +259,8 @@ def validate_markdown(
             if match:
                 alt_steps.append(match.group(1))
 
+    if not main_steps:
+        errors.append("luồng chính phải có ít nhất một bước được đánh số")
     expected = [str(i) for i in range(1, len(main_steps) + 1)]
     if main_steps != expected:
         errors.append(f"số bước chính phải liên tục từ 1; hiện có: {main_steps}")
@@ -297,7 +314,7 @@ def check_unit(
     if unit.md:
         errors.extend(validate_markdown(unit, defined_rules, defined_ucs))
 
-    with tempfile.TemporaryDirectory(prefix="skygo-usecase-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="smartrecruit-usecase-") as temp_dir:
         for tool, specs in ((ACTGEN, unit.act), (SEQGEN, unit.seq)):
             for spec in specs:
                 rc, output = run([tool, spec, "-o", temp_dir, "--no-png"])
@@ -355,6 +372,18 @@ def cmd_build(args: argparse.Namespace) -> int:
         print("Chưa có nguồn Use Case để build.")
         return 0
 
+    defined_rules, defined_ucs = get_defined_ids(units)
+    invalid = False
+    for unit in selected:
+        ok, errors = check_unit(unit, defined_rules, defined_ucs)
+        if not ok:
+            invalid = True
+            for error in errors:
+                print(f"LỖI {unit.code}: {error}")
+    if invalid:
+        print("Sửa nguồn Use Case rồi build lại.")
+        return 1
+
     no_png = args.no_png
     wants_diagrams = args.only in (None, "diagrams")
     wants_docx = args.only in (None, "docx")
@@ -409,7 +438,7 @@ def cmd_build(args: argparse.Namespace) -> int:
 
 
 def make_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Kiểm tra và sinh sơ đồ Use Case SkyGo.")
+    parser = argparse.ArgumentParser(description="Kiểm tra và sinh sơ đồ Use Case SmartRecruit AI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("list", help="liệt kê UC và các nguồn hiện có")
     for command, help_text in (
@@ -420,7 +449,7 @@ def make_parser() -> argparse.ArgumentParser:
         child.add_argument(
             "targets",
             nargs="*",
-            help="all, một mã UC (ví dụ BKG-UC-001) hoặc tên module (ví dụ booking)",
+            help="all, một mã UC (ví dụ CV-UC-001) hoặc tên module (ví dụ resumes)",
         )
         if command == "build":
             child.add_argument(

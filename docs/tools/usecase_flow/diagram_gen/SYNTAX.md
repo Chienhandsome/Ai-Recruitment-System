@@ -9,7 +9,7 @@ Hai tool dùng chung một số quy tắc, còn từ vựng riêng thì khác nh
 - File UTF-8. Nhãn có dấu tiếng Việt vẫn vẽ đúng (đã thử với font DejaVu Sans khi xuất PNG).
 - Dòng trống và dòng bắt đầu bằng `#` bị bỏ qua.
 - `title: <tên sơ đồ>` đặt tên sơ đồ, tuỳ chọn.
-- Chuỗi có khoảng trắng phải đặt trong dấu nháy kép: `"Người học"`.
+- Chuỗi có khoảng trắng phải đặt trong dấu nháy kép: `"Ứng viên"`.
 - Trong nhãn, `\n` là xuống dòng.
 - `<id>` chỉ gồm chữ, số và `_`, không trùng nhau trong một file.
 - Lỗi cú pháp in dạng `LOI: dong N: <lý do>` kèm dòng gốc, và tool dừng, không ghi file nào. Các thông báo lỗi của tool viết không dấu.
@@ -54,24 +54,24 @@ Ví dụ đầy đủ: [examples/sample_activity.act](examples/sample_activity.a
 ### Participant
 
 ```
-actor    u "Người học"
-boundary b "Màn hình Quiz" "Giao diện"
-control  c "QuizService" "Xử lý nghiệp vụ"
-entity   q "QuizDAO" "Truy cập dữ liệu"
+actor    u "Ứng viên"
+boundary b "Trang hồ sơ" "Next.js"
+control  c "ResumesService" "Xử lý nghiệp vụ"
+entity   q "PrismaService" "Truy cập dữ liệu"
 ```
 
 Cú pháp: `<loại> <id> "<tên>" ["<chữ trong dải xám>"] [created]`
 
 - Loại là `actor`, `boundary`, `control` hoặc `entity`, vẽ bằng biểu tượng tương ứng.
-- Quy ước SkyGo: `actor` là User/hệ thống ngoài; `boundary` là giao diện; `control` là service nghiệp vụ; `entity` là DAO/repository truy cập dữ liệu. Participant `entity` đại diện tầng truy cập dữ liệu, không phải bảng MySQL hoặc entity nghiệp vụ.
+- Quy ước SmartRecruit AI: `actor` là Ứng viên/Nhà tuyển dụng/Quản trị viên hoặc hệ thống ngoài; `boundary` là giao diện; `control` là service nghiệp vụ; `entity` là DAO/repository truy cập dữ liệu. Participant `entity` đại diện tầng truy cập dữ liệu, ví dụ PrismaService; không phải entity nghiệp vụ.
 - Tên hiện dưới biểu tượng. Chữ trong dải xám ở đầu cột mặc định bằng tên, ghi thêm chuỗi thứ ba nếu muốn khác.
 - `created`: participant này được tạo giữa chừng. Phải có message `[create]` tới nó.
 
 ### Message
 
 ```
-u -> b : chọn đáp án          # gọi (nét liền)
-q --> c : đúng / sai          # trả về (nét đứt)
+u -> b : xem trạng thái CV    # gọi (nét liền)
+q --> c : trạng thái CV       # trả về (nét đứt)
 c -> q [create] : tạo bản ghi
 c -> q [destroy] : xoá        # vẽ dấu X, kết thúc đường sống
 ```
@@ -81,13 +81,13 @@ Cờ `[create]` hoặc `[destroy]` đứng trước dấu hai chấm. Không h�
 ### Khối alt và loop
 
 ```
-alt: đáp án đúng
-c --> b : giải thích
-else: đáp án sai
-c --> b : báo chưa đúng
+alt: CV thuộc hồ sơ người gọi
+c --> b : trả trạng thái
+else: không tìm thấy CV thuộc hồ sơ
+c --> b : báo không tìm thấy
 end
 
-loop: còn câu hỏi
+loop: CV còn chờ xử lý
 ...
 end
 ```
@@ -114,4 +114,4 @@ Mỗi tool nhận một file và ghi ba file cùng tên vào thư mục `-o` (m�
 
 Tuỳ chọn: `-o <thư mục>`, `--scale <số>` (độ phân giải PNG, mặc định 1.5), `--no-png`.
 
-Khi chạy qua `tools/build.py`, `-o` luôn là `dist/<module>/<UCxx>/`. Đừng chỉnh tay file trong `dist/` vì lần build sau sẽ ghi đè. Muốn đổi sơ đồ thì sửa file `.act` hoặc `.seq`.
+Khi chạy qua `docs/tools/usecase_flow/build.py`, `-o` là `docs/build/usecase-flow/<module>/<UC-ID>/`. Đừng chỉnh tay file trong thư mục đầu ra vì lần build sau sẽ ghi đè. Muốn đổi sơ đồ thì sửa file `.act` hoặc `.seq`.

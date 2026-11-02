@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Chuyển file đặc tả SkyGo Use Case (Markdown, theo STANDARD.md) sang DOCX.
+"""Chuyển file đặc tả SmartRecruit AI Use Case (Markdown, theo STANDARD.md) sang DOCX.
 
 Dùng:
   python md2docx.py <file.md | thư mục> [...] [--out dist] [--template uc-template.docx]
-  python md2docx.py f3-lam-quiz --check-only
-  python md2docx.py BKG-UC-001_x.md --assets docs/build/usecase-flow/booking/BKG-UC-001
+  python md2docx.py docs/usecase_spec/resumes --check-only
+  python md2docx.py CV-UC-001_tai-cv.md --assets docs/build/usecase-flow/resumes/CV-UC-001
 
 Việc script làm:
   1. Đọc file <MODULE>-UC-NNN_*.md (bỏ qua README.md, rules.md).

@@ -1,16 +1,16 @@
-# Công cụ sơ đồ và kiểm tra Use Case SkyGo
+# Công cụ sơ đồ và kiểm tra Use Case SmartRecruit AI
 
-Bộ công cụ này hỗ trợ nguồn Use Case SkyGo trong `docs/usecase_spec/`. Mã UC có tiền tố module, ví dụ `AUTH-UC-001`, `FLT-UC-001`, `BKG-UC-001` và `PAY-UC-001`.
+Bộ công cụ này hỗ trợ nguồn Use Case SmartRecruit AI trong `docs/usecase_spec/`. Mã UC có tiền tố module, ví dụ `AUTH-UC-001`, `CV-UC-001`, `APP-UC-001` và `BILL-UC-001`.
 
 ## Dùng nhanh
 
-Chạy từ thư mục gốc `SkyGo`:
+Chạy từ thư mục gốc repository:
 
 ```powershell
 python docs/tools/usecase_flow/build.py list
 python docs/tools/usecase_flow/build.py check
-python docs/tools/usecase_flow/build.py build BKG-UC-001
-python docs/tools/usecase_flow/build.py build payment
+python docs/tools/usecase_flow/build.py build CV-UC-001
+python docs/tools/usecase_flow/build.py build resumes
 python docs/tools/usecase_flow/build.py build
 ```
 
@@ -36,17 +36,30 @@ docs/usecase_spec/
 
 Tìm file theo tên và mã Use Case, không cố định độ sâu thư mục. Mỗi UC chỉ có tối đa một nguồn `.md`, `.act` và `.seq` trong một module. Prefix module và thư mục sở hữu phải khớp quy ước trong `docs/usecase_spec/CONVENTIONS.md`.
 
+Tầng `<feature>/` là tùy chọn. Mẫu hiện có nằm trực tiếp ở `resumes/use-cases/` và `resumes/diagrams/`. Danh mục prefix/thư mục nằm trong [00-module.md](../../usecase_spec/00-module.md), đồng bộ với `PREFIX_TO_MODULE` trong `build.py`. Prefix chưa đăng ký hoặc đặt sai module sẽ bị báo lỗi. `list` chỉ liệt kê file thực tế, không liệt kê UC mới đăng ký trong danh mục.
+
 ## Kiểm tra nội dung
 
 `check` kiểm tra cấu trúc Markdown, thứ tự bước chính, nhãn các mục bắt buộc, mã tham chiếu BR/UC, mã trùng và cú pháp sơ đồ. Nó không xác nhận rằng sơ đồ diễn đạt đúng nghiệp vụ trong UC; phần đó cần người rà soát.
+
+`build` kiểm tra các UC được chọn trước khi tạo đầu ra; nguồn không hợp lệ sẽ dừng build. UC đang viết dở có thể thiếu loại nguồn; xem cột `md/act/seq` ở `list` để biết thành phần còn thiếu.
 
 Nguồn sơ đồ dùng cú pháp tại [diagram_gen/SYNTAX.md](diagram_gen/SYNTAX.md). Có thể chạy riêng `actgen.py` hoặc `seqgen.py`; xem hướng dẫn đầu file và cú pháp tương ứng.
 
 ## Cài đặt
 
-- Python 3.9 trở lên; công cụ kiểm tra và sinh draw.io/SVG dùng thư viện chuẩn.
+- Python 3.10 trở lên; công cụ kiểm tra và sinh draw.io/SVG dùng thư viện chuẩn.
 - Xuất DOCX cần `python-docx`: `pip install python-docx`.
 - Xuất PNG cần `playwright` và Chromium. Nếu thiếu, lệnh build vẫn sinh draw.io/SVG và thông báo bỏ qua PNG.
+
+```powershell
+python -m pip install python-docx playwright
+python -m playwright install chromium
+```
+
+Nếu Windows chỉ có alias `python` của Microsoft Store, dùng đường dẫn Python thật hoặc `py -3` khi đã cài interpreter. Không cần cài dependency của backend/AI service để kiểm tra sơ đồ.
+
+Kiểm tra hồi quy công cụ: `python -m unittest discover -s docs/tools/usecase_flow -p "test_*.py"`.
 
 ## Giới hạn
 

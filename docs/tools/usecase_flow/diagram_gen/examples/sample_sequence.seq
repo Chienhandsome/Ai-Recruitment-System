@@ -1,15 +1,65 @@
-# Ví dụ sequence diagram kiểu robustness (chạy: python seqgen.py examples/sample_sequence.seq -o /tmp/out)
-title: Ví dụ Sequence
-actor u "Người học"
-boundary b "Màn hình Quiz" "Giao diện"
-control c "QuizService" "Xử lý nghiệp vụ"
-entity q "QuizDAO" "Truy cập dữ liệu"
-u -> b : chọn đáp án
-b -> c : gửi đáp án
-c -> q : kiểm tra đáp án
-q --> c : đúng / sai
-alt: đáp án đúng
-c --> b : giải thích
-else: đáp án sai
-c --> b : báo chưa đúng
+title: CV-UC-001 — Tiếp nhận CV, không chờ kết quả AI
+actor u "Ứng viên"
+boundary web "Next.js" "Giao diện hồ sơ"
+control api "ResumesController" "Xác thực và nhận file"
+control upload "UploadResumeUseCase" "Tiếp nhận CV"
+entity db "PrismaService" "Truy cập dữ liệu"
+entity storage "SupabaseStorageService" "Lưu CV riêng tư"
+control mq "RabbitMQService" "Gửi yêu cầu phân tích"
+u -> web : Chọn và gửi CV
+web -> api : Upload multipart file
+alt: Phiên không hợp lệ hoặc thiếu file
+api --> web : Từ chối yêu cầu
+web --> u : Hiển thị lỗi
+else: Yêu cầu qua kiểm tra ban đầu
+api -> upload : Tiếp nhận CV của người gọi
+upload -> db : Tìm CandidateProfile
+db --> upload : Hồ sơ hoặc không tìm thấy
+alt: Thiếu profile hoặc file sai MIME/kích thước
+upload --> api : Lỗi hồ sơ/file
+api --> web : Trả lỗi
+web --> u : Hiển thị lỗi
+else: Hồ sơ và file hợp lệ
+upload -> db : Tạo Resume PENDING
+db --> upload : Resume ID
+upload -> storage : Lưu file CV
+storage --> upload : Bucket/objectPath hoặc lỗi
+alt: Lưu file lỗi
+upload -> db : Đánh dấu FAILED
+upload --> api : Lỗi tải CV
+api --> web : Trả lỗi
+web --> u : Hiển thị lỗi tải CV
+else: Lưu file thành công
+upload -> db : Lưu bucket/objectPath và đặt primaryResumeId
+db --> upload : Kết quả cập nhật
+alt: Cập nhật lưu trữ lỗi
+upload -> db : Đánh dấu FAILED
+upload --> api : Lỗi tải CV
+api --> web : Trả lỗi
+web --> u : Hiển thị lỗi tải CV
+else: Cập nhật thành công
+upload -> storage : Tạo signed URL tải CV
+storage --> upload : URL tạm hoặc lỗi
+alt: Không tạo được URL tạm
+upload --> api : PENDING kèm cảnh báo chưa vào hàng đợi
+else: Có URL tạm
+upload -> mq : resume.analysis.requested
+mq --> upload : Kết quả publish
+alt: Publish lỗi hoặc trả false
+upload --> api : PENDING kèm cảnh báo chưa vào hàng đợi
+else: Publish thành công
+upload -> db : Cập nhật Resume/Profile PROCESSING
+db --> upload : Thành công hoặc lỗi cập nhật
+alt: Đồng bộ trạng thái thành công
+upload --> api : Thông tin CV và PROCESSING
+else: Đồng bộ trạng thái lỗi
+upload --> api : PENDING kèm cảnh báo đang đồng bộ
+end
+end
+end
+api --> web : Phản hồi tiếp nhận, không chờ worker
+web --> u : Hiển thị trạng thái và cảnh báo nếu có
+end
+end
+end
 end

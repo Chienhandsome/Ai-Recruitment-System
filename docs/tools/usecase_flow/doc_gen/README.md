@@ -7,22 +7,22 @@
 Thông thường chạy qua bộ lệnh tổng:
 
 ```powershell
-python docs/tools/usecase_flow/build.py build BKG-UC-001
+python docs/tools/usecase_flow/build.py build CV-UC-001
 ```
 
 Lệnh này sinh sơ đồ trước, sau đó xuất DOCX và chèn PNG nếu có. Có thể chỉ xuất DOCX từ nguồn đã có:
 
 ```powershell
-python docs/tools/usecase_flow/build.py build BKG-UC-001 --only docx
+python docs/tools/usecase_flow/build.py build CV-UC-001 --only docx
 ```
 
 Chạy riêng:
 
 ```powershell
 python docs/tools/usecase_flow/doc_gen/md2docx.py `
-  docs/usecase_spec/booking/<feature>/use-cases/BKG-UC-001_tao-dat-cho.md `
-  --out docs/build/usecase-flow/booking/BKG-UC-001 `
-  --assets docs/build/usecase-flow/booking/BKG-UC-001
+  docs/usecase_spec/resumes/use-cases/CV-UC-001_tai-cv.md `
+  --out docs/build/usecase-flow/resumes/CV-UC-001 `
+  --assets docs/build/usecase-flow/resumes/CV-UC-001
 ```
 
 Cài dependency xuất Word:

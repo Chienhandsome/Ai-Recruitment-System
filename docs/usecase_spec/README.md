@@ -1,15 +1,27 @@
-# Đặc tả Use Case SkyGo
+# Đặc tả Use Case — SmartRecruit AI
 
-Bộ tài liệu này đặc tả luồng nghiệp vụ Use Case của SkyGo. Phạm vi chuẩn là [kế hoạch triển khai trong folder Flight](../../../Ke-hoach-trien-khai.md); các thay đổi so với kế hoạch cần được nhóm chốt trước khi sửa đặc tả.
+Bộ tài liệu mô tả hệ thống tuyển dụng AI trong repository hiện tại. Phạm vi được đối chiếu với code ngày 01/11/2026; không dùng kế hoạch của dự án khác làm căn cứ.
 
 ## Bắt đầu từ đâu
 
-1. Đọc [CONVENTIONS.md](./CONVENTIONS.md) để nắm module, actor, mã UC/BR/OQ và cách quản lý nguồn.
-2. Đọc [STANDARD.md](./STANDARD.md) trước khi viết một Use Case.
-3. Xem `00-module.md` để biết phạm vi, thuật ngữ và danh mục UC đã chốt.
-4. Vào README và `rules.md` của feature liên quan; sau đó đọc file UC và sơ đồ của feature đó.
+1. Đọc [00-module.md](00-module.md) để xem actor, module, danh mục UC và nguồn code đối chiếu.
+2. Đọc [CONVENTIONS.md](CONVENTIONS.md) về mã UC/BR/OQ và quản lý nguồn.
+3. Dùng [STANDARD.md](STANDARD.md) khi viết UC; xem mẫu chạy được [CV-UC-001](resumes/use-cases/CV-UC-001_tai-cv.md).
+4. Chạy công cụ tại [../tools/usecase_flow](../tools/usecase_flow/README.md) để kiểm tra và sinh đầu ra.
 
-## Cấu trúc dự kiến
+## Phạm vi hiện tại
+
+- Tài khoản Candidate, Recruiter, Admin; Supabase Auth với email/password, xác minh email/OTP, Google OAuth và khôi phục mật khẩu.
+- Hồ sơ ứng viên, kỹ năng, tải CV và phân tích bất đồng bộ; hồ sơ và dashboard nhà tuyển dụng.
+- Tin tuyển dụng, ứng tuyển, đánh giá AI và quản lý giai đoạn tuyển dụng.
+- Lịch/phản hồi phỏng vấn, quy trình nhiều vòng và phỏng vấn AI qua Interview Service; phân tích JD và luyện phỏng vấn cho ứng viên.
+- Offer, hợp đồng, ký OTP, bảo hành tuyển dụng và tranh chấp.
+- Gói dịch vụ, đơn hàng, PayOS/mock theo cấu hình, quyền lợi và hạn mức; talent pool, mở khóa hồ sơ và lời mời ứng tuyển.
+- Thông báo; quản trị người dùng, tin tuyển dụng, kỹ năng, gói và chính sách.
+
+Danh mục ghi nhận chức năng có code, không khẳng định mọi luồng đã được kiểm thử trên môi trường triển khai. Module chỉ có schema/scaffold không được coi là chức năng hoàn thiện. Một số README cũ ở gốc có thể chậm hơn code; dùng nguồn truy vết trong danh mục.
+
+## Cấu trúc
 
 ```text
 usecase_spec/
@@ -17,34 +29,22 @@ usecase_spec/
   CONVENTIONS.md
   STANDARD.md
   00-module.md
-  auth/
-  flight/
-  booking/
-  payment/
+  resumes/
+    README.md
+    rules.md
+    use-cases/CV-UC-001_tai-cv.md
+    diagrams/CV-UC-001_activity.act
+    diagrams/CV-UC-001_sequence.seq
 ```
 
-Mỗi thư mục module có README, danh sách/feature, nguồn business rule và Use Case. Sơ đồ nguồn Activity/Sequence gắn với Use Case tương ứng. Chưa tạo module hoặc UC nào khi phạm vi và mã chưa được chốt trong `00-module.md`.
+Các module khác đã được đăng ký trong danh mục, chưa có file UC chi tiết. Chỉ tạo thư mục khi có nội dung; không tạo hàng loạt file rỗng. Trạng thái đặc tả khác với trạng thái triển khai.
 
-## Phạm vi MVP đang theo
+## Quy trình cập nhật
 
-- Tài khoản User: đăng ký, đăng nhập, đăng xuất; mật khẩu lưu dạng băm.
-- Tìm chuyến một chiều từ dữ liệu mẫu trong MySQL cho 1–4 người lớn; xem chi tiết trước đăng nhập; sắp xếp theo giá.
-- Cần đăng nhập để bắt đầu đặt booking hoặc xem lịch sử.
-- Nhập thông tin từng hành khách người lớn, chọn hành lý cơ bản, xem lại trước thanh toán.
-- Tạo thanh toán PayOS; backend xác minh webhook trước khi cập nhật trạng thái thanh toán.
-- Lưu booking, mã giao dịch và trạng thái trong MySQL; xác nhận booking đã thanh toán và chỉ cho User xem booking của chính mình.
-- Phạm vi MVP còn có bảo vệ API, kiểm tra dữ liệu, giới hạn đăng nhập sai, chống trùng, xử lý lỗi và đo baseline hiệu năng.
+1. Đọc controller, service/use-case, DTO/schema và test liên quan; đối chiếu UI nếu mô tả thao tác từ giao diện.
+2. Đăng ký mục tiêu actor và mã UC trong `00-module.md`; gắn nguồn code tương ứng.
+3. Ghi rule có căn cứ trong `rules.md`; ghi quyết định chưa rõ thành OQ, phân biệt hành vi hiện tại và đề xuất.
+4. Viết UC, Activity và Sequence cùng nhánh thành công/lỗi, đặc biệt trạng thái chờ và xử lý nền.
+5. Chạy `python docs/tools/usecase_flow/build.py check`; sau đó build nếu cần bàn giao.
 
-Khứ hồi, nhiều chặng, chọn ghế, tích hợp API hãng bay/thời gian thực và vai trò Manager nằm ngoài phạm vi MVP. Xem chi tiết tại kế hoạch triển khai.
-
-## Quy trình viết và rà soát
-
-1. Ghi mục tiêu, actor và ranh giới module trong `00-module.md`.
-2. Ghi business rule đã chốt trong `rules.md`; ghi điều chưa rõ thành OQ tại đúng feature.
-3. Viết UC theo format `STANDARD.md`, tham chiếu business rule bằng mã.
-4. Viết nguồn `.act` và `.seq` từ các bước/nhánh đã chốt trong UC.
-5. Rà tính nhất quán giữa rule, UC, Activity và Sequence; cập nhật cả các tham chiếu chịu ảnh hưởng khi đổi rule.
-
-## Công cụ và đầu ra
-
-Các file Markdown, `.act` và `.seq` là nguồn có thể chỉnh sửa. Dùng bộ công cụ tại `docs/tools/usecase_flow/` để kiểm tra cấu trúc, sinh sơ đồ và xuất từng Use Case ra DOCX. Cài `python-docx` để xuất DOCX; Playwright/Chromium chỉ cần khi muốn sinh ảnh PNG tự động. Đầu ra nằm trong `docs/build/usecase-flow/`; không sửa tay file đầu ra sinh tự động.
+Markdown, `.act`, `.seq` là nguồn chỉnh sửa. Đầu ra tự sinh nằm ở `docs/build/usecase-flow/`; không sửa tay. `check` chỉ xác minh cấu trúc và cú pháp, không thay thế rà soát nghiệp vụ hay kiểm thử hệ thống.

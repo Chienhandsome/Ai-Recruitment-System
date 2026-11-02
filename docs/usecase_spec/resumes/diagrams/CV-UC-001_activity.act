@@ -1,0 +1,52 @@
+title: CV-UC-001 — Tải CV để phân tích hồ sơ
+lane U "Ứng viên"
+lane S "Hệ thống"
+start st U
+action submit U "Chọn và gửi CV"
+decision session S "Phiên hợp lệ?"
+action auth_error S "Từ chối yêu cầu"
+end auth_end S
+decision profile S "Có hồ sơ ứng viên?"
+action profile_error S "Báo không tìm thấy hồ sơ"
+end profile_end S
+decision valid S "File hợp lệ?"
+action file_error S "Báo thiếu file, sai MIME hoặc quá 5 MB"
+end file_end S
+action store S "Tạo CV PENDING, lưu file và đặt CV chính"
+decision stored S "Lưu thành công?"
+action store_error S "Đánh dấu FAILED và báo lỗi tải CV"
+end store_end S
+action dispatch S "Tạo URL tạm và gửi yêu cầu phân tích"
+decision queued S "Publish thành công?"
+action pending S "Trả PENDING kèm cảnh báo chờ gửi lại"
+end pending_end S
+action status S "Cập nhật trạng thái PROCESSING"
+decision synced S "Đồng bộ trạng thái thành công?"
+action sync_warning S "Trả PENDING kèm cảnh báo đang đồng bộ"
+end sync_end S
+action accepted S "Trả thông tin CV và PROCESSING"
+end done S
+st -> submit
+submit -> session
+session -> auth_error : Không
+auth_error -> auth_end
+session -> profile : Có
+profile -> profile_error : Không
+profile_error -> profile_end
+profile -> valid : Có
+valid -> file_error : Không
+file_error -> file_end
+valid -> store : Có
+store -> stored
+stored -> store_error : Không
+store_error -> store_end
+stored -> dispatch : Có
+dispatch -> queued
+queued -> pending : Không
+pending -> pending_end
+queued -> status : Có
+status -> synced
+synced -> sync_warning : Không
+sync_warning -> sync_end
+synced -> accepted : Có
+accepted -> done

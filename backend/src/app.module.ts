@@ -8,6 +8,7 @@ import { SupabaseModule } from './infrastructure/supabase/supabase.module';
 import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
 import { EmailModule } from './infrastructure/email/email.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { JobCacheModule } from './infrastructure/cache/job-cache.module';
 
 import { CompaniesModule } from './modules/companies/companies.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
@@ -38,6 +39,7 @@ import { DisputesModule } from './modules/disputes/disputes.module';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
+    JobCacheModule,
     CacheModule.register({
       isGlobal: true,
       ttl: 60 * 60 * 1000, // 1 hour

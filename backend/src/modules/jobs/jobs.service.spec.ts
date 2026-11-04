@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
 import { NotFoundException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
+import { JobCacheService } from '../../infrastructure/cache/job-cache.service';
 
 const publishedJob = {
   id: 'job-1',
@@ -60,10 +61,31 @@ const publishedJob = {
 };
 
 describe('JobsService candidate browsing', () => {
+  it('invalidates after a scheduled expiry update commits', async () => {
+    const events: string[] = [];
+    const prisma = {
+      jobPosting: {
+        findMany: jest.fn().mockResolvedValue([{ id: 'expired', recruiter: null }]),
+        update: jest.fn().mockImplementation(() => {
+          events.push('committed');
+          return Promise.resolve({});
+        }),
+      },
+    } as any;
+    const cache = { invalidate: jest.fn().mockImplementation(() => {
+      events.push('invalidated');
+      return Promise.resolve();
+    }) } as unknown as JobCacheService;
+    const service = new JobsService(prisma, {} as never, {} as never, cache);
+    await service.handleAutoExpirePastJobs();
+    expect(events).toEqual(['committed', 'invalidated']);
+  });
+
   it('only queries active published jobs and returns a safe paginated contract', async () => {
     const prisma = {
       jobPosting: {
         count: jest.fn().mockResolvedValue(1),
+        aggregate: jest.fn().mockResolvedValue({ _min: { expiryDate: null } }),
         findMany: jest.fn().mockResolvedValue([publishedJob]),
       },
     } as any;
@@ -268,6 +290,7 @@ describe('JobsService candidate browsing', () => {
       },
       jobPosting: {
         count: jest.fn().mockResolvedValue(1),
+        aggregate: jest.fn().mockResolvedValue({ _min: { expiryDate: null } }),
         findMany: jest.fn().mockResolvedValue([publishedJob]),
       },
     } as any;

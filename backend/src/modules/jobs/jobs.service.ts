@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../database/prisma.service';
@@ -16,6 +17,7 @@ import { ExtendJobExpiryDto } from './dto/extend-job-expiry.dto';
 import { Prisma, JobStatus, JobCloseReason, ApplicationStage } from '@prisma/client';
 import { QueryCandidateJobDto } from './dto/query-candidate-job.dto';
 import { EntitlementsService } from '../billing/entitlements.service';
+import { JobCacheService } from '../../infrastructure/cache/job-cache.service';
 
 const candidateJobListInclude = {
   recruiter: {
@@ -62,6 +64,7 @@ export class JobsService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
     private readonly entitlements: EntitlementsService,
+    @Optional() private readonly jobCache?: JobCacheService,
   ) {}
 
   private async getRecruiterProfile(userId: string) {
@@ -81,9 +84,14 @@ export class JobsService {
   }
 
   async getJobCategories() {
-    return this.prisma.jobCategory.findMany({
-      orderBy: { name: 'asc' },
+    const load = async () => ({
+      value: await this.prisma.jobCategory.findMany({
+        orderBy: { name: 'asc' },
+      }),
     });
+    return this.jobCache
+      ? this.jobCache.remember('categories', 'all', 30 * 60 * 1000, load)
+      : (await load()).value;
   }
 
   async create(userId: string, dto: CreateJobDto) {
@@ -292,6 +300,22 @@ export class JobsService {
   }
 
   async findCandidateJobs(query: QueryCandidateJobDto) {
+    const identity = JSON.stringify([
+      query.search?.trim() || '',
+      query.categoryId || '',
+      query.employmentType || '',
+      query.workingModel || '',
+      query.location?.trim() || '',
+      query.page ?? 1,
+      query.limit ?? 12,
+    ]);
+    const load = () => this.loadCandidateJobs(query);
+    return this.jobCache
+      ? this.jobCache.remember('jobs', identity, 30_000, load)
+      : (await load()).value;
+  }
+
+  private async loadCandidateJobs(query: QueryCandidateJobDto) {
     const {
       search,
       categoryId,
@@ -336,7 +360,7 @@ export class JobsService {
       where.location = { contains: location.trim(), mode: 'insensitive' };
     }
 
-    const [total, jobs] = await Promise.all([
+    const [total, jobs, expiry] = await Promise.all([
       this.prisma.jobPosting.count({ where }),
       this.prisma.jobPosting.findMany({
         where,
@@ -345,15 +369,20 @@ export class JobsService {
         orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
         include: candidateJobListInclude,
       }),
+      // Includes off-page jobs: their expiration also changes totals/pages.
+      this.prisma.jobPosting.aggregate({ where, _min: { expiryDate: true } }),
     ]);
 
     return {
-      data: jobs.map((job) => this.toCandidateJobSummary(job)),
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+      expiresAt: expiry._min.expiryDate?.getTime(),
+      value: {
+        data: jobs.map((job) => this.toCandidateJobSummary(job)),
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       },
     };
   }
@@ -1022,6 +1051,8 @@ export class JobsService {
           closedAt: now,
         },
       });
+      // Scheduled writes do not pass through the HTTP invalidation interceptor.
+      await this.jobCache?.invalidate();
 
       if (job.recruiter?.userId) {
         try {
